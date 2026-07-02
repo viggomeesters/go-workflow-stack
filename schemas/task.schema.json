@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repo-local.task.v1",
+  "title": "Repo-local Go Task",
+  "type": "object",
+  "required": [
+    "schema",
+    "kind",
+    "id",
+    "project",
+    "status",
+    "summary",
+    "scope",
+    "acceptance",
+    "verification",
+    "claim"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": "go-workflow.repo-local.task.v1"
+    },
+    "kind": {
+      "const": "task"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "open",
+        "active",
+        "blocked",
+        "done"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "type": "object",
+      "required": [
+        "read",
+        "modify"
+      ],
+      "properties": {
+        "read": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "modify": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "acceptance": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "verification": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "claim": {
+      "type": "object",
+      "required": [
+        "agent",
+        "claimed_at"
+      ],
+      "properties": {
+        "agent": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "claimed_at": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    }
+  }
+}

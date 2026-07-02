@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repo-local.hierarchy.v1",
+  "title": "Repo-local Go Hierarchy",
+  "type": "object",
+  "required": [
+    "schema",
+    "kind",
+    "project",
+    "feature_groups"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": "go-workflow.repo-local.hierarchy.v1"
+    },
+    "kind": {
+      "const": "hierarchy"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "feature_groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "features"
+        ],
+        "additionalProperties": true,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "id",
+                "title"
+              ],
+              "additionalProperties": true,
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                },
+                "title": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "tasks": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

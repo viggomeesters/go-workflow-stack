@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repo-local.vision.v1",
+  "title": "Repo-local Go Vision",
+  "type": "object",
+  "required": [
+    "schema",
+    "kind",
+    "project",
+    "status",
+    "north_star",
+    "wedge",
+    "target_user",
+    "core_promise",
+    "product_principles",
+    "non_goals",
+    "success_metrics"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": "go-workflow.repo-local.vision.v1"
+    },
+    "kind": {
+      "const": "vision"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "draft",
+        "active",
+        "superseded",
+        "archived"
+      ]
+    },
+    "north_star": {
+      "type": "string",
+      "minLength": 1
+    },
+    "wedge": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_user": {
+      "type": "string",
+      "minLength": 1
+    },
+    "core_promise": {
+      "type": "string",
+      "minLength": 1
+    },
+    "product_principles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "non_goals": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "success_metrics": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

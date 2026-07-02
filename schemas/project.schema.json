@@ -1,0 +1,41 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repo-local.project.v1",
+  "title": "Repo-local Go Project",
+  "type": "object",
+  "required": [
+    "schema",
+    "kind",
+    "id",
+    "name",
+    "source_of_truth",
+    "default_verification"
+  ],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {
+      "const": "go-workflow.repo-local.project.v1"
+    },
+    "kind": {
+      "const": "project"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "source_of_truth": {
+      "const": "repo-local"
+    },
+    "default_verification": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    }
+  }
+}

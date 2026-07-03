@@ -281,6 +281,28 @@ def parse_hierarchy(feature_groups: list[str], features: list[str], project_id: 
     return {"schema": HIERARCHY_SCHEMA, "kind": "hierarchy", "project": project_id, "feature_groups": list(groups.values())}
 
 
+def append_task_to_hierarchy(root: Path, feature_ref: str, task_id: str) -> None:
+    if not feature_ref:
+        return
+    if "." not in feature_ref:
+        raise RepoLocalError("--feature must be formatted as group_id.feature_id")
+    group_id, feature_id = [slugify(part) for part in feature_ref.split(".", 1)]
+    path = root / "hierarchy.json"
+    hierarchy = load_json(path)
+    for group in hierarchy.get("feature_groups", []):
+        if group.get("id") != group_id:
+            continue
+        for feature in group.get("features", []):
+            if feature.get("id") != feature_id:
+                continue
+            tasks = feature.setdefault("tasks", [])
+            if task_id not in tasks:
+                tasks.append(task_id)
+            dump_json(path, hierarchy)
+            return
+    raise RepoLocalError(f"feature not found in hierarchy: {feature_ref}")
+
+
 def task_path(root: Path, status: str, task_id: str) -> Path:
     return root / "tasks" / status / f"{task_id}.json"
 
@@ -435,6 +457,54 @@ def cmd_status(args: argparse.Namespace) -> int:
             for error in route["errors"]:
                 print(f"- {error}")
     return 0 if route["valid"] else 1
+
+
+def cmd_task_create(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    errors = validate_repo(repo)
+    if errors:
+        for error in errors:
+            print(f"error: {error}", file=sys.stderr)
+        return 1
+    project = load_json(root / "project.json")
+    task_id = slugify(args.id or args.summary)
+    if not TASK_ID_RE.fullmatch(task_id):
+        raise RepoLocalError(f"invalid task id: {task_id}")
+    for status in ("open", "active", "blocked", "done"):
+        if task_path(root, status, task_id).exists():
+            raise RepoLocalError(f"task already exists: {task_id}")
+    acceptance = args.acceptance or ["Task result is implemented and verified."]
+    verification = args.verification or project.get("default_verification") or ["git diff --check"]
+    task = {
+        "schema": TASK_SCHEMA,
+        "kind": "task",
+        "id": task_id,
+        "project": project["id"],
+        "status": "open",
+        "summary": args.summary,
+        "description": args.description or args.summary,
+        "scope": {"read": args.read or [".go/**"], "modify": args.modify or [".go/**"]},
+        "acceptance": acceptance,
+        "verification": verification,
+        "claim": {"agent": None, "claimed_at": None},
+        "evidence": [],
+    }
+    target = task_path(root, "open", task_id)
+    dump_json(target, task)
+    try:
+        append_task_to_hierarchy(root, args.feature, task_id)
+    except Exception:
+        target.unlink(missing_ok=True)
+        raise
+    errors = validate_repo(repo)
+    if errors:
+        target.unlink(missing_ok=True)
+        for error in errors:
+            print(f"error: {error}", file=sys.stderr)
+        return 1
+    print(relative(repo, target))
+    return 0
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -632,6 +702,19 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("repo", nargs="?", default=".")
     status.add_argument("--json", action="store_true")
     status.set_defaults(func=cmd_status)
+    task = sub.add_parser("task", help="Author repo-local tasks")
+    task_sub = task.add_subparsers(dest="task_command", required=True)
+    task_create = task_sub.add_parser("create", help="Create an open repo-local task")
+    task_create.add_argument("repo")
+    task_create.add_argument("--id")
+    task_create.add_argument("--summary", required=True)
+    task_create.add_argument("--description", default="")
+    task_create.add_argument("--feature", default="", help="group_id.feature_id")
+    task_create.add_argument("--read", action="append", default=[])
+    task_create.add_argument("--modify", action="append", default=[])
+    task_create.add_argument("--acceptance", action="append", default=[])
+    task_create.add_argument("--verification", action="append", default=[])
+    task_create.set_defaults(func=cmd_task_create)
     init = sub.add_parser("init", help="Initialize .go fixture state in a repo")
     init.add_argument("repo", nargs="?", default=".")
     init.add_argument("--force", action="store_true")

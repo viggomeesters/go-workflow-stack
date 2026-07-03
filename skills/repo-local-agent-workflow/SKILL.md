@@ -97,6 +97,16 @@ python3 ~/github/go-workflow-stack/cli/go.py readback <target-repo>
 python3 ~/github/go-workflow-stack/cli/go.py next <target-repo>
 ```
 
+For v0.2+ authoring, prefer CLI primitives over hand-written `.go` JSON:
+
+```bash
+python3 ~/github/go-workflow-stack/cli/go.py adopt <target-repo> --project-id <id> --name "<name>"
+python3 ~/github/go-workflow-stack/cli/go.py status <target-repo> --json
+python3 ~/github/go-workflow-stack/cli/go.py task create <target-repo> --id <id> --summary "<summary>" --feature <group.feature>
+```
+
+Use `adopt` only when the target repo does not already have `.go/` state; it refuses existing non-empty `.go/` directories unless `--force` is explicitly passed. Use `task create` for normal follow-up task authoring so Hermes does not hand-write repo-local task JSON.
+
 For a brand-new public repo, use GitHub's template flow from `go-project-template` when practical. For an existing repo, copy only `.go/` and keep edits scoped.
 
 ## When creating a Vision Brief

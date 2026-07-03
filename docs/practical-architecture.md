@@ -112,3 +112,28 @@ Hermes should load the repo-local workflow operating rules from the stack repo, 
 That means updates to repo-local workflow behavior belong in `go-workflow-stack/skills/repo-local-agent-workflow/SKILL.md`, followed by a Hermes `/reload-skills` or fresh session.
 
 For project adoption, use `go-project-template` as the source for `.go/` structure. The stack includes `scripts/apply-template.sh <target-repo>` for existing repositories and the GitHub template flow for new repositories.
+
+## `$go-*` bridge status
+
+Current state:
+
+- `$go-plan` and `$go-goal` are still Hermes/AW Lite skills for normal invocations.
+- `go-workflow-stack` is the repo-local protocol/tooling layer.
+- A target repo with `.go/project.json` can now be detected with:
+
+```bash
+python3 ~/github/go-workflow-stack/cli/go.py route <target-repo> --json
+```
+
+Bridge rule:
+
+- If a target repo has `.go/project.json`, repo-local project work should use the stack's `.go` route.
+- If there is no `.go/project.json`, Hermes should keep using AW Lite/vault planning and execution.
+- Multi-repo orchestration remains AW Lite/control-plane until the stack has an explicit model for parent work spanning repositories.
+
+Target state:
+
+- `$go-*` stays the user-facing command family.
+- The stack becomes the shared protocol and validator.
+- Each project repo owns its own `.go/` state.
+- The vault remains memory/index/fallback, not the hidden execution database for normal project work.

@@ -412,6 +412,62 @@ def cmd_readback(args: argparse.Namespace) -> int:
     return 0
 
 
+def route_repo(repo: Path) -> dict[str, Any]:
+    repo = repo.resolve()
+    root = go_root(repo)
+    project_file = root / "project.json"
+    if project_file.exists():
+        errors = validate_repo(repo)
+        project_id = ""
+        project_name = ""
+        try:
+            project = load_json(project_file)
+            project_id = str(project.get("id") or "")
+            project_name = str(project.get("name") or "")
+        except RepoLocalError:
+            pass
+        return {
+            "repo": str(repo),
+            "mode": "repo-local",
+            "state_root": ".go",
+            "project_id": project_id,
+            "project_name": project_name,
+            "valid": not errors,
+            "reason": ".go/project.json exists",
+            "fallback": "aw-lite",
+            "errors": errors,
+        }
+    return {
+        "repo": str(repo),
+        "mode": "aw-lite-fallback",
+        "state_root": "system/agent-workflow",
+        "project_id": "",
+        "project_name": "",
+        "valid": True,
+        "reason": "no .go/project.json in target repo",
+        "fallback": "aw-lite",
+        "errors": [],
+    }
+
+
+def cmd_route(args: argparse.Namespace) -> int:
+    route = route_repo(Path(args.repo))
+    if args.json:
+        print(json.dumps(route, indent=2, ensure_ascii=False))
+    else:
+        print(f"mode: {route['mode']}")
+        print(f"repo: {route['repo']}")
+        print(f"state_root: {route['state_root']}")
+        if route.get("project_id"):
+            print(f"project: {route['project_name']} ({route['project_id']})")
+        print(f"reason: {route['reason']}")
+        if route.get("errors"):
+            print("errors:")
+            for error in route["errors"]:
+                print(f"- {error}")
+    return 0 if route["valid"] else 1
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -445,6 +501,10 @@ def build_parser() -> argparse.ArgumentParser:
     readback = sub.add_parser("readback", help="Summarize a repo from .go state only")
     readback.add_argument("repo", nargs="?", default=".")
     readback.set_defaults(func=cmd_readback)
+    route = sub.add_parser("route", help="Classify a target repo as repo-local .go or AW Lite fallback")
+    route.add_argument("repo", nargs="?", default=".")
+    route.add_argument("--json", action="store_true")
+    route.set_defaults(func=cmd_route)
     return parser
 
 

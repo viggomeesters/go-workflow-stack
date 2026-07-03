@@ -67,6 +67,7 @@ bash scripts/apply-template.sh ../my-project
 - `finish <task-id> --repo <repo> --agent <name> --evidence <text>`: move an active task to done and append evidence.
 - `dirty-check <repo>`: classify dirty Git state against owned paths.
 - `readback <repo>`: summarize the project from `.go/` only.
+- `route <repo> [--json]`: classify the target as `repo-local` when `.go/project.json` exists, otherwise `aw-lite-fallback`.
 
 ## Contract
 

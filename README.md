@@ -60,6 +60,8 @@ bash scripts/apply-template.sh ../my-project
 
 ## CLI commands
 
+- `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
+- `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `init <repo>`: create a minimal `.go/` fixture.
 - `validate <repo>`: validate `.go/` JSON and JSONL files.
 - `next <repo>`: show the first open task.

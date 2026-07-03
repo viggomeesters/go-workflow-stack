@@ -44,6 +44,18 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).astimezone().isoformat(timespec="seconds")
 
 
+def slugify(value: str) -> str:
+    slug = re.sub(r"[^A-Za-z0-9._-]+", "-", value.strip()).strip("-._")
+    return slug or "project"
+
+
+def parse_pipe_fields(value: str, expected: int, label: str) -> list[str]:
+    parts = [part.strip() for part in value.split("|")]
+    if len(parts) != expected or any(not part for part in parts):
+        raise RepoLocalError(f"{label} must have {expected} pipe-separated non-empty fields")
+    return parts
+
+
 def load_json(path: Path) -> dict[str, Any]:
     try:
         data = json.loads(path.read_text(encoding="utf-8"))
@@ -228,6 +240,47 @@ def copy_fixture_init(repo: Path, force: bool = False) -> None:
         shutil.copy2(source, target)
 
 
+def ensure_go_dirs(root: Path) -> None:
+    for rel in [
+        "tasks/open",
+        "tasks/active",
+        "tasks/blocked",
+        "tasks/done",
+        "runs",
+        "evidence",
+        "decisions",
+        "locks",
+    ]:
+        (root / rel).mkdir(parents=True, exist_ok=True)
+
+
+def parse_principles(values: list[str]) -> list[dict[str, str]]:
+    if not values:
+        values = [
+            "repo-local-state|Project workflow state lives in .go/ next to code.|A fresh clone should explain current direction and next work.|go-workflow-stack validate/readback",
+            "json-first|Current state is JSON and append-only history is JSONL.|Agents need deterministic, diffable contracts.|schema validation and CLI checks",
+        ]
+    principles = []
+    for value in values:
+        pid, statement, rationale, enforcement = parse_pipe_fields(value, 4, "--principle")
+        principles.append({"id": slugify(pid), "statement": statement, "rationale": rationale, "enforcement": enforcement})
+    return principles
+
+
+def parse_hierarchy(feature_groups: list[str], features: list[str], project_id: str) -> dict[str, Any]:
+    groups: dict[str, dict[str, Any]] = {}
+    for value in feature_groups or ["workflow|Workflow"]:
+        gid, title = parse_pipe_fields(value, 2, "--feature-group")
+        groups[slugify(gid)] = {"id": slugify(gid), "title": title, "features": []}
+    for value in features or ["workflow|repo-local-workflow|Repo-local workflow"]:
+        gid, fid, title = parse_pipe_fields(value, 3, "--feature")
+        gid = slugify(gid)
+        if gid not in groups:
+            groups[gid] = {"id": gid, "title": gid.replace("-", " ").title(), "features": []}
+        groups[gid]["features"].append({"id": slugify(fid), "title": title, "tasks": []})
+    return {"schema": HIERARCHY_SCHEMA, "kind": "hierarchy", "project": project_id, "feature_groups": list(groups.values())}
+
+
 def task_path(root: Path, status: str, task_id: str) -> Path:
     return root / "tasks" / status / f"{task_id}.json"
 
@@ -296,6 +349,92 @@ def classify_dirty(repo: Path, owned_patterns: list[str]) -> dict[str, list[str]
 
 def event(task_id: str, event_name: str, agent: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
     return {"schema": EVENT_SCHEMA, "kind": "event", "event": event_name, "created_at": now_iso(), "task_id": task_id, "agent": agent, "data": data or {}}
+
+
+def cmd_adopt(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    repo.mkdir(parents=True, exist_ok=True)
+    root = go_root(repo)
+    if root.exists() and any(root.iterdir()) and not args.force:
+        raise RepoLocalError(f"{root} already exists; use status/task create, or pass --force to replace")
+    if args.force and root.exists():
+        shutil.rmtree(root)
+    ensure_go_dirs(root)
+    project_id = slugify(args.project_id or repo.name)
+    name = args.name or repo.name
+    default_verification = args.verification or ["git diff --check"]
+    dump_json(root / "project.json", {
+        "schema": PROJECT_SCHEMA,
+        "kind": "project",
+        "id": project_id,
+        "name": name,
+        "source_of_truth": "repo-local",
+        "default_verification": default_verification,
+        "links": {"repo": args.repo_url or ""},
+    })
+    dump_json(root / "architecture-principles.json", {
+        "schema": ARCH_SCHEMA,
+        "kind": "architecture_principles",
+        "project": project_id,
+        "principles": parse_principles(args.principle or []),
+    })
+    dump_json(root / "vision.json", {
+        "schema": VISION_SCHEMA,
+        "kind": "vision",
+        "project": project_id,
+        "status": "active",
+        "north_star": args.north_star or f"{name} is understandable and operable from its repo-local .go contract.",
+        "wedge": args.wedge or "Repo-local project state with clone-readable agent continuity.",
+        "target_user": args.target_user or "Project maintainers and future agents.",
+        "core_promise": args.core_promise or "A fresh clone can explain current direction, constraints, hierarchy, and next work.",
+        "product_principles": args.product_principle or ["repo-local", "json-first", "proof-first"],
+        "non_goals": args.non_goal or ["no central execution database", "no broad migration by default"],
+        "success_metrics": args.success_metric or ["go-workflow-stack validate passes", "go-workflow-stack readback is useful"],
+    })
+    dump_json(root / "hierarchy.json", parse_hierarchy(args.feature_group or [], args.feature or [], project_id))
+    for jsonl in [root / "runs" / "events.jsonl", root / "evidence" / "events.jsonl", root / "decisions" / "events.jsonl"]:
+        jsonl.touch(exist_ok=True)
+    errors = validate_repo(repo)
+    if errors:
+        for error in errors:
+            print(f"error: {error}", file=sys.stderr)
+        return 1
+    print(f"adopted: {root}")
+    return 0
+
+
+def cmd_status(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    route = route_repo(repo)
+    status: dict[str, Any] = {"repo": str(repo), "route": route}
+    if route["mode"] == "repo-local" and route["valid"]:
+        root = go_root(repo)
+        project = load_json(root / "project.json")
+        status["project"] = {"id": project.get("id"), "name": project.get("name")}
+        counts = {}
+        for state in ("open", "active", "blocked", "done"):
+            counts[state] = len(list((root / "tasks" / state).glob("*.json")))
+        status["tasks"] = counts
+        tasks = open_tasks(repo)
+        status["next"] = None if not tasks else {"id": tasks[0][1].get("id"), "summary": tasks[0][1].get("summary")}
+        status["dirty"] = classify_dirty(repo, [".go/**"])
+    if args.json:
+        print(json.dumps(status, indent=2, ensure_ascii=False))
+    else:
+        print(f"mode: {route['mode']}")
+        print(f"valid: {route['valid']}")
+        if status.get("project"):
+            print(f"project: {status['project']['name']} ({status['project']['id']})")
+            print("tasks: " + ", ".join(f"{k}={v}" for k, v in status["tasks"].items()))
+            nxt = status.get("next")
+            print("next: none" if not nxt else f"next: {nxt['id']} — {nxt['summary']}")
+            blocking = status.get("dirty", {}).get("blocking", [])
+            print(f"dirty_blocking: {len(blocking)}")
+        if route.get("errors"):
+            print("errors:")
+            for error in route["errors"]:
+                print(f"- {error}")
+    return 0 if route["valid"] else 1
 
 
 def cmd_init(args: argparse.Namespace) -> int:
@@ -471,6 +610,28 @@ def cmd_route(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
+    adopt = sub.add_parser("adopt", help="Adopt a repo by creating real repo-local .go state")
+    adopt.add_argument("repo", nargs="?", default=".")
+    adopt.add_argument("--project-id")
+    adopt.add_argument("--name")
+    adopt.add_argument("--repo-url", default="")
+    adopt.add_argument("--verification", action="append", default=[])
+    adopt.add_argument("--north-star", default="")
+    adopt.add_argument("--wedge", default="")
+    adopt.add_argument("--target-user", default="")
+    adopt.add_argument("--core-promise", default="")
+    adopt.add_argument("--product-principle", action="append", default=[])
+    adopt.add_argument("--non-goal", action="append", default=[])
+    adopt.add_argument("--success-metric", action="append", default=[])
+    adopt.add_argument("--principle", action="append", default=[], help="id|statement|rationale|enforcement")
+    adopt.add_argument("--feature-group", action="append", default=[], help="id|title")
+    adopt.add_argument("--feature", action="append", default=[], help="group_id|feature_id|title")
+    adopt.add_argument("--force", action="store_true")
+    adopt.set_defaults(func=cmd_adopt)
+    status = sub.add_parser("status", help="Summarize route, project, task counts, next work, and dirty state")
+    status.add_argument("repo", nargs="?", default=".")
+    status.add_argument("--json", action="store_true")
+    status.set_defaults(func=cmd_status)
     init = sub.add_parser("init", help="Initialize .go fixture state in a repo")
     init.add_argument("repo", nargs="?", default=".")
     init.add_argument("--force", action="store_true")

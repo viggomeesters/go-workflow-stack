@@ -2,13 +2,18 @@
 .PHONY: check
 check:
 	python3 -m py_compile cli/go.py
-	python3 cli/go.py validate ../go-project-template
-	python3 cli/go.py readback ../go-project-template
-	python3 cli/go.py status ../go-project-template --json >/tmp/go-project-template-status.json
+	TEMPLATE=$$(if [ -d ../go-project-template/.go ]; then printf '%s' ../go-project-template; else printf '%s' fixtures/minimal; fi); \
+	  python3 cli/go.py validate $$TEMPLATE; \
+	  python3 cli/go.py readback $$TEMPLATE; \
+	  python3 cli/go.py status $$TEMPLATE --json >/tmp/go-project-template-status.json
 	TMP=$$(mktemp -d); \
 	  git init -q $$TMP/adopt-smoke; \
 	  python3 cli/go.py adopt $$TMP/adopt-smoke --project-id adopt-smoke --name "Adopt Smoke" --feature-group workflow\|Workflow --feature workflow\|repo-local\|Repo-local --verification "git diff --check"; \
 	  python3 cli/go.py task create $$TMP/adopt-smoke --id smoke-task --summary "Smoke task" --feature workflow.repo-local --acceptance "Task exists" --verification "git diff --check"; \
+	  python3 -c 'import json,sys; h=json.load(open(sys.argv[1])); assert h["feature_groups"][0]["features"][0]["tasks"] == ["smoke-task"]' $$TMP/adopt-smoke/.go/hierarchy.json; \
+	  if python3 cli/go.py task create $$TMP/adopt-smoke --id smoke-task --summary "Duplicate" >/tmp/go-duplicate.out 2>/tmp/go-duplicate.err; then echo "duplicate task create should fail"; exit 1; fi; \
+	  if python3 cli/go.py task create $$TMP/adopt-smoke --id bad-feature --summary "Bad feature" --feature workflow.missing >/tmp/go-bad-feature.out 2>/tmp/go-bad-feature.err; then echo "bad feature task create should fail"; exit 1; fi; \
+	  test ! -e $$TMP/adopt-smoke/.go/tasks/open/bad-feature.json; \
 	  python3 cli/go.py validate $$TMP/adopt-smoke; \
 	  python3 cli/go.py next $$TMP/adopt-smoke; \
 	  python3 cli/go.py status $$TMP/adopt-smoke --json >/tmp/go-adopt-smoke-status.json

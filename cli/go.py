@@ -21,8 +21,8 @@ from pathlib import Path
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
-VAULT_ROOT = SCRIPT_DIR.parents[2]
-CONTRACT_ROOT = VAULT_ROOT / "system" / "agent-workflow" / "repo-local"
+STACK_ROOT = SCRIPT_DIR.parents[0]
+CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
 FIXTURE_ROOT = CONTRACT_ROOT / "fixtures" / "minimal" / ".go"
 

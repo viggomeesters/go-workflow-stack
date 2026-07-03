@@ -1,0 +1,10 @@
+{
+  "schema": "go-workflow.repo-local.project.v1",
+  "kind": "project",
+  "id": "repo-local-spike-fixture",
+  "name": "Repo Local Spike Fixture",
+  "source_of_truth": "repo-local",
+  "default_verification": [
+    "python -m pytest"
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "task-schema-smoke",
+  "project": "repo-local-spike-fixture",
+  "status": "open",
+  "summary": "Prove schema validation",
+  "scope": {
+    "read": [
+      ".go/**"
+    ],
+    "modify": [
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "go validate passes on fixture"
+  ],
+  "verification": [
+    "python system/scripts/agent_workflow/repo_local_go.py validate <repo>"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  }
+}

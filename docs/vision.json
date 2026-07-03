@@ -1,0 +1,20 @@
+{
+  "schema": "repo.design-vision.v1",
+  "kind": "repo_vision",
+  "title": "Go Workflow Stack",
+  "north_star": "Make agentic engineering state clone-readable and repo-local.",
+  "wedge": "Reusable tooling for repo-local agent workflow state, not a central task database.",
+  "target_audience": "Developers and agents starting or continuing project work from a repository clone.",
+  "principles": [
+    "JSON/JSONL first",
+    "repo-local project state",
+    "public-safe synthetic examples",
+    "local validation before release"
+  ],
+  "non_goals": [
+    "central vault execution database",
+    "private data examples",
+    "broad migration of existing task state"
+  ],
+  "status": "active"
+}

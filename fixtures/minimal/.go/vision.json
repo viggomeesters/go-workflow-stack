@@ -1,0 +1,21 @@
+{
+  "schema": "go-workflow.repo-local.vision.v1",
+  "kind": "vision",
+  "project": "repo-local-spike-fixture",
+  "status": "active",
+  "north_star": "A clone-local agent contract proves repo-local continuation.",
+  "wedge": "Self-contained project OS, not a central workflow database.",
+  "target_user": "Agents continuing repo work from a fresh clone.",
+  "core_promise": "Understand and continue the project from `.go/` only.",
+  "product_principles": [
+    "repo-local state",
+    "JSON/JSONL canonical"
+  ],
+  "non_goals": [
+    "central vault execution database",
+    "broad migration"
+  ],
+  "success_metrics": [
+    "go validate passes"
+  ]
+}

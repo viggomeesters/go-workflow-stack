@@ -1,20 +1,130 @@
 {
-  "schema": "repo.design-vision.v1",
-  "kind": "repo_vision",
-  "title": "Go Workflow Stack",
-  "north_star": "Make agentic engineering state clone-readable and repo-local.",
-  "wedge": "Reusable tooling for repo-local agent workflow state, not a central task database.",
-  "target_audience": "Developers and agents starting or continuing project work from a repository clone.",
+  "$schema": "https://viggomeesters.github.io/schemas/repo-vision-contract.schema.json",
+  "schema_version": "1.0.0",
+  "artifact_kind": "repo_design_vision_contract",
+  "repo": {
+    "name": "go-workflow-stack",
+    "primary_users": [
+      "agents",
+      "developers"
+    ],
+    "product_surface": "cli_and_schemas"
+  },
+  "vision": {
+    "one_line": "Reusable schemas and CLI for repo-local `.go/` agent workflow state.",
+    "north_star": "Agentic engineering state is clone-readable, repo-local, and verifiable without a central task database.",
+    "promise": "A fresh clone explains the workflow contract, validates locally, and shows what proof is required before claiming success."
+  },
   "principles": [
-    "JSON/JSONL first",
-    "repo-local project state",
-    "public-safe synthetic examples",
-    "local validation before release"
+    {
+      "id": "agent-first",
+      "title": "Agent-first product surface",
+      "rule": "Optimize structured contracts, schemas, fixtures, checks, and evidence over prose-first browsing.",
+      "good": [
+        "JSON/JSONL contracts",
+        "deterministic checks",
+        "explicit evidence boundaries"
+      ],
+      "bad": [
+        "strategy prose as source of truth",
+        "manual-only checklists",
+        "unverified done claims"
+      ]
+    },
+    {
+      "id": "repo-local",
+      "title": "Repo-local source of truth",
+      "rule": "Project workflow state lives in `.go/` beside project code.",
+      "good": [
+        ".go/project.json",
+        ".go/tasks/open/*.json",
+        ".go/evidence/*.jsonl"
+      ],
+      "bad": [
+        "hidden central task queues",
+        "chat-only task context"
+      ]
+    },
+    {
+      "id": "json-first",
+      "title": "JSON/JSONL first",
+      "rule": "Machine-consumable artifacts are JSON or JSONL; Markdown is narrative only.",
+      "good": [
+        "schemas",
+        "fixtures",
+        "structured reports"
+      ],
+      "bad": [
+        "canonical state only in README prose"
+      ]
+    },
+    {
+      "id": "public-safe",
+      "title": "Synthetic public examples",
+      "rule": "Public examples must avoid private vault/customer/person data and secrets.",
+      "good": [
+        "synthetic fixture ids",
+        "documented privacy boundary"
+      ],
+      "bad": [
+        "real vault extracts",
+        "tokens",
+        "private screenshots"
+      ]
+    }
   ],
   "non_goals": [
-    "central vault execution database",
-    "private data examples",
-    "broad migration of existing task state"
+    "broad migration of existing AW Lite tasks",
+    "central vault execution database under a new name",
+    "private data examples"
   ],
-  "status": "active"
+  "public_safety": {
+    "forbidden": [
+      "secrets",
+      "customer data",
+      "private screenshots",
+      "proprietary copied content"
+    ],
+    "required_boundaries": [
+      "synthetic examples",
+      "local validation",
+      "explicit non-goals"
+    ]
+  },
+  "acceptance_scorecard": [
+    {
+      "id": "self-contained",
+      "question": "Can a fresh clone validate the repo locally?",
+      "pass_condition": "`make check` passes."
+    },
+    {
+      "id": "agent-readable",
+      "question": "Can an agent consume the contract without scraping prose?",
+      "pass_condition": "Core contracts are JSON/JSONL."
+    },
+    {
+      "id": "safe-public",
+      "question": "Is the repository public-safe?",
+      "pass_condition": "No secrets/private artifacts in current tree or checked history signals."
+    }
+  ],
+  "review_checklist": [
+    "Run make check",
+    "Run repo-complete validate",
+    "Verify no private data or credentials",
+    "Keep Markdown non-canonical"
+  ],
+  "maturity_model": [
+    {
+      "level": "L0",
+      "state": "present",
+      "meaning": "Vision contract exists and parses."
+    },
+    {
+      "level": "L1",
+      "state": "tested",
+      "meaning": "Local validation gates pass."
+    }
+  ],
+  "residual_risk_wording": "This repo is an early public spike; real-project pilots are still needed before broad migration."
 }

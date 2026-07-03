@@ -16,7 +16,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 - **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
 
-For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md).
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2 authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md).
 
 ## Practical architecture in one minute
 

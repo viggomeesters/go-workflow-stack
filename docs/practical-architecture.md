@@ -96,6 +96,19 @@ Instead, the project repo carries its own operational contract.
 
 ## What to do next
 
-- Improve the stack when commands/schemas need to change.
+- Improve the stack when commands/schemas/skills need to change.
 - Improve the template when the starter `.go/` shape should change.
 - Improve a real project's `.go/` files when that project direction/tasks/evidence changes.
+
+## Hermes integration
+
+Hermes should load the repo-local workflow operating rules from the stack repo, not from a hidden one-off runtime copy:
+
+```text
+~/.hermes/skills/software-development/repo-local-agent-workflow
+  -> ~/github/go-workflow-stack/skills/repo-local-agent-workflow
+```
+
+That means updates to repo-local workflow behavior belong in `go-workflow-stack/skills/repo-local-agent-workflow/SKILL.md`, followed by a Hermes `/reload-skills` or fresh session.
+
+For project adoption, use `go-project-template` as the source for `.go/` structure. The stack includes `scripts/apply-template.sh <target-repo>` for existing repositories and the GitHub template flow for new repositories.

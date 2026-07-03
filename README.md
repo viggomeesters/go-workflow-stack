@@ -52,6 +52,12 @@ Initialize a fresh repo with the current minimal fixture:
 python3 cli/go.py init ../my-project --force
 ```
 
+Apply the public template's `.go/` structure to an existing repo:
+
+```bash
+bash scripts/apply-template.sh ../my-project
+```
+
 ## CLI commands
 
 - `init <repo>`: create a minimal `.go/` fixture.

@@ -13,8 +13,19 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 ## Repository roles
 
 - **This repo (`go-workflow-stack`)**: reusable workflow tooling.
-- **Template repo (`go-project-template`)**: starter `.go/` project-state structure.
+- **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
+
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md).
+
+## Practical architecture in one minute
+
+Use this stack when you want reusable commands and validation. Use [`go-project-template`](https://github.com/viggomeesters/go-project-template) when you want to start a new repo that already carries its own `.go/` state. A real project should copy/adapt the template and then keep tasks, evidence, decisions, and architecture principles in its own repository.
+
+```text
+go-workflow-stack  -> validates/operates -> project repo with .go/
+go-project-template -> seeds/copies ------^
+```
 
 ## Install / usage
 

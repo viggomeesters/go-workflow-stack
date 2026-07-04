@@ -45,6 +45,18 @@ python3 ~/github/go-workflow-stack/cli/go.py task create <repo> \
 
 The command validates the repo after writing. It refuses duplicate task ids and rolls back the task file if hierarchy attachment fails.
 
+## `bundle export` / `bundle import`
+
+Move repo-local state between clones or review contexts without touching the vault:
+
+```bash
+python3 ~/github/go-workflow-stack/cli/go.py bundle export <repo> --output /tmp/project.go-bundle.json
+python3 ~/github/go-workflow-stack/cli/go.py bundle import <target-repo> /tmp/project.go-bundle.json
+python3 ~/github/go-workflow-stack/cli/go.py bundle import <target-repo> /tmp/project.go-bundle.json --write --agent hermes --task-id import-review
+```
+
+Import is dry-run by default. `--write` stores an immutable review artifact under `.go/imports/` and appends a decision event; it does not overwrite target tasks, vision, hierarchy, or evidence.
+
 ## Current boundary
 
-These commands author single-repo `.go` state. They do not replace AW Lite multi-repo orchestration and they do not migrate historical AW Lite plans/tasks.
+These commands author and move single-repo `.go` state. They do not replace AW Lite multi-repo orchestration and they do not migrate historical AW Lite plans/tasks. When `.go/project.json` exists, repo-local `.go` wins; AW Lite remains fallback/control-plane.

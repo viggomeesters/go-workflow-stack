@@ -16,7 +16,9 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 - **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
 
-For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2 authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md).
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2 authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md).
+
+Routing rule: when a target repo contains `.go/project.json`, repo-local `.go` state wins. AW Lite/vault state is fallback/control-plane only.
 
 ## Practical architecture in one minute
 
@@ -71,6 +73,8 @@ bash scripts/apply-template.sh ../my-project
 - `dirty-check <repo>`: classify dirty Git state against owned paths.
 - `readback <repo>`: summarize the project from `.go/` only.
 - `route <repo> [--json]`: classify the target as `repo-local` when `.go/project.json` exists, otherwise `aw-lite-fallback`.
+- `bundle export <repo> [--output bundle.json]`: export a compact `.go` readback/task/history bundle without vault access.
+- `bundle import <repo> bundle.json [--write]`: validate a bundle and, only with `--write`, store it under `.go/imports/` as a review/reconcile artifact.
 
 ## Contract
 
@@ -87,10 +91,11 @@ bash scripts/apply-template.sh ../my-project
   runs/*.jsonl
   evidence/*.jsonl
   decisions/*.jsonl
+  imports/*.json
   locks/
 ```
 
-JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Markdown is a human view only.
+JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Markdown is a human view only. Import bundles are review artifacts: they never overwrite existing project state unless a later explicit task chooses to reconcile them.
 
 ## Development
 

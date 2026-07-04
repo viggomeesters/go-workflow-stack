@@ -8,6 +8,7 @@ This document is the practical status line for moving from vault-first AW Lite t
 - Normal/vague `$go-plan` and `$go-goal` invocations remain AW Lite/vault-first.
 - `repo-local-agent-workflow` is sourced from `go-workflow-stack` and loaded into Hermes by symlink.
 - `go-project-template` is the GitHub template for new project-local `.go/` state.
+- `bundle export/import` moves compact `.go` state between clones/review contexts without vault access; import is dry-run unless `--write` stores `.go/imports/<bundle_id>.json`.
 
 ## Bridge
 

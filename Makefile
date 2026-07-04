@@ -16,4 +16,13 @@ check:
 	  test ! -e $$TMP/adopt-smoke/.go/tasks/open/bad-feature.json; \
 	  python3 cli/go.py validate $$TMP/adopt-smoke; \
 	  python3 cli/go.py next $$TMP/adopt-smoke; \
-	  python3 cli/go.py status $$TMP/adopt-smoke --json >/tmp/go-adopt-smoke-status.json
+	  python3 cli/go.py status $$TMP/adopt-smoke --json >/tmp/go-adopt-smoke-status.json; \
+	  python3 cli/go.py bundle export $$TMP/adopt-smoke --output $$TMP/adopt-smoke-bundle.json; \
+	  python3 -m json.tool $$TMP/adopt-smoke-bundle.json >/tmp/go-adopt-smoke-bundle.pretty.json; \
+	  git init -q $$TMP/import-target; \
+	  python3 cli/go.py adopt $$TMP/import-target --project-id import-target --name "Import Target" --feature-group workflow\|Workflow --feature workflow\|repo-local\|Repo-local --verification "git diff --check"; \
+	  python3 cli/go.py bundle import $$TMP/import-target $$TMP/adopt-smoke-bundle.json >/tmp/go-import-dry-run.json; \
+	  python3 -c 'import json,sys; plan=json.load(open(sys.argv[1])); assert plan["mode"] == "dry_run" and plan["target_path"].startswith(".go/imports/")' /tmp/go-import-dry-run.json; \
+	  python3 cli/go.py bundle import $$TMP/import-target $$TMP/adopt-smoke-bundle.json --write --agent make-check --task-id import-smoke; \
+	  python3 cli/go.py validate $$TMP/import-target; \
+	  test -n "$$(ls $$TMP/import-target/.go/imports/*.json)"

@@ -32,6 +32,7 @@ VISION_SCHEMA = "go-workflow.repo-local.vision.v1"
 HIERARCHY_SCHEMA = "go-workflow.repo-local.hierarchy.v1"
 TASK_SCHEMA = "go-workflow.repo-local.task.v1"
 EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
+EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
 
@@ -249,6 +250,7 @@ def ensure_go_dirs(root: Path) -> None:
         "runs",
         "evidence",
         "decisions",
+        "imports",
         "locks",
     ]:
         (root / rel).mkdir(parents=True, exist_ok=True)
@@ -596,6 +598,163 @@ def cmd_dirty_check(args: argparse.Namespace) -> int:
     return 1 if dirty["blocking"] and args.fail_on_blocking else 0
 
 
+
+def load_jsonl_events(path: Path, limit: int = 20) -> list[dict[str, Any]]:
+    if not path.exists():
+        return []
+    events: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            data = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(data, dict):
+            events.append(data)
+    if limit <= 0:
+        return []
+    return events[-limit:]
+
+
+def collect_tasks(root: Path, include_done: bool = False) -> dict[str, Any]:
+    states = ("open", "active", "blocked", "done")
+    result: dict[str, Any] = {"counts": {}, "records": {}}
+    for state in states:
+        records = []
+        for path in sorted((root / "tasks" / state).glob("*.json")):
+            data = load_json(path)
+            if state != "done" or include_done:
+                records.append({
+                    "id": data.get("id"),
+                    "status": data.get("status"),
+                    "summary": data.get("summary"),
+                    "scope": data.get("scope"),
+                    "acceptance": data.get("acceptance", []),
+                    "verification": data.get("verification", []),
+                    "evidence": data.get("evidence", []),
+                })
+        result["counts"][state] = len(list((root / "tasks" / state).glob("*.json")))
+        result["records"][state] = records
+    return result
+
+
+def build_export_bundle(repo: Path, include_done: bool = False, max_events: int = 20) -> dict[str, Any]:
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot export invalid .go state:\n- " + "\n- ".join(errors))
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    vision = load_json(root / "vision.json")
+    principles = load_json(root / "architecture-principles.json")
+    hierarchy = load_json(root / "hierarchy.json")
+    tasks = collect_tasks(root, include_done=include_done)
+    next_tasks = tasks["records"].get("open", [])
+    return {
+        "schema": EXPORT_BUNDLE_SCHEMA,
+        "kind": "export_bundle",
+        "bundle_id": f"{slugify(str(project.get('id') or repo.name))}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+        "created_at": now_iso(),
+        "source": {
+            "repo_name": repo.name,
+            "project_id": project.get("id"),
+            "project_name": project.get("name"),
+        },
+        "readback": {
+            "north_star": vision.get("north_star"),
+            "wedge": vision.get("wedge"),
+            "principles": [p.get("id") for p in principles.get("principles", []) if isinstance(p, dict)],
+            "feature_groups": [g.get("id") for g in hierarchy.get("feature_groups", []) if isinstance(g, dict)],
+            "next_task": None if not next_tasks else {"id": next_tasks[0].get("id"), "summary": next_tasks[0].get("summary")},
+        },
+        "tasks": tasks,
+        "history": {
+            "runs": load_jsonl_events(root / "runs" / "events.jsonl", max_events),
+            "evidence": load_jsonl_events(root / "evidence" / "events.jsonl", max_events),
+            "decisions": load_jsonl_events(root / "decisions" / "events.jsonl", max_events),
+        },
+    }
+
+
+def validate_export_bundle(data: dict[str, Any]) -> None:
+    if data.get("schema") != EXPORT_BUNDLE_SCHEMA:
+        raise RepoLocalError("bundle schema mismatch")
+    if data.get("kind") != "export_bundle":
+        raise RepoLocalError("bundle kind must be export_bundle")
+    source = data.get("source")
+    if not isinstance(source, dict) or not source.get("project_id"):
+        raise RepoLocalError("bundle source.project_id required")
+    if not data.get("bundle_id"):
+        raise RepoLocalError("bundle_id required")
+
+
+def cmd_bundle_export(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    bundle = build_export_bundle(repo, include_done=args.include_done, max_events=args.max_events)
+    text = json.dumps(bundle, indent=2, ensure_ascii=False) + "\n"
+    if args.output:
+        output = Path(args.output).resolve()
+        output.parent.mkdir(parents=True, exist_ok=True)
+        output.write_text(text, encoding="utf-8")
+        print(output)
+    else:
+        print(text, end="")
+    return 0
+
+
+def cmd_bundle_import(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot import into invalid .go state:\n- " + "\n- ".join(errors))
+    bundle = load_json(Path(args.bundle).resolve())
+    validate_export_bundle(bundle)
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    source = bundle["source"]
+    import_name = slugify(str(bundle["bundle_id"])) + ".json"
+    target = root / "imports" / import_name
+    plan = {
+        "schema": "go-workflow.repo-local.import-plan.v1",
+        "kind": "import_plan",
+        "mode": "write" if args.write else "dry_run",
+        "target_project": {"id": project.get("id"), "name": project.get("name")},
+        "source_project": {"id": source.get("project_id"), "name": source.get("project_name")},
+        "bundle_id": bundle.get("bundle_id"),
+        "target_path": relative(repo, target),
+        "source_task_counts": bundle.get("tasks", {}).get("counts", {}),
+        "actions": [
+            "validate target .go state",
+            "validate export bundle schema",
+            "write immutable import artifact under .go/imports/" if args.write else "dry-run only; no files written",
+            "append decision.recorded event" if args.write else "skip event append until --write",
+        ],
+    }
+    if not args.write:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+        return 0
+    if target.exists() and not args.force:
+        raise RepoLocalError(f"import artifact already exists: {relative(repo, target)}; pass --force to replace")
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text(json.dumps({"plan": plan, "bundle": bundle}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    append_jsonl(root / "decisions" / "events.jsonl", event(
+        args.task_id,
+        "decision.recorded",
+        args.agent,
+        {
+            "decision": "imported repo-local export bundle as review/reconcile artifact",
+            "bundle_id": bundle.get("bundle_id"),
+            "source_project": source.get("project_id"),
+            "target_path": relative(repo, target),
+        },
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        target.unlink(missing_ok=True)
+        raise RepoLocalError("import wrote invalid .go state:\n- " + "\n- ".join(errors))
+    print(relative(repo, target))
+    return 0
+
 def cmd_readback(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     errors = validate_repo(repo)
@@ -749,6 +908,22 @@ def build_parser() -> argparse.ArgumentParser:
     route.add_argument("repo", nargs="?", default=".")
     route.add_argument("--json", action="store_true")
     route.set_defaults(func=cmd_route)
+    bundle = sub.add_parser("bundle", help="Export/import compact repo-local .go bundles")
+    bundle_sub = bundle.add_subparsers(dest="bundle_command", required=True)
+    bundle_export = bundle_sub.add_parser("export", help="Export a compact .go readback/task/history bundle")
+    bundle_export.add_argument("repo", nargs="?", default=".")
+    bundle_export.add_argument("--output", default="")
+    bundle_export.add_argument("--include-done", action="store_true", help="Include done task summaries/evidence instead of counts only")
+    bundle_export.add_argument("--max-events", type=int, default=20, help="Maximum recent events per JSONL stream")
+    bundle_export.set_defaults(func=cmd_bundle_export)
+    bundle_import = bundle_sub.add_parser("import", help="Validate and optionally write an import/reconcile artifact")
+    bundle_import.add_argument("repo")
+    bundle_import.add_argument("bundle")
+    bundle_import.add_argument("--write", action="store_true", help="Write .go/imports/<bundle_id>.json and append a decision event")
+    bundle_import.add_argument("--force", action="store_true", help="Replace an existing import artifact with the same bundle id")
+    bundle_import.add_argument("--agent", default="agent")
+    bundle_import.add_argument("--task-id", default="bundle-import")
+    bundle_import.set_defaults(func=cmd_bundle_import)
     return parser
 
 

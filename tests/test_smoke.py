@@ -30,6 +30,21 @@ def test_bundle_export_import_smoke(tmp_path: Path):
         str(bundle),
     ], text=True, capture_output=True)
     assert export_result.returncode == 0, export_result.stderr + export_result.stdout
+    second_bundle = tmp_path / "bundle-second.json"
+    second_export = subprocess.run([
+        sys.executable,
+        str(ROOT / "cli" / "go.py"),
+        "bundle",
+        "export",
+        str(source),
+        "--output",
+        str(second_bundle),
+    ], text=True, capture_output=True)
+    assert second_export.returncode == 0, second_export.stderr + second_export.stdout
+    import json
+    first_id = json.loads(bundle.read_text())["bundle_id"]
+    second_id = json.loads(second_bundle.read_text())["bundle_id"]
+    assert first_id != second_id
     target = tmp_path / "target"
     subprocess.run(["git", "init", "-q", str(target)], check=True)
     adopt_result = subprocess.run([

@@ -653,7 +653,7 @@ def build_export_bundle(repo: Path, include_done: bool = False, max_events: int 
     return {
         "schema": EXPORT_BUNDLE_SCHEMA,
         "kind": "export_bundle",
-        "bundle_id": f"{slugify(str(project.get('id') or repo.name))}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')}",
+        "bundle_id": f"{slugify(str(project.get('id') or repo.name))}-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}",
         "created_at": now_iso(),
         "source": {
             "repo_name": repo.name,

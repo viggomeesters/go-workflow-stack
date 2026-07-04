@@ -34,6 +34,8 @@ Default import is a dry run. It validates the target `.go` state and the bundle,
 
 It also appends a `decision.recorded` event. It does **not** overwrite `project.json`, `vision.json`, `hierarchy.json`, task files, or evidence streams from the target repo. Reconciliation remains an explicit later task.
 
+If the same bundle id already exists, write mode refuses to replace it. `--force` is available only for intentional local repair of a previously written import artifact; normal handoff usage should treat `.go/imports/*.json` as immutable.
+
 ## Routing boundary
 
 When `<repo>/.go/project.json` exists, repo-local `.go` state wins. AW Lite/vault is fallback/control-plane only. This prevents the old failure mode where a repo-local task request created an unrelated vault task.

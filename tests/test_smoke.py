@@ -112,6 +112,11 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     assert ready_plan["state"]["has_principles"] is True
     assert ready_plan["state"]["open_task_count"] == 1
     assert ready_plan["recommended"]["command"] == "auto"
+
+    handoff_route = run_go("router", str(repo), "--command", "go", "--intent", "controle afgeven werk tot groen", "--json")
+    assert handoff_route.returncode == 0, handoff_route.stderr + handoff_route.stdout
+    handoff_plan = json.loads(handoff_route.stdout)
+    assert handoff_plan["recommended"]["command"] == "loop"
     loop_route = run_go("router", str(repo), "--command", "GOO", "--intent", "controle afgeven werk tot groen", "--json")
     assert loop_route.returncode == 0, loop_route.stderr + loop_route.stdout
     loop_plan = json.loads(loop_route.stdout)

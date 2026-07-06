@@ -84,6 +84,11 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert plan["can_escalate_to"] == ["go-loop"]
     assert plan["loop"] == ["status", "next", "claim", "execute", "verify", "recheck", "devil", "finish", "self-reflect", "summarize", "continue-or-escalate"]
     assert plan["next_tasks"] == ["design-monitor", "build-poller"]
+    assert plan["execution_policy"]["ask_policy"] == "do-not-ask-when-safe-default-exists"
+    assert plan["execution_policy"]["may_create_follow_up_tasks"] is True
+    assert plan["execution_policy"]["may_continue_after_self_reflect"] is True
+    assert "claim_and_execute_open_tasks" in plan["execution_policy"]["allowed_autonomous_actions"]
+    assert "missing_credentials" in plan["execution_policy"]["human_gates"]
     loop = run_go("loop", str(repo), "--max-tasks", "2", "--json")
     assert loop.returncode == 0, loop.stderr + loop.stdout
     loop_plan = json.loads(loop.stdout)

@@ -135,7 +135,7 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
 7. Validate and report the next open task.
 
-`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present:
+`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done.
 
 1. Run status/route/dirty validation.
 2. Take one open task at a time: next → claim → execute → verify.

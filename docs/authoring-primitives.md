@@ -44,7 +44,17 @@ python3 ~/github/go-workflow-stack/cli/go.py loop ~/github/marktplaats-bot --max
 python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --max-tasks 10 --json
 ```
 
-`go auto` is not a task-list printer. It means Viggo gives control to the agent inside repo-local safety rails. The agent should execute, verify, recheck/devil, finish with evidence, self-reflect, then continue or escalate.
+`go auto` is not a task-list printer. It means Viggo gives control to the agent inside repo-local safety rails. The emitted JSON includes an `execution_policy` with allowed autonomous actions, human gates, and the no-friction ask policy:
+
+```json
+{
+  "ask_policy": "do-not-ask-when-safe-default-exists",
+  "may_create_follow_up_tasks": true,
+  "may_continue_after_self_reflect": true
+}
+```
+
+The agent should execute, verify, recheck/devil, finish with evidence, self-reflect, then continue or escalate.
 
 `go auto` may invoke `go loop` when self-reflect produces follow-up tasks, review fails, first green is weak, or work should continue beyond the initial batch. `go loop` means keep selecting/claiming/repairing tasks until done, budget exhausted, or blocker.
 

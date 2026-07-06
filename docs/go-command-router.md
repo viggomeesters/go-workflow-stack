@@ -47,6 +47,8 @@ Hand off control for autonomous execution:
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --json
 ```
 
+`auto` is a control handoff. Its JSON includes `execution_policy`: safe defaults should be chosen without asking, same-scope follow-up tasks may be created, verification failures may be fixed, and self-reflect may continue into `go-loop`.
+
 Escalate to the stronger loop contract when `go auto` needs to keep driving beyond the initial batch:
 
 ```bash

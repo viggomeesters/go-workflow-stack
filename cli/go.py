@@ -651,6 +651,32 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
     project = load_json(root / "project.json")
     tasks = [task[1] for task in open_tasks(repo)[: max(args.max_tasks, 1)]]
     is_loop = mode == "go-loop"
+    stop_conditions = [
+        "no_open_tasks_and_no_self_reflect_follow_up",
+        "blocking_dirty_conflict_or_secret_state",
+        "missing_credentials",
+        "public_destructive_payment_or_impersonation_action",
+        "recipient_or_outcome_ambiguity",
+        "scope_expansion_with_real_product_tradeoff",
+    ]
+    execution_policy = {
+        "ask_policy": "do-not-ask-when-safe-default-exists",
+        "authority": "high-autonomy-bounded-by-repo-scope-and-human-gates",
+        "may_create_follow_up_tasks": True,
+        "may_continue_after_self_reflect": True,
+        "may_escalate_to_go_loop": not is_loop,
+        "allowed_autonomous_actions": [
+            "claim_and_execute_open_tasks",
+            "edit_files_within_task_scope",
+            "run_tests_checks_and_smokes",
+            "fix_verification_failures_within_scope",
+            "run_recheck_devil_hardening",
+            "append_evidence_and_decisions",
+            "create_same_scope_follow_up_tasks",
+            "summarize_compactly_without_waiting_for_prompt",
+        ],
+        "human_gates": stop_conditions[1:],
+    }
     return {
         "mode": mode,
         "repo": str(repo),
@@ -660,6 +686,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         "autonomy": "control-handed-off-until-blocker" if is_loop else "high-autonomy-bounded-batch-with-loop-escalation",
         "can_escalate_to": [] if is_loop else ["go-loop"],
         "continues_beyond_initial_tasks": is_loop,
+        "execution_policy": execution_policy,
         "loop": ["status", "next", "claim", "execute", "verify", "recheck", "devil", "finish", "self-reflect", "summarize", "continue-or-escalate"],
         "agent_contract": {
             "execute": "Hermes claims one open .go task at a time, edits only task scope, verifies, records evidence, then finishes.",
@@ -667,7 +694,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
             "loop_escalation": "go-auto may invoke go-loop when self-reflect creates follow-up work, verification/review fails, first green is not trustworthy, or the project needs continued autonomous repair beyond the initial batch.",
             "feedback": "New Viggo input is converted into .go tasks/decisions before another go auto/go loop pass.",
             "summary_max_chars": args.summary_chars,
-            "stop_conditions": ["no open tasks and no self-reflect follow-up", "blocking dirty/conflict/secret state", "missing credentials", "public/destructive/payment action needs human gate", "scope expansion with real product trade-off"],
+            "stop_conditions": stop_conditions,
         },
     }
 

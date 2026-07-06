@@ -524,6 +524,15 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     return 0
 
 
+def spike_task_scope(scope_name: str) -> dict[str, list[str]]:
+    if scope_name == "docs":
+        return {"read": [".go/**", "README.md", "docs/**"], "modify": [".go/**", "README.md", "docs/**", "Makefile"]}
+    return {
+        "read": [".go/**", "README.md", "docs/**", "cli/go.py", "tests/**", "Makefile"],
+        "modify": [".go/**", "README.md", "docs/**", "cli/go.py", "tests/**", "Makefile"],
+    }
+
+
 def cmd_spike(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     ensure_git_repo(repo)
@@ -587,6 +596,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
         dump_json(root / "hierarchy.json", hierarchy)
     target_epic = slugify(args.target_epic or str(epics[0]["id"]))
     task_values = [parse_spike_task(value) for value in args.task] if args.task else default_spike_tasks()
+    default_task_scope = spike_task_scope(args.task_scope)
     created_tasks: list[str] = []
     project = load_json(root / "project.json")
     for order, (task_id, summary) in enumerate(task_values, start=1):
@@ -601,7 +611,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "summary": summary,
             "description": summary,
             "order": order,
-            "scope": {"read": [".go/**", "README.md", "docs/**"], "modify": [".go/**", "README.md", "docs/**", "scripts/**", "Makefile"]},
+            "scope": default_task_scope,
             "acceptance": ["Task result is implemented and verified with evidence."],
             "verification": project.get("default_verification") or ["make check"],
             "claim": {"agent": None, "claimed_at": None},
@@ -677,6 +687,29 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         ],
         "human_gates": stop_conditions[1:],
     }
+    dirty_entries = [f"{code} {path}" for code, path in git_status(repo)]
+    preflight_blockers = [
+        entry
+        for entry in dirty_entries
+        if entry[:2] in {"UU", "AA", "DD", "AU", "UA", "DU", "UD"}
+        or any(token in entry.lower() for token in ["secret", ".env", "credential", "password"])
+    ]
+    run_envelope = {
+        "schema": "go-workflow.auto-run-envelope.v1",
+        "result_schema": "go-workflow.auto-run-result.v1",
+        "run_until": "done_or_blocker_or_budget_or_safety_gate",
+        "budget": {"max_tasks": max(args.max_tasks, 1), "summary_chars": args.summary_chars},
+        "preflight": {
+            "valid_go_state": True,
+            "open_task_count": len(open_tasks(repo)),
+            "selected_task_count": len(tasks),
+            "dirty_entries": dirty_entries,
+            "human_gate_required": bool(preflight_blockers),
+            "human_gate_blockers": preflight_blockers,
+        },
+        "checkpoint_after": ["each_task_finish", "blocker", "budget_exhausted", "safety_gate"],
+        "final_result_fields": ["status", "completed_tasks", "blocked_task", "evidence", "checks", "summary", "next_action"],
+    }
     return {
         "mode": mode,
         "repo": str(repo),
@@ -687,6 +720,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         "can_escalate_to": [] if is_loop else ["go-loop"],
         "continues_beyond_initial_tasks": is_loop,
         "execution_policy": execution_policy,
+        "run_envelope": run_envelope,
         "loop": ["status", "next", "claim", "execute", "verify", "recheck", "devil", "finish", "self-reflect", "summarize", "continue-or-escalate"],
         "agent_contract": {
             "execute": "Hermes claims one open .go task at a time, edits only task scope, verifies, records evidence, then finishes.",
@@ -766,8 +800,10 @@ def cmd_router(args: argparse.Namespace) -> int:
     recommended: dict[str, Any]
     if normalized not in {"go", "go-loop"}:
         recommended = {"command": "unknown", "reason": "command token is not a go/go-loop variant"}
-    elif not state["repo_exists"] or not state["has_go"]:
-        recommended = {"command": "spike", "reason": "repo or .go contract is missing", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<intent>'}\""}
+    elif not state["repo_exists"]:
+        recommended = {"command": "spike", "mode": "create_repo", "reason": "repo directory is missing", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<intent>'}\""}
+    elif not state["has_go"]:
+        recommended = {"command": "spike", "mode": "repair_existing_repo", "reason": "repo exists but .go contract is missing", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<intent>'}\" --skip-repo-complete"}
     elif not state["valid"] or not state["has_vision"] or not state["has_principles"] or not state["has_hierarchy"]:
         recommended = {"command": "spike", "reason": "repo-local contract is incomplete or invalid", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<repair intent>'}\""}
     elif state["open_task_count"] > 0 and normalized == "go-loop":
@@ -1312,6 +1348,7 @@ def build_parser() -> argparse.ArgumentParser:
     spike.add_argument("--epic", action="append", default=[], help="epic_id|title")
     spike.add_argument("--target-epic", default="", help="epic id to attach generated tasks to")
     spike.add_argument("--task", action="append", default=[], help="task_id|summary")
+    spike.add_argument("--task-scope", choices=["code", "docs"], default="code", help="default scope preset for generated tasks")
     spike.add_argument("--verification", action="append", default=[])
     spike.add_argument("--skip-repo-complete", action="store_true")
     spike.add_argument("--agent", default="agent")

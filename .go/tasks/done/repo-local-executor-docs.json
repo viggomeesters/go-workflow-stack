@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "repo-local-executor-docs",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Document how Hermes executes go auto beyond CLI policy",
+  "description": "Document how Hermes executes go auto beyond CLI policy",
+  "order": 2,
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "scripts/**",
+      "Makefile"
+    ]
+  },
+  "acceptance": [
+    "Task result is implemented and verified with evidence."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-06T12:56:20+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-06T12:56:39+02:00",
+      "agent": "hermes",
+      "summary": "Documented Hermes executor boundary for go auto: execution_policy plus run_envelope, immediate tool-call loop, verification/recheck/devil/harden, finish evidence, self-reflect, and compact handoff. Verified pytest -q and make check."
+    }
+  ]
+}

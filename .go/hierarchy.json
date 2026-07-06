@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.repo-local.hierarchy.v1",
+  "kind": "hierarchy",
+  "project": "go-workflow-stack",
+  "epics": [
+    {
+      "id": "autonomous-go-runtime",
+      "title": "Autonomous Go Runtime",
+      "features": [],
+      "tasks": [
+        "auto-preflight-envelope",
+        "repo-local-executor-docs",
+        "router-state-hardening",
+        "spike-task-scope-presets"
+      ]
+    },
+    {
+      "id": "workflow",
+      "title": "Workflow",
+      "features": [
+        {
+          "id": "repo-local-workflow",
+          "title": "Repo-local workflow",
+          "tasks": []
+        }
+      ],
+      "tasks": []
+    }
+  ]
+}

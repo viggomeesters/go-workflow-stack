@@ -1,0 +1,46 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "auto-preflight-envelope",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add machine-readable go auto preflight and run envelope",
+  "description": "Add machine-readable go auto preflight and run envelope",
+  "order": 1,
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "cli/go.py",
+      "tests/**",
+      "Makefile"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "cli/go.py",
+      "tests/**",
+      "Makefile"
+    ]
+  },
+  "acceptance": [
+    "Task result is implemented and verified with evidence."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-06T12:53:39+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-06T12:56:07+02:00",
+      "agent": "hermes",
+      "summary": "Added go-auto run_envelope with preflight/budget/run-until/checkpoint/result schema; verified pytest -q and make check."
+    }
+  ]
+}

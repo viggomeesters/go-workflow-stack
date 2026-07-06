@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.repo-local.vision.v1",
+  "kind": "vision",
+  "project": "go-workflow-stack",
+  "status": "active",
+  "north_star": "Go Workflow Stack can be designed, built, verified, and continued from repo-local .go state.",
+  "wedge": "Reusable repo-local agent workflow stack. Make go/go-auto/go-loop practical: route rough Viggo commands, create or repair repo-local .go state, execute autonomously inside safety gates, validate with tests, and document exact operator usage.",
+  "target_user": "Viggo and future autonomous agents continuing this project.",
+  "core_promise": "A single go spike/go auto loop can turn rough intent into repo, vision, principles, tasks, verified work, reflection, and concise handoff.",
+  "product_principles": [
+    "repo-local",
+    "proof-first",
+    "autonomous-but-scoped",
+    "feedback-turns-into-tasks"
+  ],
+  "non_goals": [
+    "no hidden central execution state",
+    "no unbounded public/destructive actions",
+    "no technical fluff handoff"
+  ],
+  "success_metrics": [
+    "repo validates",
+    "next tasks are claimable",
+    "go auto plan is explicit"
+  ]
+}

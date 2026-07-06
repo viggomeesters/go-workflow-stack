@@ -21,6 +21,7 @@ python3 ~/github/go-workflow-stack/cli/go.py spike ~/github/marktplaats-bot \
   --project-id marktplaats-bot \
   --name "Marktplaats Bot" \
   --brief "Inbox monitor that checks Marktplaats messages and alerts Viggo" \
+  --task-scope code \
   --epic "inbox-monitor|Inbox Monitor" \
   --task "design-monitor|Design the inbox monitor" \
   --task "build-poller|Build the polling loop"
@@ -54,7 +55,16 @@ python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --
 }
 ```
 
-The agent should execute, verify, recheck/devil, finish with evidence, self-reflect, then continue or escalate.
+The emitted JSON also carries a `run_envelope` so an executor can run and resume without chat guesswork:
+
+```json
+{
+  "run_until": "done_or_blocker_or_budget_or_safety_gate",
+  "budget": {"max_tasks": 3},
+  "preflight": {"valid_go_state": true, "human_gate_required": false},
+  "result_schema": "go-workflow.auto-run-result.v1"
+}
+```
 
 `go auto` may invoke `go loop` when self-reflect produces follow-up tasks, review fails, first green is weak, or work should continue beyond the initial batch. `go loop` means keep selecting/claiming/repairing tasks until done, budget exhausted, or blocker.
 

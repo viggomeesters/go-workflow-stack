@@ -117,13 +117,13 @@ For v0.3+ end-to-end command routing, use these higher-level primitives:
 
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO --intent "<rough Viggo input>" --json
-python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>"
+python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>" --task-scope code
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
 python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 --json
 python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias
 ```
 
-Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. Normalize `loop`, `go-loop`, and `goloop` to the stronger `go-loop` route. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, `go-loop`, or task creation.
+Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. Normalize `loop`, `go-loop`, and `goloop` to the stronger `go-loop` route. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, `go-loop`, or task creation. For `spike`, it distinguishes `mode=create_repo` from `mode=repair_existing_repo`; repair examples include `--skip-repo-complete` to avoid overwriting mature repos.
 
 `go spike` is the bootstrap command Viggo can say when the project is still only an idea/design:
 
@@ -135,7 +135,7 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
 7. Validate and report the next open task.
 
-`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done.
+`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, run-until condition, checkpoint triggers, and expected result schema.
 
 1. Run status/route/dirty validation.
 2. Take one open task at a time: next → claim → execute → verify.

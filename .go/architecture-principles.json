@@ -1,0 +1,19 @@
+{
+  "schema": "go-workflow.repo-local.architecture-principles.v1",
+  "kind": "architecture_principles",
+  "project": "go-workflow-stack",
+  "principles": [
+    {
+      "id": "repo-local-state",
+      "statement": "Project workflow state lives in .go/ next to code.",
+      "rationale": "A fresh clone should explain current direction and next work.",
+      "enforcement": "go-workflow-stack validate/readback"
+    },
+    {
+      "id": "json-first",
+      "statement": "Current state is JSON and append-only history is JSONL.",
+      "rationale": "Agents need deterministic, diffable contracts.",
+      "enforcement": "schema validation and CLI checks"
+    }
+  ]
+}

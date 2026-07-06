@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "spike-task-scope-presets",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Improve go spike task scope presets for code/docs workflow repos",
+  "description": "Self-reflect follow-up: generated tasks defaulted to docs/scripts/Makefile and missed cli/tests for go-workflow-stack implementation tasks. Add CLI options or better defaults so go spike can create implementation-ready task scopes without manual patching.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/**",
+      "docs/**",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "go spike can create tasks with explicit read/modify scope presets or implementation defaults"
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-06T12:59:06+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-06T13:02:19+02:00",
+      "agent": "hermes",
+      "summary": "Self-reflect follow-up implemented: go spike now has --task-scope code|docs; default code generates tasks with cli/go.py, tests/**, docs/** and Makefile scope, preventing manual scope repair for implementation repos. Verified pytest -q and make check."
+    }
+  ]
+}

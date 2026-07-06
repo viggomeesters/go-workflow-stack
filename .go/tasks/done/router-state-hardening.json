@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "router-state-hardening",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Harden router state and no-.go repair behavior",
+  "description": "Harden router state and no-.go repair behavior",
+  "order": 3,
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "scripts/**",
+      "Makefile"
+    ]
+  },
+  "acceptance": [
+    "Task result is implemented and verified with evidence."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-06T12:56:48+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-06T12:58:14+02:00",
+      "agent": "hermes",
+      "summary": "Router now distinguishes create_repo from repair_existing_repo and repair examples include --skip-repo-complete; direct tests cover existing git repo without .go. Verified pytest -q and make check."
+    }
+  ]
+}

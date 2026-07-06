@@ -1,0 +1,14 @@
+{
+  "schema": "go-workflow.repo-local.project.v1",
+  "kind": "project",
+  "id": "go-workflow-stack",
+  "name": "Go Workflow Stack",
+  "source_of_truth": "repo-local",
+  "default_verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "links": {
+    "repo": ""
+  }
+}

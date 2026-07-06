@@ -36,6 +36,7 @@ python3 ~/github/go-workflow-stack/cli/go.py spike ~/github/marktplaats-bot \
   --project-id marktplaats-bot \
   --name "Marktplaats Bot" \
   --brief "Inbox monitor that checks Marktplaats messages and alerts Viggo" \
+  --task-scope code \
   --epic "inbox-monitor|Inbox Monitor" \
   --task "design-monitor|Design the inbox monitor" \
   --task "build-poller|Build the polling loop"
@@ -47,7 +48,7 @@ Hand off control for autonomous execution:
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --json
 ```
 
-`auto` is a control handoff. Its JSON includes `execution_policy`: safe defaults should be chosen without asking, same-scope follow-up tasks may be created, verification failures may be fixed, and self-reflect may continue into `go-loop`.
+`auto` is a control handoff. Its JSON includes `execution_policy`: safe defaults should be chosen without asking, same-scope follow-up tasks may be created, verification failures may be fixed, and self-reflect may continue into `go-loop`. It also includes `run_envelope` with preflight, max-task budget, run-until condition, checkpoint triggers, and result schema so a Hermes executor has a machine-readable boundary.
 
 Escalate to the stronger loop contract when `go auto` needs to keep driving beyond the initial batch:
 
@@ -60,8 +61,8 @@ python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --
 
 | Repo state | Router decision | Why |
 |---|---|---|
-| No repo directory | `spike` | Create repo, Git, repo-complete basics, `.go` contract, first tasks |
-| Repo exists, no `.go/project.json` | `spike` | Retrofit repo-local state without broad migration |
+| No repo directory | `spike` (`mode=create_repo`) | Create repo, Git, repo-complete basics, `.go` contract, first tasks |
+| Repo exists, no `.go/project.json` | `spike` (`mode=repair_existing_repo`) | Retrofit repo-local state without broad migration; example includes `--skip-repo-complete` |
 | `.go` exists but vision/principles/hierarchy invalid or missing | `spike` repair path | Complete the repo-local contract first |
 | Valid `.go`, open tasks exist | `auto` | Hand off control for bounded autonomous execution |
 | `auto` finds follow-up work, failed review, or first green is not trustworthy | `go-loop` | Continue autonomously through repair/self-reflect until blocker |

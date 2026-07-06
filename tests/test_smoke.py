@@ -1,3 +1,4 @@
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -33,7 +34,6 @@ def test_epic_and_decision_authoring_primitives(tmp_path: Path):
 
     task = run_go("task", "create", str(repo), "--id", "prove-contract", "--summary", "Prove ADR and epic contract", "--epic", "workflow-contract", "--acceptance", "Task is linked to epic", "--verification", "git diff --check")
     assert task.returncode == 0, task.stderr + task.stdout
-    import json
     hierarchy = json.loads((repo / ".go" / "hierarchy.json").read_text())
     epic_record = next(item for item in hierarchy["epics"] if item["id"] == "workflow-contract")
     assert "prove-contract" in epic_record["tasks"]
@@ -72,12 +72,14 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert (repo / ".go" / "architecture-principles.json").is_file()
     assert (repo / ".go" / "tasks" / "open" / "design-monitor.json").is_file()
     assert (repo / ".go" / "tasks" / "open" / "build-poller.json").is_file()
+    design_task = json.loads((repo / ".go" / "tasks" / "open" / "design-monitor.json").read_text())
+    assert "cli/go.py" in design_task["scope"]["read"]
+    assert "tests/**" in design_task["scope"]["modify"]
 
     validate = run_go("validate", str(repo))
     assert validate.returncode == 0, validate.stderr + validate.stdout
     auto = run_go("auto", str(repo), "--max-tasks", "2", "--json")
     assert auto.returncode == 0, auto.stderr + auto.stdout
-    import json
     plan = json.loads(auto.stdout)
     assert plan["mode"] == "go-auto"
     assert plan["control_handoff"] is True
@@ -89,6 +91,11 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert plan["execution_policy"]["may_continue_after_self_reflect"] is True
     assert "claim_and_execute_open_tasks" in plan["execution_policy"]["allowed_autonomous_actions"]
     assert "missing_credentials" in plan["execution_policy"]["human_gates"]
+    assert plan["run_envelope"]["run_until"] == "done_or_blocker_or_budget_or_safety_gate"
+    assert plan["run_envelope"]["budget"]["max_tasks"] == 2
+    assert plan["run_envelope"]["preflight"]["valid_go_state"] is True
+    assert plan["run_envelope"]["preflight"]["human_gate_required"] is False
+    assert plan["run_envelope"]["result_schema"] == "go-workflow.auto-run-result.v1"
     loop = run_go("loop", str(repo), "--max-tasks", "2", "--json")
     assert loop.returncode == 0, loop.stderr + loop.stdout
     loop_plan = json.loads(loop.stdout)
@@ -106,11 +113,23 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     missing = tmp_path / "missing-project"
     missing_route = run_go("router", str(missing), "--command", "gOo", "--intent", "marktplaats inbox bot", "--json")
     assert missing_route.returncode == 0, missing_route.stderr + missing_route.stdout
-    import json
     missing_plan = json.loads(missing_route.stdout)
     assert missing_plan["normalized_command"] == "go"
     assert missing_plan["state"]["repo_exists"] is False
     assert missing_plan["recommended"]["command"] == "spike"
+
+    existing_without_go = tmp_path / "existing-without-go"
+    existing_without_go.mkdir()
+    subprocess.run(["git", "init", "-q", str(existing_without_go)], check=True)
+    repair_route = run_go("router", str(existing_without_go), "--command", "GO", "--intent", "existing repo needs workflow", "--json")
+    assert repair_route.returncode == 0, repair_route.stderr + repair_route.stdout
+    repair_plan = json.loads(repair_route.stdout)
+    assert repair_plan["state"]["repo_exists"] is True
+    assert repair_plan["state"]["is_git_repo"] is True
+    assert repair_plan["state"]["has_go"] is False
+    assert repair_plan["recommended"]["command"] == "spike"
+    assert repair_plan["recommended"]["mode"] == "repair_existing_repo"
+    assert "--skip-repo-complete" in repair_plan["recommended"]["example"]
 
     repo = tmp_path / "ready-project"
     spike = run_go("spike", str(repo), "--project-id", "ready", "--name", "Ready", "--task", "first|First task")
@@ -163,7 +182,6 @@ def test_bundle_export_import_smoke(tmp_path: Path):
         str(second_bundle),
     ], text=True, capture_output=True)
     assert second_export.returncode == 0, second_export.stderr + second_export.stdout
-    import json
     first_id = json.loads(bundle.read_text())["bundle_id"]
     second_id = json.loads(second_bundle.read_text())["bundle_id"]
     assert first_id != second_id

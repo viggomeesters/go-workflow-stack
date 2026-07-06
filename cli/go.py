@@ -854,8 +854,54 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
     return (0 if result["status"] == "done" else 1), result
 
 
+def build_agent_handoff(repo: Path, args: argparse.Namespace, mode: str) -> dict[str, Any]:
+    plan = build_loop_plan(repo, args, mode=mode)
+    selected: list[dict[str, Any]] = []
+    verification_commands: list[str] = []
+    for _, task in open_tasks(repo)[: max(args.max_tasks, 1)]:
+        selected.append({
+            "id": task.get("id"),
+            "summary": task.get("summary"),
+            "description": task.get("description", ""),
+            "scope": task.get("scope", {}),
+            "acceptance": task.get("acceptance", []),
+            "verification": task.get("verification", []),
+        })
+        verification_commands.extend(task.get("verification", []) or [])
+    return {
+        "schema": "go-workflow.agent-handoff.v1",
+        "mode": mode,
+        "target_runtime": "hermes-bertus",
+        "repo": str(repo),
+        "project_id": plan["project_id"],
+        "command": f"{mode} --execute",
+        "control_handoff": True,
+        "tasks": selected,
+        "run_envelope": plan["run_envelope"],
+        "execution_policy": plan["execution_policy"],
+        "gates": plan["execution_policy"]["human_gates"],
+        "expected_evidence": {
+            "verification_commands": verification_commands,
+            "task_state": ".go/tasks/done/<task-id>.json or .go/tasks/blocked/<task-id>.json",
+            "events": [".go/evidence/events.jsonl", ".go/runs/events.jsonl", ".go/reflections/events.jsonl"],
+            "final_result_schema": "go-workflow.auto-run-result.v1",
+        },
+        "agent_instructions": [
+            "Do not ask when a safe default exists.",
+            "Edit only within task scope.",
+            "Run verification before finish.",
+            "Finish with evidence or block with check output.",
+            "Escalate to go-loop when self-reflect or review finds same-scope repair work.",
+        ],
+    }
+
+
 def cmd_auto(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    if args.emit_handoff:
+        handoff = build_agent_handoff(repo, args, mode="go-auto")
+        print(json.dumps(handoff, indent=2, ensure_ascii=False) if args.json else handoff["command"])
+        return 0
     if args.execute:
         exit_code, result = execute_loop_plan(repo, args, mode="go-auto")
         if args.json:
@@ -880,6 +926,10 @@ def cmd_auto(args: argparse.Namespace) -> int:
 
 def cmd_loop(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    if args.emit_handoff:
+        handoff = build_agent_handoff(repo, args, mode="go-loop")
+        print(json.dumps(handoff, indent=2, ensure_ascii=False) if args.json else handoff["command"])
+        return 0
     if args.execute:
         exit_code, result = execute_loop_plan(repo, args, mode="go-loop")
         if args.json:
@@ -1500,6 +1550,7 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--max-tasks", type=int, default=3)
     auto.add_argument("--summary-chars", type=int, default=900)
     auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
+    auto.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
     auto.add_argument("--agent", default="agent")
     auto.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
     auto.add_argument("--json", action="store_true")
@@ -1513,6 +1564,7 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--max-tasks", type=int, default=10)
         loop.add_argument("--summary-chars", type=int, default=900)
         loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
+        loop.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
         loop.add_argument("--agent", default="agent")
         loop.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
         loop.add_argument("--json", action="store_true")

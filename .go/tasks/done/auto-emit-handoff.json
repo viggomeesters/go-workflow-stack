@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "auto-emit-handoff",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add go-auto handoff emitter for Hermes/Bertus",
+  "description": "Add a machine-readable --emit-handoff mode so go auto can produce a bounded Hermes/Bertus execution handoff with task ids, scope, gates, expected evidence, and run envelope.",
+  "scope": {
+    "read": [
+      ".go/**"
+    ],
+    "modify": [
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "go auto --emit-handoff returns JSON with schema, target repo, command, tasks, scope, gates, expected evidence, and run envelope",
+    "go-loop --emit-handoff uses go-loop mode and preserves the same handoff contract"
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-06T13:48:21+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-06T13:51:29+02:00",
+      "agent": "hermes",
+      "summary": "Implemented go auto/go-loop --emit-handoff with go-workflow.agent-handoff.v1 including repo, mode, target runtime, tasks, scope, gates, expected evidence, execution_policy, and run_envelope. Verified pytest -q, make check, and go-project-template make check."
+    }
+  ]
+}

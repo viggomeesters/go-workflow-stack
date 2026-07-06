@@ -121,6 +121,7 @@ For v0.3+ end-to-end command routing, use these higher-level primitives:
 python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO --intent "<rough Viggo input>" --json
 python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>" --task-scope code
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
+python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --emit-handoff --json
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --execute --agent hermes --json
 python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 --json
 python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias

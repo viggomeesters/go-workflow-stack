@@ -80,6 +80,21 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert validate.returncode == 0, validate.stderr + validate.stdout
     auto = run_go("auto", str(repo), "--max-tasks", "2", "--json")
     assert auto.returncode == 0, auto.stderr + auto.stdout
+    handoff = run_go("auto", str(repo), "--max-tasks", "1", "--emit-handoff", "--json")
+    assert handoff.returncode == 0, handoff.stderr
+    handoff_plan = json.loads(handoff.stdout)
+    assert handoff_plan["schema"] == "go-workflow.agent-handoff.v1"
+    assert handoff_plan["mode"] == "go-auto"
+    assert handoff_plan["target_runtime"] == "hermes-bertus"
+    assert handoff_plan["tasks"][0]["id"] == "design-monitor"
+    assert "docs/**" in handoff_plan["tasks"][0]["scope"]["modify"]
+    assert "make check" in handoff_plan["expected_evidence"]["verification_commands"]
+    assert handoff_plan["run_envelope"]["result_schema"] == "go-workflow.auto-run-result.v1"
+
+    loop_handoff = run_go("go-loop", str(repo), "--max-tasks", "1", "--emit-handoff", "--json")
+    assert loop_handoff.returncode == 0, loop_handoff.stderr
+    assert json.loads(loop_handoff.stdout)["mode"] == "go-loop"
+
     plan = json.loads(auto.stdout)
     assert plan["mode"] == "go-auto"
     assert plan["control_handoff"] is True

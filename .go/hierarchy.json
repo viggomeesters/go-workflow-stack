@@ -11,7 +11,8 @@
         "auto-preflight-envelope",
         "repo-local-executor-docs",
         "router-state-hardening",
-        "spike-task-scope-presets"
+        "spike-task-scope-presets",
+        "auto-emit-handoff"
       ]
     },
     {

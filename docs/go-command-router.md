@@ -46,9 +46,10 @@ Hand off control for autonomous execution:
 
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --json
+python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --execute --agent hermes --json
 ```
 
-`auto` is a control handoff. Its JSON includes `execution_policy`: safe defaults should be chosen without asking, same-scope follow-up tasks may be created, verification failures may be fixed, and self-reflect may continue into `go-loop`. It also includes `run_envelope` with preflight, max-task budget, run-until condition, checkpoint triggers, and result schema so a Hermes executor has a machine-readable boundary.
+`auto --execute` runs the machine lifecycle for verification-ready tasks: preflight dirty/lock/conflict/secret gates, claim one open task, run its verification commands, finish with evidence on success, move to blocked on verification failure, and append `.go/reflections/events.jsonl` for the batch.
 
 Escalate to the stronger loop contract when `go auto` needs to keep driving beyond the initial batch:
 
@@ -95,6 +96,7 @@ It does this:
    - `.go/evidence/events.jsonl`
    - `.go/decisions/events.jsonl`
    - `.go/runs/events.jsonl`
+   - `.go/reflections/events.jsonl` when `auto --execute` has run
 5. Append an ADR-lite decision event: this repo uses `go spike` / `go auto`.
 6. Validate the contract.
 7. Print the next open task.

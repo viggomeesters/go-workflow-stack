@@ -197,7 +197,7 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     errors: list[str] = []
     require(data.get("schema") == EVENT_SCHEMA, errors, f"{prefix}: schema mismatch")
     require(data.get("kind") == "event", errors, f"{prefix}: kind must be event")
-    require(data.get("event") in {"task.claimed", "task.finished", "evidence.appended", "decision.recorded", "run.checked"}, errors, f"{prefix}: invalid event")
+    require(data.get("event") in {"task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected"}, errors, f"{prefix}: invalid event")
     require(bool(data.get("created_at")), errors, f"{prefix}: created_at required")
     require(bool(data.get("task_id")), errors, f"{prefix}: task_id required")
     return errors
@@ -687,26 +687,13 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         ],
         "human_gates": stop_conditions[1:],
     }
-    dirty_entries = [f"{code} {path}" for code, path in git_status(repo)]
-    preflight_blockers = [
-        entry
-        for entry in dirty_entries
-        if entry[:2] in {"UU", "AA", "DD", "AU", "UA", "DU", "UD"}
-        or any(token in entry.lower() for token in ["secret", ".env", "credential", "password"])
-    ]
+    preflight = build_auto_preflight(repo, len(tasks), max(args.max_tasks, 1))
     run_envelope = {
         "schema": "go-workflow.auto-run-envelope.v1",
         "result_schema": "go-workflow.auto-run-result.v1",
         "run_until": "done_or_blocker_or_budget_or_safety_gate",
         "budget": {"max_tasks": max(args.max_tasks, 1), "summary_chars": args.summary_chars},
-        "preflight": {
-            "valid_go_state": True,
-            "open_task_count": len(open_tasks(repo)),
-            "selected_task_count": len(tasks),
-            "dirty_entries": dirty_entries,
-            "human_gate_required": bool(preflight_blockers),
-            "human_gate_blockers": preflight_blockers,
-        },
+        "preflight": preflight,
         "checkpoint_after": ["each_task_finish", "blocker", "budget_exhausted", "safety_gate"],
         "final_result_fields": ["status", "completed_tasks", "blocked_task", "evidence", "checks", "summary", "next_action"],
     }
@@ -733,8 +720,152 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
     }
 
 
+def build_auto_preflight(repo: Path, selected_task_count: int, max_tasks: int) -> dict[str, Any]:
+    root = go_root(repo)
+    dirty_entries: list[str] = []
+    blockers: list[str] = []
+    for code, path in git_status(repo):
+        entry = f"{code} {path}"
+        dirty_entries.append(entry)
+        conflict = "U" in code or code in {"AA", "DD"}
+        secret_like = bool(BLOCK_SECRET_RE.search(path))
+        destructive = code.strip().startswith("D") or code.endswith("D")
+        lock_state = path.startswith(".go/locks/")
+        if conflict:
+            blockers.append(f"{entry} — merge conflict")
+        elif secret_like:
+            blockers.append(f"{entry} — secret-looking path")
+        elif destructive:
+            blockers.append(f"{entry} — delete requires explicit review")
+        elif lock_state:
+            blockers.append(f"{entry} — workflow lock state")
+    lock_files = [] if not (root / "locks").is_dir() else [relative(repo, path) for path in sorted((root / "locks").glob("*")) if path.is_file()]
+    for lock in lock_files:
+        blockers.append(f"{lock} — active workflow lock")
+    return {
+        "valid_go_state": True,
+        "open_task_count": len(open_tasks(repo)),
+        "selected_task_count": selected_task_count,
+        "max_tasks": max_tasks,
+        "dirty_entries": dirty_entries,
+        "lock_files": lock_files,
+        "human_gate_required": bool(blockers),
+        "human_gate_blockers": blockers,
+    }
+
+
+def run_verification_commands(repo: Path, task: dict[str, Any]) -> list[dict[str, Any]]:
+    checks: list[dict[str, Any]] = []
+    for command in task.get("verification", []) or []:
+        result = subprocess.run(command, cwd=repo, shell=True, text=True, capture_output=True, check=False)
+        checks.append({
+            "task_id": task.get("id"),
+            "command": command,
+            "returncode": result.returncode,
+            "stdout": result.stdout[-2000:],
+            "stderr": result.stderr[-2000:],
+        })
+        if result.returncode != 0:
+            break
+    if not checks:
+        checks.append({"task_id": task.get("id"), "command": None, "returncode": 0, "stdout": "", "stderr": "no verification commands configured"})
+    return checks
+
+
+def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, evidence_summary: str) -> Path:
+    task["status"] = "done"
+    task.setdefault("evidence", []).append({"created_at": now_iso(), "agent": agent, "summary": evidence_summary})
+    target = task_path(root, "done", task["id"])
+    dump_json(target, task)
+    active_path.unlink()
+    append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": evidence_summary}))
+    return target
+
+
+def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, reason: str, checks: list[dict[str, Any]]) -> Path:
+    task["status"] = "blocked"
+    task["blocked"] = {"created_at": now_iso(), "agent": agent, "reason": reason}
+    target = task_path(root, "blocked", task["id"])
+    dump_json(target, task)
+    active_path.unlink()
+    append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.blocked", agent, {"reason": reason, "checks": checks}))
+    return target
+
+
+def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
+    plan = build_loop_plan(repo, args, mode=mode)
+    root = go_root(repo)
+    preflight = plan["run_envelope"]["preflight"]
+    result: dict[str, Any] = {
+        "schema": "go-workflow.auto-run-result.v1",
+        "mode": mode,
+        "repo": str(repo),
+        "run_envelope": plan["run_envelope"],
+        "status": "running",
+        "completed_tasks": [],
+        "blocked_task": None,
+        "evidence": [],
+        "checks": [],
+        "summary": "",
+        "next_action": None,
+    }
+    if preflight["human_gate_required"] and not args.allow_dirty:
+        result.update({"status": "safety_gate", "summary": "Preflight blocked by dirty/lock/conflict/secret state.", "next_action": "resolve human_gate_blockers or rerun with explicit override"})
+        append_jsonl(root / "runs" / "events.jsonl", event("go-auto", "auto.safety_gate", args.agent, {"blockers": preflight["human_gate_blockers"]}))
+        return 1, result
+
+    for _ in range(max(args.max_tasks, 1)):
+        tasks = open_tasks(repo)
+        if not tasks:
+            result["status"] = "done"
+            result["summary"] = "No open tasks remain."
+            break
+        open_path, task = tasks[0]
+        dirty = classify_dirty(repo, task.get("scope", {}).get("modify", []))
+        if dirty["blocking"] and not args.allow_dirty:
+            result.update({"status": "safety_gate", "blocked_task": task.get("id"), "summary": "Task scope dirty gate blocked execution.", "next_action": "resolve dirty state or rerun with explicit override"})
+            result["run_envelope"]["preflight"]["human_gate_required"] = True
+            result["run_envelope"]["preflight"].setdefault("human_gate_blockers", []).extend(dirty["blocking"])
+            append_jsonl(root / "runs" / "events.jsonl", event(task.get("id", "unknown"), "auto.safety_gate", args.agent, {"blockers": dirty["blocking"]}))
+            return 1, result
+        task["status"] = "active"
+        task["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
+        active_path = task_path(root, "active", task["id"])
+        dump_json(active_path, task)
+        open_path.unlink()
+        append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
+        checks = run_verification_commands(repo, task)
+        result["checks"].extend(checks)
+        failed = next((check for check in checks if check["returncode"] != 0), None)
+        if failed:
+            block_task_record(repo, root, active_path, task, args.agent, f"verification failed: {failed['command']}", checks)
+            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Verification failed; task moved to blocked.", "next_action": "fix failing verification and re-open/continue"})
+            break
+        evidence_summary = "; ".join(check["command"] or "no verification configured" for check in checks)
+        finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
+        result["completed_tasks"].append(task["id"])
+        result["evidence"].append({"task_id": task["id"], "summary": f"auto-execute verified: {evidence_summary}"})
+        result["status"] = "done"
+        result["summary"] = f"Completed {len(result['completed_tasks'])} task(s)."
+        if mode != "go-loop" and len(result["completed_tasks"]) >= max(args.max_tasks, 1):
+            result["next_action"] = "budget_exhausted_or_batch_complete"
+            break
+    append_jsonl(root / "reflections" / "events.jsonl", event("go-auto", "auto.reflected", args.agent, {"mode": mode, "status": result["status"], "completed_tasks": result["completed_tasks"], "blocked_task": result["blocked_task"], "next_action": result["next_action"]}))
+    return (0 if result["status"] == "done" else 1), result
+
+
 def cmd_auto(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    if args.execute:
+        exit_code, result = execute_loop_plan(repo, args, mode="go-auto")
+        if args.json:
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+        else:
+            print(f"go-auto execute: {result['status']}")
+            print("completed_tasks: " + (", ".join(result["completed_tasks"]) if result["completed_tasks"] else "none"))
+            if result.get("blocked_task"):
+                print(f"blocked_task: {result['blocked_task']}")
+        return exit_code
     plan = build_loop_plan(repo, args, mode="go-auto")
     if args.json:
         print(json.dumps(plan, indent=2, ensure_ascii=False))
@@ -749,6 +880,16 @@ def cmd_auto(args: argparse.Namespace) -> int:
 
 def cmd_loop(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    if args.execute:
+        exit_code, result = execute_loop_plan(repo, args, mode="go-loop")
+        if args.json:
+            print(json.dumps(result, indent=2, ensure_ascii=False))
+        else:
+            print(f"go-loop execute: {result['status']}")
+            print("completed_tasks: " + (", ".join(result["completed_tasks"]) if result["completed_tasks"] else "none"))
+            if result.get("blocked_task"):
+                print(f"blocked_task: {result['blocked_task']}")
+        return exit_code
     plan = build_loop_plan(repo, args, mode="go-loop")
     if args.json:
         print(json.dumps(plan, indent=2, ensure_ascii=False))
@@ -1358,6 +1499,9 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("repo", nargs="?", default=".")
     auto.add_argument("--max-tasks", type=int, default=3)
     auto.add_argument("--summary-chars", type=int, default=900)
+    auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
+    auto.add_argument("--agent", default="agent")
+    auto.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
     auto.add_argument("--json", action="store_true")
     auto.set_defaults(func=cmd_auto)
     for loop_command, loop_help in (
@@ -1368,6 +1512,9 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("repo", nargs="?", default=".")
         loop.add_argument("--max-tasks", type=int, default=10)
         loop.add_argument("--summary-chars", type=int, default=900)
+        loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
+        loop.add_argument("--agent", default="agent")
+        loop.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
         loop.add_argument("--json", action="store_true")
         loop.set_defaults(func=cmd_loop)
     router = sub.add_parser("router", help="Normalize go/GO/GOO commands and choose spike/auto/task route from repo state")

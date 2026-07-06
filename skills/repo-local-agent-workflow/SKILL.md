@@ -77,6 +77,7 @@ Prefer small canonical files over one mega-state file:
   runs/*.jsonl
   evidence/*.jsonl
   decisions/*.jsonl       # ADR-lite decision events
+  reflections/*.jsonl     # auto/loop batch self-reflection events
   imports/*.json
   locks/
 ```
@@ -95,6 +96,7 @@ Use these names consistently, but keep them lightweight:
 | Task | `.go/tasks/<state>/*.json` | executable scoped unit with acceptance and verification |
 | ADR-lite / Decision | `.go/decisions/events.jsonl` | append-only decision event with context, decision, consequences |
 | Evidence | `.go/evidence/events.jsonl` | proof that work actually ran or shipped |
+| Reflection | `.go/reflections/events.jsonl` | append-only auto/loop batch self-review and next-action trail |
 
 ADR and Epic are standard contract concepts; do not introduce them ad hoc outside these files/events.
 
@@ -119,6 +121,7 @@ For v0.3+ end-to-end command routing, use these higher-level primitives:
 python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO --intent "<rough Viggo input>" --json
 python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>" --task-scope code
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
+python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --execute --agent hermes --json
 python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 --json
 python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias
 ```
@@ -135,7 +138,7 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
 7. Validate and report the next open task.
 
-`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, run-until condition, checkpoint triggers, and expected result schema.
+`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, run-until condition, checkpoint triggers, and expected result schema. `go auto --execute` lets the CLI perform the mechanical lifecycle for verification-ready tasks: preflight gates, claim, verification commands, finish with evidence, blocked-state on failed verification, and `.go/reflections/events.jsonl` batch reflection.
 
 1. Run status/route/dirty validation.
 2. Take one open task at a time: next → claim → execute → verify.

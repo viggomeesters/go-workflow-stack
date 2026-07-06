@@ -109,6 +109,48 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert alias_plan["next_tasks"] == ["design-monitor", "build-poller"]
 
 
+def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
+    repo = tmp_path / "exec-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "exec", "--name", "Exec", "--verification", "python3 -c \"print('ok')\"")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "verify-only", "--summary", "Verify only", "--epic", "workflow", "--verification", "python3 -c \"print('verified')\"")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
+
+    executed = run_go("auto", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["verify-only"]
+    assert result["checks"][0]["returncode"] == 0
+    done_task = json.loads((repo / ".go" / "tasks" / "done" / "verify-only.json").read_text())
+    assert done_task["evidence"]
+    evidence_log = (repo / ".go" / "evidence" / "events.jsonl").read_text()
+    assert "task.finished" in evidence_log
+    reflection_log = (repo / ".go" / "reflections" / "events.jsonl").read_text()
+    assert "auto.reflected" in reflection_log
+
+
+def test_auto_execute_blocks_on_preflight_gate(tmp_path: Path):
+    repo = tmp_path / "dirty-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "dirty", "--name", "Dirty")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "blocked", "--summary", "Blocked", "--epic", "workflow")
+    assert task.returncode == 0, task.stderr + task.stdout
+    (repo / ".env").write_text("TOKEN=secret\n", encoding="utf-8")
+
+    executed = run_go("auto", str(repo), "--execute", "--json")
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "safety_gate"
+    assert result["run_envelope"]["preflight"]["human_gate_required"] is True
+    assert "secret-looking" in "\n".join(result["run_envelope"]["preflight"]["human_gate_blockers"])
+    assert (repo / ".go" / "tasks" / "open" / "blocked.json").is_file()
+
+
 def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path):
     missing = tmp_path / "missing-project"
     missing_route = run_go("router", str(missing), "--command", "gOo", "--intent", "marktplaats inbox bot", "--json")

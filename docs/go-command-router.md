@@ -50,6 +50,7 @@ Escalate to the stronger loop contract when `go auto` needs to keep driving beyo
 
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py loop ~/github/marktplaats-bot --max-tasks 10 --json
+python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --max-tasks 10 --json
 ```
 
 ## Router decision matrix

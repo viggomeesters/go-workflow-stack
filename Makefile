@@ -32,6 +32,8 @@ check:
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["control_handoff"] and p["can_escalate_to"] == ["go-loop"] and "continue-or-escalate" in p["loop"]' /tmp/go-auto-smoke.json; \
 	  python3 cli/go.py loop $$TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-smoke.json; \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["mode"] == "go-loop" and p["continues_beyond_initial_tasks"]' /tmp/go-loop-smoke.json; \
+	  python3 cli/go.py go-loop $$TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-alias-smoke.json; \
+	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["mode"] == "go-loop" and p["next_tasks"] == ["first", "second"]' /tmp/go-loop-alias-smoke.json; \
 	  python3 cli/go.py router $$TMP/spike-smoke --command gOo --intent "ga verder" --json >/tmp/go-router-smoke.json; \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["normalized_command"] == "go" and p["recommended"]["command"] == "auto"' /tmp/go-router-smoke.json; \
 	  python3 cli/go.py router $$TMP/spike-smoke --command GOO --intent "controle afgeven werk tot groen" --json >/tmp/go-router-loop-smoke.json; \

@@ -1285,12 +1285,16 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--summary-chars", type=int, default=900)
     auto.add_argument("--json", action="store_true")
     auto.set_defaults(func=cmd_auto)
-    loop = sub.add_parser("loop", help="Run the stronger go-loop control-handoff contract until blocker")
-    loop.add_argument("repo", nargs="?", default=".")
-    loop.add_argument("--max-tasks", type=int, default=10)
-    loop.add_argument("--summary-chars", type=int, default=900)
-    loop.add_argument("--json", action="store_true")
-    loop.set_defaults(func=cmd_loop)
+    for loop_command, loop_help in (
+        ("loop", "Run the stronger go-loop control-handoff contract until blocker"),
+        ("go-loop", "Alias for loop; explicit go-loop control-handoff contract"),
+    ):
+        loop = sub.add_parser(loop_command, help=loop_help)
+        loop.add_argument("repo", nargs="?", default=".")
+        loop.add_argument("--max-tasks", type=int, default=10)
+        loop.add_argument("--summary-chars", type=int, default=900)
+        loop.add_argument("--json", action="store_true")
+        loop.set_defaults(func=cmd_loop)
     router = sub.add_parser("router", help="Normalize go/GO/GOO commands and choose spike/auto/task route from repo state")
     router.add_argument("repo", nargs="?", default=".")
     router.add_argument("--command", default="go")

@@ -90,6 +90,11 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert loop_plan["mode"] == "go-loop"
     assert loop_plan["autonomy"] == "control-handed-off-until-blocker"
     assert loop_plan["continues_beyond_initial_tasks"] is True
+    go_loop_alias = run_go("go-loop", str(repo), "--max-tasks", "2", "--json")
+    assert go_loop_alias.returncode == 0, go_loop_alias.stderr + go_loop_alias.stdout
+    alias_plan = json.loads(go_loop_alias.stdout)
+    assert alias_plan["mode"] == "go-loop"
+    assert alias_plan["next_tasks"] == ["design-monitor", "build-poller"]
 
 
 def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path):

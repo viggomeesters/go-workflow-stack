@@ -120,6 +120,7 @@ python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO 
 python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>"
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
 python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 --json
+python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias
 ```
 
 Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, or task creation.

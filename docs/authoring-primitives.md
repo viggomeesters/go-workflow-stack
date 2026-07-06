@@ -41,6 +41,7 @@ Hand off control for autonomous execution:
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --json
 python3 ~/github/go-workflow-stack/cli/go.py loop ~/github/marktplaats-bot --max-tasks 10 --json
+python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --max-tasks 10 --json
 ```
 
 `go auto` is not a task-list printer. It means Viggo gives control to the agent inside repo-local safety rails. The agent should execute, verify, recheck/devil, finish with evidence, self-reflect, then continue or escalate.

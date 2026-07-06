@@ -2,7 +2,7 @@
   "schema": "go-workflow.repo-local.hierarchy.v1",
   "kind": "hierarchy",
   "project": "repo-local-spike-fixture",
-  "feature_groups": [
+  "epics": [
     {
       "id": "workflow-contract",
       "title": "Workflow Contract",
@@ -14,7 +14,8 @@
             "task-schema-smoke"
           ]
         }
-      ]
+      ],
+      "tasks": []
     }
   ]
 }

@@ -68,7 +68,7 @@ Prefer small canonical files over one mega-state file:
   project.json
   architecture-principles.json
   vision.json
-  hierarchy.json
+  hierarchy.json          # epics/features/task links; "feature_groups" accepted as legacy alias
   tasks/
     open/*.json
     active/*.json
@@ -76,12 +76,27 @@ Prefer small canonical files over one mega-state file:
     done/*.json
   runs/*.jsonl
   evidence/*.jsonl
-  decisions/*.jsonl
+  decisions/*.jsonl       # ADR-lite decision events
   imports/*.json
   locks/
 ```
 
 JSON is canonical for current state. JSONL is preferred for append-only lifecycle/evidence/decision events. Markdown may be generated for humans, but it must not become the source of truth.
+
+## Standard primitives
+
+Use these names consistently, but keep them lightweight:
+
+| Primitive | Canonical location | Meaning |
+|---|---|---|
+| Vision | `.go/vision.json` | north star, wedge, target user, promise, non-goals, success metrics |
+| Principle | `.go/architecture-principles.json` | durable project constraints and enforcement rules |
+| Epic | `.go/hierarchy.json` `epics[]` | large work package / feature group; not Jira ceremony |
+| Task | `.go/tasks/<state>/*.json` | executable scoped unit with acceptance and verification |
+| ADR-lite / Decision | `.go/decisions/events.jsonl` | append-only decision event with context, decision, consequences |
+| Evidence | `.go/evidence/events.jsonl` | proof that work actually ran or shipped |
+
+ADR and Epic are standard contract concepts; do not introduce them ad hoc outside these files/events.
 
 ## Starting or retrofitting a project
 
@@ -98,17 +113,56 @@ python3 ~/github/go-workflow-stack/cli/go.py readback <target-repo>
 python3 ~/github/go-workflow-stack/cli/go.py next <target-repo>
 ```
 
+For v0.3+ end-to-end command routing, use these higher-level primitives:
+
+```bash
+python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO --intent "<rough Viggo input>" --json
+python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>"
+python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
+python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 --json
+```
+
+Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, or task creation.
+
+`go spike` is the bootstrap command Viggo can say when the project is still only an idea/design:
+
+1. Resolve target: existing repo if named/found; otherwise create a new repo directory and initialize Git.
+2. Apply repo-complete basics without overwriting existing files.
+3. Write `.go/vision.json` from the rough intent/design.
+4. Write `.go/architecture-principles.json` with durable constraints.
+5. Write `.go/hierarchy.json` epics and `.go/tasks/open/*.json` in execution order.
+6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
+7. Validate and report the next open task.
+
+`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present:
+
+1. Run status/route/dirty validation.
+2. Take one open task at a time: next → claim → execute → verify.
+3. Run recheck/devil/hardening before finish when the task changed code/docs/contracts.
+4. Finish only with evidence appended to `.go/evidence/events.jsonl`.
+5. After the task batch, run self-reflect: decide whether vision/principles/tasks need improvement.
+6. If self-reflect, failed review, weak first-green, or remaining same-scope work requires continued repair, `go auto` may invoke `go loop`.
+7. Summarize to Viggo compactly, max configured chars, no technical fluff spam.
+8. Convert Viggo's next feedback into new `.go` tasks/decisions, then repeat on the next `go auto`.
+
+`go loop` is the stronger control-handoff contract: continue selecting, claiming, executing, verifying, repairing, and creating same-scope follow-up tasks until done, budget exhausted, or blocker. Use it when Viggo says or implies: loop, werk tot groen, ga door, controle afgeven, avondrun, or when `go auto` discovers it should not stop at the first batch.
+
+Stop conditions: blocking dirty state in owned scope, merge conflict, secret-looking/destructive/public/payment action, missing credentials, or genuinely ambiguous recipient/outcome.
+
 For v0.2+ authoring and handoff, prefer CLI primitives over hand-written `.go` JSON:
 
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py adopt <target-repo> --project-id <id> --name "<name>"
 python3 ~/github/go-workflow-stack/cli/go.py status <target-repo> --json
-python3 ~/github/go-workflow-stack/cli/go.py task create <target-repo> --id <id> --summary "<summary>" --feature <group.feature>
+python3 ~/github/go-workflow-stack/cli/go.py epic create <target-repo> --id <id> --title "<title>"
+python3 ~/github/go-workflow-stack/cli/go.py task create <target-repo> --id <id> --summary "<summary>" --epic <epic-id>
+python3 ~/github/go-workflow-stack/cli/go.py task create <target-repo> --id <id> --summary "<summary>" --feature <epic.feature>
+python3 ~/github/go-workflow-stack/cli/go.py decision create <target-repo> --id adr-001 --title "<title>" --context "<why>" --decision "<what>"
 python3 ~/github/go-workflow-stack/cli/go.py bundle export <target-repo> --output /tmp/project.go-bundle.json
 python3 ~/github/go-workflow-stack/cli/go.py bundle import <review-repo> /tmp/project.go-bundle.json --write --agent hermes --task-id import-review
 ```
 
-Use `adopt` only when the target repo does not already have `.go/` state; it refuses existing non-empty `.go/` directories unless `--force` is explicitly passed. Use `task create` for normal follow-up task authoring so Hermes does not hand-write repo-local task JSON. Use `bundle export/import` for clone-safe handoffs: import is dry-run unless `--write`, and write mode stores `.go/imports/<bundle_id>.json` plus a decision event without overwriting existing target state.
+Use `adopt` only when the target repo does not already have `.go/` state; it refuses existing non-empty `.go/` directories unless `--force` is explicitly passed. Use `epic create`, `task create`, and `decision create` for normal follow-up authoring so Hermes does not hand-write repo-local hierarchy/task/ADR JSON. Use `bundle export/import` for clone-safe handoffs: import is dry-run unless `--write`, and write mode stores `.go/imports/<bundle_id>.json` plus a decision event without overwriting existing target state.
 
 For a brand-new public repo, use GitHub's template flow from `go-project-template` when practical. For an existing repo, copy only `.go/` and keep edits scoped.
 

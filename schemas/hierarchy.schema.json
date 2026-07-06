@@ -6,8 +6,7 @@
   "required": [
     "schema",
     "kind",
-    "project",
-    "feature_groups"
+    "project"
   ],
   "additionalProperties": true,
   "properties": {
@@ -21,14 +20,26 @@
       "type": "string",
       "minLength": 1
     },
+    "epics": {
+      "$ref": "#/$defs/epics"
+    },
     "feature_groups": {
+      "$ref": "#/$defs/epics",
+      "deprecated": true
+    }
+  },
+  "anyOf": [
+    { "required": ["epics"] },
+    { "required": ["feature_groups"] }
+  ],
+  "$defs": {
+    "epics": {
       "type": "array",
       "items": {
         "type": "object",
         "required": [
           "id",
-          "title",
-          "features"
+          "title"
         ],
         "additionalProperties": true,
         "properties": {
@@ -39,6 +50,15 @@
           "title": {
             "type": "string",
             "minLength": 1
+          },
+          "description": {
+            "type": "string"
+          },
+          "tasks": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
           },
           "features": {
             "type": "array",

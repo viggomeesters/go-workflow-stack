@@ -11,7 +11,7 @@ python3 cli/go.py bundle export <repo> --output /tmp/project.go-bundle.json
 The export validates the source repo first, then writes a compact JSON bundle containing:
 
 - source project id/name
-- readback summary: north star, wedge, principles, feature groups, next task
+- readback summary: north star, wedge, principles, epics, next task
 - task counts and open/active/blocked task records
 - recent runs/evidence/decision events
 

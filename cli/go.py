@@ -135,16 +135,38 @@ def validate_vision(data: dict[str, Any], rel: str) -> list[str]:
     return errors
 
 
+def hierarchy_epics(data: dict[str, Any]) -> list[dict[str, Any]]:
+    """Return canonical epics, accepting legacy feature_groups during migration."""
+    epics = data.get("epics")
+    if isinstance(epics, list):
+        return [epic for epic in epics if isinstance(epic, dict)]
+    groups = data.get("feature_groups")
+    if isinstance(groups, list):
+        return [group for group in groups if isinstance(group, dict)]
+    return []
+
+
+def set_hierarchy_epics(data: dict[str, Any], epics: list[dict[str, Any]]) -> None:
+    data["epics"] = epics
+    data.pop("feature_groups", None)
+
+
 def validate_hierarchy(data: dict[str, Any], rel: str) -> list[str]:
     errors: list[str] = []
     require(data.get("schema") == HIERARCHY_SCHEMA, errors, f"{rel}: schema mismatch")
     require(data.get("kind") == "hierarchy", errors, f"{rel}: kind must be hierarchy")
     require(bool(data.get("project")), errors, f"{rel}: project required")
-    groups = data.get("feature_groups")
-    require(isinstance(groups, list), errors, f"{rel}: feature_groups must be a list")
-    if isinstance(groups, list):
-        for group in groups:
-            require(isinstance(group, dict) and bool(group.get("id")) and isinstance(group.get("features"), list), errors, f"{rel}: each feature_group needs id and features")
+    has_epics = isinstance(data.get("epics"), list)
+    has_legacy_groups = isinstance(data.get("feature_groups"), list)
+    require(has_epics or has_legacy_groups, errors, f"{rel}: epics must be a list")
+    for epic in hierarchy_epics(data):
+        require(bool(epic.get("id")) and bool(epic.get("title")), errors, f"{rel}: each epic needs id and title")
+        require(isinstance(epic.get("tasks", []), list), errors, f"{rel}: epic {epic.get('id', '<missing>')} tasks must be a list")
+        require(isinstance(epic.get("features", []), list), errors, f"{rel}: epic {epic.get('id', '<missing>')} features must be a list")
+        for feature in epic.get("features", []):
+            require(isinstance(feature, dict) and bool(feature.get("id")) and bool(feature.get("title")), errors, f"{rel}: each feature needs id and title")
+            if isinstance(feature, dict):
+                require(isinstance(feature.get("tasks", []), list), errors, f"{rel}: feature {feature.get('id', '<missing>')} tasks must be a list")
     return errors
 
 
@@ -270,36 +292,56 @@ def parse_principles(values: list[str]) -> list[dict[str, str]]:
 
 
 def parse_hierarchy(feature_groups: list[str], features: list[str], project_id: str) -> dict[str, Any]:
-    groups: dict[str, dict[str, Any]] = {}
+    epics: dict[str, dict[str, Any]] = {}
     for value in feature_groups or ["workflow|Workflow"]:
         gid, title = parse_pipe_fields(value, 2, "--feature-group")
-        groups[slugify(gid)] = {"id": slugify(gid), "title": title, "features": []}
+        epics[slugify(gid)] = {"id": slugify(gid), "title": title, "features": [], "tasks": []}
     for value in features or ["workflow|repo-local-workflow|Repo-local workflow"]:
         gid, fid, title = parse_pipe_fields(value, 3, "--feature")
         gid = slugify(gid)
-        if gid not in groups:
-            groups[gid] = {"id": gid, "title": gid.replace("-", " ").title(), "features": []}
-        groups[gid]["features"].append({"id": slugify(fid), "title": title, "tasks": []})
-    return {"schema": HIERARCHY_SCHEMA, "kind": "hierarchy", "project": project_id, "feature_groups": list(groups.values())}
+        if gid not in epics:
+            epics[gid] = {"id": gid, "title": gid.replace("-", " ").title(), "features": [], "tasks": []}
+        epics[gid]["features"].append({"id": slugify(fid), "title": title, "tasks": []})
+    return {"schema": HIERARCHY_SCHEMA, "kind": "hierarchy", "project": project_id, "epics": list(epics.values())}
+
+
+def append_task_to_epic(root: Path, epic_id: str, task_id: str) -> None:
+    if not epic_id:
+        return
+    path = root / "hierarchy.json"
+    hierarchy = load_json(path)
+    epics = hierarchy_epics(hierarchy)
+    for epic in epics:
+        if epic.get("id") != slugify(epic_id):
+            continue
+        tasks = epic.setdefault("tasks", [])
+        if task_id not in tasks:
+            tasks.append(task_id)
+        set_hierarchy_epics(hierarchy, epics)
+        dump_json(path, hierarchy)
+        return
+    raise RepoLocalError(f"epic not found in hierarchy: {epic_id}")
 
 
 def append_task_to_hierarchy(root: Path, feature_ref: str, task_id: str) -> None:
     if not feature_ref:
         return
     if "." not in feature_ref:
-        raise RepoLocalError("--feature must be formatted as group_id.feature_id")
+        raise RepoLocalError("--feature must be formatted as epic_id.feature_id")
     group_id, feature_id = [slugify(part) for part in feature_ref.split(".", 1)]
     path = root / "hierarchy.json"
     hierarchy = load_json(path)
-    for group in hierarchy.get("feature_groups", []):
-        if group.get("id") != group_id:
+    epics = hierarchy_epics(hierarchy)
+    for epic in epics:
+        if epic.get("id") != group_id:
             continue
-        for feature in group.get("features", []):
+        for feature in epic.get("features", []):
             if feature.get("id") != feature_id:
                 continue
             tasks = feature.setdefault("tasks", [])
             if task_id not in tasks:
                 tasks.append(task_id)
+            set_hierarchy_epics(hierarchy, epics)
             dump_json(path, hierarchy)
             return
     raise RepoLocalError(f"feature not found in hierarchy: {feature_ref}")
@@ -327,7 +369,7 @@ def open_tasks(repo: Path) -> list[tuple[Path, dict[str, Any]]]:
     tasks = []
     for path in sorted((root / "tasks" / "open").glob("*.json")):
         tasks.append((path, load_json(path)))
-    return tasks
+    return sorted(tasks, key=lambda item: (item[1].get("order", 999999), item[0].name))
 
 
 def path_matches(path: str, patterns: list[str]) -> bool:
@@ -373,6 +415,61 @@ def classify_dirty(repo: Path, owned_patterns: list[str]) -> dict[str, list[str]
 
 def event(task_id: str, event_name: str, agent: str, data: dict[str, Any] | None = None) -> dict[str, Any]:
     return {"schema": EVENT_SCHEMA, "kind": "event", "event": event_name, "created_at": now_iso(), "task_id": task_id, "agent": agent, "data": data or {}}
+
+
+def write_missing_text(path: Path, content: str) -> bool:
+    if path.exists():
+        return False
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(content, encoding="utf-8")
+    return True
+
+
+def ensure_git_repo(repo: Path) -> None:
+    repo.mkdir(parents=True, exist_ok=True)
+    if not (repo / ".git").exists():
+        result = subprocess.run(["git", "init", "-q"], cwd=repo, text=True, capture_output=True, check=False)
+        if result.returncode != 0:
+            raise RepoLocalError(result.stderr.strip() or "git init failed")
+
+
+def write_repo_complete_starter(repo: Path, name: str) -> list[str]:
+    created: list[str] = []
+    files = {
+        "README.md": f"# {name}\n\nRepo-local agent workflow project.\n\n## Development\n\n```bash\nmake check\n```\n",
+        ".gitignore": ".env\n.env.*\n__pycache__/\n.pytest_cache/\nnode_modules/\ndist/\nbuild/\n",
+        "LICENSE": "MIT License\n\nCopyright (c) 2026 Viggo Meesters\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in all\ncopies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE\nSOFTWARE.\n",
+        "SECURITY.md": "# Security\n\nDo not commit credentials, private data, tokens, cookies, or production secrets.\n",
+        "CONTRIBUTING.md": "# Contributing\n\nUse repo-local `.go/` tasks, verify before finishing, and keep changes scoped.\n",
+        "CHANGELOG.md": "# Changelog\n\n## Unreleased\n\n- Initial repo-local spike scaffold.\n",
+        "Makefile": "GO_STACK ?= ../go-workflow-stack\n\n.PHONY: check\ncheck:\n\tpython3 $(GO_STACK)/cli/go.py validate .\n\tpython3 $(GO_STACK)/cli/go.py readback .\n",
+        "scripts/check.sh": "#!/usr/bin/env bash\nset -euo pipefail\nmake check\n",
+    }
+    for rel, content in files.items():
+        if write_missing_text(repo / rel, content):
+            created.append(rel)
+    check = repo / "scripts" / "check.sh"
+    if check.exists():
+        check.chmod(check.stat().st_mode | 0o111)
+    return created
+
+
+def parse_spike_task(value: str) -> tuple[str, str]:
+    task_id, summary = parse_pipe_fields(value, 2, "--task")
+    return slugify(task_id), summary
+
+
+def default_spike_tasks() -> list[tuple[str, str]]:
+    return [
+        ("write-vision", "Write or refine the repo-local vision"),
+        ("write-architecture-principles", "Write architecture principles and constraints"),
+        ("repo-complete", "Bootstrap repo-complete hygiene and local checks"),
+        ("implementation-slice", "Build the first working implementation slice"),
+        ("verification", "Run focused and repository verification"),
+        ("hardening-devil-review", "Run recheck, devil review, and hardening pass"),
+        ("self-reflect", "Self-reflect on architecture and workflow improvements"),
+        ("handoff-summary", "Write concise user handoff and next steps"),
+    ]
 
 
 def cmd_adopt(args: argparse.Namespace) -> int:
@@ -424,6 +521,247 @@ def cmd_adopt(args: argparse.Namespace) -> int:
             print(f"error: {error}", file=sys.stderr)
         return 1
     print(f"adopted: {root}")
+    return 0
+
+
+def cmd_spike(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    ensure_git_repo(repo)
+    name = args.name or repo.name.replace("-", " ").title()
+    project_id = slugify(args.project_id or repo.name)
+    root = go_root(repo)
+    created_repo_files: list[str] = [] if args.skip_repo_complete else write_repo_complete_starter(repo, name)
+    if not (root / "project.json").exists():
+        ensure_go_dirs(root)
+        dump_json(root / "project.json", {
+            "schema": PROJECT_SCHEMA,
+            "kind": "project",
+            "id": project_id,
+            "name": name,
+            "source_of_truth": "repo-local",
+            "default_verification": args.verification or ["make check"],
+            "links": {"repo": args.repo_url or ""},
+        })
+        dump_json(root / "architecture-principles.json", {
+            "schema": ARCH_SCHEMA,
+            "kind": "architecture_principles",
+            "project": project_id,
+            "principles": parse_principles(args.principle or []),
+        })
+        brief = args.brief or f"{name} repo-local spike."
+        dump_json(root / "vision.json", {
+            "schema": VISION_SCHEMA,
+            "kind": "vision",
+            "project": project_id,
+            "status": "active",
+            "north_star": args.north_star or f"{name} can be designed, built, verified, and continued from repo-local .go state.",
+            "wedge": args.wedge or brief,
+            "target_user": args.target_user or "Viggo and future autonomous agents continuing this project.",
+            "core_promise": args.core_promise or "A single go spike/go auto loop can turn rough intent into repo, vision, principles, tasks, verified work, reflection, and concise handoff.",
+            "product_principles": args.product_principle or ["repo-local", "proof-first", "autonomous-but-scoped", "feedback-turns-into-tasks"],
+            "non_goals": args.non_goal or ["no hidden central execution state", "no unbounded public/destructive actions", "no technical fluff handoff"],
+            "success_metrics": args.success_metric or ["repo validates", "next tasks are claimable", "go auto plan is explicit"],
+        })
+        epics = args.epic or ["delivery|Delivery"]
+        dump_json(root / "hierarchy.json", parse_hierarchy(epics, [], project_id))
+        for jsonl in [root / "runs" / "events.jsonl", root / "evidence" / "events.jsonl", root / "decisions" / "events.jsonl"]:
+            jsonl.touch(exist_ok=True)
+    else:
+        errors = validate_repo(repo)
+        if errors:
+            raise RepoLocalError("existing .go state is invalid:\n- " + "\n- ".join(errors))
+        project_id = str(load_json(root / "project.json").get("id") or project_id)
+        for epic_value in args.epic or []:
+            epic_id, title = parse_pipe_fields(epic_value, 2, "--epic")
+            hierarchy = load_json(root / "hierarchy.json")
+            epics = hierarchy_epics(hierarchy)
+            if not any(epic.get("id") == slugify(epic_id) for epic in epics):
+                epics.append({"id": slugify(epic_id), "title": title, "features": [], "tasks": []})
+                set_hierarchy_epics(hierarchy, epics)
+                dump_json(root / "hierarchy.json", hierarchy)
+    hierarchy = load_json(root / "hierarchy.json")
+    epics = hierarchy_epics(hierarchy)
+    if not epics:
+        epics = [{"id": "delivery", "title": "Delivery", "features": [], "tasks": []}]
+        set_hierarchy_epics(hierarchy, epics)
+        dump_json(root / "hierarchy.json", hierarchy)
+    target_epic = slugify(args.target_epic or str(epics[0]["id"]))
+    task_values = [parse_spike_task(value) for value in args.task] if args.task else default_spike_tasks()
+    created_tasks: list[str] = []
+    project = load_json(root / "project.json")
+    for order, (task_id, summary) in enumerate(task_values, start=1):
+        if any(task_path(root, state, task_id).exists() for state in ("open", "active", "blocked", "done")):
+            continue
+        task = {
+            "schema": TASK_SCHEMA,
+            "kind": "task",
+            "id": task_id,
+            "project": project_id,
+            "status": "open",
+            "summary": summary,
+            "description": summary,
+            "order": order,
+            "scope": {"read": [".go/**", "README.md", "docs/**"], "modify": [".go/**", "README.md", "docs/**", "scripts/**", "Makefile"]},
+            "acceptance": ["Task result is implemented and verified with evidence."],
+            "verification": project.get("default_verification") or ["make check"],
+            "claim": {"agent": None, "claimed_at": None},
+            "evidence": [],
+        }
+        dump_json(task_path(root, "open", task_id), task)
+        append_task_to_epic(root, target_epic, task_id)
+        created_tasks.append(task_id)
+    append_jsonl(root / "decisions" / "events.jsonl", event(
+        "go-spike",
+        "decision.recorded",
+        args.agent,
+        {
+            "decision_id": "go-spike-created",
+            "title": "Initialize go spike contract",
+            "status": "accepted",
+            "context": args.brief or "go spike command",
+            "decision": "Use repo-local .go vision, principles, epics, tasks, evidence, and go auto loop for this project.",
+            "consequences": ["Feedback becomes tasks", "go auto can continue from repo state"],
+        },
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("spike produced invalid .go state:\n- " + "\n- ".join(errors))
+    result = {
+        "repo": str(repo),
+        "project_id": project_id,
+        "created_repo_files": created_repo_files,
+        "created_tasks": created_tasks,
+        "next": None if not open_tasks(repo) else open_tasks(repo)[0][1]["id"],
+    }
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"spike: {repo}")
+        print(f"project: {project_id}")
+        print("created_tasks: " + (", ".join(created_tasks) if created_tasks else "none"))
+        print("next: " + str(result["next"] or "none"))
+    return 0
+
+
+def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto") -> dict[str, Any]:
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError(f"cannot run {mode} on invalid .go state:\n- " + "\n- ".join(errors))
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    tasks = [task[1] for task in open_tasks(repo)[: max(args.max_tasks, 1)]]
+    is_loop = mode == "go-loop"
+    return {
+        "mode": mode,
+        "repo": str(repo),
+        "project_id": project.get("id"),
+        "next_tasks": [task["id"] for task in tasks],
+        "control_handoff": True,
+        "autonomy": "control-handed-off-until-blocker" if is_loop else "high-autonomy-bounded-batch-with-loop-escalation",
+        "can_escalate_to": [] if is_loop else ["go-loop"],
+        "continues_beyond_initial_tasks": is_loop,
+        "loop": ["status", "next", "claim", "execute", "verify", "recheck", "devil", "finish", "self-reflect", "summarize", "continue-or-escalate"],
+        "agent_contract": {
+            "execute": "Hermes claims one open .go task at a time, edits only task scope, verifies, records evidence, then finishes.",
+            "control": "Viggo has handed off control: do not merely print a task list; keep executing until done, blocker, budget, or safety gate.",
+            "loop_escalation": "go-auto may invoke go-loop when self-reflect creates follow-up work, verification/review fails, first green is not trustworthy, or the project needs continued autonomous repair beyond the initial batch.",
+            "feedback": "New Viggo input is converted into .go tasks/decisions before another go auto/go loop pass.",
+            "summary_max_chars": args.summary_chars,
+            "stop_conditions": ["no open tasks and no self-reflect follow-up", "blocking dirty/conflict/secret state", "missing credentials", "public/destructive/payment action needs human gate", "scope expansion with real product trade-off"],
+        },
+    }
+
+
+def cmd_auto(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    plan = build_loop_plan(repo, args, mode="go-auto")
+    if args.json:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+    else:
+        print(f"go-auto: {plan['project_id']}")
+        print("control: handed off until blocker")
+        print("next_tasks: " + (", ".join(plan["next_tasks"]) if plan["next_tasks"] else "none"))
+        print("can_escalate_to: " + (", ".join(plan["can_escalate_to"]) if plan["can_escalate_to"] else "none"))
+        print("loop: " + " → ".join(plan["loop"]))
+    return 0
+
+
+def cmd_loop(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    plan = build_loop_plan(repo, args, mode="go-loop")
+    if args.json:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+    else:
+        print(f"go-loop: {plan['project_id']}")
+        print("control: handed off until blocker")
+        print("next_tasks: " + (", ".join(plan["next_tasks"]) if plan["next_tasks"] else "none"))
+        print("loop: " + " → ".join(plan["loop"]))
+    return 0
+
+
+def cmd_router(args: argparse.Namespace) -> int:
+    raw_command = args.command or "go"
+    normalized = "go" if re.fullmatch(r"go+", raw_command, flags=re.I) else raw_command.lower()
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    state = {
+        "repo_exists": repo.exists(),
+        "is_git_repo": (repo / ".git").is_dir(),
+        "has_go": root.is_dir(),
+        "has_project": (root / "project.json").is_file(),
+        "has_vision": (root / "vision.json").is_file(),
+        "has_principles": (root / "architecture-principles.json").is_file(),
+        "has_hierarchy": (root / "hierarchy.json").is_file(),
+        "open_task_count": 0,
+        "active_task_count": 0,
+        "blocked_task_count": 0,
+        "done_task_count": 0,
+        "valid": False,
+        "errors": [],
+    }
+    if state["has_go"]:
+        for status in ("open", "active", "blocked", "done"):
+            state[f"{status}_task_count"] = len(list((root / "tasks" / status).glob("*.json")))
+    if state["has_project"]:
+        errors = validate_repo(repo)
+        state["valid"] = not errors
+        state["errors"] = errors
+    intent = (args.intent or "").strip().lower()
+    recommended: dict[str, Any]
+    if normalized != "go":
+        recommended = {"command": "unknown", "reason": "command token is not a go/goo variant"}
+    elif not state["repo_exists"] or not state["has_go"]:
+        recommended = {"command": "spike", "reason": "repo or .go contract is missing", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<intent>'}\""}
+    elif not state["valid"] or not state["has_vision"] or not state["has_principles"] or not state["has_hierarchy"]:
+        recommended = {"command": "spike", "reason": "repo-local contract is incomplete or invalid", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<repair intent>'}\""}
+    elif state["open_task_count"] > 0 and any(word in intent for word in ["loop", "ralph", "groen", "avondrun", "controle afgeven"]):
+        recommended = {"command": "loop", "reason": "repo is valid, has open tasks, and intent asks for full control handoff/loop", "example": f"python3 {Path(__file__).resolve()} loop {repo} --max-tasks {args.max_tasks}"}
+    elif state["open_task_count"] > 0 and any(word in intent for word in ["auto", "verder", "door", "go", "bouw", "maak", "fix", "run", "ga"]):
+        recommended = {"command": "auto", "reason": "repo is valid and has open tasks", "example": f"python3 {Path(__file__).resolve()} auto {repo} --max-tasks {args.max_tasks}"}
+    elif state["open_task_count"] > 0:
+        recommended = {"command": "auto", "reason": "repo is valid and has open tasks", "example": f"python3 {Path(__file__).resolve()} auto {repo} --max-tasks {args.max_tasks}"}
+    else:
+        recommended = {"command": "task create", "reason": "repo is valid but has no open tasks; convert feedback into tasks", "example": f"python3 {Path(__file__).resolve()} task create {repo} --summary \"<next task>\""}
+    result = {
+        "schema": "go-workflow.router.v1",
+        "normalized_command": normalized,
+        "raw_command": raw_command,
+        "intent": args.intent,
+        "repo": str(repo),
+        "state": state,
+        "recommended": recommended,
+        "router_policy": "Normalize /^go+$/i tokens (go, GO, Go, GOO, gOo) to the repo-local go router, then choose spike/auto/task-create from repo state.",
+    }
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"command: {raw_command} -> {normalized}")
+        print(f"repo_exists: {state['repo_exists']}")
+        print(f"has_go: {state['has_go']}")
+        print(f"has_vision: {state['has_vision']}")
+        print(f"has_principles: {state['has_principles']}")
+        print(f"open_tasks: {state['open_task_count']}")
+        print(f"recommended: {recommended['command']} — {recommended['reason']}")
     return 0
 
 
@@ -492,10 +830,15 @@ def cmd_task_create(args: argparse.Namespace) -> int:
         "claim": {"agent": None, "claimed_at": None},
         "evidence": [],
     }
+    if args.feature and args.epic:
+        raise RepoLocalError("use either --feature or --epic, not both")
     target = task_path(root, "open", task_id)
     dump_json(target, task)
     try:
-        append_task_to_hierarchy(root, args.feature, task_id)
+        if args.epic:
+            append_task_to_epic(root, args.epic, task_id)
+        else:
+            append_task_to_hierarchy(root, args.feature, task_id)
     except Exception:
         target.unlink(missing_ok=True)
         raise
@@ -664,7 +1007,7 @@ def build_export_bundle(repo: Path, include_done: bool = False, max_events: int 
             "north_star": vision.get("north_star"),
             "wedge": vision.get("wedge"),
             "principles": [p.get("id") for p in principles.get("principles", []) if isinstance(p, dict)],
-            "feature_groups": [g.get("id") for g in hierarchy.get("feature_groups", []) if isinstance(g, dict)],
+            "epics": [g.get("id") for g in hierarchy_epics(hierarchy)],
             "next_task": None if not next_tasks else {"id": next_tasks[0].get("id"), "summary": next_tasks[0].get("summary")},
         },
         "tasks": tasks,
@@ -755,6 +1098,63 @@ def cmd_bundle_import(args: argparse.Namespace) -> int:
     print(relative(repo, target))
     return 0
 
+def cmd_decision_create(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot record decision in invalid .go state:\n- " + "\n- ".join(errors))
+    decision_id = slugify(args.id or args.title)
+    if not TASK_ID_RE.fullmatch(decision_id):
+        raise RepoLocalError(f"invalid decision id: {decision_id}")
+    append_jsonl(root / "decisions" / "events.jsonl", event(
+        args.task_id or "project-decision",
+        "decision.recorded",
+        args.agent,
+        {
+            "decision_id": decision_id,
+            "title": args.title,
+            "status": args.status,
+            "context": args.context,
+            "decision": args.decision,
+            "consequences": args.consequence or [],
+        },
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("decision wrote invalid .go state:\n- " + "\n- ".join(errors))
+    print(f"{decision_id} — {args.title}")
+    return 0
+
+
+def cmd_epic_create(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot create epic in invalid .go state:\n- " + "\n- ".join(errors))
+    epic_id = slugify(args.id or args.title)
+    path = root / "hierarchy.json"
+    hierarchy = load_json(path)
+    epics = hierarchy_epics(hierarchy)
+    if any(epic.get("id") == epic_id for epic in epics):
+        raise RepoLocalError(f"epic already exists: {epic_id}")
+    epics.append({
+        "id": epic_id,
+        "title": args.title,
+        "description": args.description,
+        "features": [],
+        "tasks": [],
+    })
+    set_hierarchy_epics(hierarchy, epics)
+    dump_json(path, hierarchy)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("epic wrote invalid .go state:\n- " + "\n- ".join(errors))
+    print(f"{epic_id} — {args.title}")
+    return 0
+
+
 def cmd_readback(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     errors = validate_repo(repo)
@@ -772,7 +1172,7 @@ def cmd_readback(args: argparse.Namespace) -> int:
     print(f"North star: {vision['north_star']}")
     print(f"Wedge: {vision['wedge']}")
     print("Principles: " + "; ".join(p["id"] for p in principles.get("principles", [])))
-    print("Feature groups: " + "; ".join(g["id"] for g in hierarchy.get("feature_groups", [])))
+    print("Epics: " + "; ".join(g["id"] for g in hierarchy_epics(hierarchy)))
     if tasks:
         print(f"Next task: {tasks[0][1]['id']} — {tasks[0][1]['summary']}")
     else:
@@ -853,10 +1253,51 @@ def build_parser() -> argparse.ArgumentParser:
     adopt.add_argument("--non-goal", action="append", default=[])
     adopt.add_argument("--success-metric", action="append", default=[])
     adopt.add_argument("--principle", action="append", default=[], help="id|statement|rationale|enforcement")
-    adopt.add_argument("--feature-group", action="append", default=[], help="id|title")
-    adopt.add_argument("--feature", action="append", default=[], help="group_id|feature_id|title")
+    adopt.add_argument("--feature-group", action="append", default=[], help="legacy alias for epic: id|title")
+    adopt.add_argument("--feature", action="append", default=[], help="epic_id|feature_id|title")
     adopt.add_argument("--force", action="store_true")
     adopt.set_defaults(func=cmd_adopt)
+    spike = sub.add_parser("spike", help="Bootstrap a repo and .go contract from rough intent")
+    spike.add_argument("repo")
+    spike.add_argument("--project-id")
+    spike.add_argument("--name")
+    spike.add_argument("--repo-url", default="")
+    spike.add_argument("--brief", default="")
+    spike.add_argument("--north-star", default="")
+    spike.add_argument("--wedge", default="")
+    spike.add_argument("--target-user", default="")
+    spike.add_argument("--core-promise", default="")
+    spike.add_argument("--product-principle", action="append", default=[])
+    spike.add_argument("--non-goal", action="append", default=[])
+    spike.add_argument("--success-metric", action="append", default=[])
+    spike.add_argument("--principle", action="append", default=[], help="id|statement|rationale|enforcement")
+    spike.add_argument("--epic", action="append", default=[], help="epic_id|title")
+    spike.add_argument("--target-epic", default="", help="epic id to attach generated tasks to")
+    spike.add_argument("--task", action="append", default=[], help="task_id|summary")
+    spike.add_argument("--verification", action="append", default=[])
+    spike.add_argument("--skip-repo-complete", action="store_true")
+    spike.add_argument("--agent", default="agent")
+    spike.add_argument("--json", action="store_true")
+    spike.set_defaults(func=cmd_spike)
+    auto = sub.add_parser("auto", help="Emit the go-auto control-handoff contract; Hermes must execute it until done/blocker/budget")
+    auto.add_argument("repo", nargs="?", default=".")
+    auto.add_argument("--max-tasks", type=int, default=3)
+    auto.add_argument("--summary-chars", type=int, default=900)
+    auto.add_argument("--json", action="store_true")
+    auto.set_defaults(func=cmd_auto)
+    loop = sub.add_parser("loop", help="Run the stronger go-loop control-handoff contract until blocker")
+    loop.add_argument("repo", nargs="?", default=".")
+    loop.add_argument("--max-tasks", type=int, default=10)
+    loop.add_argument("--summary-chars", type=int, default=900)
+    loop.add_argument("--json", action="store_true")
+    loop.set_defaults(func=cmd_loop)
+    router = sub.add_parser("router", help="Normalize go/GO/GOO commands and choose spike/auto/task route from repo state")
+    router.add_argument("repo", nargs="?", default=".")
+    router.add_argument("--command", default="go")
+    router.add_argument("--intent", default="")
+    router.add_argument("--max-tasks", type=int, default=3)
+    router.add_argument("--json", action="store_true")
+    router.set_defaults(func=cmd_router)
     status = sub.add_parser("status", help="Summarize route, project, task counts, next work, and dirty state")
     status.add_argument("repo", nargs="?", default=".")
     status.add_argument("--json", action="store_true")
@@ -868,12 +1309,34 @@ def build_parser() -> argparse.ArgumentParser:
     task_create.add_argument("--id")
     task_create.add_argument("--summary", required=True)
     task_create.add_argument("--description", default="")
-    task_create.add_argument("--feature", default="", help="group_id.feature_id")
+    task_create.add_argument("--feature", default="", help="epic_id.feature_id")
+    task_create.add_argument("--epic", default="", help="epic_id; attaches the task directly to an epic")
     task_create.add_argument("--read", action="append", default=[])
     task_create.add_argument("--modify", action="append", default=[])
     task_create.add_argument("--acceptance", action="append", default=[])
     task_create.add_argument("--verification", action="append", default=[])
     task_create.set_defaults(func=cmd_task_create)
+    epic = sub.add_parser("epic", help="Author repo-local epics")
+    epic_sub = epic.add_subparsers(dest="epic_command", required=True)
+    epic_create = epic_sub.add_parser("create", help="Create an epic in hierarchy.json")
+    epic_create.add_argument("repo")
+    epic_create.add_argument("--id")
+    epic_create.add_argument("--title", required=True)
+    epic_create.add_argument("--description", default="")
+    epic_create.set_defaults(func=cmd_epic_create)
+    decision = sub.add_parser("decision", help="Record ADR-lite repo-local decisions")
+    decision_sub = decision.add_subparsers(dest="decision_command", required=True)
+    decision_create = decision_sub.add_parser("create", help="Append a decision.recorded event")
+    decision_create.add_argument("repo")
+    decision_create.add_argument("--id")
+    decision_create.add_argument("--title", required=True)
+    decision_create.add_argument("--status", default="accepted", choices=["proposed", "accepted", "superseded", "rejected"])
+    decision_create.add_argument("--context", required=True)
+    decision_create.add_argument("--decision", required=True)
+    decision_create.add_argument("--consequence", action="append", default=[])
+    decision_create.add_argument("--agent", default="agent")
+    decision_create.add_argument("--task-id", default="project-decision")
+    decision_create.set_defaults(func=cmd_decision_create)
     init = sub.add_parser("init", help="Initialize .go fixture state in a repo")
     init.add_argument("repo", nargs="?", default=".")
     init.add_argument("--force", action="store_true")

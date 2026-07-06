@@ -16,7 +16,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 - **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
 
-For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2 authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md).
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md).
 
 Routing rule: when a target repo contains `.go/project.json`, repo-local `.go` state wins. AW Lite/vault state is fallback/control-plane only.
 
@@ -62,9 +62,15 @@ bash scripts/apply-template.sh ../my-project
 
 ## CLI commands
 
+- `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend `spike`, `auto`, or task creation.
+- `spike <repo> --brief <text>`: create/adopt a repo, scaffold repo-complete basics, write `.go` vision/principles/epics/tasks, and validate.
+- `auto <repo>`: hand off control for autonomous execution; may escalate to `go-loop` when self-reflect/review requires continued repair or follow-up work.
+- `loop <repo>`: stronger control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
-- `task create <repo> --summary <text> [--feature group.feature]`: create an open repo-local task and optionally attach it to the hierarchy.
+- `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
+- `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
+- `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
 - `init <repo>`: create a minimal `.go/` fixture.
 - `validate <repo>`: validate `.go/` JSON and JSONL files.
 - `next <repo>`: show the first open task.

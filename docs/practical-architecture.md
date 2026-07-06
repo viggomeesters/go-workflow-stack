@@ -52,7 +52,7 @@ In `my-project` edit:
 - `.go/project.json` — identity and default verification;
 - `.go/architecture-principles.json` — hard project rules such as native JavaScript, size limits, visual constraints, privacy boundaries;
 - `.go/vision.json` — what the project should become;
-- `.go/hierarchy.json` — feature groups, features, and task links;
+- `.go/hierarchy.json` — epic-lite work packages, features, and task links;
 - `.go/tasks/open/*.json` — claimable work.
 
 ### 4. Validate from the stack

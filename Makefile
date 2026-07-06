@@ -37,4 +37,4 @@ check:
 	  python3 cli/go.py router $$TMP/spike-smoke --command gOo --intent "ga verder" --json >/tmp/go-router-smoke.json; \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["normalized_command"] == "go" and p["recommended"]["command"] == "auto"' /tmp/go-router-smoke.json; \
 	  python3 cli/go.py router $$TMP/spike-smoke --command GOO --intent "controle afgeven werk tot groen" --json >/tmp/go-router-loop-smoke.json; \
-	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["recommended"]["command"] == "loop"' /tmp/go-router-loop-smoke.json
+	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["recommended"]["command"] == "go-loop"' /tmp/go-router-loop-smoke.json

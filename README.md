@@ -62,10 +62,10 @@ bash scripts/apply-template.sh ../my-project
 
 ## CLI commands
 
-- `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend `spike`, `auto`, or task creation.
+- `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend `spike`, `auto`, `go-loop`, or task creation.
 - `spike <repo> --brief <text>`: create/adopt a repo, scaffold repo-complete basics, write `.go` vision/principles/epics/tasks, and validate.
 - `auto <repo>`: hand off control for autonomous execution; may escalate to `go-loop` when self-reflect/review requires continued repair or follow-up work.
-- `loop <repo>`: stronger control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
+- `go-loop <repo>` / `loop <repo>`: stronger control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.

@@ -61,7 +61,7 @@ python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --
 | Repo exists, no `.go/project.json` | `spike` | Retrofit repo-local state without broad migration |
 | `.go` exists but vision/principles/hierarchy invalid or missing | `spike` repair path | Complete the repo-local contract first |
 | Valid `.go`, open tasks exist | `auto` | Hand off control for bounded autonomous execution |
-| `auto` finds follow-up work, failed review, or first green is not trustworthy | `loop` | Continue autonomously through repair/self-reflect until blocker |
+| `auto` finds follow-up work, failed review, or first green is not trustworthy | `go-loop` | Continue autonomously through repair/self-reflect until blocker |
 | Valid `.go`, no open tasks | `task create` / feedback ingestion | Convert new Viggo input into tasks/decisions |
 | Dirty owned scope / conflict / secret-looking path | block | Human/repair gate before autonomous changes |
 

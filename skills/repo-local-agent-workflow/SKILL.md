@@ -123,7 +123,7 @@ python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 -
 python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias
 ```
 
-Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, or task creation.
+Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, `go-loop`, or task creation.
 
 `go spike` is the bootstrap command Viggo can say when the project is still only an idea/design:
 

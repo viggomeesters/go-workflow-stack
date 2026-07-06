@@ -735,7 +735,7 @@ def cmd_router(args: argparse.Namespace) -> int:
     elif not state["valid"] or not state["has_vision"] or not state["has_principles"] or not state["has_hierarchy"]:
         recommended = {"command": "spike", "reason": "repo-local contract is incomplete or invalid", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<repair intent>'}\""}
     elif state["open_task_count"] > 0 and any(word in intent for word in ["loop", "ralph", "groen", "avondrun", "controle afgeven"]):
-        recommended = {"command": "loop", "reason": "repo is valid, has open tasks, and intent asks for full control handoff/loop", "example": f"python3 {Path(__file__).resolve()} loop {repo} --max-tasks {args.max_tasks}"}
+        recommended = {"command": "go-loop", "reason": "repo is valid, has open tasks, and intent asks for full control handoff/loop", "example": f"python3 {Path(__file__).resolve()} go-loop {repo} --max-tasks {args.max_tasks}"}
     elif state["open_task_count"] > 0 and any(word in intent for word in ["auto", "verder", "door", "go", "bouw", "maak", "fix", "run", "ga"]):
         recommended = {"command": "auto", "reason": "repo is valid and has open tasks", "example": f"python3 {Path(__file__).resolve()} auto {repo} --max-tasks {args.max_tasks}"}
     elif state["open_task_count"] > 0:

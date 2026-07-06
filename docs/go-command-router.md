@@ -15,7 +15,8 @@ gOo
 Router rule:
 
 ```text
-/^go+$/i  ->  repo-local go router
+/^go+$/i                    -> repo-local go router
+loop | go-loop | goloop      -> go-loop control-handoff router
 ```
 
 The router then inspects the target repo and chooses what should happen next.

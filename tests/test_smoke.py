@@ -126,6 +126,12 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     assert loop_route.returncode == 0, loop_route.stderr + loop_route.stdout
     loop_plan = json.loads(loop_route.stdout)
     assert loop_plan["recommended"]["command"] == "go-loop"
+    # Direct command tokens for the stronger loop should also route, not only `go` + intent words.
+    direct_loop_route = run_go("router", str(repo), "--command", "go-loop", "--intent", "", "--json")
+    assert direct_loop_route.returncode == 0, direct_loop_route.stderr + direct_loop_route.stdout
+    direct_loop_plan = json.loads(direct_loop_route.stdout)
+    assert direct_loop_plan["normalized_command"] == "go-loop"
+    assert direct_loop_plan["recommended"]["command"] == "go-loop"
 
 
 def test_bundle_export_import_smoke(tmp_path: Path):

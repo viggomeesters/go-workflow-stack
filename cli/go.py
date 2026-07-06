@@ -699,9 +699,18 @@ def cmd_loop(args: argparse.Namespace) -> int:
     return 0
 
 
+def normalize_router_command(raw_command: str) -> str:
+    token = (raw_command or "go").strip().lower()
+    if re.fullmatch(r"go+", token, flags=re.I):
+        return "go"
+    if token in {"go-loop", "goloop", "loop"}:
+        return "go-loop"
+    return token
+
+
 def cmd_router(args: argparse.Namespace) -> int:
     raw_command = args.command or "go"
-    normalized = "go" if re.fullmatch(r"go+", raw_command, flags=re.I) else raw_command.lower()
+    normalized = normalize_router_command(raw_command)
     repo = Path(args.repo).resolve()
     root = go_root(repo)
     state = {
@@ -728,12 +737,14 @@ def cmd_router(args: argparse.Namespace) -> int:
         state["errors"] = errors
     intent = (args.intent or "").strip().lower()
     recommended: dict[str, Any]
-    if normalized != "go":
-        recommended = {"command": "unknown", "reason": "command token is not a go/goo variant"}
+    if normalized not in {"go", "go-loop"}:
+        recommended = {"command": "unknown", "reason": "command token is not a go/go-loop variant"}
     elif not state["repo_exists"] or not state["has_go"]:
         recommended = {"command": "spike", "reason": "repo or .go contract is missing", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<intent>'}\""}
     elif not state["valid"] or not state["has_vision"] or not state["has_principles"] or not state["has_hierarchy"]:
         recommended = {"command": "spike", "reason": "repo-local contract is incomplete or invalid", "example": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{args.intent or '<repair intent>'}\""}
+    elif state["open_task_count"] > 0 and normalized == "go-loop":
+        recommended = {"command": "go-loop", "reason": "explicit go-loop command and repo has open tasks", "example": f"python3 {Path(__file__).resolve()} go-loop {repo} --max-tasks {args.max_tasks}"}
     elif state["open_task_count"] > 0 and any(word in intent for word in ["loop", "ralph", "groen", "avondrun", "controle afgeven"]):
         recommended = {"command": "go-loop", "reason": "repo is valid, has open tasks, and intent asks for full control handoff/loop", "example": f"python3 {Path(__file__).resolve()} go-loop {repo} --max-tasks {args.max_tasks}"}
     elif state["open_task_count"] > 0 and any(word in intent for word in ["auto", "verder", "door", "go", "bouw", "maak", "fix", "run", "ga"]):
@@ -750,7 +761,7 @@ def cmd_router(args: argparse.Namespace) -> int:
         "repo": str(repo),
         "state": state,
         "recommended": recommended,
-        "router_policy": "Normalize /^go+$/i tokens (go, GO, Go, GOO, gOo) to the repo-local go router, then choose spike/auto/task-create from repo state.",
+        "router_policy": "Normalize /^go+$/i tokens (go, GO, Go, GOO, gOo) to the repo-local go router; normalize loop/go-loop/goloop to go-loop; then choose spike/auto/go-loop/task-create from repo state.",
     }
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))

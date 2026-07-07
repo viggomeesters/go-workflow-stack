@@ -143,12 +143,13 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 
 1. Run status/route/dirty validation.
 2. Take one open task at a time: next → claim → execute → verify.
-3. Run recheck/devil/hardening before finish when the task changed code/docs/contracts.
-4. Finish only with evidence appended to `.go/evidence/events.jsonl`.
-5. After the task batch, run self-reflect: decide whether vision/principles/tasks need improvement.
-6. If self-reflect, failed review, weak first-green, or remaining same-scope work requires continued repair, `go auto` may invoke `go loop`.
-7. Summarize to Viggo compactly, max configured chars, no technical fluff spam.
-8. Convert Viggo's next feedback into new `.go` tasks/decisions, then repeat on the next `go auto`.
+3. If `go auto` discovers new same-scope work, a bug from live proof, or Viggo corrects behavior mid-run, create and claim a concrete `.go/tasks/open/<id>.json` task before patching. Do not treat ad-hoc fixes as outside the repo-local workflow just because they are obvious.
+4. Run recheck/devil/hardening before finish when the task changed code/docs/contracts.
+5. Finish only with evidence appended to `.go/evidence/events.jsonl`.
+6. After the task batch, run self-reflect: decide whether vision/principles/tasks need improvement.
+7. If self-reflect, failed review, weak first-green, or remaining same-scope work requires continued repair, `go auto` may invoke `go loop`.
+8. Summarize to Viggo compactly, max configured chars, no technical fluff spam.
+9. Convert Viggo's next feedback into new `.go` tasks/decisions, then repeat on the next `go auto`.
 
 `go loop` is the stronger control-handoff contract: continue selecting, claiming, executing, verifying, repairing, and creating same-scope follow-up tasks until done, budget exhausted, or blocker. Use it when Viggo says or implies: loop, werk tot groen, ga door, controle afgeven, avondrun, or when `go auto` discovers it should not stop at the first batch.
 

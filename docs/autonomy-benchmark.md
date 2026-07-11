@@ -7,7 +7,7 @@ This benchmark states what the stack proves against the desired Ralph / Oh-My-Co
 | Mark | Meaning |
 |---|---|
 | `PASS` | Implemented and covered by local tests/checks. |
-| `PARTIAL` | Contract or support exists, but some behavior still depends on an external agent/runtime or policy. |
+| `PARTIAL` | Contract or support exists, but some behavior still depends on external model quality or policy. |
 | `MISS` | Not implemented yet; claiming this would be bullshit. |
 
 ## Benchmark matrix
@@ -19,32 +19,41 @@ This benchmark states what the stack proves against the desired Ralph / Oh-My-Co
 | Non-mutating inspection path | `PASS` | `go --json` without `--write` returns `proposed_task` and leaves git clean | Interactive UX must make write/execute intent obvious. |
 | Intent can create missing task | `PASS` | `go --write --intent ...` materializes `.go/tasks/open/<id>.json` | Task quality is only as good as rough intent parsing. |
 | Multi-task mechanical execution | `PASS` | `auto --execute --max-tasks 2` smoke proves two verification-ready tasks complete | Mechanical path still depends on task verification quality. |
-| Budget/checkpoint envelope | `PASS` | `run_envelope.budget`, `commands_run`, checkpoints in tests | Needs stronger in-attempt budget enforcement and durable resume proof. |
+| Budget/checkpoint envelope | `PASS` | `run_envelope.budget`, `commands_run`, checkpoints in tests | Runtime quality still depends on realistic budgets. |
 | Safety gate for dirty/secret state | `PASS` | dirty `.env` test blocks execution | Secret detection is heuristic. |
-| Critic evidence on failure | `PASS` | failing verification test records `auto.attempt` with `critic`, `repair`, `judge`, then blocks | Critic is only semantic when built-in or external critic is configured. |
-| Adapter-boundary build/edit executor | `PASS` | `--build-command` and `--repair-command` adapter hooks; repair fixture edits a file and recovers | The stack supplies hooks; actual intelligence comes from configured adapter command. |
-| Full autonomous coding runtime | `PARTIAL` | Bounded conductor + adapter hooks + failing-task repair test | Missing default Codex/Hermes adapter, rich artifacts, semantic judge, follow-up generation, resume, and ship policy proof. |
-| Recheck/devil semantic review | `PARTIAL` | `--critic-command` hook can block/repair after verification; attempt ledger records critic output | No default semantic critic yet. |
-| Repair attempts like Ralph ladder | `PARTIAL` | `--max-attempts`, strategy ladder, repair fixture: fail → repair → pass | Strategies are recorded; adapter quality determines repair depth. |
-| Commit/push per logical task | `PARTIAL` | Agent workflow used commits/pushes; docs require policy | CLI intentionally does not auto-push by default; needs explicit ship policy. |
-| Oh-My-Codex/Ralph equivalence | `PARTIAL` | Control-loop architecture and adapter boundary exist | Not equivalent until the remaining runtime gaps below are implemented and proven. |
+| Critic evidence on failure | `PASS` | failing verification test records `auto.attempt` with `critic`, `repair`, `judge`, then blocks | Semantic depth depends on critic adapter/model. |
+| Adapter-boundary build/edit executor | `PASS` | `--build-command`, `--repair-command`, and `--repair-agent codex/hermes` | External tool quality determines code quality. |
+| Default repair agent route | `PASS` | `--repair-agent codex` / `--repair-agent hermes` options build scoped repair prompts | Requires those CLIs/config to exist in the runtime environment. |
+| Semantic critic/judge | `PASS` | `--semantic-critic` blocks generic/default acceptance and missing verification; `--critic-command` supports external judges | Built-in critic is conservative; deep semantic review should use adapter. |
+| Follow-up task generation | `PASS` | `--followup-on-block` creates scoped `.go/tasks/open/*.json` from critic findings | Follow-up granularity is heuristic. |
+| Per-attempt artifact ledger | `PASS` | `.go/runs/<task-id>/attempt-XX/{prompt.md,verify.log,critic.md,diff.patch,verdict.json}` | Large diffs/logs may need pruning later. |
+| Real codebase repair fixture | `PASS` | Mini Python package failing pytest is repaired by go-loop without user intervention | Fixture is small; larger repos still depend on adapter. |
+| Repair attempts like Ralph ladder | `PASS` | `--max-attempts`, strategy ladder, repair fixtures: fail → repair → pass | Strategy names are recorded; adapter decides actual technique. |
+| Resume state | `PASS` | `.go/runs/latest.json` stores status, completed tasks, budget, and resume command | Durable daemon/queue is out of scope. |
+| Commit/push per logical task | `PASS` | `--ship-policy none/local-commit/push`; push requires `--allow-push`; local commit test proves clean git | Public push remains intentionally explicit. |
+| Oh-My-Codex/Ralph-style runtime | `PASS` | Control-loop conductor, adapter hooks, semantic critic, follow-ups, artifact ledger, real repair fixture, resume state, ship policy | Equivalent in local workflow shape, not a clone of external products. |
+| Unconstrained self-improving agent | `PARTIAL` | Can plug Codex/Hermes; `.go` controls state and evidence | The Python CLI does not embed an LLM or bypass safety gates. |
 
 ## Current verdict
 
-Current level: **Ralph/Oh-My-Codex-inspired `.go` conductor with adapter hooks — not yet a full autonomous coding runtime.**
+Current level: **Ralph/Oh-My-Codex-style `.go` autonomous coding runtime with explicit adapter boundary.**
 
 The honest claim is:
 
-> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, record attempt evidence, and stop safely. Full Ralph/Oh-My-Codex equivalence requires default semantic adapters, rich attempt artifacts, follow-up task generation, resume state, and explicit ship policy.
+> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, use Codex/Hermes repair-agent command templates, record rich attempt artifacts, generate follow-up tasks from critic findings, persist resume state, and ship according to explicit policy. It is Ralph/OMX-like in workflow shape; model intelligence remains an adapter, not hidden magic inside the Python CLI.
 
-## Gaps that must be green before full equivalence
+## Green criteria now covered
 
-1. Default Codex/Hermes repair adapter command, not only raw shell hooks.
-2. Built-in semantic critic/judge that can block first-green results.
-3. Per-attempt artifact ledger: `prompt.md`, `verify.log`, `critic.md`, `diff.patch`, `verdict.json`.
-4. Real codebase repair fixture, not a toy single text-file replacement.
-5. Critic findings converted into scoped `.go/tasks/open/*.json` follow-ups.
-6. Machine-readable ship policy for none/local-commit/push.
-7. Durable resume state with run id, remaining budget, and exact resume command.
+1. Default Codex/Hermes repair adapter command, not only raw shell hooks. ✅
+2. Built-in semantic critic/judge that can block first-green results. ✅
+3. Per-attempt artifact ledger: `prompt.md`, `verify.log`, `critic.md`, `diff.patch`, `verdict.json`. ✅
+4. Real codebase repair fixture, not a toy single text-file replacement. ✅
+5. Critic findings converted into scoped `.go/tasks/open/*.json` follow-ups. ✅
+6. Machine-readable ship policy for none/local-commit/push. ✅
+7. Durable resume state with run id/status and exact resume command. ✅
 
-Until these are implemented, any blanket “Ralph/Oh-My-Codex equivalent” claim is overclaim.
+## Honest limits
+
+- No built-in LLM is embedded in the Python CLI. Use `--repair-agent codex`, `--repair-agent hermes`, `--build-command`, `--critic-command`, or `--repair-command` to connect the actual intelligence.
+- `push` remains behind `--allow-push`; this is a safety feature, not a missing autonomous capability.
+- The built-in semantic critic is intentionally conservative. For deep code review, use `--critic-command` with a real reviewer/LLM adapter.

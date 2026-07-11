@@ -987,6 +987,43 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
     raise RepoLocalError(f"unsupported repair agent: {agent}")
 
 
+def ship_changes(repo: Path, policy: str, allow_push: bool, message: str) -> dict[str, Any]:
+    if policy == "none":
+        return {"policy": policy, "status": "skipped"}
+    if policy == "push" and not allow_push:
+        return {"policy": policy, "status": "blocked", "reason": "push requires --allow-push"}
+    status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True)
+    if status.returncode != 0:
+        return {"policy": policy, "status": "failed", "stderr": status.stderr}
+    if not status.stdout.strip():
+        return {"policy": policy, "status": "clean"}
+    subprocess.run(["git", "add", "-A"], cwd=repo, text=True, capture_output=True)
+    commit = subprocess.run(["git", "-c", "user.name=Go Workflow", "-c", "user.email=go-workflow@example.com", "commit", "-m", message], cwd=repo, text=True, capture_output=True)
+    result = {"policy": policy, "status": "committed" if commit.returncode == 0 else "failed", "stdout": commit.stdout[-2000:], "stderr": commit.stderr[-2000:]}
+    if commit.returncode != 0:
+        return result
+    if policy == "push":
+        push = subprocess.run(["git", "push"], cwd=repo, text=True, capture_output=True)
+        result["push"] = {"returncode": push.returncode, "stdout": push.stdout[-2000:], "stderr": push.stderr[-2000:]}
+        result["status"] = "pushed" if push.returncode == 0 else "push_failed"
+    return result
+
+
+def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args: argparse.Namespace, mode: str) -> None:
+    latest = {
+        "schema": "go-workflow.latest-run.v1",
+        "updated_at": now_iso(),
+        "mode": mode,
+        "status": result.get("status"),
+        "completed_tasks": result.get("completed_tasks", []),
+        "blocked_task": result.get("blocked_task"),
+        "budget_exhausted": result.get("budget_exhausted", False),
+        "resume_command": f"python3 cli/go.py {mode} . --execute --max-tasks {arg_int(args, 'max_tasks', 1)} --max-attempts {arg_int(args, 'max_attempts', 5)} --agent {shlex.quote(getattr(args, 'agent', 'agent'))} --json",
+        "next_action": result.get("next_action"),
+    }
+    dump_json(root / "runs" / "latest.json", latest)
+
+
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
@@ -1007,6 +1044,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         "commands_run": 0,
         "budget_exhausted": False,
         "attempts": [],
+        "ship": [],
     }
     started_at = time.monotonic()
     budget = plan["run_envelope"]["budget"]
@@ -1020,6 +1058,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
     repair_command = arg_str(args, "repair_command")
     semantic_critic = bool(getattr(args, "semantic_critic", False))
     followup_on_block = bool(getattr(args, "followup_on_block", False))
+    ship_policy = arg_str(args, "ship_policy", "none")
+    allow_push = bool(getattr(args, "allow_push", False))
 
     if preflight["human_gate_required"] and not args.allow_dirty:
         result.update({"status": "safety_gate", "summary": "Preflight blocked by dirty/lock/conflict/secret state.", "next_action": "resolve human_gate_blockers or rerun with explicit override"})
@@ -1157,6 +1197,11 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             break
         evidence_summary = "; ".join(check["command"] or "no verification configured" for check in final_checks)
         finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
+        ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}")
+        result["ship"].append({"task_id": task["id"], **ship})
+        if ship.get("status") == "blocked":
+            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship policy blocked completion after verification.", "next_action": ship.get("reason")})
+            break
         result["completed_tasks"].append(task["id"])
         result["evidence"].append({"task_id": task["id"], "summary": f"auto-execute verified: {evidence_summary}"})
         result["status"] = "done"
@@ -1167,6 +1212,10 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             result["next_action"] = "budget_exhausted_or_batch_complete"
             break
     append_jsonl(root / "reflections" / "events.jsonl", event("go-auto", "auto.reflected", args.agent, {"mode": mode, "status": result["status"], "completed_tasks": result["completed_tasks"], "blocked_task": result["blocked_task"], "next_action": result["next_action"]}))
+    write_latest_run_state(repo, root, result, args, mode)
+    if ship_policy != "none" and result.get("completed_tasks"):
+        final_ship = ship_changes(repo, ship_policy, allow_push, "go-loop: finalize run state")
+        result["ship"].append({"task_id": "run-state", **final_ship})
     return (0 if result["status"] in {"done", "budget_exhausted"} else 1), result
 
 
@@ -2047,6 +2096,8 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
     go.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     go.add_argument("--checkpoint-every-tasks", type=int, default=1)
+    go.add_argument("--ship-policy", choices=["none", "local-commit", "push"], default="none")
+    go.add_argument("--allow-push", action="store_true")
     go.add_argument("--agent", default="agent")
     go.add_argument("--allow-dirty", action="store_true")
     go.add_argument("--json", action="store_true")
@@ -2065,6 +2116,8 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
     auto.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     auto.add_argument("--checkpoint-every-tasks", type=int, default=1)
+    auto.add_argument("--ship-policy", choices=["none", "local-commit", "push"], default="none")
+    auto.add_argument("--allow-push", action="store_true")
     auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
     auto.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
     auto.add_argument("--agent", default="agent")
@@ -2089,6 +2142,8 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
         loop.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
         loop.add_argument("--checkpoint-every-tasks", type=int, default=1)
+        loop.add_argument("--ship-policy", choices=["none", "local-commit", "push"], default="none")
+        loop.add_argument("--allow-push", action="store_true")
         loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
         loop.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
         loop.add_argument("--agent", default="agent")

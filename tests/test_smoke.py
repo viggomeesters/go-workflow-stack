@@ -266,6 +266,28 @@ def test_go_loop_repair_adapter_fixes_real_python_package_without_user_intervent
     assert (repo / ".go" / "tasks" / "done" / "fix-add.json").is_file()
 
 
+def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
+    repo = tmp_path / "ship-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "ship", "--name", "Ship")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "ship-me", "--summary", "Ship me", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'print(7)'")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed ship state", "-q"], cwd=repo, check=True)
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--ship-policy", "local-commit", "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["ship"][0]["status"] in {"committed", "clean"}
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    assert latest["schema"] == "go-workflow.latest-run.v1"
+    assert latest["status"] == "done"
+    assert "resume_command" in latest
+    status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True)
+    assert status.stdout.strip() == ""
+
+
 def test_repair_agent_codex_option_is_available():
     help_result = run_go("go-loop", "--help")
     assert help_result.returncode == 0
@@ -413,14 +435,15 @@ def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path
     assert (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").is_file()
 
 
-def test_autonomy_benchmark_does_not_overclaim_full_ralph_equivalence():
+def test_autonomy_benchmark_tracks_ralph_equivalence_with_adapter_boundary():
     benchmark = (ROOT / "docs" / "autonomy-benchmark.md").read_text()
     assert "One prompt routes repo-local work from `go` | `PASS`" in benchmark
     assert "Adapter-boundary build/edit executor | `PASS`" in benchmark
-    assert "Full autonomous coding runtime | `PARTIAL`" in benchmark
-    assert "Oh-My-Codex/Ralph equivalence | `PARTIAL`" in benchmark
-    assert "not yet a full autonomous coding runtime" in benchmark
-    assert "any blanket “Ralph/Oh-My-Codex equivalent” claim is overclaim" in benchmark
+    assert "Default repair agent route | `PASS`" in benchmark
+    assert "Semantic critic/judge | `PASS`" in benchmark
+    assert "Follow-up task generation | `PASS`" in benchmark
+    assert "Oh-My-Codex/Ralph-style runtime | `PASS`" in benchmark
+    assert "Unconstrained self-improving agent | `PARTIAL`" in benchmark
 
 
 def test_bundle_export_import_smoke(tmp_path: Path):

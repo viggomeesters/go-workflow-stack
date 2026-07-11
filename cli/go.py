@@ -13,6 +13,7 @@ import fnmatch
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -970,6 +971,22 @@ def builtin_semantic_findings(repo: Path, task: dict[str, Any], checks: list[dic
     return findings
 
 
+def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
+    prompt = " ".join([
+        "You are the repair adapter for go-workflow-stack.",
+        "In repo {repo}, fix .go task {task_id} on attempt {attempt} using strategy {strategy}.",
+        "Read GO_TASK_JSON from the environment.",
+        "Edit only paths allowed by the task scope.",
+        "Run the task verification commands before exiting.",
+        "Exit non-zero if you cannot safely repair within scope.",
+    ])
+    if agent == "codex":
+        return "codex exec --dangerously-bypass-approvals-and-sandbox " + shlex.quote(prompt)
+    if agent == "hermes":
+        return "hermes -p " + shlex.quote(prompt)
+    raise RepoLocalError(f"unsupported repair agent: {agent}")
+
+
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
@@ -1040,6 +1057,10 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         task_passed = False
         final_checks: list[dict[str, Any]] = []
         last_failed_command = "verification"
+        task_repair_command = repair_command
+        repair_agent = arg_str(args, "repair_agent", "")
+        if repair_agent and not task_repair_command:
+            task_repair_command = default_repair_agent_command(repair_agent, task)
         for attempt_number in range(1, max_attempts + 1):
             strategy = strategies[min(attempt_number - 1, len(strategies) - 1)]
             attempt = {
@@ -1063,8 +1084,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     last_failed_command = build["command"]
                     result["attempts"].append(attempt)
                     record_attempt(repo, root, task, args.agent, attempt, final_checks)
-                    if repair_command and attempt_number < max_attempts:
-                        repair = run_hook_command(repo, repair_command, task, attempt_number, strategy, "repair")
+                    if task_repair_command and attempt_number < max_attempts:
+                        repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair")
                         result["commands_run"] += 1
                         attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
                         continue
@@ -1109,8 +1130,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 record_attempt(repo, root, task, args.agent, attempt, final_checks)
                 task_passed = True
                 break
-            if repair_command and attempt_number < max_attempts:
-                repair = run_hook_command(repo, repair_command, task, attempt_number, strategy, "repair")
+            if task_repair_command and attempt_number < max_attempts:
+                repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair")
                 result["commands_run"] += 1
                 attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
                 attempt["judge"] = {"status": "retry", "reason": "repair attempted; rerun loop strategy"}
@@ -2022,6 +2043,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
     go.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     go.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+    go.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")
     go.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
     go.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     go.add_argument("--checkpoint-every-tasks", type=int, default=1)
@@ -2039,6 +2061,7 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
     auto.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     auto.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+    auto.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")
     auto.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
     auto.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     auto.add_argument("--checkpoint-every-tasks", type=int, default=1)
@@ -2062,6 +2085,7 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
         loop.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
         loop.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+        loop.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")
         loop.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
         loop.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
         loop.add_argument("--checkpoint-every-tasks", type=int, default=1)

@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "codex-agent-adapter-and-real-fixture",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add Codex repair adapter and real codebase fixture",
+  "description": "Add a first-class Codex repair adapter command builder and replace toy answer.txt proof with a mini package failing-test repair fixture that exercises real code edits.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/**",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "CLI can emit/use a Codex repair adapter command from task JSON and verification failure context.",
+    "A mini Python package fixture is repaired by go-loop without user intervention."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T16:08:50+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T16:10:34+02:00",
+      "agent": "hermes",
+      "summary": "Added --repair-agent codex/hermes adapter option and real mini Python package repair fixture. go-loop now proves failing pytest package repair without user intervention, beyond toy answer.txt. Verification: pytest -q 16 passed; make check passed."
+    }
+  ]
+}

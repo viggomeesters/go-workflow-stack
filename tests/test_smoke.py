@@ -230,6 +230,49 @@ def test_go_loop_repair_adapter_fixes_failing_task_without_user_intervention(tmp
     assert verdict["schema"] == "go-workflow.attempt-verdict.v1"
     assert result["attempts"][0]["artifacts"]["verdict"].endswith("verdict.json")
 
+def test_go_loop_repair_adapter_fixes_real_python_package_without_user_intervention(tmp_path: Path):
+    repo = tmp_path / "real-repair-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "realrepair", "--name", "Real Repair")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "calc.py").write_text("def add(a, b):\n    return a - b\n", encoding="utf-8")
+    (repo / "test_calc.py").write_text("from calc import add\n\ndef test_add():\n    assert add(2, 3) == 5\n", encoding="utf-8")
+    verify = "python3 -m pytest test_calc.py -q"
+    task = run_go(
+        "task", "create", str(repo),
+        "--id", "fix-add",
+        "--summary", "Fix add implementation",
+        "--epic", "workflow",
+        "--read", "calc.py",
+        "--read", "test_calc.py",
+        "--modify", "calc.py",
+        "--acceptance", "add(2, 3) returns 5 and the pytest fixture passes",
+        "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "calc.py", "test_calc.py"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed broken package", "-q"], cwd=repo, check=True)
+    repair_command = "python3 -c \"from pathlib import Path; p=Path('calc.py'); p.write_text(p.read_text().replace('return a - b', 'return a + b'), encoding='utf-8')\""
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "3", "--execute", "--agent", "pytest", "--repair-command", repair_command, "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["fix-add"]
+    assert len(result["attempts"]) == 2
+    assert result["attempts"][0]["verify"]["status"] == "failed"
+    assert result["attempts"][1]["verify"]["status"] == "passed"
+    assert "return a + b" in (repo / "calc.py").read_text()
+    assert (repo / ".go" / "tasks" / "done" / "fix-add.json").is_file()
+
+
+def test_repair_agent_codex_option_is_available():
+    help_result = run_go("go-loop", "--help")
+    assert help_result.returncode == 0
+    assert "--repair-agent" in help_result.stdout
+    assert "codex" in help_result.stdout
+
+
 def test_go_loop_semantic_critic_creates_followup_from_blocking_findings(tmp_path: Path):
     repo = tmp_path / "semantic-critic-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

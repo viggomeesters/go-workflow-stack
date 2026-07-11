@@ -230,6 +230,27 @@ def test_go_loop_repair_adapter_fixes_failing_task_without_user_intervention(tmp
     assert verdict["schema"] == "go-workflow.attempt-verdict.v1"
     assert result["attempts"][0]["artifacts"]["verdict"].endswith("verdict.json")
 
+def test_go_loop_semantic_critic_creates_followup_from_blocking_findings(tmp_path: Path):
+    repo = tmp_path / "semantic-critic-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "semantic", "--name", "Semantic")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "vague-task", "--summary", "Vague task", "--epic", "workflow", "--verification", "python3 -c 'print(1)'")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed semantic critic state", "-q"], cwd=repo, check=True)
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--semantic-critic", "--followup-on-block", "--json")
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert result["created_followups"]
+    followup_id = result["created_followups"][0]
+    assert (repo / ".go" / "tasks" / "open" / f"{followup_id}.json").is_file()
+    assert (repo / ".go" / "tasks" / "blocked" / "vague-task.json").is_file()
+    assert "acceptance" in (repo / ".go" / "tasks" / "open" / f"{followup_id}.json").read_text()
+
+
 def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     repo = tmp_path / "multi-exec-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

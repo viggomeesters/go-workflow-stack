@@ -927,6 +927,49 @@ def record_attempt(repo: Path, root: Path, task: dict[str, Any], agent: str, att
     append_jsonl(root / "runs" / "events.jsonl", event(str(task.get("id", "unknown")), "auto.attempt", agent, attempt))
 
 
+def create_followup_task(repo: Path, task: dict[str, Any], findings: list[str], agent: str) -> dict[str, Any]:
+    root = go_root(repo)
+    followup_id = slugify(f"followup-{task.get('id', 'task')}-{len(findings)}").lower()
+    base = followup_id
+    index = 2
+    while task_path(root, "open", followup_id).exists() or task_path(root, "done", followup_id).exists() or task_path(root, "active", followup_id).exists():
+        followup_id = f"{base}-{index}"
+        index += 1
+    project = load_json(root / "project.json")
+    followup = {
+        "schema": TASK_SCHEMA,
+        "kind": "task",
+        "id": followup_id,
+        "project": project["id"],
+        "status": "open",
+        "summary": f"Resolve critic findings for {task.get('id')}",
+        "description": "\n".join(findings),
+        "scope": task.get("scope", {"read": [], "modify": []}),
+        "acceptance": ["All listed critic findings are resolved or explicitly reclassified as non-blocking."],
+        "verification": task.get("verification", []),
+        "evidence": [],
+        "created_from": {"task_id": task.get("id"), "agent": agent, "created_at": now_iso(), "findings": findings},
+    }
+    dump_json(task_path(root, "open", followup_id), followup)
+    append_jsonl(root / "runs" / "events.jsonl", event(followup_id, "run.checked", agent, {"action": "critic.followup_created", "source_task": task.get("id"), "findings": findings}))
+    return followup
+
+
+def builtin_semantic_findings(repo: Path, task: dict[str, Any], checks: list[dict[str, Any]]) -> list[str]:
+    findings: list[str] = []
+    acceptance = task.get("acceptance") or []
+    if not acceptance:
+        findings.append("task has no acceptance criteria; first-green cannot prove done")
+    if acceptance == ["Task result is implemented and verified."]:
+        findings.append("task uses generic default acceptance criteria; first-green cannot prove done")
+    if not task.get("verification"):
+        findings.append("task has no verification commands; loop cannot prove behavior")
+    failed = [check for check in checks if check.get("returncode") != 0]
+    if failed:
+        findings.append(f"verification still failing: {failed[0].get('command')}")
+    return findings
+
+
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
@@ -958,6 +1001,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
     build_command = arg_str(args, "build_command")
     critic_command = arg_str(args, "critic_command")
     repair_command = arg_str(args, "repair_command")
+    semantic_critic = bool(getattr(args, "semantic_critic", False))
+    followup_on_block = bool(getattr(args, "followup_on_block", False))
 
     if preflight["human_gate_required"] and not args.allow_dirty:
         result.update({"status": "safety_gate", "summary": "Preflight blocked by dirty/lock/conflict/secret state.", "next_action": "resolve human_gate_blockers or rerun with explicit override"})
@@ -1038,7 +1083,15 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     "repair_hint": "Fix the failing command output inside task scope, then rerun verification.",
                 }
             else:
-                if critic_command:
+                builtin_findings = builtin_semantic_findings(repo, task, checks) if semantic_critic else []
+                if builtin_findings:
+                    attempt["critic"] = {
+                        "status": "blocking_findings",
+                        "blocking_findings": builtin_findings,
+                        "repair_hint": "Resolve the critic findings or create scoped follow-up work before finishing.",
+                    }
+                    last_failed_command = "semantic critic"
+                elif critic_command:
                     critic = run_hook_command(repo, critic_command, task, attempt_number, strategy, "critic")
                     result["commands_run"] += 1
                     attempt["critic"] = {
@@ -1073,6 +1126,11 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             break
         if not task_passed:
             block_reason = f"critic blocked after bounded executor attempts: {last_failed_command}"
+            if followup_on_block and result["attempts"]:
+                last_attempt = result["attempts"][-1]
+                findings = (last_attempt.get("critic") or {}).get("blocking_findings") or [block_reason]
+                followup = create_followup_task(repo, task, findings, args.agent)
+                result.setdefault("created_followups", []).append(followup["id"])
             block_task_record(repo, root, active_path, task, args.agent, block_reason, final_checks)
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Bounded executor attempts failed; critic/repair evidence recorded and task moved to blocked.", "next_action": "repair failing gate or configure build/critic/repair adapter, then rerun go-loop"})
             break
@@ -1964,6 +2022,8 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
     go.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     go.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+    go.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
+    go.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     go.add_argument("--checkpoint-every-tasks", type=int, default=1)
     go.add_argument("--agent", default="agent")
     go.add_argument("--allow-dirty", action="store_true")
@@ -1979,6 +2039,8 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
     auto.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     auto.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+    auto.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
+    auto.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     auto.add_argument("--checkpoint-every-tasks", type=int, default=1)
     auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
     auto.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
@@ -2000,6 +2062,8 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
         loop.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
         loop.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
+        loop.add_argument("--semantic-critic", action="store_true", help="run built-in semantic critic before finish")
+        loop.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
         loop.add_argument("--checkpoint-every-tasks", type=int, default=1)
         loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
         loop.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")

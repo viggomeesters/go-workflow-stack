@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "semantic-critic-followups",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add semantic critic and follow-up task generation",
+  "description": "Add built-in critic checks and blocked follow-up task generation from critic findings so major findings become executable .go work instead of prose.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "Built-in critic blocks missing acceptance/verification and out-of-scope dirty changes.",
+    "Blocked critic findings can create a scoped follow-up task."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T16:05:59+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T16:08:35+02:00",
+      "agent": "hermes",
+      "summary": "Added built-in semantic critic flag and critic follow-up generation. --semantic-critic blocks generic/default acceptance or missing verification; --followup-on-block creates scoped .go follow-up tasks from critic findings. Verification: pytest -q 14 passed; make check passed."
+    }
+  ]
+}

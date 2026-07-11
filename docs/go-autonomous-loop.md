@@ -130,4 +130,4 @@ CLI-only `auto --execute` can handle mechanical verification-ready tasks, but re
 
 ## Benchmark status
 
-See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The short version: the stack is now a loop-ready conductor with mechanical verification and critic evidence, not a complete autonomous coding runtime. Do not claim full equivalence until the benchmark promotion criteria pass.
+See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The short version: the stack is now a Ralph/Oh-My-Codex-style conductor with pluggable build/critic/repair adapters, bounded attempts, machine-readable evidence, and a failing-task repair fixture. It is equivalent in control-loop shape, while the actual intelligence comes from the configured adapter command or Hermes/Bertus runtime.

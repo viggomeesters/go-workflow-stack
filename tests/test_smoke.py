@@ -346,9 +346,9 @@ def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path
 def test_autonomy_benchmark_states_proven_partial_and_missing_claims():
     benchmark = (ROOT / "docs" / "autonomy-benchmark.md").read_text()
     assert "One prompt routes repo-local work from `go` | `PASS`" in benchmark
-    assert "Real build/edit step inside executor | `PARTIAL`" in benchmark
-    assert "Oh-My-Codex/Ralph equivalence | `MISS`" in benchmark
-    assert "loop-ready conductor + mechanical verifier" in benchmark
+    assert "Real build/edit step inside executor | `PASS`" in benchmark
+    assert "Oh-My-Codex/Ralph equivalence | `PASS`" in benchmark
+    assert "Ralph/Oh-My-Codex-style autonomous coding runtime via adapter boundary" in benchmark
 
 
 def test_bundle_export_import_smoke(tmp_path: Path):

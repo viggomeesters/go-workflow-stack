@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "autonomy-benchmark-promotion",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Promote autonomy benchmark after executor proof",
+  "description": "Update docs/autonomy-benchmark.md and runtime skill after tests prove the stack now has a real Ralph/Oh-My-Codex-style executor adapter. Keep limitations honest and do not overclaim beyond the adapter boundary.",
+  "scope": {
+    "read": [
+      "docs/**",
+      "skills/**",
+      "tests/**"
+    ],
+    "modify": [
+      "docs/**",
+      "skills/**",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "Benchmark marks the newly proven executor criteria as PASS with test evidence.",
+    "Remaining limitations are explicit rather than hidden."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T14:10:39+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T14:15:08+02:00",
+      "agent": "hermes",
+      "summary": "Promoted autonomy benchmark to PASS where adapter proof exists: docs/autonomy-benchmark.md now states Ralph/Oh-My-Codex-style runtime via adapter boundary; docs/go-autonomous-loop.md and repo-local skill document build/critic/repair adapter hooks and honest limits. Verification: pytest -q 13 passed; make check passed; validate passed; git diff --check passed."
+    }
+  ]
+}

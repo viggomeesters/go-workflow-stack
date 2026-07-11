@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "auto-execute-repair-loop",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Upgrade auto --execute beyond verify-only",
   "description": "Replace the current verify-only executor with a real autonomous loop skeleton: preflight, claim, run verification, on failure perform bounded same-scope repair hooks or emit agent handoff, rerun gates, finish/block with evidence, and continue.",
   "scope": {
@@ -27,8 +27,14 @@
     "pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T10:20:28+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T10:20:29+02:00",
+      "agent": "hermes",
+      "summary": "Upgraded auto --execute result model with commands_run/checkpoints/budget_exhausted, max command/minute budget enforcement, own-lifecycle dirty continuation across multiple tasks, actionable safety/blocked states, and regression test for two-task execution; verification: pytest -q 10 passed; make check passed"
+    }
+  ]
 }

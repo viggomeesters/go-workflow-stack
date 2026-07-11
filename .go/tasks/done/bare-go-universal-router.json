@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "bare-go-universal-router",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Implement bare go universal router",
   "description": "Make bare `go` resolve loose/direct commands versus repo-local .go execution: detect target repo, repair missing contract, create task from intent, or enter autonomous loop.",
   "scope": {
@@ -32,8 +32,14 @@
     "pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T10:20:29+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T10:20:29+02:00",
+      "agent": "hermes",
+      "summary": "Added bare  CLI universal router that distinguishes missing repo/missing .go/invalid contract from repo-local execution, creates a scoped task from actionable intent when no open task exists, returns go-auto/go-loop plan, and has regression test; verification: pytest -q 10 passed; make check passed"
+    }
+  ]
 }

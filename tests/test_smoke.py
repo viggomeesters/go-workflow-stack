@@ -124,6 +124,10 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert "missing_credentials" in plan["execution_policy"]["human_gates"]
     assert plan["run_envelope"]["run_until"] == "done_or_blocker_or_budget_or_safety_gate"
     assert plan["run_envelope"]["budget"]["max_tasks"] == 2
+    assert plan["run_envelope"]["budget"]["max_minutes"] == 45
+    assert plan["run_envelope"]["budget"]["max_commands"] == 36
+    assert plan["run_envelope"]["budget"]["checkpoint_every_tasks"] == 1
+    assert plan["run_envelope"]["telegram_policy"]["default"] == "silent_until_done_blocker_or_checkpoint"
     assert plan["run_envelope"]["preflight"]["valid_go_state"] is True
     assert plan["run_envelope"]["preflight"]["human_gate_required"] is False
     assert plan["run_envelope"]["result_schema"] == "go-workflow.auto-run-result.v1"
@@ -162,6 +166,31 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     assert "task.finished" in evidence_log
     reflection_log = (repo / ".go" / "reflections" / "events.jsonl").read_text()
     assert "auto.reflected" in reflection_log
+    assert result["commands_run"] == 1
+    assert result["checkpoints"]
+
+
+def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
+    repo = tmp_path / "multi-exec-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "multi", "--name", "Multi", "--verification", "python3 -c \"print('ok')\"")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    first = run_go("task", "create", str(repo), "--id", "first", "--summary", "First", "--epic", "workflow", "--verification", "python3 -c \"print('first')\"")
+    second = run_go("task", "create", str(repo), "--id", "second", "--summary", "Second", "--epic", "workflow", "--verification", "python3 -c \"print('second')\"")
+    assert first.returncode == 0, first.stderr + first.stdout
+    assert second.returncode == 0, second.stderr + second.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
+
+    executed = run_go("auto", str(repo), "--max-tasks", "2", "--execute", "--agent", "pytest", "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["first", "second"]
+    assert result["commands_run"] == 2
+    assert len(result["checkpoints"]) == 2
+    assert (repo / ".go" / "tasks" / "done" / "first.json").is_file()
+    assert (repo / ".go" / "tasks" / "done" / "second.json").is_file()
 
 
 def test_auto_execute_blocks_on_preflight_gate(tmp_path: Path):
@@ -229,6 +258,22 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     direct_loop_plan = json.loads(direct_loop_route.stdout)
     assert direct_loop_plan["normalized_command"] == "go-loop"
     assert direct_loop_plan["recommended"]["command"] == "go-loop"
+
+
+def test_bare_go_creates_task_from_intent_and_returns_loop_plan(tmp_path: Path):
+    repo = tmp_path / "bare-go-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "bare", "--name", "Bare")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    # The adopted repo has no executable open tasks; bare go must materialize intent into .go state.
+    result = run_go("go", str(repo), "--intent", "Add bare go task routing", "--json")
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema"] == "go-workflow.bare-go.v1"
+    assert payload["created_task"]["id"] == "add-bare-go-task-routing"
+    assert payload["action"] == "go-auto"
+    assert payload["plan"]["next_tasks"] == ["add-bare-go-task-routing"]
+    assert (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").is_file()
 
 
 def test_bundle_export_import_smoke(tmp_path: Path):

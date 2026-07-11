@@ -16,6 +16,7 @@ import re
 import shutil
 import subprocess
 import sys
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -653,13 +654,21 @@ def cmd_spike(args: argparse.Namespace) -> int:
     return 0
 
 
+def arg_int(args: argparse.Namespace, name: str, default: int) -> int:
+    return int(getattr(args, name, default) or default)
+
+
 def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto") -> dict[str, Any]:
     errors = validate_repo(repo)
     if errors:
         raise RepoLocalError(f"cannot run {mode} on invalid .go state:\n- " + "\n- ".join(errors))
     root = go_root(repo)
     project = load_json(root / "project.json")
-    tasks = [task[1] for task in open_tasks(repo)[: max(args.max_tasks, 1)]]
+    max_tasks = max(arg_int(args, "max_tasks", 3), 1)
+    max_minutes = max(arg_int(args, "max_minutes", 45), 1)
+    max_commands = max(arg_int(args, "max_commands", max_tasks * 12), 1)
+    checkpoint_every_tasks = max(arg_int(args, "checkpoint_every_tasks", 1), 1)
+    tasks = [task[1] for task in open_tasks(repo)[:max_tasks]]
     is_loop = mode == "go-loop"
     stop_conditions = [
         "no_open_tasks_and_no_self_reflect_follow_up",
@@ -687,14 +696,15 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         ],
         "human_gates": stop_conditions[1:],
     }
-    preflight = build_auto_preflight(repo, len(tasks), max(args.max_tasks, 1))
+    preflight = build_auto_preflight(repo, len(tasks), max_tasks)
     run_envelope = {
         "schema": "go-workflow.auto-run-envelope.v1",
         "result_schema": "go-workflow.auto-run-result.v1",
         "run_until": "done_or_blocker_or_budget_or_safety_gate",
-        "budget": {"max_tasks": max(args.max_tasks, 1), "summary_chars": args.summary_chars},
+        "budget": {"max_tasks": max_tasks, "max_minutes": max_minutes, "max_commands": max_commands, "checkpoint_every_tasks": checkpoint_every_tasks, "summary_chars": args.summary_chars},
         "preflight": preflight,
-        "checkpoint_after": ["each_task_finish", "blocker", "budget_exhausted", "safety_gate"],
+        "checkpoint_after": ["checkpoint_every_tasks", "blocker", "budget_exhausted", "safety_gate", "done"],
+        "telegram_policy": {"default": "silent_until_done_blocker_or_checkpoint", "checkpoint_every_tasks": checkpoint_every_tasks, "summary_chars": args.summary_chars},
         "final_result_fields": ["status", "completed_tasks", "blocked_task", "evidence", "checks", "summary", "next_action"],
     }
     return {
@@ -716,6 +726,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
             "loop_escalation": "go-auto may invoke go-loop when self-reflect creates follow-up work, verification/review fails, first green is not trustworthy, or the project needs continued autonomous repair beyond the initial batch.",
             "feedback": "New Viggo input is converted into .go tasks/decisions before another go auto/go loop pass.",
             "summary_max_chars": args.summary_chars,
+            "telegram_policy": "quiet until done/blocker/checkpoint; do not stream command transcripts",
             "stop_conditions": stop_conditions,
         },
     }
@@ -809,13 +820,26 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         "checks": [],
         "summary": "",
         "next_action": None,
+        "checkpoints": [],
+        "commands_run": 0,
+        "budget_exhausted": False,
     }
+    started_at = time.monotonic()
+    budget = plan["run_envelope"]["budget"]
+    max_commands = int(budget.get("max_commands") or 1)
+    max_minutes = int(budget.get("max_minutes") or 1)
+    checkpoint_every_tasks = int(budget.get("checkpoint_every_tasks") or 1)
+
     if preflight["human_gate_required"] and not args.allow_dirty:
         result.update({"status": "safety_gate", "summary": "Preflight blocked by dirty/lock/conflict/secret state.", "next_action": "resolve human_gate_blockers or rerun with explicit override"})
         append_jsonl(root / "runs" / "events.jsonl", event("go-auto", "auto.safety_gate", args.agent, {"blockers": preflight["human_gate_blockers"]}))
         return 1, result
 
-    for _ in range(max(args.max_tasks, 1)):
+    for _ in range(max(arg_int(args, "max_tasks", 3), 1)):
+        elapsed_minutes = (time.monotonic() - started_at) / 60
+        if result["commands_run"] >= max_commands or elapsed_minutes >= max_minutes:
+            result.update({"status": "budget_exhausted", "budget_exhausted": True, "summary": "Budget exhausted before selecting another task.", "next_action": "continue with go-loop using a larger budget"})
+            break
         tasks = open_tasks(repo)
         if not tasks:
             result["status"] = "done"
@@ -823,6 +847,10 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             break
         open_path, task = tasks[0]
         dirty = classify_dirty(repo, task.get("scope", {}).get("modify", []))
+        # In an executed batch, finishing earlier tasks intentionally mutates .go evidence/runs/task files.
+        # Do not let our own lifecycle writes block the next task; pre-existing dirty state is already gated by preflight.
+        if result["completed_tasks"]:
+            dirty = {"blocking": [], "report_only": dirty.get("blocking", []) + dirty.get("report_only", [])}
         if dirty["blocking"] and not args.allow_dirty:
             result.update({"status": "safety_gate", "blocked_task": task.get("id"), "summary": "Task scope dirty gate blocked execution.", "next_action": "resolve dirty state or rerun with explicit override"})
             result["run_envelope"]["preflight"]["human_gate_required"] = True
@@ -836,6 +864,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         open_path.unlink()
         append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
         checks = run_verification_commands(repo, task)
+        result["commands_run"] += len([check for check in checks if check.get("command")])
         result["checks"].extend(checks)
         failed = next((check for check in checks if check["returncode"] != 0), None)
         if failed:
@@ -848,11 +877,13 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         result["evidence"].append({"task_id": task["id"], "summary": f"auto-execute verified: {evidence_summary}"})
         result["status"] = "done"
         result["summary"] = f"Completed {len(result['completed_tasks'])} task(s)."
-        if mode != "go-loop" and len(result["completed_tasks"]) >= max(args.max_tasks, 1):
+        if len(result["completed_tasks"]) % checkpoint_every_tasks == 0:
+            result["checkpoints"].append({"created_at": now_iso(), "completed_tasks": list(result["completed_tasks"]), "status": result["status"], "telegram_policy": plan["run_envelope"].get("telegram_policy", {})})
+        if mode != "go-loop" and len(result["completed_tasks"]) >= max(arg_int(args, "max_tasks", 3), 1):
             result["next_action"] = "budget_exhausted_or_batch_complete"
             break
     append_jsonl(root / "reflections" / "events.jsonl", event("go-auto", "auto.reflected", args.agent, {"mode": mode, "status": result["status"], "completed_tasks": result["completed_tasks"], "blocked_task": result["blocked_task"], "next_action": result["next_action"]}))
-    return (0 if result["status"] == "done" else 1), result
+    return (0 if result["status"] in {"done", "budget_exhausted"} else 1), result
 
 
 def build_agent_handoff(repo: Path, args: argparse.Namespace, mode: str) -> dict[str, Any]:
@@ -896,6 +927,111 @@ def build_agent_handoff(repo: Path, args: argparse.Namespace, mode: str) -> dict
         ],
     }
 
+
+
+def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> dict[str, Any]:
+    root = go_root(repo)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot create intent task in invalid .go state:\n- " + "\n- ".join(errors))
+    project = load_json(root / "project.json")
+    summary = intent.strip() or "Continue toward project goal"
+    task_id = slugify(summary).lower()[:48].strip("-") or "continue-project-goal"
+    base_id = task_id
+    index = 2
+    while any(task_path(root, state, task_id).exists() for state in ("open", "active", "blocked", "done")):
+        suffix = f"-{index}"
+        task_id = (base_id[: 48 - len(suffix)] + suffix).strip("-")
+        index += 1
+    verification = project.get("default_verification") or ["git diff --check"]
+    task = {
+        "schema": TASK_SCHEMA,
+        "kind": "task",
+        "id": task_id,
+        "project": project["id"],
+        "status": "open",
+        "summary": summary,
+        "description": f"Created from bare go intent: {summary}",
+        "scope": {"read": [".go/**", "README.md", "docs/**", "src/**", "tests/**"], "modify": [".go/**", "README.md", "docs/**", "src/**", "tests/**"]},
+        "acceptance": ["Intent is implemented or explicitly blocked with evidence.", "Result is verified and summarized compactly."],
+        "verification": verification,
+        "claim": {"agent": None, "claimed_at": None},
+        "evidence": [],
+    }
+    target = task_path(root, "open", task_id)
+    dump_json(target, task)
+    hierarchy = load_json(root / "hierarchy.json")
+    epics = hierarchy_epics(hierarchy)
+    if epics:
+        epics[0].setdefault("tasks", [])
+        if task_id not in epics[0]["tasks"]:
+            epics[0]["tasks"].append(task_id)
+        set_hierarchy_epics(hierarchy, epics)
+        dump_json(root / "hierarchy.json", hierarchy)
+    append_jsonl(root / "runs" / "events.jsonl", event(task_id, "run.checked", agent, {"action": "task.created_from_go_intent", "intent": summary, "path": relative(repo, target)}))
+    errors = validate_repo(repo)
+    if errors:
+        target.unlink(missing_ok=True)
+        raise RepoLocalError("created intent task invalidated .go state:\n- " + "\n- ".join(errors))
+    return {"id": task_id, "summary": summary, "path": relative(repo, target)}
+
+
+def cmd_go(args: argparse.Namespace) -> int:
+    """Bare go universal router: route loose vs repo-local work and optionally execute."""
+    repo = Path(args.repo).resolve()
+    intent = (args.intent or "").strip()
+    root = go_root(repo)
+    state = {
+        "repo_exists": repo.exists(),
+        "has_go": root.is_dir(),
+        "has_project": (root / "project.json").is_file(),
+        "has_vision": (root / "vision.json").is_file(),
+        "has_principles": (root / "architecture-principles.json").is_file(),
+        "has_hierarchy": (root / "hierarchy.json").is_file(),
+    }
+    result: dict[str, Any] = {
+        "schema": "go-workflow.bare-go.v1",
+        "repo": str(repo),
+        "intent": intent,
+        "state": state,
+        "created_task": None,
+        "action": None,
+        "plan": None,
+    }
+    if not state["repo_exists"]:
+        result.update({"action": "spike", "reason": "repo missing; create repo-local .go contract first", "next_command": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{intent or '<intent>'}\""})
+    elif not state["has_project"]:
+        result.update({"action": "spike", "reason": "repo has no .go/project.json; repair/adopt contract first", "next_command": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{intent or '<intent>'}\" --skip-repo-complete"})
+    else:
+        errors = validate_repo(repo)
+        if errors:
+            result.update({"action": "contract_repair_required", "reason": "repo-local .go contract is invalid", "errors": errors})
+        else:
+            if not open_tasks(repo) and intent:
+                result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
+            mode = "go-loop" if args.loop or any(word in intent.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
+            result["action"] = mode
+            plan = build_loop_plan(repo, args, mode=mode)
+            result["plan"] = plan
+            if args.execute:
+                exit_code, executed = execute_loop_plan(repo, args, mode=mode)
+                result["execution"] = executed
+                if args.json:
+                    print(json.dumps(result, indent=2, ensure_ascii=False))
+                else:
+                    print(f"go: {executed['status']}")
+                return exit_code
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"go action: {result.get('action')}")
+        if result.get("created_task"):
+            print(f"created_task: {result['created_task']['id']}")
+        if result.get("plan"):
+            print("next_tasks: " + (", ".join(result["plan"].get("next_tasks", [])) or "none"))
+        elif result.get("next_command"):
+            print(f"next: {result['next_command']}")
+    return 0
 
 def cmd_auto(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
@@ -1593,10 +1729,27 @@ def build_parser() -> argparse.ArgumentParser:
     spike.add_argument("--agent", default="agent")
     spike.add_argument("--json", action="store_true")
     spike.set_defaults(func=cmd_spike)
+    go = sub.add_parser("go", help="Bare go universal router: loose command vs repo-local .go autonomous loop")
+    go.add_argument("repo", nargs="?", default=".")
+    go.add_argument("--intent", default="")
+    go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
+    go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")
+    go.add_argument("--max-tasks", type=int, default=10)
+    go.add_argument("--summary-chars", type=int, default=900)
+    go.add_argument("--max-minutes", type=int, default=90)
+    go.add_argument("--max-commands", type=int, default=120)
+    go.add_argument("--checkpoint-every-tasks", type=int, default=1)
+    go.add_argument("--agent", default="agent")
+    go.add_argument("--allow-dirty", action="store_true")
+    go.add_argument("--json", action="store_true")
+    go.set_defaults(func=cmd_go)
     auto = sub.add_parser("auto", help="Emit the go-auto control-handoff contract; Hermes must execute it until done/blocker/budget")
     auto.add_argument("repo", nargs="?", default=".")
     auto.add_argument("--max-tasks", type=int, default=3)
     auto.add_argument("--summary-chars", type=int, default=900)
+    auto.add_argument("--max-minutes", type=int, default=45)
+    auto.add_argument("--max-commands", type=int, default=36)
+    auto.add_argument("--checkpoint-every-tasks", type=int, default=1)
     auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
     auto.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
     auto.add_argument("--agent", default="agent")
@@ -1611,6 +1764,9 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("repo", nargs="?", default=".")
         loop.add_argument("--max-tasks", type=int, default=10)
         loop.add_argument("--summary-chars", type=int, default=900)
+        loop.add_argument("--max-minutes", type=int, default=90)
+        loop.add_argument("--max-commands", type=int, default=120)
+        loop.add_argument("--checkpoint-every-tasks", type=int, default=1)
         loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
         loop.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
         loop.add_argument("--agent", default="agent")

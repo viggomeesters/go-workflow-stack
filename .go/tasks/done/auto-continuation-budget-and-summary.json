@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "auto-continuation-budget-and-summary",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Add continuation budget and compact progress checkpoints",
   "description": "Make go auto usable for long trains by adding max-minutes/max-commands/checkpoint cadence and compact TG summaries only at completion/blocker/checkpoint.",
   "scope": {
@@ -29,8 +29,14 @@
     "pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T10:13:22+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T10:20:18+02:00",
+      "agent": "hermes",
+      "summary": "Added go auto/go-loop budget fields max_minutes, max_commands, checkpoint_every_tasks, quiet telegram_policy, command/checkpoint result accounting, tests for budget envelope and checkpoints; verification: pytest -q 10 passed; make check passed; git diff --check passed"
+    }
+  ]
 }

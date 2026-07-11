@@ -223,6 +223,12 @@ def test_go_loop_repair_adapter_fixes_failing_task_without_user_intervention(tmp
     assert result["attempts"][1]["judge"]["status"] == "passed"
     assert (repo / "answer.txt").read_text().strip() == "fixed"
     assert (repo / ".go" / "tasks" / "done" / "repair-me.json").is_file()
+    attempt_dir = repo / ".go" / "runs" / "repair-me" / "attempt-01"
+    for name in ["prompt.md", "verify.log", "critic.md", "diff.patch", "verdict.json"]:
+        assert (attempt_dir / name).is_file(), name
+    verdict = json.loads((attempt_dir / "verdict.json").read_text())
+    assert verdict["schema"] == "go-workflow.attempt-verdict.v1"
+    assert result["attempts"][0]["artifacts"]["verdict"].endswith("verdict.json")
 
 def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     repo = tmp_path / "multi-exec-project"

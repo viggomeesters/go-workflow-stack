@@ -839,6 +839,94 @@ def arg_str(args: argparse.Namespace, name: str, default: str = "") -> str:
     return value or default
 
 
+def attempt_markdown(task: dict[str, Any], attempt: dict[str, Any]) -> str:
+    return "\n".join([
+        f"# Attempt {attempt.get('attempt')} — {task.get('id')}",
+        "",
+        f"Strategy: `{attempt.get('strategy')}`",
+        "",
+        "## Task",
+        "",
+        f"Summary: {task.get('summary', '')}",
+        "",
+        str(task.get('description', '')),
+        "",
+        "## Acceptance",
+        "",
+        *[f"- {item}" for item in task.get("acceptance", [])],
+        "",
+        "## Verification",
+        "",
+        *[f"- `{item}`" for item in task.get("verification", [])],
+        "",
+    ])
+
+
+def checks_log(checks: list[dict[str, Any]]) -> str:
+    chunks: list[str] = []
+    for check in checks:
+        chunks.extend([
+            f"$ {check.get('command')}",
+            f"returncode: {check.get('returncode')}",
+            "stdout:",
+            str(check.get("stdout", "")),
+            "stderr:",
+            str(check.get("stderr", "")),
+            "",
+        ])
+    return "\n".join(chunks)
+
+
+def critic_markdown(attempt: dict[str, Any]) -> str:
+    critic = attempt.get("critic", {})
+    findings = critic.get("blocking_findings") or []
+    lines = [f"# Critic — {attempt.get('task_id')} attempt {attempt.get('attempt')}", "", f"Status: `{critic.get('status')}`", "", "## Blocking findings"]
+    lines.extend(f"- {finding}" for finding in findings)
+    if not findings:
+        lines.append("- none")
+    if critic.get("repair_hint"):
+        lines.extend(["", "## Repair hint", str(critic.get("repair_hint"))])
+    if critic.get("result"):
+        lines.extend(["", "## Adapter result", "```json", json.dumps(critic.get("result"), indent=2), "```"])
+    return "\n".join(lines) + "\n"
+
+
+def git_diff_text(repo: Path) -> str:
+    completed = subprocess.run(["git", "diff", "--no-ext-diff", "--"], cwd=repo, text=True, capture_output=True)
+    return completed.stdout if completed.returncode == 0 else completed.stderr
+
+
+def record_attempt(repo: Path, root: Path, task: dict[str, Any], agent: str, attempt: dict[str, Any], checks: list[dict[str, Any]]) -> None:
+    attempt_no = int(attempt.get("attempt") or 0)
+    attempt_dir = root / "runs" / str(task.get("id", "unknown")) / f"attempt-{attempt_no:02d}"
+    attempt_dir.mkdir(parents=True, exist_ok=True)
+    (attempt_dir / "prompt.md").write_text(attempt_markdown(task, attempt), encoding="utf-8")
+    (attempt_dir / "verify.log").write_text(checks_log(checks), encoding="utf-8")
+    (attempt_dir / "critic.md").write_text(critic_markdown(attempt), encoding="utf-8")
+    (attempt_dir / "diff.patch").write_text(git_diff_text(repo), encoding="utf-8")
+    verdict = {
+        "schema": "go-workflow.attempt-verdict.v1",
+        "task_id": task.get("id"),
+        "attempt": attempt_no,
+        "strategy": attempt.get("strategy"),
+        "build_status": (attempt.get("build") or {}).get("status"),
+        "verify_status": (attempt.get("verify") or {}).get("status"),
+        "critic_status": (attempt.get("critic") or {}).get("status"),
+        "repair_status": (attempt.get("repair") or {}).get("status"),
+        "judge_status": (attempt.get("judge") or {}).get("status"),
+        "created_at": now_iso(),
+    }
+    (attempt_dir / "verdict.json").write_text(json.dumps(verdict, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    attempt["artifacts"] = {
+        "prompt": str(attempt_dir.relative_to(root.parent) / "prompt.md"),
+        "verify_log": str(attempt_dir.relative_to(root.parent) / "verify.log"),
+        "critic": str(attempt_dir.relative_to(root.parent) / "critic.md"),
+        "diff": str(attempt_dir.relative_to(root.parent) / "diff.patch"),
+        "verdict": str(attempt_dir.relative_to(root.parent) / "verdict.json"),
+    }
+    append_jsonl(root / "runs" / "events.jsonl", event(str(task.get("id", "unknown")), "auto.attempt", agent, attempt))
+
+
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
@@ -929,7 +1017,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     attempt["judge"] = {"status": "retry_or_block", "reason": "build adapter failed"}
                     last_failed_command = build["command"]
                     result["attempts"].append(attempt)
-                    append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                    record_attempt(repo, root, task, args.agent, attempt, final_checks)
                     if repair_command and attempt_number < max_attempts:
                         repair = run_hook_command(repo, repair_command, task, attempt_number, strategy, "repair")
                         result["commands_run"] += 1
@@ -965,7 +1053,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             if attempt["verify"]["status"] == "passed" and attempt["critic"]["status"] == "passed":
                 attempt["judge"] = {"status": "passed", "reason": "verification and critic passed"}
                 result["attempts"].append(attempt)
-                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                record_attempt(repo, root, task, args.agent, attempt, final_checks)
                 task_passed = True
                 break
             if repair_command and attempt_number < max_attempts:
@@ -974,14 +1062,14 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
                 attempt["judge"] = {"status": "retry", "reason": "repair attempted; rerun loop strategy"}
                 result["attempts"].append(attempt)
-                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                record_attempt(repo, root, task, args.agent, attempt, final_checks)
                 if repair["returncode"] == 0:
                     continue
                 break
             attempt["repair"] = {"status": "requires_agent_repair", "reason": "no repair adapter available or max attempts reached"}
             attempt["judge"] = {"status": "blocked", "reason": "failed after bounded attempt"}
             result["attempts"].append(attempt)
-            append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+            record_attempt(repo, root, task, args.agent, attempt, final_checks)
             break
         if not task_passed:
             block_reason = f"critic blocked after bounded executor attempts: {last_failed_command}"

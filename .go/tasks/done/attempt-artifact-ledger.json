@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "attempt-artifact-ledger",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Persist per-attempt Ralph artifacts",
+  "description": "Write per-attempt prompt, verify log, critic output, diff patch, and verdict JSON under .go/runs/<task-id>/attempt-XX/ so evidence is inspectable beyond JSONL.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "Each executor attempt writes artifact files under .go/runs/<task-id>/attempt-XX/.",
+    "Tests assert prompt.md, verify.log, critic.md, verdict.json, and diff.patch exist."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T16:04:27+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T16:05:46+02:00",
+      "agent": "hermes",
+      "summary": "Added per-attempt artifact ledger under .go/runs/<task-id>/attempt-XX/ with prompt.md, verify.log, critic.md, diff.patch, verdict.json. Attempt JSONL now links artifacts. Verification: pytest -q 13 passed; make check passed."
+    }
+  ]
+}

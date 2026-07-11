@@ -260,19 +260,32 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     assert direct_loop_plan["recommended"]["command"] == "go-loop"
 
 
-def test_bare_go_creates_task_from_intent_and_returns_loop_plan(tmp_path: Path):
+def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path: Path):
     repo = tmp_path / "bare-go-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "bare", "--name", "Bare")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    # The adopted repo has no executable open tasks; bare go must materialize intent into .go state.
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
+
+    # The adopted repo has no executable open tasks; bare go JSON inspection must not mutate state.
     result = run_go("go", str(repo), "--intent", "Add bare go task routing", "--json")
     assert result.returncode == 0, result.stderr + result.stdout
     payload = json.loads(result.stdout)
     assert payload["schema"] == "go-workflow.bare-go.v1"
-    assert payload["created_task"]["id"] == "add-bare-go-task-routing"
+    assert payload["created_task"] is None
+    assert payload["proposed_task"]["id"] == "add-bare-go-task-routing"
+    assert payload["write_boundary"].startswith("dry_run")
     assert payload["action"] == "go-auto"
     assert payload["plan"]["next_tasks"] == ["add-bare-go-task-routing"]
+    assert not (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").exists()
+    status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True, check=True)
+    assert status.stdout == ""
+
+    written = run_go("go", str(repo), "--intent", "Add bare go task routing", "--write", "--json")
+    assert written.returncode == 0, written.stderr + written.stdout
+    written_payload = json.loads(written.stdout)
+    assert written_payload["created_task"]["id"] == "add-bare-go-task-routing"
     assert (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").is_file()
 
 

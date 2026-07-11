@@ -1007,11 +1007,27 @@ def cmd_go(args: argparse.Namespace) -> int:
         if errors:
             result.update({"action": "contract_repair_required", "reason": "repo-local .go contract is invalid", "errors": errors})
         else:
-            if not open_tasks(repo) and intent:
-                result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
             mode = "go-loop" if args.loop or any(word in intent.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
+            has_open_tasks = bool(open_tasks(repo))
+            may_write_intent_task = bool(args.write or args.execute)
+            if not has_open_tasks and intent and may_write_intent_task:
+                result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
+                has_open_tasks = True
+            elif not has_open_tasks and intent:
+                proposed_id = slugify(intent).lower()[:48].strip("-") or "continue-project-goal"
+                result["proposed_task"] = {
+                    "id": proposed_id,
+                    "summary": intent,
+                    "write_required": True,
+                    "write_flag": "--write",
+                }
+                result["write_boundary"] = "dry_run: no .go state was changed; rerun with --write or --execute to materialize the intent task"
             result["action"] = mode
             plan = build_loop_plan(repo, args, mode=mode)
+            if result.get("proposed_task") and not plan.get("next_tasks"):
+                plan["next_tasks"] = [result["proposed_task"]["id"]]
+                plan["run_envelope"]["preflight"]["selected_task_count"] = 0
+                plan["run_envelope"]["preflight"]["dry_run_proposed_task"] = result["proposed_task"]
             result["plan"] = plan
             if args.execute:
                 exit_code, executed = execute_loop_plan(repo, args, mode=mode)
@@ -1733,6 +1749,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("repo", nargs="?", default=".")
     go.add_argument("--intent", default="")
     go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
+    go.add_argument("--write", action="store_true", help="materialize intent-created tasks; default --json/plan mode is non-mutating")
     go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")
     go.add_argument("--max-tasks", type=int, default=10)
     go.add_argument("--summary-chars", type=int, default=900)

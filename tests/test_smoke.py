@@ -168,7 +168,7 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     assert "auto.reflected" in reflection_log
     assert result["commands_run"] == 1
     assert result["checkpoints"]
-    assert result["attempts"][0]["stages"] == ["build", "verify", "critic", "judge"]
+    assert result["attempts"][0]["stages"] == ["build", "verify", "critic", "repair", "judge"]
     assert result["attempts"][0]["critic"]["status"] == "passed"
 
 
@@ -196,6 +196,33 @@ def test_auto_execute_failure_records_critic_attempt_before_blocking(tmp_path: P
     assert "critic blocked" in blocked_task["blocked"]["reason"]
     runs_log = (repo / ".go" / "runs" / "events.jsonl").read_text()
     assert "auto.attempt" in runs_log
+
+
+def test_go_loop_repair_adapter_fixes_failing_task_without_user_intervention(tmp_path: Path):
+    repo = tmp_path / "repair-exec-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "repair", "--name", "Repair")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "answer.txt").write_text("broken", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('answer.txt').read_text().strip() == 'fixed' else 9)\""
+    task = run_go("task", "create", str(repo), "--id", "repair-me", "--summary", "Repair me", "--epic", "workflow", "--read", "answer.txt", "--modify", "answer.txt", "--verification", verify)
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "answer.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed broken repair state", "-q"], cwd=repo, check=True)
+    repair_command = "python3 -c \"from pathlib import Path; Path('answer.txt').write_text('fixed', encoding='utf-8')\""
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "3", "--execute", "--agent", "pytest", "--repair-command", repair_command, "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["repair-me"]
+    assert len(result["attempts"]) == 2
+    assert result["attempts"][0]["verify"]["status"] == "failed"
+    assert result["attempts"][0]["repair"]["status"] == "passed"
+    assert result["attempts"][1]["verify"]["status"] == "passed"
+    assert result["attempts"][1]["judge"]["status"] == "passed"
+    assert (repo / "answer.txt").read_text().strip() == "fixed"
+    assert (repo / ".go" / "tasks" / "done" / "repair-me.json").is_file()
 
 def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     repo = tmp_path / "multi-exec-project"

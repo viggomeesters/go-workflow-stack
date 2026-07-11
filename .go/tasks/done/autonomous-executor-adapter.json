@@ -1,0 +1,43 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "autonomous-executor-adapter",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add Ralph-style autonomous executor adapter",
+  "description": "Upgrade go-loop from mechanical verifier to a bounded autonomous coding runtime by adding pluggable build/critic/repair hooks, attempt ladder, machine-readable attempts, and tests proving a failing task can be repaired without user intervention.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/**",
+      "docs/**",
+      "skills/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/**",
+      "docs/**",
+      "skills/**"
+    ]
+  },
+  "acceptance": [
+    "go-loop --execute can run build/critic/repair adapter commands across multiple attempts.",
+    "A failing fixture is repaired automatically and finishes done without user intervention.",
+    "Attempt evidence records build, verify, critic, repair, judge and strategy per attempt."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T14:06:47+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T14:10:16+02:00",
+      "agent": "hermes",
+      "summary": "Implemented pluggable Ralph-style executor adapter hooks: --build-command, --critic-command, --repair-command, --max-attempts; go-loop now runs bounded attempt ladder with build/verify/critic/repair/judge evidence and can repair a failing fixture without user intervention. Verification: pytest -q 13 passed; make check passed; validate passed; git diff --check passed."
+    }
+  ]
+}

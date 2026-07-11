@@ -804,6 +804,41 @@ def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str,
     return target
 
 
+def format_hook_command(command: str, repo: Path, task: dict[str, Any], attempt: int, strategy: str) -> str:
+    return command.format(
+        repo=str(repo),
+        task_id=task.get("id", "unknown"),
+        attempt=attempt,
+        strategy=strategy,
+    )
+
+
+def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str) -> dict[str, Any]:
+    rendered = format_hook_command(command, repo, task, attempt, strategy)
+    env = os.environ.copy()
+    env.update({
+        "GO_REPO": str(repo),
+        "GO_TASK_ID": str(task.get("id", "unknown")),
+        "GO_TASK_JSON": json.dumps(task, ensure_ascii=False),
+        "GO_ATTEMPT": str(attempt),
+        "GO_STRATEGY": strategy,
+        "GO_HOOK": hook,
+    })
+    completed = subprocess.run(rendered, shell=True, cwd=repo, env=env, text=True, capture_output=True)
+    return {
+        "hook": hook,
+        "command": rendered,
+        "returncode": completed.returncode,
+        "stdout": completed.stdout[-4000:],
+        "stderr": completed.stderr[-4000:],
+    }
+
+
+def arg_str(args: argparse.Namespace, name: str, default: str = "") -> str:
+    value = getattr(args, name, default)
+    return value or default
+
+
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
@@ -830,6 +865,11 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
     max_commands = int(budget.get("max_commands") or 1)
     max_minutes = int(budget.get("max_minutes") or 1)
     checkpoint_every_tasks = int(budget.get("checkpoint_every_tasks") or 1)
+    max_attempts = max(int(getattr(args, "max_attempts", 5) or 5), 1)
+    strategies = ["direct_fix", "re_approach", "simplify", "last_stand", "block_with_evidence"]
+    build_command = arg_str(args, "build_command")
+    critic_command = arg_str(args, "critic_command")
+    repair_command = arg_str(args, "repair_command")
 
     if preflight["human_gate_required"] and not args.allow_dirty:
         result.update({"status": "safety_gate", "summary": "Preflight blocked by dirty/lock/conflict/secret state.", "next_action": "resolve human_gate_blockers or rerun with explicit override"})
@@ -864,41 +904,91 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         dump_json(active_path, task)
         open_path.unlink()
         append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
-        attempt = {
-            "task_id": task["id"],
-            "attempt": 1,
-            "strategy": "direct_fix",
-            "stages": ["build", "verify", "critic", "judge"],
-            "build": {"status": "delegated_to_existing_task_artifacts", "note": "CLI executor does not synthesize code edits; Hermes/Bertus performs build work before/around this mechanical verifier."},
-            "verify": {"status": "running", "checks": []},
-            "critic": {"status": "pending", "blocking_findings": []},
-            "repair": {"status": "not_needed"},
-            "judge": {"status": "pending"},
-        }
-        checks = run_verification_commands(repo, task)
-        attempt["verify"] = {"status": "passed" if all(check["returncode"] == 0 for check in checks) else "failed", "checks": checks}
-        result["commands_run"] += len([check for check in checks if check.get("command")])
-        result["checks"].extend(checks)
-        failed = next((check for check in checks if check["returncode"] != 0), None)
-        if failed:
-            attempt["critic"] = {
-                "status": "blocking_findings",
-                "blocking_findings": [f"verification failed: {failed['command']}"],
-                "repair_hint": "Fix the failing command output inside task scope, then rerun go-loop.",
+        task_passed = False
+        final_checks: list[dict[str, Any]] = []
+        last_failed_command = "verification"
+        for attempt_number in range(1, max_attempts + 1):
+            strategy = strategies[min(attempt_number - 1, len(strategies) - 1)]
+            attempt = {
+                "task_id": task["id"],
+                "attempt": attempt_number,
+                "strategy": strategy,
+                "stages": ["build", "verify", "critic", "repair", "judge"],
+                "build": {"status": "skipped", "note": "No build adapter command configured; assuming task artifacts are already produced by the invoking agent."},
+                "verify": {"status": "running", "checks": []},
+                "critic": {"status": "pending", "blocking_findings": []},
+                "repair": {"status": "not_needed"},
+                "judge": {"status": "pending"},
             }
-            attempt["repair"] = {"status": "requires_agent_repair", "reason": "mechanical verifier cannot safely edit code without Hermes/Bertus build step"}
-            attempt["judge"] = {"status": "blocked", "reason": "verification failed after direct attempt"}
+            if build_command:
+                build = run_hook_command(repo, build_command, task, attempt_number, strategy, "build")
+                result["commands_run"] += 1
+                attempt["build"] = {"status": "passed" if build["returncode"] == 0 else "failed", "result": build}
+                if build["returncode"] != 0:
+                    attempt["critic"] = {"status": "blocking_findings", "blocking_findings": ["build adapter failed"], "repair_hint": build["stderr"] or build["stdout"]}
+                    attempt["judge"] = {"status": "retry_or_block", "reason": "build adapter failed"}
+                    last_failed_command = build["command"]
+                    result["attempts"].append(attempt)
+                    append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                    if repair_command and attempt_number < max_attempts:
+                        repair = run_hook_command(repo, repair_command, task, attempt_number, strategy, "repair")
+                        result["commands_run"] += 1
+                        attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
+                        continue
+                    break
+            checks = run_verification_commands(repo, task)
+            final_checks = checks
+            attempt["verify"] = {"status": "passed" if all(check["returncode"] == 0 for check in checks) else "failed", "checks": checks}
+            result["commands_run"] += len([check for check in checks if check.get("command")])
+            result["checks"].extend(checks)
+            failed = next((check for check in checks if check["returncode"] != 0), None)
+            if failed:
+                last_failed_command = failed["command"] or "verification"
+                attempt["critic"] = {
+                    "status": "blocking_findings",
+                    "blocking_findings": [f"verification failed: {last_failed_command}"],
+                    "repair_hint": "Fix the failing command output inside task scope, then rerun verification.",
+                }
+            else:
+                if critic_command:
+                    critic = run_hook_command(repo, critic_command, task, attempt_number, strategy, "critic")
+                    result["commands_run"] += 1
+                    attempt["critic"] = {
+                        "status": "passed" if critic["returncode"] == 0 else "blocking_findings",
+                        "blocking_findings": [] if critic["returncode"] == 0 else [critic["stderr"] or critic["stdout"] or "critic adapter failed"],
+                        "result": critic,
+                    }
+                    if critic["returncode"] != 0:
+                        last_failed_command = critic["command"]
+                else:
+                    attempt["critic"] = {"status": "passed", "blocking_findings": []}
+            if attempt["verify"]["status"] == "passed" and attempt["critic"]["status"] == "passed":
+                attempt["judge"] = {"status": "passed", "reason": "verification and critic passed"}
+                result["attempts"].append(attempt)
+                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                task_passed = True
+                break
+            if repair_command and attempt_number < max_attempts:
+                repair = run_hook_command(repo, repair_command, task, attempt_number, strategy, "repair")
+                result["commands_run"] += 1
+                attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
+                attempt["judge"] = {"status": "retry", "reason": "repair attempted; rerun loop strategy"}
+                result["attempts"].append(attempt)
+                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+                if repair["returncode"] == 0:
+                    continue
+                break
+            attempt["repair"] = {"status": "requires_agent_repair", "reason": "no repair adapter available or max attempts reached"}
+            attempt["judge"] = {"status": "blocked", "reason": "failed after bounded attempt"}
             result["attempts"].append(attempt)
             append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
-            block_reason = f"critic blocked after verification failure: {failed['command']}"
-            block_task_record(repo, root, active_path, task, args.agent, block_reason, checks)
-            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Verification failed; critic evidence recorded and task moved to blocked.", "next_action": "repair failing verification inside task scope, then rerun go-loop"})
             break
-        attempt["critic"] = {"status": "passed", "blocking_findings": []}
-        attempt["judge"] = {"status": "passed", "reason": "verification passed and critic found no mechanical blockers"}
-        result["attempts"].append(attempt)
-        append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
-        evidence_summary = "; ".join(check["command"] or "no verification configured" for check in checks)
+        if not task_passed:
+            block_reason = f"critic blocked after bounded executor attempts: {last_failed_command}"
+            block_task_record(repo, root, active_path, task, args.agent, block_reason, final_checks)
+            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Bounded executor attempts failed; critic/repair evidence recorded and task moved to blocked.", "next_action": "repair failing gate or configure build/critic/repair adapter, then rerun go-loop"})
+            break
+        evidence_summary = "; ".join(check["command"] or "no verification configured" for check in final_checks)
         finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
         result["completed_tasks"].append(task["id"])
         result["evidence"].append({"task_id": task["id"], "summary": f"auto-execute verified: {evidence_summary}"})
@@ -1782,6 +1872,10 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--summary-chars", type=int, default=900)
     go.add_argument("--max-minutes", type=int, default=90)
     go.add_argument("--max-commands", type=int, default=120)
+    go.add_argument("--max-attempts", type=int, default=5)
+    go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+    go.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
+    go.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
     go.add_argument("--checkpoint-every-tasks", type=int, default=1)
     go.add_argument("--agent", default="agent")
     go.add_argument("--allow-dirty", action="store_true")
@@ -1793,6 +1887,10 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--summary-chars", type=int, default=900)
     auto.add_argument("--max-minutes", type=int, default=45)
     auto.add_argument("--max-commands", type=int, default=36)
+    auto.add_argument("--max-attempts", type=int, default=5)
+    auto.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+    auto.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
+    auto.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
     auto.add_argument("--checkpoint-every-tasks", type=int, default=1)
     auto.add_argument("--execute", action="store_true", help="execute the lifecycle: preflight, claim, run verification, finish/block, reflect")
     auto.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")
@@ -1810,6 +1908,10 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--summary-chars", type=int, default=900)
         loop.add_argument("--max-minutes", type=int, default=90)
         loop.add_argument("--max-commands", type=int, default=120)
+        loop.add_argument("--max-attempts", type=int, default=5)
+        loop.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+        loop.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
+        loop.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
         loop.add_argument("--checkpoint-every-tasks", type=int, default=1)
         loop.add_argument("--execute", action="store_true", help="execute the lifecycle until done/blocker/budget/safety gate")
         loop.add_argument("--emit-handoff", action="store_true", help="emit Hermes/Bertus agent handoff JSON")

@@ -102,12 +102,23 @@ It does this:
 6. Validate the contract.
 7. Print the next open task.
 
+## What bare `go` means
+
+The target UX is that Viggo says only `go` and the agent does the routing.
+
+- If the request is a small loose command, handle it directly.
+- If a repo has `.go/project.json`, repo-local `.go` wins.
+- If `.go` is missing or incomplete, repair the contract first: vision, design principles, hierarchy, concrete task, goal/acceptance/verification.
+- If `.go` is valid and work exists, enter the autonomous loop. Do **not** make Viggo type `go` again after every phase.
+
+See [`go-autonomous-loop.md`](go-autonomous-loop.md) for the full contract.
+
 ## What `go auto` means for Hermes/Bertus
 
 `go auto` is not “print a task list”. It means **Viggo hands over control** inside the repo-local safety boundary. The CLI does not run an LLM; it emits the execution contract Hermes must follow immediately with tool calls unless a stop condition is already present:
 
 ```text
-status -> next -> claim -> execute -> verify -> recheck -> devil -> finish -> self-reflect -> summarize -> continue-or-escalate
+route -> status -> contract-repair-if-needed -> next-or-create-task -> claim -> execute -> verify -> recheck -> devil -> repair -> verify -> commit/ship -> finish -> self-reflect -> continue-or-block
 ```
 
 Operationally:

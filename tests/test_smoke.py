@@ -113,7 +113,9 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert plan["mode"] == "go-auto"
     assert plan["control_handoff"] is True
     assert plan["can_escalate_to"] == ["go-loop"]
-    assert plan["loop"] == ["status", "next", "claim", "execute", "verify", "recheck", "devil", "finish", "self-reflect", "summarize", "continue-or-escalate"]
+    assert plan["loop"] == ["route", "status", "contract-repair-if-needed", "next-or-create-task", "claim", "execute", "verify", "recheck", "devil", "repair", "verify", "commit-or-ship", "finish", "self-reflect", "continue-or-block"]
+    assert "does not hand commands back to Viggo" in plan["agent_contract"]["execute"]
+    assert "vision/end goal" in plan["agent_contract"]["contract_preflight"]
     assert plan["next_tasks"] == ["design-monitor", "build-poller"]
     assert plan["execution_policy"]["ask_policy"] == "do-not-ask-when-safe-default-exists"
     assert plan["execution_policy"]["may_create_follow_up_tasks"] is True

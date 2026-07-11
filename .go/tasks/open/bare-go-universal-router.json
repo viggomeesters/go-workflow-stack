@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "bare-go-universal-router",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Implement bare go universal router",
+  "description": "Make bare `go` resolve loose/direct commands versus repo-local .go execution: detect target repo, repair missing contract, create task from intent, or enter autonomous loop.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "docs/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ],
+    "modify": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "docs/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ]
+  },
+  "acceptance": [
+    "Router distinguishes loose/simple work from repo-local .go work without making Viggo choose subcommands.",
+    "When .go exists, the router requires vision/principles/hierarchy/task/goal before execution.",
+    "When no task exists but intent is actionable, the router creates a scoped task instead of asking for another go."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

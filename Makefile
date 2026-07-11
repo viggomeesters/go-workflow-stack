@@ -30,7 +30,7 @@ check:
 	  python3 cli/go.py spike $$TMP/spike-smoke --project-id spike-smoke --name "Spike Smoke" --brief "Smoke go spike" --epic delivery\|Delivery --task first\|First --task second\|Second --verification "python3 -c 'print(42)'"; \
 	  python3 cli/go.py validate $$TMP/spike-smoke; \
 	  python3 cli/go.py auto $$TMP/spike-smoke --max-tasks 2 --json >/tmp/go-auto-smoke.json; \
-	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); ep=p["execution_policy"]; assert p["control_handoff"] and p["can_escalate_to"] == ["go-loop"] and "continue-or-escalate" in p["loop"] and ep["ask_policy"] == "do-not-ask-when-safe-default-exists" and ep["may_create_follow_up_tasks"]' /tmp/go-auto-smoke.json; \
+	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); ep=p["execution_policy"]; assert p["control_handoff"] and p["can_escalate_to"] == ["go-loop"] and "continue-or-block" in p["loop"] and "contract-repair-if-needed" in p["loop"] and ep["ask_policy"] == "do-not-ask-when-safe-default-exists" and ep["may_create_follow_up_tasks"]' /tmp/go-auto-smoke.json; \
 	  python3 cli/go.py loop $$TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-smoke.json; \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["mode"] == "go-loop" and p["continues_beyond_initial_tasks"]' /tmp/go-loop-smoke.json; \
 	  python3 cli/go.py go-loop $$TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-alias-smoke.json; \

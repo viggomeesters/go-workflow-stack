@@ -68,10 +68,10 @@ bash scripts/apply-template.sh ../my-project
 
 ## CLI commands
 
-- `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend `spike`, `auto`, `go-loop`, or task creation. Missing repos are `mode=create_repo`; existing repos without `.go` are `mode=repair_existing_repo`.
+- `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend direct handling, `spike`, `auto`, `go-loop`, or task creation. Missing repos are `mode=create_repo`; existing repos without `.go` are `mode=repair_existing_repo`.
 - `spike <repo> --brief <text> [--task-scope code|docs]`: create/adopt a repo, scaffold repo-complete basics, write `.go` vision/principles/epics/tasks, and validate. `code` is the default so generated tasks include CLI/test scope for implementation repos.
-- `auto <repo>`: hand off control for autonomous execution; includes explicit high-autonomy `execution_policy`, machine-readable `run_envelope`, same-scope follow-up creation, and escalation to `go-loop` when self-reflect/review requires continued repair. Add `--emit-handoff` to produce a Hermes/Bertus task/scope/gate/evidence handoff; add `--execute` to let the CLI run preflight → claim → verification → finish/block → reflection for verification-ready tasks.
-- `go-loop <repo>` / `loop <repo>`: stronger control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
+- `auto <repo>`: hand off control for autonomous execution. It is the machine-readable shape behind Viggo saying bare `go` in a repo-local project: repair missing contract, create or claim the next task, execute, verify, recheck/devil, repair, commit/ship, finish, self-reflect, and continue until done, blocker, or budget. Add `--emit-handoff` to produce a Hermes/Bertus task/scope/gate/evidence handoff; add `--execute` for mechanical verification-ready tasks.
+- `go-loop <repo>` / `loop <repo>`: stronger Ralph/Oh-My-Codex-style control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.

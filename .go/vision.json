@@ -3,24 +3,33 @@
   "kind": "vision",
   "project": "go-workflow-stack",
   "status": "active",
-  "north_star": "Go Workflow Stack can be designed, built, verified, and continued from repo-local .go state.",
-  "wedge": "Reusable repo-local agent workflow stack. Make go/go-auto/go-loop practical: route rough Viggo commands, create or repair repo-local .go state, execute autonomously inside safety gates, validate with tests, and document exact operator usage.",
+  "north_star": "Viggo can say only `go`; the agent resolves loose vs repo-local work, repairs the .go contract if needed, then autonomously works toward the defined goal until done, blocked, or budget-exhausted.",
+  "wedge": "A repo-local autonomous workflow stack: .go holds vision, principles, hierarchy, tasks, evidence, decisions, and loop state; Hermes/Bertus uses it to run a Ralph/old-go-workflow-style build→verify→critic→repair→ship loop without Viggo spamming micro-commands.",
   "target_user": "Viggo and future autonomous agents continuing this project.",
-  "core_promise": "A single go spike/go auto loop can turn rough intent into repo, vision, principles, tasks, verified work, reflection, and concise handoff.",
+  "core_promise": "One `go` can turn rough intent into a valid .go contract, split the goal into tasks, claim/execute/recheck/devil/repair/commit/finish each task, self-reflect, capture lessons, and report compactly.",
   "product_principles": [
     "repo-local",
+    "goal-first",
+    "autonomous-command-train",
+    "bounded-loop-persistence",
     "proof-first",
-    "autonomous-but-scoped",
-    "feedback-turns-into-tasks"
+    "feedback-turns-into-tasks",
+    "quiet-telegram"
   ],
   "non_goals": [
     "no hidden central execution state",
-    "no unbounded public/destructive actions",
+    "no random feature invention from autonomy",
+    "no broad scope expansion without explicit goal fit",
+    "no unbounded public/destructive/payment actions",
+    "no command-spam handoff back to Viggo",
     "no technical fluff handoff"
   ],
   "success_metrics": [
-    "repo validates",
-    "next tasks are claimable",
-    "go auto plan is explicit"
+    "a bare `go` routes correctly between loose work and repo-local .go work",
+    "valid .go contract is repaired before execution",
+    "open work is split into executable tasks with acceptance and verification",
+    "loop continues across tasks without Viggo re-triggering each phase",
+    "recheck/devil/self-reflect findings create repairs or follow-up tasks before final done",
+    "final report includes commits, verification, and open/blocker state"
   ]
 }

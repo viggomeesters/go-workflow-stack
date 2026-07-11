@@ -148,17 +148,29 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
 7. Validate and report the next open task.
 
-`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing. When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, run-until condition, checkpoint triggers, and expected result schema. `go auto --execute` lets the CLI perform the mechanical lifecycle for verification-ready tasks: preflight gates, claim, verification commands, finish with evidence, blocked-state on failed verification, and `.go/reflections/events.jsonl` batch reflection.
+`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing and it is not a request for Viggo to keep typing the next phase. Bare `go` in a repo-local project should converge to this same command-train behavior after routing.
 
-1. Run status/route/dirty validation.
-2. Take one open task at a time: next → claim → execute → verify.
-3. If `go auto` discovers new same-scope work, a bug from live proof, or Viggo corrects behavior mid-run, create and claim a concrete `.go/tasks/open/<id>.json` task before patching. Do not treat ad-hoc fixes as outside the repo-local workflow just because they are obvious.
-4. Run recheck/devil/hardening before finish when the task changed code/docs/contracts.
-5. Finish only with evidence appended to `.go/evidence/events.jsonl`.
-6. After the task batch, run self-reflect: decide whether vision/principles/tasks need improvement.
-7. If self-reflect, failed review, weak first-green, or remaining same-scope work requires continued repair, `go auto` may invoke `go loop`.
-8. Summarize to Viggo compactly, max configured chars, no technical fluff spam.
-9. Convert Viggo's next feedback into new `.go` tasks/decisions, then repeat on the next `go auto`.
+Before implementation, the agent must ensure the repo-local contract is good enough to execute:
+
+1. Vision/end goal exists in `.go/vision.json`.
+2. Design principles exist in `.go/architecture-principles.json`.
+3. Hierarchy exists in `.go/hierarchy.json`.
+4. A concrete task exists for the current slice.
+5. Acceptance and verification evidence are explicit.
+
+When Hermes/Bertus receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, run-until condition, checkpoint triggers, and expected result schema. `go auto --execute` is only the mechanical path for verification-ready tasks; real coding relies on the Hermes/Bertus executor following the handoff rather than returning commands to Viggo.
+
+1. Run route/status/contract/dirty validation.
+2. Create or claim one task at a time: next/create → claim → execute → verify.
+3. Run recheck/devil/critic; first green is not done for non-trivial work.
+4. Repair in scope and re-run verification when review finds blockers.
+5. If `go auto` discovers new same-scope work, a bug from live proof, or Viggo corrects behavior mid-run, create and claim a concrete `.go/tasks/open/<id>.json` task before patching. Do not treat ad-hoc fixes as outside the repo-local workflow just because they are obvious.
+6. Finish only with evidence appended to `.go/evidence/events.jsonl`.
+7. Commit/push according to repo policy when the task changes repo files.
+8. After the task batch, run self-reflect: decide whether vision/principles/tasks/skills need improvement.
+9. If self-reflect, failed review, weak first-green, or remaining same-scope work requires continued repair, continue or invoke `go loop`.
+10. Summarize to Viggo compactly only at done/blocker/checkpoint; no Telegram command spam.
+11. Convert Viggo's next feedback into new `.go` tasks/decisions, then repeat on the next `go`/`go auto`.
 
 `go loop` is the stronger control-handoff contract: continue selecting, claiming, executing, verifying, repairing, and creating same-scope follow-up tasks until done, budget exhausted, or blocker. Use it when Viggo says or implies: loop, werk tot groen, ga door, controle afgeven, avondrun, or when `go auto` discovers it should not stop at the first batch.
 

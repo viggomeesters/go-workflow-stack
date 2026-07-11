@@ -14,6 +14,24 @@
       "statement": "Current state is JSON and append-only history is JSONL.",
       "rationale": "Agents need deterministic, diffable contracts.",
       "enforcement": "schema validation and CLI checks"
+    },
+    {
+      "id": "goal-contract-before-execution",
+      "statement": "Every autonomous go run must define or repair the end goal, acceptance, verification, and task boundary before implementation.",
+      "rationale": "Autonomy without an explicit goal becomes random feature generation.",
+      "enforcement": "router/preflight blocks or repairs missing vision, principles, hierarchy, and executable task state"
+    },
+    {
+      "id": "command-train-not-command-spam",
+      "statement": "A bare go on a valid .go repo starts the agent command train instead of returning micro-commands for Viggo to run.",
+      "rationale": "Viggo should provide direction, not repeatedly trigger next/claim/recheck/devil/finish phases.",
+      "enforcement": "Hermes skill and CLI handoff require immediate tool execution until done, blocker, or budget"
+    },
+    {
+      "id": "first-green-is-not-done",
+      "statement": "A task is not done at first passing verification; recheck/devil/critic and repair/self-reflect must run for non-trivial work.",
+      "rationale": "Viggo consistently finds gaps after recheck/selfimprove, so the loop must internalize that review stack.",
+      "enforcement": "loop conductor requires critic verdict before finish for code/docs/contracts/public behavior"
     }
   ]
 }

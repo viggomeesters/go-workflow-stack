@@ -168,7 +168,34 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     assert "auto.reflected" in reflection_log
     assert result["commands_run"] == 1
     assert result["checkpoints"]
+    assert result["attempts"][0]["stages"] == ["build", "verify", "critic", "judge"]
+    assert result["attempts"][0]["critic"]["status"] == "passed"
 
+
+def test_auto_execute_failure_records_critic_attempt_before_blocking(tmp_path: Path):
+    repo = tmp_path / "failing-exec-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "fail", "--name", "Fail")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "failing", "--summary", "Failing", "--epic", "workflow", "--verification", "python3 -c \"import sys; sys.exit(7)\"")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert result["blocked_task"] == "failing"
+    attempt = result["attempts"][0]
+    assert attempt["verify"]["status"] == "failed"
+    assert attempt["critic"]["status"] == "blocking_findings"
+    assert attempt["repair"]["status"] == "requires_agent_repair"
+    assert attempt["judge"]["status"] == "blocked"
+    blocked_task = json.loads((repo / ".go" / "tasks" / "blocked" / "failing.json").read_text())
+    assert "critic blocked" in blocked_task["blocked"]["reason"]
+    runs_log = (repo / ".go" / "runs" / "events.jsonl").read_text()
+    assert "auto.attempt" in runs_log
 
 def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     repo = tmp_path / "multi-exec-project"

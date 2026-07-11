@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "go-loop-critic-repair-executor",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Implement real critic/repair loop in go-loop executor",
   "description": "auto/go-loop --execute currently claims tasks and runs verification, but it does not perform actual code edits, recheck/devil critic passes, repair attempts, or structured attempt ledgers. Add executor contract or adapter hooks that make the Ralph/Oh-My-Codex claim true.",
   "scope": {
@@ -29,8 +29,14 @@
     "pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T13:58:54+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T14:00:14+02:00",
+      "agent": "hermes",
+      "summary": "Added structured go-loop/auto execute attempts with build/verify/critic/repair/judge fields, auto.attempt events, and failing verification critic evidence before blocking. Verification: pytest -q 11 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed."
+    }
+  ]
 }

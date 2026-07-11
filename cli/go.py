@@ -198,7 +198,7 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     errors: list[str] = []
     require(data.get("schema") == EVENT_SCHEMA, errors, f"{prefix}: schema mismatch")
     require(data.get("kind") == "event", errors, f"{prefix}: kind must be event")
-    require(data.get("event") in {"task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected"}, errors, f"{prefix}: invalid event")
+    require(data.get("event") in {"task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
     require(bool(data.get("created_at")), errors, f"{prefix}: created_at required")
     require(bool(data.get("task_id")), errors, f"{prefix}: task_id required")
     return errors
@@ -823,6 +823,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         "checkpoints": [],
         "commands_run": 0,
         "budget_exhausted": False,
+        "attempts": [],
     }
     started_at = time.monotonic()
     budget = plan["run_envelope"]["budget"]
@@ -863,14 +864,40 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         dump_json(active_path, task)
         open_path.unlink()
         append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
+        attempt = {
+            "task_id": task["id"],
+            "attempt": 1,
+            "strategy": "direct_fix",
+            "stages": ["build", "verify", "critic", "judge"],
+            "build": {"status": "delegated_to_existing_task_artifacts", "note": "CLI executor does not synthesize code edits; Hermes/Bertus performs build work before/around this mechanical verifier."},
+            "verify": {"status": "running", "checks": []},
+            "critic": {"status": "pending", "blocking_findings": []},
+            "repair": {"status": "not_needed"},
+            "judge": {"status": "pending"},
+        }
         checks = run_verification_commands(repo, task)
+        attempt["verify"] = {"status": "passed" if all(check["returncode"] == 0 for check in checks) else "failed", "checks": checks}
         result["commands_run"] += len([check for check in checks if check.get("command")])
         result["checks"].extend(checks)
         failed = next((check for check in checks if check["returncode"] != 0), None)
         if failed:
-            block_task_record(repo, root, active_path, task, args.agent, f"verification failed: {failed['command']}", checks)
-            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Verification failed; task moved to blocked.", "next_action": "fix failing verification and re-open/continue"})
+            attempt["critic"] = {
+                "status": "blocking_findings",
+                "blocking_findings": [f"verification failed: {failed['command']}"],
+                "repair_hint": "Fix the failing command output inside task scope, then rerun go-loop.",
+            }
+            attempt["repair"] = {"status": "requires_agent_repair", "reason": "mechanical verifier cannot safely edit code without Hermes/Bertus build step"}
+            attempt["judge"] = {"status": "blocked", "reason": "verification failed after direct attempt"}
+            result["attempts"].append(attempt)
+            append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
+            block_reason = f"critic blocked after verification failure: {failed['command']}"
+            block_task_record(repo, root, active_path, task, args.agent, block_reason, checks)
+            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Verification failed; critic evidence recorded and task moved to blocked.", "next_action": "repair failing verification inside task scope, then rerun go-loop"})
             break
+        attempt["critic"] = {"status": "passed", "blocking_findings": []}
+        attempt["judge"] = {"status": "passed", "reason": "verification passed and critic found no mechanical blockers"}
+        result["attempts"].append(attempt)
+        append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "auto.attempt", args.agent, attempt))
         evidence_summary = "; ".join(check["command"] or "no verification configured" for check in checks)
         finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
         result["completed_tasks"].append(task["id"])

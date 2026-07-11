@@ -18,7 +18,10 @@
         "hermes-go-auto-skill-execution-rule",
         "auto-continuation-budget-and-summary",
         "bare-go-universal-router",
-        "tot-bare-go-echt-werkt"
+        "tot-bare-go-echt-werkt",
+        "bare-go-dry-run-write-boundary",
+        "go-loop-critic-repair-executor",
+        "benchmark-autonomy-against-ralph-omx"
       ]
     },
     {

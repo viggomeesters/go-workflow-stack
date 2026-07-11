@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "benchmark-autonomy-against-ralph-omx",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Benchmark bare go autonomy against Ralph/Oh-My-Codex criteria",
+  "description": "Create a small benchmark fixture/matrix that measures the stack against autonomous-loop criteria: one-prompt continuation, task splitting, multi-task execution, failure repair, critic loop, safe stop, evidence, and final compact reporting.",
+  "scope": {
+    "read": [
+      "docs/**",
+      "tests/**",
+      "cli/go.py"
+    ],
+    "modify": [
+      "docs/**",
+      "tests/**",
+      "cli/go.py"
+    ]
+  },
+  "acceptance": [
+    "Benchmark document or test matrix states what is proven, partially proven, and not yet proven versus Ralph/Oh-My-Codex style autonomy."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

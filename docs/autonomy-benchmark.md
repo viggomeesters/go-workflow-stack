@@ -1,13 +1,13 @@
 # Bare Go Autonomy Benchmark
 
-This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; the claim must stay tied to the proven runtime boundary.
+This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; claims must stay tied to the proven runtime boundary.
 
 ## Scale
 
 | Mark | Meaning |
 |---|---|
 | `PASS` | Implemented and covered by local tests/checks. |
-| `PARTIAL` | Contract or support exists, but some behavior still depends on external model quality or policy. |
+| `PARTIAL` | Contract or support exists, but some behavior still depends on external model quality, local adapter availability, or explicit policy. |
 | `MISS` | Not implemented yet; claiming this would be bullshit. |
 
 ## Benchmark matrix
@@ -19,41 +19,46 @@ This benchmark states what the stack proves against the desired Ralph / Oh-My-Co
 | Non-mutating inspection path | `PASS` | `go --json` without `--write` returns `proposed_task` and leaves git clean | Interactive UX must make write/execute intent obvious. |
 | Intent can create missing task | `PASS` | `go --write --intent ...` materializes `.go/tasks/open/<id>.json` | Task quality is only as good as rough intent parsing. |
 | Multi-task mechanical execution | `PASS` | `auto --execute --max-tasks 2` smoke proves two verification-ready tasks complete | Mechanical path still depends on task verification quality. |
-| Budget/checkpoint envelope | `PASS` | `run_envelope.budget`, `commands_run`, checkpoints in tests | Runtime quality still depends on realistic budgets. |
+| Hard command budget | `PASS` | Budget test proves `--max-commands 1` stops before the second verification command and returns `budget_exhausted` | Timeouts are still delegated to subprocess behavior. |
 | Safety gate for dirty/secret state | `PASS` | dirty `.env` test blocks execution | Secret detection is heuristic. |
-| Critic evidence on failure | `PASS` | failing verification test records `auto.attempt` with `critic`, `repair`, `judge`, then blocks | Semantic depth depends on critic adapter/model. |
-| Adapter-boundary build/edit executor | `PASS` | `--build-command`, `--repair-command`, and `--repair-agent codex/hermes` | External tool quality determines code quality. |
-| Default repair agent route | `PASS` | `--repair-agent codex` / `--repair-agent hermes` options build scoped repair prompts | Requires those CLIs/config to exist in the runtime environment. |
+| Adapter availability proof | `PASS` | `agent-check --json` reports real Codex/Hermes availability; missing Codex blocks instead of fake-green | Adapter quality/config remains local-machine dependent. |
+| Adapter-boundary build/edit executor | `PASS` | `--build-command`, `--repair-command`, and availability-gated `--repair-agent codex/hermes` | External tool quality determines code quality. |
+| Dangerous adapter bypass avoided | `PASS` | Codex template no longer uses `--dangerously-bypass-approvals-and-sandbox`; test asserts absence | Codex CLI flags can change upstream. |
+| Diff/scope enforcement after adapters | `PASS` | Scope-violation test blocks when a repair adapter edits `forbidden.txt` outside `scope.modify` | Generated-file ignore list may need expansion. |
 | Semantic critic/judge | `PASS` | `--semantic-critic` blocks generic/default acceptance and missing verification; `--critic-command` supports external judges | Built-in critic is conservative; deep semantic review should use adapter. |
 | Follow-up task generation | `PASS` | `--followup-on-block` creates scoped `.go/tasks/open/*.json` from critic findings | Follow-up granularity is heuristic. |
 | Per-attempt artifact ledger | `PASS` | `.go/runs/<task-id>/attempt-XX/{prompt.md,verify.log,critic.md,diff.patch,verdict.json}` | Large diffs/logs may need pruning later. |
 | Real codebase repair fixture | `PASS` | Mini Python package failing pytest is repaired by go-loop without user intervention | Fixture is small; larger repos still depend on adapter. |
 | Repair attempts like Ralph ladder | `PASS` | `--max-attempts`, strategy ladder, repair fixtures: fail → repair → pass | Strategy names are recorded; adapter decides actual technique. |
-| Resume state | `PASS` | `.go/runs/latest.json` stores status, completed tasks, budget, and resume command | Durable daemon/queue is out of scope. |
-| Commit/push per logical task | `PASS` | `--ship-policy none/local-commit/push`; push requires `--allow-push`; local commit test proves clean git | Public push remains intentionally explicit. |
-| Oh-My-Codex/Ralph-style runtime | `PASS` | Control-loop conductor, adapter hooks, semantic critic, follow-ups, artifact ledger, real repair fixture, resume state, ship policy | Equivalent in local workflow shape, not a clone of external products. |
+| Exact resume state | `PASS` | `.go/runs/latest.json` stores effective flags and resume command including budgets, repair flags, critic/follow-up, ship policy, allow flags | Resume does not restore external process env beyond command/flags. |
+| Scoped ship policy | `PASS` | `--ship-policy none/local-commit/push`; scoped staging test proves unrelated dirty files are not committed; push requires `--allow-push` | Public push remains intentionally explicit. |
+| Oh-My-Codex/Ralph-style runtime | `PASS` | Control-loop conductor, availability-gated adapters, hard budget, scope enforcement, semantic critic, follow-ups, artifact ledger, real repair fixture, exact resume, scoped ship policy | Equivalent in local workflow shape, not a clone of external products. |
 | Unconstrained self-improving agent | `PARTIAL` | Can plug Codex/Hermes; `.go` controls state and evidence | The Python CLI does not embed an LLM or bypass safety gates. |
 
 ## Current verdict
 
-Current level: **Ralph/Oh-My-Codex-style `.go` autonomous coding runtime with explicit adapter boundary.**
+Current level: **Ralph/Oh-My-Codex-style `.go` autonomous coding runtime with explicit, hardened adapter boundary.**
 
 The honest claim is:
 
-> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, use Codex/Hermes repair-agent command templates, record rich attempt artifacts, generate follow-up tasks from critic findings, persist resume state, and ship according to explicit policy. It is Ralph/OMX-like in workflow shape; model intelligence remains an adapter, not hidden magic inside the Python CLI.
+> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, use availability-gated Codex/Hermes repair-agent command templates, enforce adapter diff scope, enforce command budgets, record rich attempt artifacts, generate follow-up tasks from critic findings, persist exact resume state, and ship according to scoped policy. It is Ralph/OMX-like in workflow shape; model intelligence remains an adapter, not hidden magic inside the Python CLI.
 
 ## Green criteria now covered
 
-1. Default Codex/Hermes repair adapter command, not only raw shell hooks. ✅
+1. Default Codex/Hermes repair adapter command with real availability reporting. ✅
 2. Built-in semantic critic/judge that can block first-green results. ✅
 3. Per-attempt artifact ledger: `prompt.md`, `verify.log`, `critic.md`, `diff.patch`, `verdict.json`. ✅
 4. Real codebase repair fixture, not a toy single text-file replacement. ✅
 5. Critic findings converted into scoped `.go/tasks/open/*.json` follow-ups. ✅
-6. Machine-readable ship policy for none/local-commit/push. ✅
-7. Durable resume state with run id/status and exact resume command. ✅
+6. Machine-readable ship policy for none/local-commit/push with scoped staging. ✅
+7. Durable resume state with exact effective flags and resume command. ✅
+8. Adapter diff/scope enforcement after build/critic/repair hooks. ✅
+9. Hard command-budget enforcement before/inside command execution. ✅
+10. No dangerous Codex bypass flag in the default adapter template. ✅
 
 ## Honest limits
 
 - No built-in LLM is embedded in the Python CLI. Use `--repair-agent codex`, `--repair-agent hermes`, `--build-command`, `--critic-command`, or `--repair-command` to connect the actual intelligence.
 - `push` remains behind `--allow-push`; this is a safety feature, not a missing autonomous capability.
 - The built-in semantic critic is intentionally conservative. For deep code review, use `--critic-command` with a real reviewer/LLM adapter.
+- Real-world large-repo performance still depends on adapter quality, test quality, and task scope quality.

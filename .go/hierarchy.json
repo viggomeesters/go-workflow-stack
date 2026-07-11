@@ -43,7 +43,13 @@
       ],
       "tasks": [
         "template-pairing-smoke",
-        "document-template-check-skill"
+        "document-template-check-skill",
+        "runtime-adapter-proof",
+        "diff-scope-enforcement",
+        "safe-ship-scoped-add",
+        "hard-budget-enforcement",
+        "exact-resume-command",
+        "benchmark-claim-downgrade"
       ]
     }
   ]

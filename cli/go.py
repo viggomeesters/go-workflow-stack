@@ -767,10 +767,22 @@ def build_auto_preflight(repo: Path, selected_task_count: int, max_tasks: int) -
     }
 
 
-def run_verification_commands(repo: Path, task: dict[str, Any]) -> list[dict[str, Any]]:
+def run_verification_commands(repo: Path, task: dict[str, Any], command_budget: int | None = None) -> list[dict[str, Any]]:
     checks: list[dict[str, Any]] = []
+    commands_run = 0
     for command in task.get("verification", []) or []:
+        if command_budget is not None and commands_run >= command_budget:
+            checks.append({
+                "task_id": task.get("id"),
+                "command": command,
+                "returncode": 124,
+                "stdout": "",
+                "stderr": "command budget exhausted before verification command",
+                "budget_exhausted": True,
+            })
+            break
         result = subprocess.run(command, cwd=repo, shell=True, text=True, capture_output=True, check=False)
+        commands_run += 1
         checks.append({
             "task_id": task.get("id"),
             "command": command,
@@ -838,6 +850,78 @@ def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: in
 def arg_str(args: argparse.Namespace, name: str, default: str = "") -> str:
     value = getattr(args, name, default)
     return value or default
+
+
+def git_status_paths(repo: Path) -> list[str]:
+    completed = subprocess.run(["git", "status", "--porcelain"], cwd=repo, text=True, capture_output=True)
+    if completed.returncode != 0:
+        return []
+    paths: list[str] = []
+    for line in completed.stdout.splitlines():
+        if not line.strip():
+            continue
+        raw = line[3:]
+        if " -> " in raw:
+            raw = raw.split(" -> ", 1)[1]
+        paths.append(raw.strip().strip('"'))
+    return paths
+
+
+def allowed_runtime_path(path: str) -> bool:
+    return path.startswith((
+        ".go/tasks/",
+        ".go/runs/",
+        ".go/evidence/",
+        ".go/reflections/",
+        ".go/locks/",
+    ))
+
+
+def task_allowed_paths(task: dict[str, Any]) -> set[str]:
+    scope = task.get("scope", {}) or {}
+    allowed = set(scope.get("modify", []) or [])
+    allowed.update(scope.get("read", []) or [])
+    return {path.strip("/") for path in allowed if path}
+
+
+def path_allowed_by_task(path: str, task: dict[str, Any], allow_runtime: bool = True) -> bool:
+    clean = path.strip("/")
+    if allow_runtime and allowed_runtime_path(clean):
+        return True
+    for allowed in task_allowed_paths(task):
+        if clean == allowed or clean.startswith(allowed.rstrip("/") + "/"):
+            return True
+    return False
+
+
+def ignorable_generated_path(path: str) -> bool:
+    clean = path.strip("/")
+    return clean == "__pycache__" or clean.startswith("__pycache__/") or "/__pycache__/" in clean or clean.startswith(".pytest_cache/")
+
+
+def scope_violations(repo: Path, task: dict[str, Any]) -> list[str]:
+    return [path for path in git_status_paths(repo) if not ignorable_generated_path(path) and not path_allowed_by_task(path, task)]
+
+
+def scope_violations_after(repo: Path, task: dict[str, Any], before: set[str]) -> list[str]:
+    return [path for path in git_status_paths(repo) if path not in before and not ignorable_generated_path(path) and not path_allowed_by_task(path, task)]
+
+
+def ensure_budget(result: dict[str, Any], max_commands: int, started_at: float, max_minutes: int, stage: str) -> bool:
+    elapsed_minutes = (time.monotonic() - started_at) / 60
+    if result["commands_run"] >= max_commands or elapsed_minutes >= max_minutes:
+        result.update({
+            "status": "budget_exhausted",
+            "budget_exhausted": True,
+            "summary": f"Budget exhausted before {stage}.",
+            "next_action": "resume with go-loop using a larger budget or narrower task scope",
+        })
+        return False
+    return True
+
+
+def shell_quote(value: str) -> str:
+    return shlex.quote(str(value))
 
 
 def attempt_markdown(task: dict[str, Any], attempt: dict[str, Any]) -> str:
@@ -971,7 +1055,16 @@ def builtin_semantic_findings(repo: Path, task: dict[str, Any], checks: list[dic
     return findings
 
 
+def repair_agent_available(agent: str) -> dict[str, Any]:
+    binary = "codex" if agent == "codex" else "hermes" if agent == "hermes" else agent
+    path = shutil.which(binary)
+    return {"agent": agent, "binary": binary, "available": bool(path), "path": path}
+
+
 def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
+    availability = repair_agent_available(agent)
+    if not availability["available"]:
+        raise RepoLocalError(f"repair agent '{agent}' is not available on PATH")
     prompt = " ".join([
         "You are the repair adapter for go-workflow-stack.",
         "In repo {repo}, fix .go task {task_id} on attempt {attempt} using strategy {strategy}.",
@@ -981,13 +1074,13 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Exit non-zero if you cannot safely repair within scope.",
     ])
     if agent == "codex":
-        return "codex exec --dangerously-bypass-approvals-and-sandbox " + shlex.quote(prompt)
+        return "codex exec " + shlex.quote(prompt)
     if agent == "hermes":
         return "hermes -p " + shlex.quote(prompt)
     raise RepoLocalError(f"unsupported repair agent: {agent}")
 
 
-def ship_changes(repo: Path, policy: str, allow_push: bool, message: str) -> dict[str, Any]:
+def ship_changes(repo: Path, policy: str, allow_push: bool, message: str, task: dict[str, Any] | None = None) -> dict[str, Any]:
     if policy == "none":
         return {"policy": policy, "status": "skipped"}
     if policy == "push" and not allow_push:
@@ -995,11 +1088,18 @@ def ship_changes(repo: Path, policy: str, allow_push: bool, message: str) -> dic
     status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True)
     if status.returncode != 0:
         return {"policy": policy, "status": "failed", "stderr": status.stderr}
-    if not status.stdout.strip():
+    changed = git_status_paths(repo)
+    if not changed:
         return {"policy": policy, "status": "clean"}
-    subprocess.run(["git", "add", "-A"], cwd=repo, text=True, capture_output=True)
+    allowed_paths = [path for path in changed if allowed_runtime_path(path) or (task is not None and path_allowed_by_task(path, task, allow_runtime=False))]
+    unrelated = [path for path in changed if path not in allowed_paths]
+    if not allowed_paths:
+        return {"policy": policy, "status": "blocked", "reason": "no scoped paths to ship", "unrelated_dirty": unrelated}
+    add = subprocess.run(["git", "add", "--", *allowed_paths], cwd=repo, text=True, capture_output=True)
+    if add.returncode != 0:
+        return {"policy": policy, "status": "failed", "stderr": add.stderr, "scoped_paths": allowed_paths, "unrelated_dirty": unrelated}
     commit = subprocess.run(["git", "-c", "user.name=Go Workflow", "-c", "user.email=go-workflow@example.com", "commit", "-m", message], cwd=repo, text=True, capture_output=True)
-    result = {"policy": policy, "status": "committed" if commit.returncode == 0 else "failed", "stdout": commit.stdout[-2000:], "stderr": commit.stderr[-2000:]}
+    result = {"policy": policy, "status": "committed" if commit.returncode == 0 else "failed", "stdout": commit.stdout[-2000:], "stderr": commit.stderr[-2000:], "scoped_paths": allowed_paths, "unrelated_dirty": unrelated}
     if commit.returncode != 0:
         return result
     if policy == "push":
@@ -1007,6 +1107,41 @@ def ship_changes(repo: Path, policy: str, allow_push: bool, message: str) -> dic
         result["push"] = {"returncode": push.returncode, "stdout": push.stdout[-2000:], "stderr": push.stderr[-2000:]}
         result["status"] = "pushed" if push.returncode == 0 else "push_failed"
     return result
+
+
+def build_resume_command(mode: str, args: argparse.Namespace) -> str:
+    parts = ["python3", "cli/go.py", mode, ".", "--execute"]
+    valued = [
+        ("--max-tasks", arg_int(args, "max_tasks", 1)),
+        ("--summary-chars", arg_int(args, "summary_chars", 1200)),
+        ("--max-minutes", arg_int(args, "max_minutes", 45)),
+        ("--max-commands", arg_int(args, "max_commands", 12)),
+        ("--max-attempts", arg_int(args, "max_attempts", 5)),
+        ("--checkpoint-every-tasks", arg_int(args, "checkpoint_every_tasks", 1)),
+        ("--agent", getattr(args, "agent", "agent")),
+    ]
+    for flag, value in valued:
+        parts.extend([flag, str(value)])
+    for flag, name in [
+        ("--build-command", "build_command"),
+        ("--critic-command", "critic_command"),
+        ("--repair-command", "repair_command"),
+        ("--repair-agent", "repair_agent"),
+        ("--ship-policy", "ship_policy"),
+    ]:
+        value = arg_str(args, name)
+        if value:
+            parts.extend([flag, value])
+    for flag, name in [
+        ("--semantic-critic", "semantic_critic"),
+        ("--followup-on-block", "followup_on_block"),
+        ("--allow-dirty", "allow_dirty"),
+        ("--allow-push", "allow_push"),
+        ("--json", "json"),
+    ]:
+        if bool(getattr(args, name, False)):
+            parts.append(flag)
+    return " ".join(shell_quote(part) for part in parts)
 
 
 def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args: argparse.Namespace, mode: str) -> None:
@@ -1018,7 +1153,23 @@ def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args:
         "completed_tasks": result.get("completed_tasks", []),
         "blocked_task": result.get("blocked_task"),
         "budget_exhausted": result.get("budget_exhausted", False),
-        "resume_command": f"python3 cli/go.py {mode} . --execute --max-tasks {arg_int(args, 'max_tasks', 1)} --max-attempts {arg_int(args, 'max_attempts', 5)} --agent {shlex.quote(getattr(args, 'agent', 'agent'))} --json",
+        "resume_command": build_resume_command(mode, args),
+        "effective_flags": {
+            "max_tasks": arg_int(args, "max_tasks", 1),
+            "summary_chars": arg_int(args, "summary_chars", 1200),
+            "max_minutes": arg_int(args, "max_minutes", 45),
+            "max_commands": arg_int(args, "max_commands", 12),
+            "max_attempts": arg_int(args, "max_attempts", 5),
+            "build_command": arg_str(args, "build_command"),
+            "critic_command": arg_str(args, "critic_command"),
+            "repair_command": arg_str(args, "repair_command"),
+            "repair_agent": arg_str(args, "repair_agent"),
+            "semantic_critic": bool(getattr(args, "semantic_critic", False)),
+            "followup_on_block": bool(getattr(args, "followup_on_block", False)),
+            "ship_policy": arg_str(args, "ship_policy", "none"),
+            "allow_dirty": bool(getattr(args, "allow_dirty", False)),
+            "allow_push": bool(getattr(args, "allow_push", False)),
+        },
         "next_action": result.get("next_action"),
     }
     dump_json(root / "runs" / "latest.json", latest)
@@ -1100,7 +1251,14 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         task_repair_command = repair_command
         repair_agent = arg_str(args, "repair_agent", "")
         if repair_agent and not task_repair_command:
-            task_repair_command = default_repair_agent_command(repair_agent, task)
+            try:
+                task_repair_command = default_repair_agent_command(repair_agent, task)
+            except RepoLocalError as exc:
+                block_task_record(repo, root, active_path, task, args.agent, str(exc), final_checks)
+                result.update({"status": "blocked", "blocked_task": task["id"], "summary": str(exc), "next_action": "install/configure the repair agent or use --repair-command"})
+                break
+        if result.get("status") == "blocked":
+            break
         for attempt_number in range(1, max_attempts + 1):
             strategy = strategies[min(attempt_number - 1, len(strategies) - 1)]
             attempt = {
@@ -1115,8 +1273,15 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 "judge": {"status": "pending"},
             }
             if build_command:
+                if not ensure_budget(result, max_commands, started_at, max_minutes, "build adapter"):
+                    break
+                before_paths = set(git_status_paths(repo))
                 build = run_hook_command(repo, build_command, task, attempt_number, strategy, "build")
                 result["commands_run"] += 1
+                violations = scope_violations_after(repo, task, before_paths)
+                if violations:
+                    build["returncode"] = build["returncode"] or 126
+                    build["stderr"] = (build.get("stderr") or "") + "\nscope violations after build adapter: " + ", ".join(violations)
                 attempt["build"] = {"status": "passed" if build["returncode"] == 0 else "failed", "result": build}
                 if build["returncode"] != 0:
                     attempt["critic"] = {"status": "blocking_findings", "blocking_findings": ["build adapter failed"], "repair_hint": build["stderr"] or build["stdout"]}
@@ -1125,16 +1290,27 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     result["attempts"].append(attempt)
                     record_attempt(repo, root, task, args.agent, attempt, final_checks)
                     if task_repair_command and attempt_number < max_attempts:
+                        if not ensure_budget(result, max_commands, started_at, max_minutes, "repair adapter"):
+                            break
+                        before_paths = set(git_status_paths(repo))
                         repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair")
                         result["commands_run"] += 1
+                        violations = scope_violations_after(repo, task, before_paths)
+                        if violations:
+                            repair["returncode"] = repair["returncode"] or 126
+                            repair["stderr"] = (repair.get("stderr") or "") + "\nscope violations after repair adapter: " + ", ".join(violations)
                         attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
                         continue
                     break
-            checks = run_verification_commands(repo, task)
+            if not ensure_budget(result, max_commands, started_at, max_minutes, "verification"):
+                break
+            checks = run_verification_commands(repo, task, command_budget=max_commands - result["commands_run"])
             final_checks = checks
             attempt["verify"] = {"status": "passed" if all(check["returncode"] == 0 for check in checks) else "failed", "checks": checks}
-            result["commands_run"] += len([check for check in checks if check.get("command")])
+            result["commands_run"] += len([check for check in checks if check.get("command") and not check.get("budget_exhausted")])
             result["checks"].extend(checks)
+            if any(check.get("budget_exhausted") for check in checks):
+                result.update({"status": "budget_exhausted", "budget_exhausted": True, "summary": "Budget exhausted during verification.", "next_action": "resume with go-loop using a larger budget or narrower task scope"})
             failed = next((check for check in checks if check["returncode"] != 0), None)
             if failed:
                 last_failed_command = failed["command"] or "verification"
@@ -1153,8 +1329,15 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     }
                     last_failed_command = "semantic critic"
                 elif critic_command:
+                    if not ensure_budget(result, max_commands, started_at, max_minutes, "critic adapter"):
+                        break
+                    before_paths = set(git_status_paths(repo))
                     critic = run_hook_command(repo, critic_command, task, attempt_number, strategy, "critic")
                     result["commands_run"] += 1
+                    violations = scope_violations_after(repo, task, before_paths)
+                    if violations:
+                        critic["returncode"] = critic["returncode"] or 126
+                        critic["stderr"] = (critic.get("stderr") or "") + "\nscope violations after critic adapter: " + ", ".join(violations)
                     attempt["critic"] = {
                         "status": "passed" if critic["returncode"] == 0 else "blocking_findings",
                         "blocking_findings": [] if critic["returncode"] == 0 else [critic["stderr"] or critic["stdout"] or "critic adapter failed"],
@@ -1171,8 +1354,15 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 task_passed = True
                 break
             if task_repair_command and attempt_number < max_attempts:
+                if not ensure_budget(result, max_commands, started_at, max_minutes, "repair adapter"):
+                    break
+                before_paths = set(git_status_paths(repo))
                 repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair")
                 result["commands_run"] += 1
+                violations = scope_violations_after(repo, task, before_paths)
+                if violations:
+                    repair["returncode"] = repair["returncode"] or 126
+                    repair["stderr"] = (repair.get("stderr") or "") + "\nscope violations after repair adapter: " + ", ".join(violations)
                 attempt["repair"] = {"status": "passed" if repair["returncode"] == 0 else "failed", "result": repair}
                 attempt["judge"] = {"status": "retry", "reason": "repair attempted; rerun loop strategy"}
                 result["attempts"].append(attempt)
@@ -1184,6 +1374,9 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             attempt["judge"] = {"status": "blocked", "reason": "failed after bounded attempt"}
             result["attempts"].append(attempt)
             record_attempt(repo, root, task, args.agent, attempt, final_checks)
+            break
+        if result.get("budget_exhausted"):
+            result.update({"blocked_task": task["id"]})
             break
         if not task_passed:
             block_reason = f"critic blocked after bounded executor attempts: {last_failed_command}"
@@ -1197,7 +1390,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             break
         evidence_summary = "; ".join(check["command"] or "no verification configured" for check in final_checks)
         finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
-        ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}")
+        ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
         result["ship"].append({"task_id": task["id"], **ship})
         if ship.get("status") == "blocked":
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship policy blocked completion after verification.", "next_action": ship.get("reason")})
@@ -2124,6 +2317,10 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
     auto.add_argument("--json", action="store_true")
     auto.set_defaults(func=cmd_auto)
+    agent_check = sub.add_parser("agent-check", help="Report repair-agent adapter availability")
+    agent_check.add_argument("--agent", action="append", choices=["codex", "hermes"], default=[])
+    agent_check.add_argument("--json", action="store_true")
+    agent_check.set_defaults(func=cmd_agent_check)
     for loop_command, loop_help in (
         ("loop", "Run the stronger go-loop control-handoff contract until blocker"),
         ("go-loop", "Alias for loop; explicit go-loop control-handoff contract"),
@@ -2251,6 +2448,18 @@ def build_parser() -> argparse.ArgumentParser:
     bundle_import.add_argument("--task-id", default="bundle-import")
     bundle_import.set_defaults(func=cmd_bundle_import)
     return parser
+
+
+def cmd_agent_check(args: argparse.Namespace) -> int:
+    agents = args.agent or ["codex", "hermes"]
+    payload = {"schema": "go-workflow.agent-check.v1", "agents": [repair_agent_available(agent) for agent in agents]}
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        for item in payload["agents"]:
+            status = "available" if item["available"] else "missing"
+            print(f"{item['agent']}: {status} {item.get('path') or ''}".rstrip())
+    return 0
 
 
 def main() -> int:

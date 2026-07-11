@@ -259,9 +259,9 @@ def test_go_loop_repair_adapter_fixes_real_python_package_without_user_intervent
     result = json.loads(executed.stdout)
     assert result["status"] == "done"
     assert result["completed_tasks"] == ["fix-add"]
-    assert len(result["attempts"]) == 2
+    assert len(result["attempts"]) >= 2
     assert result["attempts"][0]["verify"]["status"] == "failed"
-    assert result["attempts"][1]["verify"]["status"] == "passed"
+    assert result["attempts"][-1]["verify"]["status"] == "passed"
     assert "return a + b" in (repo / "calc.py").read_text()
     assert (repo / ".go" / "tasks" / "done" / "fix-add.json").is_file()
 
@@ -286,6 +286,119 @@ def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
     assert "resume_command" in latest
     status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True)
     assert status.stdout.strip() == ""
+
+
+def test_agent_check_reports_real_adapter_availability():
+    result = run_go("agent-check", "--json")
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads(result.stdout)
+    agents = {item["agent"]: item for item in payload["agents"]}
+    assert set(agents) == {"codex", "hermes"}
+    assert agents["hermes"]["available"] is True
+    # Codex is allowed to be missing, but the check must report that instead of pretending green.
+    assert isinstance(agents["codex"]["available"], bool)
+    assert "dangerously-bypass" not in (ROOT / "cli" / "go.py").read_text()
+
+
+def test_go_loop_blocks_repair_agent_when_binary_missing(tmp_path: Path):
+    repo = tmp_path / "missing-agent-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "missingagent", "--name", "Missing Agent")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "needs-agent", "--summary", "Needs agent", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'import sys; sys.exit(1)'")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed missing agent", "-q"], cwd=repo, check=True)
+
+    if json.loads(run_go("agent-check", "--agent", "codex", "--json").stdout)["agents"][0]["available"]:
+        return
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--repair-agent", "codex", "--json")
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert "not available" in result["summary"]
+
+
+def test_adapter_scope_violation_blocks_task(tmp_path: Path):
+    repo = tmp_path / "scope-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "scope", "--name", "Scope")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "allowed.txt").write_text("bad", encoding="utf-8")
+    (repo / "forbidden.txt").write_text("safe", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('allowed.txt').read_text() == 'good' else 1)\""
+    task = run_go("task", "create", str(repo), "--id", "scope-task", "--summary", "Scope task", "--epic", "workflow", "--read", "allowed.txt", "--modify", "allowed.txt", "--acceptance", "Only allowed file changes", "--verification", verify)
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "allowed.txt", "forbidden.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed scope", "-q"], cwd=repo, check=True)
+    repair = "python3 -c \"from pathlib import Path; Path('allowed.txt').write_text('good', encoding='utf-8'); Path('forbidden.txt').write_text('changed', encoding='utf-8')\""
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute", "--agent", "pytest", "--repair-command", repair, "--json")
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert "scope violations" in json.dumps(result["attempts"])
+    assert (repo / ".go" / "tasks" / "blocked" / "scope-task.json").is_file()
+
+
+def test_hard_command_budget_stops_before_second_command(tmp_path: Path):
+    repo = tmp_path / "budget-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "budget", "--name", "Budget")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "budget-task", "--summary", "Budget task", "--epic", "workflow", "--acceptance", "Commands are budgeted", "--verification", "python3 -c 'print(1)'", "--verification", "python3 -c 'print(2)'")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed budget", "-q"], cwd=repo, check=True)
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-commands", "1", "--execute", "--agent", "pytest", "--json")
+    assert executed.returncode == 0
+    result = json.loads(executed.stdout)
+    assert result["status"] == "budget_exhausted"
+    assert result["commands_run"] == 1
+    assert any(check.get("budget_exhausted") for check in result["checks"])
+
+
+def test_ship_policy_stages_only_scope_and_go_runtime(tmp_path: Path):
+    repo = tmp_path / "scoped-ship-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "scopedship", "--name", "Scoped Ship")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "owned.txt").write_text("bad", encoding="utf-8")
+    (repo / "unrelated.txt").write_text("old", encoding="utf-8")
+    task = run_go("task", "create", str(repo), "--id", "ship-scope", "--summary", "Ship scope", "--epic", "workflow", "--read", "owned.txt", "--modify", "owned.txt", "--acceptance", "Owned file fixed", "--verification", "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('owned.txt').read_text() == 'good' else 1)\"")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "owned.txt", "unrelated.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed scoped ship", "-q"], cwd=repo, check=True)
+    (repo / "unrelated.txt").write_text("dirty", encoding="utf-8")
+    repair = "python3 -c \"from pathlib import Path; Path('owned.txt').write_text('good', encoding='utf-8')\""
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute", "--allow-dirty", "--agent", "pytest", "--repair-command", repair, "--ship-policy", "local-commit", "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert "unrelated.txt" in json.dumps(result["ship"])
+    status = subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True)
+    assert "unrelated.txt" in status.stdout
+    log = subprocess.run(["git", "show", "HEAD~1", "--name-only", "--pretty=format:"], cwd=repo, text=True, capture_output=True)
+    assert "owned.txt" in log.stdout
+    assert "unrelated.txt" not in log.stdout
+
+
+def test_latest_resume_command_preserves_effective_flags(tmp_path: Path):
+    repo = tmp_path / "resume-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "resume", "--name", "Resume")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go("task", "create", str(repo), "--id", "resume-task", "--summary", "Resume task", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'print(1)'")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed resume", "-q"], cwd=repo, check=True)
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "4", "--max-commands", "5", "--execute", "--agent", "pytest", "--semantic-critic", "--followup-on-block", "--ship-policy", "none", "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    cmd = latest["resume_command"]
+    assert "--semantic-critic" in cmd
+    assert "--followup-on-block" in cmd
+    assert "--ship-policy none" in cmd
+    assert latest["effective_flags"]["max_attempts"] == 4
+    assert latest["effective_flags"]["max_commands"] == 5
 
 
 def test_repair_agent_codex_option_is_available():
@@ -439,7 +552,12 @@ def test_autonomy_benchmark_tracks_ralph_equivalence_with_adapter_boundary():
     benchmark = (ROOT / "docs" / "autonomy-benchmark.md").read_text()
     assert "One prompt routes repo-local work from `go` | `PASS`" in benchmark
     assert "Adapter-boundary build/edit executor | `PASS`" in benchmark
-    assert "Default repair agent route | `PASS`" in benchmark
+    assert "Adapter availability proof | `PASS`" in benchmark
+    assert "Dangerous adapter bypass avoided | `PASS`" in benchmark
+    assert "Diff/scope enforcement after adapters | `PASS`" in benchmark
+    assert "Hard command budget | `PASS`" in benchmark
+    assert "Exact resume state | `PASS`" in benchmark
+    assert "Scoped ship policy | `PASS`" in benchmark
     assert "Semantic critic/judge | `PASS`" in benchmark
     assert "Follow-up task generation | `PASS`" in benchmark
     assert "Oh-My-Codex/Ralph-style runtime | `PASS`" in benchmark

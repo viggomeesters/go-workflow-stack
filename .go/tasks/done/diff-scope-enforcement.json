@@ -1,0 +1,37 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "diff-scope-enforcement",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Enforce task scope after adapters",
+  "description": "After build/repair/critic adapters, inspect git changed paths and block if changes escape task scope or allowed .go runtime artifacts.",
+  "scope": {
+    "read": [
+      "cli/go.py"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "docs/autonomy-benchmark.md"
+    ]
+  },
+  "acceptance": [
+    "Task result is implemented and verified."
+  ],
+  "verification": [
+    "pytest -q",
+    "python3 cli/go.py validate ."
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T18:30:30+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T18:30:30+02:00",
+      "agent": "hermes",
+      "summary": "Hardening implemented and verified: pytest -q 23 passed; python3 cli/go.py validate . passed; make check passed; git diff --check passed."
+    }
+  ]
+}

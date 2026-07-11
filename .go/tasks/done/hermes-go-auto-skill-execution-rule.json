@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "hermes-go-auto-skill-execution-rule",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Patch Hermes skill so go auto starts tool execution immediately",
   "description": "Update repo-local-agent-workflow skill so Hermes/Bertus treats go auto as a tool-execution mandate: run router/status/preflight/claim/verify and continue instead of replying with suggested commands.",
   "scope": {
@@ -25,8 +25,14 @@
     "python3 cli/go.py template-check ../go-project-template --json"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T10:21:05+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T10:21:26+02:00",
+      "agent": "hermes",
+      "summary": "Added explicit no-command-spam rule and hard-gate-only ask policy to repo-local-agent-workflow skill; verified with python3 cli/go.py validate ., template-check JSON, git diff --check"
+    }
+  ]
 }

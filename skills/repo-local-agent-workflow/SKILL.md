@@ -150,6 +150,10 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 
 `go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing and it is not a request for Viggo to keep typing the next phase. Bare `go` in a repo-local project should converge to this same command-train behavior after routing.
 
+**No-command-spam rule:** when Viggo says `go`, `go auto`, or `go-loop` in a repo-local context, Hermes/Bertus must start the tool-call train immediately. Do not reply with a list of commands for Viggo to run. The default action is: inspect route/status, repair/confirm the `.go` contract, create or claim the next task, execute inside scope, verify, recheck/devil, repair, finish with evidence, and continue until done/blocker/budget.
+
+Ask only for hard gates: missing credentials, public/destructive/payment/impersonation actions, genuinely ambiguous target/outcome, unsafe dirty overlap, merge conflict, secret-looking state, or real scope/product tradeoff. Everything else is agent work.
+
 Before implementation, the agent must ensure the repo-local contract is good enough to execute:
 
 1. Vision/end goal exists in `.go/vision.json`.

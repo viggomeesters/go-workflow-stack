@@ -25,7 +25,9 @@
           "tasks": []
         }
       ],
-      "tasks": []
+      "tasks": [
+        "template-pairing-smoke"
+      ]
     }
   ]
 }

@@ -5,7 +5,8 @@ check:
 	TEMPLATE=$$(if [ -d ../go-project-template/.go ]; then printf '%s' ../go-project-template; else printf '%s' fixtures/minimal; fi); \
 	  python3 cli/go.py validate $$TEMPLATE; \
 	  python3 cli/go.py readback $$TEMPLATE; \
-	  python3 cli/go.py status $$TEMPLATE --json >/tmp/go-project-template-status.json
+	  python3 cli/go.py status $$TEMPLATE --json >/tmp/go-project-template-status.json; \
+	  if [ -d ../go-project-template/.go ]; then python3 cli/go.py template-check ../go-project-template --json >/tmp/go-template-check.json; fi
 	TMP=$$(mktemp -d); \
 	  git init -q $$TMP/adopt-smoke; \
 	  python3 cli/go.py adopt $$TMP/adopt-smoke --project-id adopt-smoke --name "Adopt Smoke" --feature-group workflow\|Workflow --feature workflow\|repo-local\|Repo-local --verification "git diff --check"; \

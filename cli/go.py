@@ -1064,6 +1064,53 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0 if route["valid"] else 1
 
 
+def cmd_template_check(args: argparse.Namespace) -> int:
+    """Validate that a project template still works with this stack checkout."""
+    template = Path(args.template_repo).resolve()
+    checks: list[dict[str, Any]] = []
+
+    def record(name: str, ok: bool, detail: str = "") -> None:
+        checks.append({"name": name, "ok": ok, "detail": detail})
+
+    record("template_exists", template.is_dir(), str(template))
+    record("template_has_go", go_root(template).is_dir(), str(go_root(template)))
+    errors = validate_repo(template) if go_root(template).is_dir() else [f"missing .go directory: {go_root(template)}"]
+    record("validate", not errors, "; ".join(errors))
+    if not errors:
+        route = route_repo(template)
+        tasks = open_tasks(template)
+        record("route_repo_local", route.get("mode") == "repo-local" and route.get("valid") is True, json.dumps(route, sort_keys=True))
+        record("has_claimable_example_task", bool(tasks), tasks[0][1].get("id", "") if tasks else "")
+    makefile = template / "Makefile"
+    check_script = template / "scripts" / "check.sh"
+    record("makefile_present", makefile.is_file(), str(makefile))
+    record("check_script_present", check_script.is_file(), str(check_script))
+    if makefile.is_file():
+        make_text = makefile.read_text(encoding="utf-8")
+        record("makefile_uses_stack_cli", "cli/go.py validate" in make_text and "cli/go.py readback" in make_text, "Makefile should validate and read back via stack CLI")
+    if check_script.is_file():
+        script_text = check_script.read_text(encoding="utf-8")
+        record("check_script_bootstraps_stack", "bootstrap-stack.sh" in script_text, "check.sh should make a fresh template clone self-checkable")
+
+    ok = all(item["ok"] for item in checks)
+    result = {
+        "schema": "go-workflow.template-check.v1",
+        "stack": str(STACK_ROOT),
+        "template": str(template),
+        "ok": ok,
+        "checks": checks,
+    }
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"template: {template}")
+        for item in checks:
+            marker = "ok" if item["ok"] else "FAIL"
+            suffix = f" — {item['detail']}" if item["detail"] else ""
+            print(f"{marker}: {item['name']}{suffix}")
+    return 0 if ok else 1
+
+
 def cmd_task_create(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
@@ -1580,6 +1627,10 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("repo", nargs="?", default=".")
     status.add_argument("--json", action="store_true")
     status.set_defaults(func=cmd_status)
+    template_check = sub.add_parser("template-check", help="Validate a go-project-template checkout against this stack")
+    template_check.add_argument("template_repo", nargs="?", default="../go-project-template")
+    template_check.add_argument("--json", action="store_true")
+    template_check.set_defaults(func=cmd_template_check)
     task = sub.add_parser("task", help="Author repo-local tasks")
     task_sub = task.add_subparsers(dest="task_command", required=True)
     task_create = task_sub.add_parser("create", help="Create an open repo-local task")

@@ -1,0 +1,46 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "template-pairing-smoke",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Harden stack/template pairing smoke",
+  "description": "Add a first-class stack-side template check and document/use it from the project template.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "README.md",
+      "Makefile",
+      "../go-project-template/**"
+    ],
+    "modify": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "README.md",
+      "Makefile"
+    ]
+  },
+  "acceptance": [
+    "Stack exposes a command that validates the sibling/template repo contract from the stack CLI.",
+    "Automated tests cover the stack/template pairing command.",
+    "The public template can run checks when the stack repo is missing by bootstrapping it."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T07:54:08+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T07:56:51+02:00",
+      "agent": "hermes",
+      "summary": "python3 cli/go.py template-check ../go-project-template --json ok=true; make check passed; pytest -q passed (8 passed)"
+    }
+  ]
+}

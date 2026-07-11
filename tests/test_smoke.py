@@ -22,6 +22,20 @@ def run_go(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[s
     return subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), *args], cwd=cwd, text=True, capture_output=True)
 
 
+def test_template_check_command_reports_pairing_contract():
+    result = run_go("template-check", str(template_repo()), "--json")
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["schema"] == "go-workflow.template-check.v1"
+    assert payload["ok"] is True
+    checks = {item["name"]: item for item in payload["checks"]}
+    assert checks["validate"]["ok"] is True
+    assert checks["route_repo_local"]["ok"] is True
+    assert checks["has_claimable_example_task"]["ok"] is True
+    if template_repo().name == "go-project-template":
+        assert checks["check_script_bootstraps_stack"]["ok"] is True
+
+
 def test_epic_and_decision_authoring_primitives(tmp_path: Path):
     repo = tmp_path / "repo"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

@@ -48,6 +48,12 @@ python3 cli/go.py readback ../go-project-template
 python3 cli/go.py next ../go-project-template
 ```
 
+Check the public template/stack pairing explicitly:
+
+```bash
+python3 cli/go.py template-check ../go-project-template --json
+```
+
 Initialize a fresh repo with the current minimal fixture:
 
 ```bash

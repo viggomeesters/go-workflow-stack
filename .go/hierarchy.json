@@ -23,7 +23,12 @@
         "go-loop-critic-repair-executor",
         "benchmark-autonomy-against-ralph-omx",
         "autonomous-executor-adapter",
-        "autonomy-benchmark-promotion"
+        "autonomy-benchmark-promotion",
+        "correct-ralph-benchmark-claims",
+        "attempt-artifact-ledger",
+        "semantic-critic-followups",
+        "codex-agent-adapter-and-real-fixture",
+        "ship-policy-and-resume-state"
       ]
     },
     {

@@ -1,6 +1,6 @@
 # Bare Go Autonomy Benchmark
 
-This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; the claim must stay tied to the proven adapter boundary.
+This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; the claim must stay tied to the proven runtime boundary.
 
 ## Scale
 
@@ -19,35 +19,32 @@ This benchmark states what the stack proves against the desired Ralph / Oh-My-Co
 | Non-mutating inspection path | `PASS` | `go --json` without `--write` returns `proposed_task` and leaves git clean | Interactive UX must make write/execute intent obvious. |
 | Intent can create missing task | `PASS` | `go --write --intent ...` materializes `.go/tasks/open/<id>.json` | Task quality is only as good as rough intent parsing. |
 | Multi-task mechanical execution | `PASS` | `auto --execute --max-tasks 2` smoke proves two verification-ready tasks complete | Mechanical path still depends on task verification quality. |
-| Budget/checkpoint envelope | `PASS` | `run_envelope.budget`, `commands_run`, checkpoints in tests | Budgets are CLI-local; durable daemon resume is out of scope. |
+| Budget/checkpoint envelope | `PASS` | `run_envelope.budget`, `commands_run`, checkpoints in tests | Needs stronger in-attempt budget enforcement and durable resume proof. |
 | Safety gate for dirty/secret state | `PASS` | dirty `.env` test blocks execution | Secret detection is heuristic. |
-| Critic evidence on failure | `PASS` | failing verification test records `auto.attempt` with `critic`, `repair`, `judge`, then blocks | Critic is only semantic when a critic adapter is configured. |
-| Real build/edit step inside executor | `PASS` | `--build-command` and `--repair-command` adapter hooks; repair fixture edits `answer.txt` and recovers | The stack supplies hooks; actual intelligence comes from the configured adapter command. |
-| Recheck/devil semantic review | `PASS` | `--critic-command` adapter hook can block/repair after verification; attempt ledger records critic output | No built-in LLM; semantic quality depends on adapter. |
-| Repair attempts like Ralph ladder | `PASS` | `--max-attempts`, strategy ladder, repair fixture: fail → repair → pass without user intervention | Strategies are recorded; adapter quality determines repair depth. |
-| Commit/push per logical task | `PARTIAL` | Agent workflow used commits/pushes; docs require policy | CLI intentionally does not auto-push by default because public/destructive boundaries need policy. |
-| Oh-My-Codex/Ralph equivalence | `PASS` | Bounded conductor + adapter hooks + failing-task repair test | Equivalent in architecture/control-loop shape, not identical to any external product implementation. |
+| Critic evidence on failure | `PASS` | failing verification test records `auto.attempt` with `critic`, `repair`, `judge`, then blocks | Critic is only semantic when built-in or external critic is configured. |
+| Adapter-boundary build/edit executor | `PASS` | `--build-command` and `--repair-command` adapter hooks; repair fixture edits a file and recovers | The stack supplies hooks; actual intelligence comes from configured adapter command. |
+| Full autonomous coding runtime | `PARTIAL` | Bounded conductor + adapter hooks + failing-task repair test | Missing default Codex/Hermes adapter, rich artifacts, semantic judge, follow-up generation, resume, and ship policy proof. |
+| Recheck/devil semantic review | `PARTIAL` | `--critic-command` hook can block/repair after verification; attempt ledger records critic output | No default semantic critic yet. |
+| Repair attempts like Ralph ladder | `PARTIAL` | `--max-attempts`, strategy ladder, repair fixture: fail → repair → pass | Strategies are recorded; adapter quality determines repair depth. |
+| Commit/push per logical task | `PARTIAL` | Agent workflow used commits/pushes; docs require policy | CLI intentionally does not auto-push by default; needs explicit ship policy. |
+| Oh-My-Codex/Ralph equivalence | `PARTIAL` | Control-loop architecture and adapter boundary exist | Not equivalent until the remaining runtime gaps below are implemented and proven. |
 
-## Verdict
+## Current verdict
 
-Current level: **Ralph/Oh-My-Codex-style autonomous coding runtime via adapter boundary**.
+Current level: **Ralph/Oh-My-Codex-inspired `.go` conductor with adapter hooks — not yet a full autonomous coding runtime.**
 
 The honest claim is:
 
-> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, recover a failing task without user intervention, record attempt evidence, and stop safely. Full intelligence is supplied by the configured adapter command or by Hermes/Bertus following the repo-local skill; the conductor now has the runtime slots and proof harness for that intelligence.
+> Viggo can use `go` / `go-loop` as the control-handoff language. The stack can route, create tasks, validate state, execute multi-task loops, run build/critic/repair adapters, record attempt evidence, and stop safely. Full Ralph/Oh-My-Codex equivalence requires default semantic adapters, rich attempt artifacts, follow-up task generation, resume state, and explicit ship policy.
 
-## Proven promotion criteria
+## Gaps that must be green before full equivalence
 
-The previous promotion criteria are now covered:
+1. Default Codex/Hermes repair adapter command, not only raw shell hooks.
+2. Built-in semantic critic/judge that can block first-green results.
+3. Per-attempt artifact ledger: `prompt.md`, `verify.log`, `critic.md`, `diff.patch`, `verdict.json`.
+4. Real codebase repair fixture, not a toy single text-file replacement.
+5. Critic findings converted into scoped `.go/tasks/open/*.json` follow-ups.
+6. Machine-readable ship policy for none/local-commit/push.
+7. Durable resume state with run id, remaining budget, and exact resume command.
 
-1. A fresh fixture starts with a failing task. ✅
-2. One `go-loop --execute` run records build, verify, critic, repair, judge attempts. ✅
-3. At least one failure is repaired without user intervention. ✅
-4. Recheck/devil findings are machine-readable via critic adapter and block finish when major. ✅
-5. Final state includes task evidence, reflection, and compact result. ✅
-
-## Remaining honest limits
-
-- No built-in LLM is embedded in the Python CLI. Use `--build-command`, `--critic-command`, and `--repair-command` to connect Codex, Hermes, Claude, local scripts, or another executor.
-- Auto-commit/push remains policy-gated. This is intentional; public/destructive side effects should not be hidden behind a generic loop.
-- Adapter commands must be deterministic enough to verify. If an adapter cannot produce a passing check, the loop blocks with evidence instead of greenwashing.
+Until these are implemented, any blanket “Ralph/Oh-My-Codex equivalent” claim is overclaim.

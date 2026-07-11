@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "correct-ralph-benchmark-claims",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Correct Ralph/OMX benchmark overclaims",
+  "description": "Downgrade misleading PASS equivalence and split adapter-boundary proof from full autonomous runtime proof. Add explicit gaps as executable requirements.",
+  "scope": {
+    "read": [
+      "docs/**",
+      "tests/**"
+    ],
+    "modify": [
+      "docs/**",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "Benchmark distinguishes adapter-boundary PASS from full autonomous coding runtime PARTIAL/MISS.",
+    "Tests prevent future blanket Ralph/OMX equivalence overclaim."
+  ],
+  "verification": [
+    "pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T16:03:28+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T16:04:18+02:00",
+      "agent": "hermes",
+      "summary": "Corrected Ralph/OMX benchmark overclaim: full autonomous runtime and equivalence are PARTIAL until default adapters/artifacts/followups/resume/ship policy are proven. Added regression test preventing blanket PASS equivalence claim. Verification: pytest -q and make check passed."
+    }
+  ]
+}

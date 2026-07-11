@@ -343,12 +343,14 @@ def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path
     assert (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").is_file()
 
 
-def test_autonomy_benchmark_states_proven_partial_and_missing_claims():
+def test_autonomy_benchmark_does_not_overclaim_full_ralph_equivalence():
     benchmark = (ROOT / "docs" / "autonomy-benchmark.md").read_text()
     assert "One prompt routes repo-local work from `go` | `PASS`" in benchmark
-    assert "Real build/edit step inside executor | `PASS`" in benchmark
-    assert "Oh-My-Codex/Ralph equivalence | `PASS`" in benchmark
-    assert "Ralph/Oh-My-Codex-style autonomous coding runtime via adapter boundary" in benchmark
+    assert "Adapter-boundary build/edit executor | `PASS`" in benchmark
+    assert "Full autonomous coding runtime | `PARTIAL`" in benchmark
+    assert "Oh-My-Codex/Ralph equivalence | `PARTIAL`" in benchmark
+    assert "not yet a full autonomous coding runtime" in benchmark
+    assert "any blanket “Ralph/Oh-My-Codex equivalent” claim is overclaim" in benchmark
 
 
 def test_bundle_export_import_smoke(tmp_path: Path):

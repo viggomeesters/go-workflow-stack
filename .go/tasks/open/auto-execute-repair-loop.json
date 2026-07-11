@@ -1,0 +1,34 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "auto-execute-repair-loop",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Upgrade auto --execute beyond verify-only",
+  "description": "Replace the current verify-only executor with a real autonomous loop skeleton: preflight, claim, run verification, on failure perform bounded same-scope repair hooks or emit agent handoff, rerun gates, finish/block with evidence, and continue.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**"
+    ],
+    "modify": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "Tests prove auto --execute continues across multiple tasks without requiring manual next/claim/finish commands.",
+    "Failures produce actionable blocked state or repair follow-up tasks, not a passive summary."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

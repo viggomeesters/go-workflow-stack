@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "auto-continuation-budget-and-summary",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Add continuation budget and compact progress checkpoints",
+  "description": "Make go auto usable for long trains by adding max-minutes/max-commands/checkpoint cadence and compact TG summaries only at completion/blocker/checkpoint.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ],
+    "modify": [
+      ".go/**",
+      "cli/go.py",
+      "tests/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ]
+  },
+  "acceptance": [
+    "CLI/handoff has budget fields for max tasks, max minutes/commands, and checkpoint cadence.",
+    "Default Telegram-facing summary is quiet until done/blocker/checkpoint."
+  ],
+  "verification": [
+    "make check",
+    "pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

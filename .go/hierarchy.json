@@ -12,7 +12,11 @@
         "repo-local-executor-docs",
         "router-state-hardening",
         "spike-task-scope-presets",
-        "auto-emit-handoff"
+        "auto-emit-handoff",
+        "auto-command-train-contract",
+        "auto-execute-repair-loop",
+        "hermes-go-auto-skill-execution-rule",
+        "auto-continuation-budget-and-summary"
       ]
     },
     {

@@ -26,7 +26,8 @@
         }
       ],
       "tasks": [
-        "template-pairing-smoke"
+        "template-pairing-smoke",
+        "document-template-check-skill"
       ]
     }
   ]

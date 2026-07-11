@@ -1,0 +1,37 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "document-template-check-skill",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Document template-check in runtime skill",
+  "description": "Document template-check in runtime skill",
+  "scope": {
+    "read": [
+      ".go/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ],
+    "modify": [
+      ".go/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
+    ]
+  },
+  "acceptance": [
+    "Runtime skill names template-check and fresh-template bootstrap verification."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T07:59:08+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-11T07:59:25+02:00",
+      "agent": "hermes",
+      "summary": "python3 cli/go.py validate . passed; python3 cli/go.py template-check ../go-project-template --json ok=true"
+    }
+  ]
+}

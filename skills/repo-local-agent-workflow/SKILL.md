@@ -115,6 +115,15 @@ python3 ~/github/go-workflow-stack/cli/go.py readback <target-repo>
 python3 ~/github/go-workflow-stack/cli/go.py next <target-repo>
 ```
 
+For the public starter template, also prove the stack/template pairing and fresh-clone check path:
+
+```bash
+python3 ~/github/go-workflow-stack/cli/go.py template-check ~/github/go-project-template --json
+bash ~/github/go-project-template/scripts/check.sh
+```
+
+`go-project-template/scripts/check.sh` bootstraps a sibling `go-workflow-stack` checkout when missing; set `GO_STACK=/path/to/go-workflow-stack` to use or populate a specific stack location.
+
 For v0.3+ end-to-end command routing, use these higher-level primitives:
 
 ```bash

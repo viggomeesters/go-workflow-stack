@@ -3,7 +3,7 @@
   "kind": "task",
   "id": "benchmark-autonomy-against-ralph-omx",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Benchmark bare go autonomy against Ralph/Oh-My-Codex criteria",
   "description": "Create a small benchmark fixture/matrix that measures the stack against autonomous-loop criteria: one-prompt continuation, task splitting, multi-task execution, failure repair, critic loop, safe stop, evidence, and final compact reporting.",
   "scope": {
@@ -26,8 +26,14 @@
     "pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-11T14:00:23+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-11T14:01:29+02:00",
+      "agent": "hermes",
+      "summary": "Added docs/autonomy-benchmark.md with PASS/PARTIAL/MISS Ralph/Oh-My-Codex matrix and promotion criteria; linked from go-autonomous-loop docs; test asserts proven/partial/missing claims. Verification: pytest -q 12 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed."
+    }
+  ]
 }

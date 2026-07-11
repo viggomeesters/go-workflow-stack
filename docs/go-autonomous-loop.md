@@ -127,3 +127,7 @@ The stack needs three layers:
 3. **Executor adapter** — for Hermes/Bertus/Codex/etc.; performs actual editing/review/tool calls and reports machine-readable results back to the conductor.
 
 CLI-only `auto --execute` can handle mechanical verification-ready tasks, but real coding requires an executor handoff. The critical improvement is that Hermes/Bertus must treat the handoff as an instruction to start tools now, not as a pretty JSON plan for Viggo to manually run.
+
+## Benchmark status
+
+See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The short version: the stack is now a loop-ready conductor with mechanical verification and critic evidence, not a complete autonomous coding runtime. Do not claim full equivalence until the benchmark promotion criteria pass.

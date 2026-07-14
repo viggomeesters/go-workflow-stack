@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "coordinated-cross-repo-publish",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Publish verified stack and template revisions in dependency order",
   "description": "Publish verified stack and template revisions in dependency order",
   "scope": {
@@ -30,5 +30,11 @@
     "agent": "codex",
     "claimed_at": "2026-07-14T13:11:49+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-14T13:16:07+02:00",
+      "agent": "codex",
+      "summary": "Stack feature revision eae9a178 pushed before template feature revision 94a9d180; workflow revisions stack 14baaa85 and template 163efde9 match origin/main; fresh remote clones validate and pair cleanly; 46 tests plus both make checks pass on Debian Python 3.12; actionlint and shellcheck pass; GitHub dispatch is externally unavailable because Actions is disabled for this user."
+    }
+  ]
 }

@@ -28,7 +28,14 @@
         "attempt-artifact-ledger",
         "semantic-critic-followups",
         "codex-agent-adapter-and-real-fixture",
-        "ship-policy-and-resume-state"
+        "ship-policy-and-resume-state",
+        "autonomous-contract-gates",
+        "default-agent-executor-critic",
+        "vision-goal-completion-audit",
+        "campaign-resume-e2e",
+        "portable-runtime-hermes-selection",
+        "wsl-doctor-launcher-version",
+        "bootstrap-linux-hermes-campaign"
       ]
     },
     {
@@ -49,7 +56,11 @@
         "safe-ship-scoped-add",
         "hard-budget-enforcement",
         "exact-resume-command",
-        "benchmark-claim-downgrade"
+        "benchmark-claim-downgrade",
+        "scope-enforcement-integrity",
+        "transactional-finish-ship",
+        "template-executable-pairing",
+        "coordinated-cross-repo-publish"
       ]
     }
   ]

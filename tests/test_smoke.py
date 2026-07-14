@@ -1,4 +1,7 @@
 import json
+import os
+import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -32,8 +35,149 @@ def test_template_check_command_reports_pairing_contract():
     assert checks["validate"]["ok"] is True
     assert checks["route_repo_local"]["ok"] is True
     assert checks["has_claimable_example_task"]["ok"] is True
+    assert checks["first_auto_execute"]["ok"] is True
     if template_repo().name == "go-project-template":
         assert checks["check_script_bootstraps_stack"]["ok"] is True
+
+
+def test_public_template_first_auto_executes_declared_task(tmp_path: Path):
+    repo = tmp_path / "fresh-template"
+    shutil.copytree(template_repo(), repo, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed template", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["GO_STACK"] = str(ROOT)
+
+    executed = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "auto", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["task-schema-smoke"]
+    assert (repo / ".go" / "tasks" / "done" / "task-schema-smoke.json").is_file()
+
+
+def test_public_template_project_launcher_discovers_stack(tmp_path: Path):
+    repo = tmp_path / "launcher-template"
+    shutil.copytree(template_repo(), repo, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    launcher = repo / "go"
+    env = os.environ.copy()
+    env["GO_STACK"] = str(ROOT)
+
+    launched = subprocess.run([str(launcher), "validate", "."], cwd=repo, text=True, capture_output=True, env=env)
+
+    assert launched.returncode == 0, launched.stderr + launched.stdout
+    assert f"ok: {repo / '.go'}" in launched.stdout
+
+
+def test_template_bootstrap_fast_forwards_existing_clean_stack(tmp_path: Path):
+    source = tmp_path / "stack-source"
+    remote = tmp_path / "stack.git"
+    checkout = tmp_path / "go-workflow-stack"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(source)], check=True)
+    (source / "cli").mkdir()
+    (source / "cli" / "go.py").write_text("VERSION = 1\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v1", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "clone", "--bare", "-q", str(source), str(remote)], check=True)
+    subprocess.run(["git", "clone", "-q", str(remote), str(checkout)], check=True)
+    (source / "cli" / "go.py").write_text("VERSION = 2\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v2", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(remote)], cwd=source, check=True)
+    subprocess.run(["git", "push", "-q", "origin", "main"], cwd=source, check=True)
+    project = tmp_path / "project"
+    shutil.copytree(template_repo(), project, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    env = os.environ.copy()
+    env["GO_STACK"] = str(checkout)
+    env["GO_STACK_REMOTE"] = str(remote)
+
+    bootstrapped = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
+
+    assert bootstrapped.returncode == 0, bootstrapped.stderr + bootstrapped.stdout
+    assert (checkout / "cli" / "go.py").read_text() == "VERSION = 2\n"
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
+    origin = subprocess.run(["git", "rev-parse", "origin/main"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
+    assert head == origin
+
+    (checkout / "local.txt").write_text("local\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=checkout, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "local", "-q"], cwd=checkout, check=True)
+    (source / "remote.txt").write_text("remote\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v3", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "push", "-q", "origin", "main"], cwd=source, check=True)
+
+    diverged = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
+
+    assert diverged.returncode == 4
+    assert "diverged from origin/main" in diverged.stderr
+
+
+def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():
+    env = os.environ.copy()
+    env["GO_RUN_REAL_HERMES_E2E"] = "1"
+    env["PATH"] = "/usr/bin:/bin"
+
+    attempted = subprocess.run(
+        ["/bin/bash", str(ROOT / "scripts" / "run-hermes-acceptance.sh")],
+        text=True, capture_output=True, env=env,
+    )
+
+    assert attempted.returncode == 2
+    assert "NOT PROVEN: hermes is not available on PATH" in attempted.stderr
+
+
+def test_spike_customizes_a_repository_created_from_public_template(tmp_path: Path):
+    repo = tmp_path / "customer-portal"
+    shutil.copytree(template_repo(), repo, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+
+    spiked = run_go(
+        "spike", str(repo), "--brief", "A customer portal for support requests",
+        "--task", "first-slice|Build the first support-request slice",
+        "--verification", "git diff --check",
+    )
+
+    assert spiked.returncode == 0, spiked.stderr + spiked.stdout
+    project = json.loads((repo / ".go" / "project.json").read_text())
+    vision = json.loads((repo / ".go" / "vision.json").read_text())
+    task = json.loads((repo / ".go" / "tasks" / "open" / "first-slice.json").read_text())
+    assert project["id"] == "customer-portal"
+    assert project["name"] == "Customer Portal"
+    assert vision["project"] == "customer-portal"
+    assert vision["wedge"] == "A customer portal for support requests"
+    assert task["project"] == "customer-portal"
+    assert not list((repo / ".go" / "tasks" / "done").glob("*.json"))
+
+
+def test_apply_template_creates_project_specific_contract(tmp_path: Path):
+    repo = tmp_path / "applied-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    env = os.environ.copy()
+    env["GO_PROJECT_TEMPLATE"] = str(template_repo())
+    env["GO_PROJECT_BRIEF"] = "An applied project with its own durable direction"
+
+    applied = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "apply-template.sh"), str(repo)],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert applied.returncode == 0, applied.stderr + applied.stdout
+    project = json.loads((repo / ".go" / "project.json").read_text())
+    vision = json.loads((repo / ".go" / "vision.json").read_text())
+    assert project["id"] == "applied-project"
+    assert vision["project"] == "applied-project"
+    assert vision["wedge"] == env["GO_PROJECT_BRIEF"]
+    assert list((repo / ".go" / "tasks" / "open").glob("*.json"))
 
 
 def test_epic_and_decision_authoring_primitives(tmp_path: Path):
@@ -59,6 +203,33 @@ def test_epic_and_decision_authoring_primitives(tmp_path: Path):
     assert validate.returncode == 0, validate.stderr + validate.stdout
     readback = run_go("readback", str(repo))
     assert "Epics: workflow; workflow-contract" in readback.stdout
+
+
+def test_validate_rejects_cross_file_project_and_hierarchy_drift(tmp_path: Path):
+    repo = tmp_path / "contract-drift"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "contract", "--name", "Contract")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "linked-task", "--summary", "Linked task",
+        "--epic", "workflow", "--acceptance", "Task remains linked to its project",
+        "--verification", "git diff --check",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    task_path = repo / ".go" / "tasks" / "open" / "linked-task.json"
+    task_data = json.loads(task_path.read_text())
+    task_data["project"] = "different-project"
+    task_path.write_text(json.dumps(task_data, indent=2) + "\n")
+    hierarchy_path = repo / ".go" / "hierarchy.json"
+    hierarchy = json.loads(hierarchy_path.read_text())
+    hierarchy["epics"][0]["tasks"] = []
+    hierarchy_path.write_text(json.dumps(hierarchy, indent=2) + "\n")
+
+    validated = run_go("validate", str(repo))
+
+    assert validated.returncode == 1
+    assert "task project" in validated.stderr
+    assert "not linked from hierarchy" in validated.stderr
 
 
 def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
@@ -99,7 +270,7 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     handoff_plan = json.loads(handoff.stdout)
     assert handoff_plan["schema"] == "go-workflow.agent-handoff.v1"
     assert handoff_plan["mode"] == "go-auto"
-    assert handoff_plan["target_runtime"] == "hermes-bertus"
+    assert handoff_plan["target_runtime"] == "codex-or-hermes-agent"
     assert handoff_plan["tasks"][0]["id"] == "design-monitor"
     assert "docs/**" in handoff_plan["tasks"][0]["scope"]["modify"]
     assert "make check" in handoff_plan["expected_evidence"]["verification_commands"]
@@ -121,7 +292,7 @@ def test_spike_bootstraps_repo_local_contract_and_auto_plan(tmp_path: Path):
     assert plan["execution_policy"]["may_create_follow_up_tasks"] is True
     assert plan["execution_policy"]["may_continue_after_self_reflect"] is True
     assert "claim_and_execute_open_tasks" in plan["execution_policy"]["allowed_autonomous_actions"]
-    assert "missing_credentials" in plan["execution_policy"]["human_gates"]
+    assert "external_authority_required" in plan["execution_policy"]["human_gates"]
     assert plan["run_envelope"]["run_until"] == "done_or_blocker_or_budget_or_safety_gate"
     assert plan["run_envelope"]["budget"]["max_tasks"] == 2
     assert plan["run_envelope"]["budget"]["max_minutes"] == 45
@@ -149,7 +320,7 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "exec", "--name", "Exec", "--verification", "python3 -c \"print('ok')\"")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    task = run_go("task", "create", str(repo), "--id", "verify-only", "--summary", "Verify only", "--epic", "workflow", "--verification", "python3 -c \"print('verified')\"")
+    task = run_go("task", "create", str(repo), "--id", "verify-only", "--summary", "Verify only", "--epic", "workflow", "--acceptance", "Verification command prints verified and exits zero", "--verification", "python3 -c \"print('verified')\"")
     assert task.returncode == 0, task.stderr + task.stdout
     subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
@@ -166,7 +337,8 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     assert "task.finished" in evidence_log
     reflection_log = (repo / ".go" / "reflections" / "events.jsonl").read_text()
     assert "auto.reflected" in reflection_log
-    assert result["commands_run"] == 1
+    assert result["commands_run"] == 2
+    assert result["completion_audit"]["project_verification_passed"] is True
     assert result["checkpoints"]
     assert result["attempts"][0]["stages"] == ["build", "verify", "critic", "repair", "judge"]
     assert result["attempts"][0]["critic"]["status"] == "passed"
@@ -177,7 +349,7 @@ def test_auto_execute_failure_records_critic_attempt_before_blocking(tmp_path: P
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "fail", "--name", "Fail")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    task = run_go("task", "create", str(repo), "--id", "failing", "--summary", "Failing", "--epic", "workflow", "--verification", "python3 -c \"import sys; sys.exit(7)\"")
+    task = run_go("task", "create", str(repo), "--id", "failing", "--summary", "Failing", "--epic", "workflow", "--acceptance", "The failing verification is recorded with critic evidence", "--verification", "python3 -c \"import sys; sys.exit(7)\"")
     assert task.returncode == 0, task.stderr + task.stdout
     subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
@@ -205,7 +377,7 @@ def test_go_loop_repair_adapter_fixes_failing_task_without_user_intervention(tmp
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     (repo / "answer.txt").write_text("broken", encoding="utf-8")
     verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('answer.txt').read_text().strip() == 'fixed' else 9)\""
-    task = run_go("task", "create", str(repo), "--id", "repair-me", "--summary", "Repair me", "--epic", "workflow", "--read", "answer.txt", "--modify", "answer.txt", "--verification", verify)
+    task = run_go("task", "create", str(repo), "--id", "repair-me", "--summary", "Repair me", "--epic", "workflow", "--read", "answer.txt", "--modify", "answer.txt", "--acceptance", "answer.txt contains exactly fixed", "--verification", verify)
     assert task.returncode == 0, task.stderr + task.stdout
     subprocess.run(["git", "add", ".go", "answer.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed broken repair state", "-q"], cwd=repo, check=True)
@@ -266,6 +438,41 @@ def test_go_loop_repair_adapter_fixes_real_python_package_without_user_intervent
     assert (repo / ".go" / "tasks" / "done" / "fix-add.json").is_file()
 
 
+def test_executor_adapter_receives_vision_principles_hierarchy_and_task_context(tmp_path: Path):
+    repo = tmp_path / "context-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go(
+        "adopt", str(repo), "--project-id", "context", "--name", "Context",
+        "--north-star", "Ship context-aware work", "--principle", "small-seams|Keep seams small.|Agents need narrow changes.|Review task scope",
+    )
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('context.json').is_file() else 1)\""
+    task = run_go(
+        "task", "create", str(repo), "--id", "capture-context", "--summary", "Capture context",
+        "--epic", "workflow", "--modify", "context.json", "--acceptance", "Adapter receives the durable project contract",
+        "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed context", "-q"], cwd=repo, check=True)
+    repair = "python3 -c \"import os; from pathlib import Path; Path('context.json').write_text(os.environ['GO_CONTEXT_JSON'], encoding='utf-8')\""
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute",
+        "--agent", "pytest", "--repair-command", repair, "--json",
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    context = json.loads((repo / "context.json").read_text())
+    assert context["vision"]["north_star"] == "Ship context-aware work"
+    assert context["architecture_principles"]["principles"][0]["id"] == "small-seams"
+    assert context["task"]["id"] == "capture-context"
+    assert context["hierarchy"]["epics"][0]["id"] == "workflow"
+    prompt_artifact = repo / ".go" / "runs" / "capture-context" / "attempt-02" / "prompt.md"
+    assert "Ship context-aware work" in prompt_artifact.read_text()
+    assert "small-seams" in prompt_artifact.read_text()
+
+
 def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
     repo = tmp_path / "ship-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -288,16 +495,225 @@ def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
     assert status.stdout.strip() == ""
 
 
+def test_blocked_ship_keeps_verified_task_active(tmp_path: Path):
+    repo = tmp_path / "blocked-ship-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "blockedship", "--name", "Blocked Ship")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "ship-blocked", "--summary", "Ship blocked",
+        "--epic", "workflow", "--acceptance", "Verification passes",
+        "--verification", "python3 -c 'print(7)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed blocked ship", "-q"], cwd=repo, check=True)
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest",
+        "--ship-policy", "push", "--json",
+    )
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert result["completed_tasks"] == []
+    assert (repo / ".go" / "tasks" / "active" / "ship-blocked.json").is_file()
+    assert not (repo / ".go" / "tasks" / "done" / "ship-blocked.json").exists()
+    assert not any("task.finished" in line for line in (repo / ".go" / "evidence" / "events.jsonl").read_text().splitlines())
+
+
+def test_failed_local_commit_restores_verified_task_to_active(tmp_path: Path):
+    repo = tmp_path / "failed-commit-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "failedcommit", "--name", "Failed Commit")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "commit-fails", "--summary", "Commit fails",
+        "--epic", "workflow", "--acceptance", "Verification passes",
+        "--verification", "python3 -c 'print(7)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed failed commit", "-q"], cwd=repo, check=True)
+    hooks = repo / ".hooks"
+    hooks.mkdir()
+    hook = hooks / "pre-commit"
+    hook.write_text("#!/bin/sh\nexit 1\n", encoding="utf-8")
+    hook.chmod(0o755)
+    subprocess.run(["git", "config", "core.hooksPath", str(hooks)], cwd=repo, check=True)
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest",
+        "--ship-policy", "local-commit", "--json",
+    )
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert (repo / ".go" / "tasks" / "active" / "commit-fails.json").is_file()
+    assert not (repo / ".go" / "tasks" / "done" / "commit-fails.json").exists()
+    assert not any("task.finished" in line for line in (repo / ".go" / "evidence" / "events.jsonl").read_text().splitlines())
+
+
 def test_agent_check_reports_real_adapter_availability():
     result = run_go("agent-check", "--json")
     assert result.returncode == 0, result.stderr + result.stdout
     payload = json.loads(result.stdout)
     agents = {item["agent"]: item for item in payload["agents"]}
     assert set(agents) == {"codex", "hermes"}
-    assert agents["hermes"]["available"] is True
-    # Codex is allowed to be missing, but the check must report that instead of pretending green.
-    assert isinstance(agents["codex"]["available"], bool)
+    assert all(isinstance(item["available"], bool) for item in agents.values())
     assert "dangerously-bypass" not in (ROOT / "cli" / "go.py").read_text()
+
+
+def test_agent_mode_task_selects_safe_default_codex_executor(tmp_path: Path):
+    repo = tmp_path / "default-agent-project"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_codex = bin_dir / "codex"
+    fake_codex.write_text(
+        "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"$GO_REPO/codex-args.txt\"\nout=''\nprevious=''\nfor arg in \"$@\"; do\n  if [ \"$previous\" = '-o' ]; then out=\"$arg\"; fi\n  previous=\"$arg\"\ndone\nif [ -n \"$out\" ]; then\n  count_file=\"$GO_REPO/.go/runs/fake-critic-count\"\n  count=0\n  if [ -f \"$count_file\" ]; then count=$(cat \"$count_file\"); fi\n  if [ \"$count\" -eq 0 ]; then\n    printf 'GO_CRITIC_VERDICT: BLOCK\\nExercise the repair loop once.\\n' > \"$out\"\n  else\n    printf 'GO_CRITIC_VERDICT: PASS\\nNo blocking findings.\\n' > \"$out\"\n  fi\n  echo $((count + 1)) > \"$count_file\"\nelse\n  printf 'built\\n' > \"$GO_REPO/built.txt\"\nfi\n",
+        encoding="utf-8",
+    )
+    fake_codex.chmod(0o755)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "defaultagent", "--name", "Default Agent")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "agent-build", "--summary", "Agent build", "--epic", "workflow",
+        "--execution-mode", "agent", "--modify", "built.txt", "--modify", "codex-args.txt",
+        "--acceptance", "The selected coding agent creates built.txt", "--verification", "test -f built.txt",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed default agent", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+
+    executed = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    assert result["status"] == "done"
+    assert len(result["attempts"]) == 2
+    assert result["attempts"][0]["build"]["status"] == "passed"
+    assert result["attempts"][0]["critic"]["status"] == "blocking_findings"
+    assert result["attempts"][1]["critic"]["status"] == "passed"
+    assert "GO_CRITIC_VERDICT: PASS" in result["attempts"][1]["critic"]["result"]["verdict_text"]
+    args = (repo / "codex-args.txt").read_text()
+    assert "--sandbox\nworkspace-write" in args
+    assert "--sandbox\nread-only" in args
+    assert "--ephemeral" in args
+    assert "dangerously-bypass" not in args
+
+
+def test_restartable_agent_campaign_builds_repairs_commits_and_completes(tmp_path: Path):
+    repo = tmp_path / "release-notes-campaign"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_hermes = bin_dir / "hermes"
+    fake_hermes.write_text(
+        """#!/usr/bin/env python3
+import json
+import os
+import sys
+from pathlib import Path
+
+repo = Path(os.environ["GO_REPO"])
+task_id = os.environ["GO_TASK_ID"]
+run_root = repo / ".go" / "runs"
+with (run_root / "adapter-invocations.log").open("a", encoding="utf-8") as handle:
+    handle.write(f"{task_id} {os.environ['GO_HOOK']} {os.environ['GO_ATTEMPT']}\\n")
+
+if os.environ["GO_HOOK"] == "critic":
+    counter = run_root / f"{task_id}.critic-count"
+    count = int(counter.read_text()) if counter.exists() else 0
+    verdict = "BLOCK" if task_id == "parse-headings" and count == 0 else "PASS"
+    print(f"GO_CRITIC_VERDICT: {verdict}")
+    print("Add one repair pass." if verdict == "BLOCK" else "Evidence is sufficient.")
+    counter.write_text(str(count + 1), encoding="utf-8")
+elif task_id == "parse-headings":
+    (repo / "release_notes.py").write_text(
+        "def headings(text):\\n    return [line[2:].strip() for line in text.splitlines() if line.startswith('# ')]\\n",
+        encoding="utf-8",
+    )
+    (repo / "test_release_notes.py").write_text(
+        "import unittest\\nfrom release_notes import headings\\n\\nclass TestReleaseNotes(unittest.TestCase):\\n    def test_headings(self):\\n        self.assertEqual(headings(chr(10).join(['# One', 'body', '# Two'])), ['One', 'Two'])\\n",
+        encoding="utf-8",
+    )
+elif task_id == "render-json":
+    (repo / "release_notes.py").write_text(
+        "import json\\n\\ndef headings(text):\\n    return [line[2:].strip() for line in text.splitlines() if line.startswith('# ')]\\n\\ndef render_json(text):\\n    return json.dumps({'headings': headings(text)}, sort_keys=True)\\n",
+        encoding="utf-8",
+    )
+    (repo / "test_release_notes.py").write_text(
+        "import unittest\\nfrom release_notes import headings, render_json\\n\\nclass TestReleaseNotes(unittest.TestCase):\\n    def test_headings(self):\\n        self.assertEqual(headings(chr(10).join(['# One', 'body', '# Two'])), ['One', 'Two'])\\n    def test_json(self):\\n        self.assertEqual(render_json('# Two'), '{\\\"headings\\\": [\\\"Two\\\"]}')\\n",
+        encoding="utf-8",
+    )
+""",
+        encoding="utf-8",
+    )
+    fake_hermes.chmod(0o755)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go(
+        "adopt", str(repo), "--project-id", "release-notes", "--name", "Release Notes",
+        "--north-star", "Turn Markdown release notes into dependable structured output",
+        "--verification", "python3 -m unittest -q",
+    )
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    for task_id, summary, acceptance in [
+        ("parse-headings", "Parse Markdown headings", "Heading parsing returns every level-one heading in order"),
+        ("render-json", "Render headings as JSON", "JSON output contains the parsed headings under a stable headings key"),
+    ]:
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", summary, "--epic", "workflow",
+            "--execution-mode", "agent", "--modify", "release_notes.py", "--modify", "test_release_notes.py",
+            "--acceptance", acceptance, "--verification", "python3 -m unittest -q",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed campaign", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+    env["GO_EXECUTOR_AGENT"] = "hermes"
+    env["GO_STACK"] = str(ROOT)
+
+    first = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--max-tasks", "1", "--max-commands", "20", "--execute", "--agent", "pytest", "--ship-policy", "local-commit", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+
+    assert first.returncode == 0, first.stderr + first.stdout
+    first_result = json.loads(first.stdout)
+    assert first_result["status"] == "budget_exhausted"
+    assert first_result["completed_tasks"] == ["parse-headings"]
+    assert first_result["attempts"][0]["critic"]["status"] == "blocking_findings"
+    assert first_result["attempts"][1]["critic"]["status"] == "passed"
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    assert latest["status"] == "budget_exhausted"
+    assert latest["effective_flags"]["ship_policy"] == "local-commit"
+    assert (repo / ".go" / "tasks" / "done" / "parse-headings.json").is_file()
+    assert (repo / ".go" / "tasks" / "open" / "render-json.json").is_file()
+
+    resumed = subprocess.run(shlex.split(latest["resume_command"]), cwd=repo, text=True, capture_output=True, env=env)
+
+    assert resumed.returncode == 0, resumed.stderr + resumed.stdout
+    resumed_result = json.loads(resumed.stdout)
+    assert resumed_result["status"] == "done"
+    assert resumed_result["completed_tasks"] == ["render-json"]
+    assert resumed_result["completion_audit"]["project_verification_passed"] is True
+    assert (repo / ".go" / "runs" / "parse-headings" / "attempt-01" / "deep-critic.txt").is_file()
+    assert (repo / ".go" / "runs" / "parse-headings" / "attempt-02" / "verdict.json").is_file()
+    assert (repo / ".go" / "runs" / "render-json" / "attempt-01" / "prompt.md").is_file()
+    subjects = subprocess.run(["git", "log", "--format=%s"], cwd=repo, text=True, capture_output=True, check=True).stdout
+    assert "go-loop: finish parse-headings" in subjects
+    assert "go-loop: finish render-json" in subjects
+    assert subprocess.run(["git", "status", "--short"], cwd=repo, text=True, capture_output=True, check=True).stdout.strip() == ""
 
 
 def test_go_loop_blocks_repair_agent_when_binary_missing(tmp_path: Path):
@@ -340,6 +756,92 @@ def test_adapter_scope_violation_blocks_task(tmp_path: Path):
     assert (repo / ".go" / "tasks" / "blocked" / "scope-task.json").is_file()
 
 
+def test_adapter_cannot_modify_read_only_path(tmp_path: Path):
+    repo = tmp_path / "read-only-scope-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "readonly", "--name", "Read Only")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "owned.txt").write_text("bad", encoding="utf-8")
+    (repo / "context.txt").write_text("keep", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('owned.txt').read_text() == 'good' else 1)\""
+    task = run_go(
+        "task", "create", str(repo), "--id", "read-only-scope", "--summary", "Read-only scope",
+        "--epic", "workflow", "--read", "context.txt", "--modify", "owned.txt",
+        "--acceptance", "Only the owned file changes", "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "owned.txt", "context.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed read-only scope", "-q"], cwd=repo, check=True)
+    repair = "python3 -c \"from pathlib import Path; Path('owned.txt').write_text('good', encoding='utf-8'); Path('context.txt').write_text('changed', encoding='utf-8')\""
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute",
+        "--agent", "pytest", "--repair-command", repair, "--json",
+    )
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert "context.txt" in json.dumps(result["attempts"])
+
+
+def test_adapter_scope_globs_allow_intended_descendants(tmp_path: Path):
+    repo = tmp_path / "glob-scope-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "globscope", "--name", "Glob Scope")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "src").mkdir()
+    (repo / "src" / "answer.txt").write_text("bad", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('src/answer.txt').read_text() == 'good' else 1)\""
+    task = run_go(
+        "task", "create", str(repo), "--id", "glob-scope", "--summary", "Glob scope",
+        "--epic", "workflow", "--modify", "src/**", "--acceptance", "Nested source changes",
+        "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "src/answer.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed glob scope", "-q"], cwd=repo, check=True)
+    repair = "python3 -c \"from pathlib import Path; Path('src/answer.txt').write_text('good', encoding='utf-8')\""
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute",
+        "--agent", "pytest", "--repair-command", repair, "--json",
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    assert json.loads(executed.stdout)["status"] == "done"
+
+
+def test_adapter_cannot_hide_scope_violation_in_preexisting_dirty_path(tmp_path: Path):
+    repo = tmp_path / "preexisting-dirty-scope-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "dirtyscope", "--name", "Dirty Scope")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "owned.txt").write_text("bad", encoding="utf-8")
+    (repo / "unrelated.txt").write_text("clean", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('owned.txt').read_text() == 'good' else 1)\""
+    task = run_go(
+        "task", "create", str(repo), "--id", "dirty-scope", "--summary", "Dirty scope",
+        "--epic", "workflow", "--modify", "owned.txt", "--acceptance", "Only owned changes",
+        "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go", "owned.txt", "unrelated.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed dirty scope", "-q"], cwd=repo, check=True)
+    (repo / "unrelated.txt").write_text("user work", encoding="utf-8")
+    repair = "python3 -c \"from pathlib import Path; Path('owned.txt').write_text('good', encoding='utf-8'); Path('unrelated.txt').write_text('adapter overwrite', encoding='utf-8')\""
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute",
+        "--agent", "pytest", "--repair-command", repair, "--json",
+    )
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert "unrelated.txt" in json.dumps(result["attempts"])
+
+
 def test_hard_command_budget_stops_before_second_command(tmp_path: Path):
     repo = tmp_path / "budget-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -355,6 +857,31 @@ def test_hard_command_budget_stops_before_second_command(tmp_path: Path):
     assert result["status"] == "budget_exhausted"
     assert result["commands_run"] == 1
     assert any(check.get("budget_exhausted") for check in result["checks"])
+
+
+def test_verification_command_timeout_stops_hung_task(tmp_path: Path):
+    repo = tmp_path / "timeout-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "timeout", "--name", "Timeout")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "hangs", "--summary", "Hangs", "--epic", "workflow",
+        "--acceptance", "Hung verification is terminated and reported", "--verification", "python3 -c 'import time; time.sleep(30)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed timeout", "-q"], cwd=repo, check=True)
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "1", "--execute",
+        "--agent", "pytest", "--command-timeout-seconds", "1", "--json",
+    )
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "blocked"
+    assert result["checks"][0]["returncode"] == 124
+    assert result["checks"][0]["timed_out"] is True
 
 
 def test_ship_policy_stages_only_scope_and_go_runtime(tmp_path: Path):
@@ -394,11 +921,81 @@ def test_latest_resume_command_preserves_effective_flags(tmp_path: Path):
     assert executed.returncode == 0, executed.stderr + executed.stdout
     latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
     cmd = latest["resume_command"]
-    assert "--semantic-critic" in cmd
-    assert "--followup-on-block" in cmd
-    assert "--ship-policy none" in cmd
+    resume_args = latest["resume_args"]
+    assert cmd == "bash .go/runs/resume.sh"
+    assert "--semantic-critic" in resume_args
+    assert "--followup-on-block" in resume_args
+    assert resume_args[resume_args.index("--ship-policy") + 1] == "none"
     assert latest["effective_flags"]["max_attempts"] == 4
     assert latest["effective_flags"]["max_commands"] == 5
+
+
+def test_executor_agent_environment_default_is_persisted(tmp_path: Path):
+    repo = tmp_path / "executor-env-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "executor-env", "--name", "Executor Env")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "mechanical", "--summary", "Mechanical task", "--epic", "workflow",
+        "--acceptance", "Verification succeeds without invoking an agent", "--verification", "python3 -c 'print(1)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed executor env", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["GO_EXECUTOR_AGENT"] = "hermes"
+
+    executed = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    assert latest["effective_flags"]["executor_agent"] == "hermes"
+    assert latest["resume_args"][latest["resume_args"].index("--executor-agent") + 1] == "hermes"
+
+    explicit = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--execute", "--executor-agent", "codex", "--agent", "pytest", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+    assert explicit.returncode == 0, explicit.stderr + explicit.stdout
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    assert latest["effective_flags"]["executor_agent"] == "codex"
+
+
+def test_resume_command_uses_relocated_stack_runtime(tmp_path: Path):
+    repo = tmp_path / "portable-resume-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "portable-resume", "--name", "Portable Resume")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    for task_id in ("first", "second"):
+        task = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", f"Task {task_id}", "--epic", "workflow",
+            "--acceptance", f"{task_id} verification succeeds", "--verification", "python3 -c 'print(1)'",
+        )
+        assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed portable resume", "-q"], cwd=repo, check=True)
+    first = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
+    assert first.returncode == 0, first.stderr + first.stdout
+    latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
+    moved_repo = tmp_path / "moved" / "portable-resume-project"
+    shutil.copytree(repo, moved_repo)
+    relocated_stack = tmp_path / "relocated-stack"
+    (relocated_stack / "cli").mkdir(parents=True)
+    shutil.copy2(ROOT / "cli" / "go.py", relocated_stack / "cli" / "go.py")
+    env = os.environ.copy()
+    env["GO_STACK"] = str(relocated_stack)
+
+    resumed = subprocess.run(shlex.split(latest["resume_command"]), cwd=moved_repo, text=True, capture_output=True, env=env)
+
+    assert str(ROOT) not in latest["resume_command"]
+    assert resumed.returncode == 0, resumed.stderr + resumed.stdout
+    result = json.loads(resumed.stdout)
+    assert result["status"] == "done"
+    assert result["completed_tasks"] == ["second"]
+    assert (moved_repo / ".go" / "runs" / "resume.sh").is_file()
 
 
 def test_repair_agent_codex_option_is_available():
@@ -408,7 +1005,64 @@ def test_repair_agent_codex_option_is_available():
     assert "codex" in help_result.stdout
 
 
-def test_go_loop_semantic_critic_creates_followup_from_blocking_findings(tmp_path: Path):
+def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path):
+    repo = tmp_path / "doctor-project"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_hermes = bin_dir / "hermes"
+    fake_hermes.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_hermes.chmod(0o755)
+    fake_uv = bin_dir / "uv"
+    fake_uv.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_uv.chmod(0o755)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "doctor", "--name", "Doctor")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text())
+    project["required_stack_version"] = "0.2.0"
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    env = os.environ.copy()
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+
+    diagnosed = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "doctor", str(repo), "--platform", "wsl", "--agent", "hermes", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+
+    assert diagnosed.returncode == 0, diagnosed.stderr + diagnosed.stdout
+    result = json.loads(diagnosed.stdout)
+    assert result["platform"]["kind"] == "wsl"
+    assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
+    assert result["stack"]["version"] == "0.2.0"
+    assert result["stack"]["compatible"] is True
+    assert result["ready"] is True
+    assert {item["name"] for item in result["prerequisites"]} >= {"python", "git", "bash", "make", "uv"}
+
+
+def test_autonomous_execution_rejects_newer_required_stack_version(tmp_path: Path):
+    repo = tmp_path / "future-stack-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "future", "--name", "Future")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "future-task", "--summary", "Future task", "--epic", "workflow",
+        "--acceptance", "Execution is version gated", "--verification", "python3 -c 'print(1)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text())
+    project["required_stack_version"] = "999.0.0"
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+
+    executed = run_go("go-loop", str(repo), "--execute", "--json")
+
+    assert executed.returncode == 1
+    assert "requires go-workflow-stack >= 999.0.0" in executed.stderr
+    assert not (repo / ".go" / "tasks" / "active" / "future-task.json").exists()
+
+
+def test_go_loop_contract_gate_rejects_generic_acceptance_before_claim(tmp_path: Path):
     repo = tmp_path / "semantic-critic-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "semantic", "--name", "Semantic")
@@ -418,15 +1072,14 @@ def test_go_loop_semantic_critic_creates_followup_from_blocking_findings(tmp_pat
     subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed semantic critic state", "-q"], cwd=repo, check=True)
 
-    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--semantic-critic", "--followup-on-block", "--json")
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
     assert executed.returncode == 1
     result = json.loads(executed.stdout)
-    assert result["status"] == "blocked"
-    assert result["created_followups"]
-    followup_id = result["created_followups"][0]
-    assert (repo / ".go" / "tasks" / "open" / f"{followup_id}.json").is_file()
-    assert (repo / ".go" / "tasks" / "blocked" / "vague-task.json").is_file()
-    assert "acceptance" in (repo / ".go" / "tasks" / "open" / f"{followup_id}.json").read_text()
+    assert result["status"] == "contract_gate"
+    assert result["commands_run"] == 0
+    assert (repo / ".go" / "tasks" / "open" / "vague-task.json").is_file()
+    assert not (repo / ".go" / "tasks" / "active" / "vague-task.json").exists()
+    assert "generic" in json.dumps(result["run_envelope"]["preflight"]["contract_findings"])
 
 
 def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
@@ -434,8 +1087,8 @@ def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "multi", "--name", "Multi", "--verification", "python3 -c \"print('ok')\"")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    first = run_go("task", "create", str(repo), "--id", "first", "--summary", "First", "--epic", "workflow", "--verification", "python3 -c \"print('first')\"")
-    second = run_go("task", "create", str(repo), "--id", "second", "--summary", "Second", "--epic", "workflow", "--verification", "python3 -c \"print('second')\"")
+    first = run_go("task", "create", str(repo), "--id", "first", "--summary", "First", "--epic", "workflow", "--acceptance", "First verification prints first and exits zero", "--verification", "python3 -c \"print('first')\"")
+    second = run_go("task", "create", str(repo), "--id", "second", "--summary", "Second", "--epic", "workflow", "--acceptance", "Second verification prints second and exits zero", "--verification", "python3 -c \"print('second')\"")
     assert first.returncode == 0, first.stderr + first.stdout
     assert second.returncode == 0, second.stderr + second.stdout
     subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
@@ -446,10 +1099,92 @@ def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     result = json.loads(executed.stdout)
     assert result["status"] == "done"
     assert result["completed_tasks"] == ["first", "second"]
-    assert result["commands_run"] == 2
+    assert result["commands_run"] == 3
+    assert result["completion_audit"]["project_verification_passed"] is True
     assert len(result["checkpoints"]) == 2
     assert (repo / ".go" / "tasks" / "done" / "first.json").is_file()
     assert (repo / ".go" / "tasks" / "done" / "second.json").is_file()
+
+
+def test_go_loop_reports_task_budget_exhaustion_when_open_work_remains(tmp_path: Path):
+    repo = tmp_path / "bounded-loop-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "bounded", "--name", "Bounded")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    for task_id in ("first", "second"):
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", task_id.title(), "--epic", "workflow",
+            "--acceptance", f"{task_id.title()} verification exits zero", "--verification", "python3 -c 'print(1)'",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed bounded loop", "-q"], cwd=repo, check=True)
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json",
+    )
+
+    assert executed.returncode == 0
+    result = json.loads(executed.stdout)
+    assert result["status"] == "budget_exhausted"
+    assert result["completed_tasks"] == ["first"]
+    assert result["budget_exhausted"] is True
+    assert (repo / ".go" / "tasks" / "open" / "second.json").is_file()
+    assert "resume" in result["next_action"]
+
+
+def test_go_loop_does_not_report_done_while_blocked_tasks_remain(tmp_path: Path):
+    repo = tmp_path / "blocked-goal-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "blockedgoal", "--name", "Blocked Goal")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "cannot-finish", "--summary", "Cannot finish", "--epic", "workflow",
+        "--acceptance", "The failing task remains visible to goal completion", "--verification", "python3 -c 'import sys; sys.exit(9)'",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed blocked goal", "-q"], cwd=repo, check=True)
+    first = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "1", "--execute", "--agent", "pytest", "--json")
+    assert first.returncode == 1
+    assert json.loads(first.stdout)["status"] == "blocked"
+
+    resumed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--allow-dirty", "--json")
+
+    assert resumed.returncode == 1
+    result = json.loads(resumed.stdout)
+    assert result["status"] == "blocked"
+    assert result["blocked_task"] == "cannot-finish"
+    assert result["completed_tasks"] == []
+    assert "blocked task" in result["summary"].lower()
+
+
+def test_goal_completion_runs_project_verification_after_tasks_finish(tmp_path: Path):
+    repo = tmp_path / "goal-verification-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go(
+        "adopt", str(repo), "--project-id", "goalverify", "--name", "Goal Verify",
+        "--verification", "python3 -c 'import sys; sys.exit(8)'",
+    )
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "task-passes", "--summary", "Task passes", "--epic", "workflow",
+        "--acceptance", "The focused task verification exits zero", "--verification", "python3 -c 'print(1)'",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed goal verification", "-q"], cwd=repo, check=True)
+
+    executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
+
+    assert executed.returncode == 1
+    result = json.loads(executed.stdout)
+    assert result["status"] == "goal_incomplete"
+    assert result["completed_tasks"] == ["task-passes"]
+    assert result["completion_audit"]["project_verification_passed"] is False
+    assert result["completion_audit"]["task_evidence_complete"] is True
+    assert (repo / ".go" / "tasks" / "done" / "task-passes.json").is_file()
+    assert "follow-up" in result["next_action"]
 
 
 def test_auto_execute_blocks_on_preflight_gate(tmp_path: Path):
@@ -457,7 +1192,7 @@ def test_auto_execute_blocks_on_preflight_gate(tmp_path: Path):
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "dirty", "--name", "Dirty")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    task = run_go("task", "create", str(repo), "--id", "blocked", "--summary", "Blocked", "--epic", "workflow")
+    task = run_go("task", "create", str(repo), "--id", "blocked", "--summary", "Blocked", "--epic", "workflow", "--acceptance", "Execution does not start while secret-looking dirty state exists")
     assert task.returncode == 0, task.stderr + task.stdout
     (repo / ".env").write_text("TOKEN=secret\n", encoding="utf-8")
 
@@ -555,12 +1290,15 @@ def test_autonomy_benchmark_tracks_ralph_equivalence_with_adapter_boundary():
     assert "Adapter availability proof | `PASS`" in benchmark
     assert "Dangerous adapter bypass avoided | `PASS`" in benchmark
     assert "Diff/scope enforcement after adapters | `PASS`" in benchmark
-    assert "Hard command budget | `PASS`" in benchmark
+    assert "Hard command and time budget | `PASS`" in benchmark
     assert "Exact resume state | `PASS`" in benchmark
-    assert "Scoped ship policy | `PASS`" in benchmark
+    assert "Scoped transactional ship policy | `PASS`" in benchmark
     assert "Semantic critic/judge | `PASS`" in benchmark
     assert "Follow-up task generation | `PASS`" in benchmark
-    assert "Oh-My-Codex/Ralph-style runtime | `PASS`" in benchmark
+    assert "Vision/principles execution context | `PASS`" in benchmark
+    assert "Template-to-project pairing | `PASS`" in benchmark
+    assert "Vision-level completion audit | `PASS`" in benchmark
+    assert "Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL`" in benchmark
     assert "Unconstrained self-improving agent | `PARTIAL`" in benchmark
 
 

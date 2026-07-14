@@ -86,6 +86,16 @@ A pass requires:
 - git state is clean/aligned or intentionally committed;
 - evidence is recorded in `.go/evidence/events.jsonl` / `.go/runs/events.jsonl`.
 
+Every build, critic, and repair adapter receives a single `GO_CONTEXT_JSON` contract containing the project, vision, architecture principles, hierarchy, selected task, recent evidence, and recent decisions. The same north star, success metrics, principles, and hierarchy are recorded in each attempt's `prompt.md`. The task is not an isolated prompt fragment: durable project direction must be visible at execution time and auditable afterwards.
+
+Tasks declare `execution_mode: mechanical|agent`. Mechanical tasks execute only their explicit commands. Agent tasks without a build command select an installed Codex adapter first and Hermes second (`--executor-agent` can override or disable this). Codex build/repair runs are ephemeral with `workspace-write`; the subsequent deep critic is a distinct ephemeral `read-only` run and must emit an explicit PASS or BLOCK verdict. A blocking verdict re-enters the repair loop instead of accepting first green.
+
+The built-in semantic critic is enabled by default. A structurally valid task with generic acceptance is stopped by a pre-claim `contract_gate`; it is not moved to active or blocked and no verification command runs. If a task budget expires while open work remains, the result is `budget_exhausted` with a persisted resume command, never `done`.
+
+After the final task, the conductor runs a goal-completion audit. `done` requires: no open, active, or blocked tasks; valid project/vision/principle/hierarchy/task links; evidence on every done task; declared vision success metrics; and passing project-level default verification. A failing final check returns `goal_incomplete` and requires concrete follow-up work. This is a structural and executable audit; semantic proof of free-text success metrics still belongs to a deep critic adapter.
+
+At each stop, `.go/runs/latest.json` stores effective budgets, adapter selection, critic settings, ship policy, and structured resume arguments. Its command invokes `.go/runs/resume.sh`, which resolves the current machine's stack through `GO_STACK`, a sibling checkout, `~/github/go-workflow-stack`, or `~/Dev/go-workflow-stack`. A deterministic two-task campaign moves the project to a new path, selects a relocated runtime, executes the resume command, and proves the remaining task and final goal audit complete.
+
 ## What not to build
 
 Do not turn `go` into an agent that invents random features because it has autonomy.
@@ -126,8 +136,8 @@ The stack needs three layers:
 2. **Conductor** — owns the loop state, budgets, phase gates, task split/claim/finish, and continuation.
 3. **Executor adapter** — for Hermes/Bertus/Codex/etc.; performs actual editing/review/tool calls and reports machine-readable results back to the conductor.
 
-CLI-only `auto --execute` can handle mechanical verification-ready tasks, but real coding requires an executor handoff. The critical improvement is that Hermes/Bertus must treat the handoff as an instruction to start tools now, not as a pretty JSON plan for Viggo to manually run.
+`auto --execute` handles both mechanical tasks and agent tasks through the safe default Codex/Hermes adapter. An emitted handoff still tells an outer Hermes/Bertus/Codex runtime to start tools now, not to return a pretty JSON plan for Viggo to run manually.
 
 ## Benchmark status
 
-See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The short version: the stack is now a Ralph/Oh-My-Codex-style conductor with pluggable build/critic/repair adapters, bounded attempts, machine-readable evidence, and a failing-task repair fixture. It is equivalent in control-loop shape, while the actual intelligence comes from the configured adapter command or Hermes/Bertus runtime.
+See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The stack now proves a hardened conductor, default agent/critic boundary, restartable multi-task campaign, transactional commits, and a vision-level completion audit. Integrated Ralph/OMC equivalence remains `PARTIAL` because deterministic adapter fixtures do not prove the quality of every live model-driven campaign.

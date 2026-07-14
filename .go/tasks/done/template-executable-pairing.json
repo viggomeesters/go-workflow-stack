@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "template-executable-pairing",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make the public template executable on first Go auto",
+  "description": "Make the public template executable on first Go auto",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "../go-project-template/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "../go-project-template/**"
+    ]
+  },
+  "acceptance": [
+    "A fresh template clone passes its declared task verification",
+    "Template pairing check executes a bounded Go auto fixture instead of validating shape only"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-14T09:44:30+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-14T09:47:32+02:00",
+      "agent": "codex",
+      "summary": "RED fresh template auto blocked on obsolete placeholder command. GREEN: template has executable validate-go script; first auto completes in a clean copied repo; template-check now performs behavioral auto execution; stack and template make check pass."
+    }
+  ]
+}

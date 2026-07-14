@@ -23,6 +23,12 @@
     "kind": {
       "const": "task"
     },
+    "execution_mode": {
+      "enum": [
+        "mechanical",
+        "agent"
+      ]
+    },
     "id": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"

@@ -63,17 +63,20 @@ python3 cli/go.py init ../my-project --force
 Apply the public template's `.go/` structure to an existing repo:
 
 ```bash
-bash scripts/apply-template.sh ../my-project
+GO_PROJECT_BRIEF="What this project must achieve" bash scripts/apply-template.sh ../my-project
 ```
+
+The apply command validates the paired template and then creates a project-specific `.go` identity, vision, hierarchy, and task set. It does not leave the target pretending to be `go-project-template`.
 
 ## CLI commands
 
 - `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend direct handling, `spike`, `auto`, `go-loop`, or task creation. Missing repos are `mode=create_repo`; existing repos without `.go` are `mode=repair_existing_repo`.
 - `spike <repo> --brief <text> [--task-scope code|docs]`: create/adopt a repo, scaffold repo-complete basics, write `.go` vision/principles/epics/tasks, and validate. `code` is the default so generated tasks include CLI/test scope for implementation repos.
-- `auto <repo>`: hand off control for autonomous execution. It is the machine-readable shape behind Viggo saying bare `go` in a repo-local project: repair missing contract, create or claim the next task, execute, verify, recheck/devil, repair, commit/ship, finish, self-reflect, and continue until done, blocker, or budget. Add `--emit-handoff` to produce a Hermes/Bertus task/scope/gate/evidence handoff; add `--execute` for mechanical verification-ready tasks.
+- `auto <repo>`: hand off control for autonomous execution. It is the machine-readable shape behind Viggo saying bare `go` in a repo-local project: validate the durable contract, claim the next task, execute, verify, critic, repair, ship, finish, reflect, and continue until done, a repository gate, or budget. Add `--emit-handoff` for an agent handoff; add `--execute` for direct execution. Tasks with `execution_mode: agent` select Codex first and Hermes second by default; `mechanical` tasks only run declared commands. Agent work uses a write-scoped ephemeral session, followed by a separate read-only deep critic. Generic acceptance is rejected before claim and the built-in semantic critic remains enabled as a structural backstop.
 - `go-loop <repo>` / `loop <repo>`: stronger Ralph/Oh-My-Codex-style control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
+- `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
 - `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
@@ -109,11 +112,28 @@ bash scripts/apply-template.sh ../my-project
 
 JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Markdown is a human view only. Import bundles are review artifacts: they never overwrite existing project state unless a later explicit task chooses to reconcile them.
 
+Every executed run writes `.go/runs/latest.json` plus `.go/runs/resume.sh`. The JSON preserves effective budgets, adapters, critic, and ship flags as structured `resume_args`; the portable shell entrypoint resolves `GO_STACK` or a conventional sibling/home checkout at resume time. A campaign can therefore move between macOS and WSL without retaining the originating machine's absolute stack path.
+
+Set `GO_EXECUTOR_AGENT=hermes` on a Hermes-first machine. An explicit `--executor-agent` still wins for a single run:
+
+```bash
+export GO_EXECUTOR_AGENT=hermes
+python3 cli/go.py go-loop ../my-project --execute --agent hermes
+```
+
+Linux CI runs the full stack suite and a deterministic Hermes build → critic → repair → resume campaign. A live-model acceptance is deliberately opt-in and never reports success when Hermes is absent:
+
+```bash
+GO_RUN_REAL_HERMES_E2E=1 bash scripts/run-hermes-acceptance.sh
+```
+
 ## Development
 
 Use local validation before committing or publishing changes. The check compiles the Python CLI where applicable and validates the template repository contract.
 
 ```bash
+python3 -m pip install -e '.[test]'
+python3 -m pytest tests/test_smoke.py -q
 make check
 bash scripts/check.sh
 ```

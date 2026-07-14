@@ -1,0 +1,34 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "coordinated-cross-repo-publish",
+  "project": "go-workflow-stack",
+  "status": "active",
+  "summary": "Publish verified stack and template revisions in dependency order",
+  "description": "Publish verified stack and template revisions in dependency order",
+  "scope": {
+    "read": [
+      ".",
+      "../go-project-template"
+    ],
+    "modify": [
+      ".go/**",
+      "../go-project-template/.go/**"
+    ]
+  },
+  "acceptance": [
+    "All stack and template changes are committed with unrelated artifacts excluded",
+    "Stack is pushed before the template revision that depends on it",
+    "Remote main branches resolve to the locally verified commits and fresh-clone smoke instructions are recorded"
+  ],
+  "verification": [
+    "git status --short",
+    "git -C ../go-project-template status --short"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-14T13:11:49+02:00"
+  },
+  "evidence": []
+}

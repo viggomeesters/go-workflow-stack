@@ -30,6 +30,10 @@
     "source_of_truth": {
       "const": "repo-local"
     },
+    "required_stack_version": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
     "default_verification": {
       "type": "array",
       "items": {

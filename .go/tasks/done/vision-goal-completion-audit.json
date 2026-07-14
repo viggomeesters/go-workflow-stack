@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "vision-goal-completion-audit",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prove the vision-level goal before a run can report done",
+  "description": "Prove the vision-level goal before a run can report done",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "A run with active or blocked tasks cannot report done merely because open is empty",
+    "Final result audits vision success metrics hierarchy task states verification critic evidence and git state",
+    "Unproven vision completion returns an exact continuation or blocker status"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-14T10:02:45+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-14T10:07:00+02:00",
+      "agent": "codex",
+      "summary": "Goal completion hardened: blocked/active tasks prevent done; task budget with open work reports budget_exhausted; final audit requires valid linked contract, done-task evidence, declared success metrics, and passing project default verification. 37 pytest tests pass."
+    }
+  ]
+}

@@ -26,8 +26,9 @@ fi
 
 mkdir -p "$TARGET"
 rm -rf "$TARGET/.go"
-cp -R "$TEMPLATE_DIR/.go" "$TARGET/.go"
-python3 "$STACK_DIR/cli/go.py" validate "$TARGET"
+python3 "$STACK_DIR/cli/go.py" template-check "$TEMPLATE_DIR" >/dev/null
+python3 "$STACK_DIR/cli/go.py" spike "$TARGET" \
+  --brief "${GO_PROJECT_BRIEF:-Initialize $(basename "$TARGET") from the public go project template.}"
 python3 "$STACK_DIR/cli/go.py" readback "$TARGET"
 
-echo "applied go-project-template .go state to $TARGET"
+echo "applied and customized go-project-template contract in $TARGET"

@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "autonomous-contract-gates",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Enforce vision principles acceptance critic and continuation before done",
+  "description": "Enforce vision principles acceptance critic and continuation before done",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "tests/test_smoke.py",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "Auto preflight blocks structurally valid but non-executable or generic task contracts",
+    "Non-trivial task completion requires a critic verdict by default",
+    "Loop completion is derived from vision-linked task exhaustion and evidence, not first green"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-14T09:47:32+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-14T10:02:35+02:00",
+      "agent": "codex",
+      "summary": "Contract hardening complete: cross-file project/hierarchy/task validation; pre-claim contract_gate for generic acceptance; semantic critic default-on; GO_CONTEXT_JSON carries vision/principles/hierarchy/evidence/decisions; process-group timeouts; open work after budget reports budget_exhausted; 35 pytest tests and make check pass."
+    }
+  ]
+}

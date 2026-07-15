@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Make the doctor mismatch fixture independent of which release tags already exist in the checkout.
+
 ## 0.3.1 - 2026-07-15
 
 - Enforce exact commit identity for immutable stack tags across bootstrap and doctor checks.

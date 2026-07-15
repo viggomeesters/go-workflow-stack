@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "hermetic-doctor-ref-fixture",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make doctor ref fixture independent of published tags",
+  "description": "Use an intentionally absent valid stack ref so the doctor mismatch test remains deterministic before and after a release tag exists.",
+  "scope": {
+    "read": [
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "tests/test_smoke.py",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "Doctor mismatch test passes whether or not v0.3.1 exists locally."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T16:49:02+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T16:49:47+02:00",
+      "agent": "codex",
+      "summary": "RED: post-tag release-check failed because v0.3.1 now resolved to HEAD, invalidating the intended mismatch fixture. GREEN: fixture declares absent valid ref v9.9.9; focused test and full 75-test Linux/pilots suite pass."
+    }
+  ]
+}

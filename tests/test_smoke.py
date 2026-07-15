@@ -1474,6 +1474,7 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text())
     project["required_stack_version"] = "0.2.0"
+    project["stack_ref"] = "v9.9.9"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
     env = os.environ.copy()
     env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
@@ -1499,7 +1500,7 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
     assert result["stack"]["version"] == "0.3.1"
     assert result["stack"]["ref"] == "v0.3.1"
-    assert result["stack"]["required_ref"] == "v0.3.1"
+    assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
     assert result["stack"]["compatible"] is True

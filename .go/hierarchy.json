@@ -80,7 +80,8 @@
         "quote-native-adapter-repo-paths",
         "quote-router-command-examples",
         "reject-template-stack-ref-override",
-        "normalize-data-file-modes"
+        "normalize-data-file-modes",
+        "hermetic-doctor-ref-fixture"
       ]
     }
   ]

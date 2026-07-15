@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 - 2026-07-15
+
+- Enforce exact commit identity for immutable stack tags across bootstrap and doctor checks.
+- Reject release tags that are not annotated or do not dereference to the release commit.
+- Require a visible, explicit `GO_STACK_ALLOW_DEV=1` override for unpinned local development runtimes.
+
 ## 0.3.0 - 2026-07-15
 
 - Replace hosted automation with a local Linux/WSL verification command.

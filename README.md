@@ -151,7 +151,7 @@ bash scripts/check.sh
 Prepare a version locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.3.0
+bash scripts/release-check.sh 0.3.1
 ```
 
 ## Privacy and security

@@ -65,6 +65,7 @@ def test_public_template_first_auto_executes_declared_task(tmp_path: Path):
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed template", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_STACK"] = str(ROOT)
+    env["GO_STACK_ALLOW_DEV"] = "1"
 
     executed = subprocess.run(
         [sys.executable, str(ROOT / "cli" / "go.py"), "auto", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json"],
@@ -86,6 +87,7 @@ def test_public_template_project_launcher_discovers_stack(tmp_path: Path):
     launcher = repo / "go"
     env = os.environ.copy()
     env["GO_STACK"] = str(ROOT)
+    env["GO_STACK_ALLOW_DEV"] = "1"
 
     launched = subprocess.run([str(launcher), "validate", "."], cwd=repo, text=True, capture_output=True, env=env)
 
@@ -116,6 +118,7 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     env = os.environ.copy()
     env["GO_STACK"] = str(checkout)
     env["GO_STACK_REMOTE"] = str(remote)
+    env["GO_STACK_REF"] = "v0.3.0"
 
     bootstrapped = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
@@ -131,6 +134,36 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
 
     assert mismatched.returncode == 4
     assert "does not provide pinned runtime v0.3.0" in mismatched.stderr
+
+
+def test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_override(tmp_path: Path):
+    source = tmp_path / "stack-source"
+    remote = tmp_path / "stack.git"
+    checkout = tmp_path / "go-workflow-stack"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(source)], check=True)
+    (source / "cli").mkdir()
+    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "tag target", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "tag", "-a", "v0.3.0", "-m", "v0.3.0"], cwd=source, check=True)
+    (source / "after-tag.txt").write_text("same declared version, different commit\n", encoding="utf-8")
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "after tag", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "clone", "--bare", "-q", str(source), str(remote)], check=True)
+    subprocess.run(["git", "clone", "-q", str(remote), str(checkout)], check=True)
+    project = tmp_path / "project"
+    shutil.copytree(template_repo(), project, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    env = os.environ.copy()
+    env.update({"GO_STACK": str(checkout), "GO_STACK_REMOTE": str(remote), "GO_STACK_REF": "v0.3.0"})
+
+    rejected = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
+    assert rejected.returncode == 4
+    assert "does not provide pinned runtime v0.3.0" in rejected.stderr
+
+    env["GO_STACK_ALLOW_DEV"] = "1"
+    allowed = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
+    assert allowed.returncode == 0, allowed.stderr + allowed.stdout
+    assert "development override" in allowed.stderr
 
 
 def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():
@@ -828,7 +861,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.0 v0.3.0 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.1 v0.3.1 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1109,6 +1142,16 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     env = os.environ.copy()
     env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
 
+    rejected = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "doctor", str(repo), "--platform", "wsl", "--agent", "hermes", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+    assert rejected.returncode == 1, rejected.stderr + rejected.stdout
+    rejected_result = json.loads(rejected.stdout)
+    assert rejected_result["stack"]["exact_ref"] is False
+    assert rejected_result["stack"]["development_override"] is False
+
+    env["GO_STACK_ALLOW_DEV"] = "1"
     diagnosed = subprocess.run(
         [sys.executable, str(ROOT / "cli" / "go.py"), "doctor", str(repo), "--platform", "wsl", "--agent", "hermes", "--json"],
         text=True, capture_output=True, env=env,
@@ -1118,9 +1161,11 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     result = json.loads(diagnosed.stdout)
     assert result["platform"]["kind"] == "wsl"
     assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
-    assert result["stack"]["version"] == "0.3.0"
-    assert result["stack"]["ref"] == "v0.3.0"
-    assert result["stack"]["required_ref"] == "v0.3.0"
+    assert result["stack"]["version"] == "0.3.1"
+    assert result["stack"]["ref"] == "v0.3.1"
+    assert result["stack"]["required_ref"] == "v0.3.1"
+    assert result["stack"]["exact_ref"] is False
+    assert result["stack"]["development_override"] is True
     assert result["stack"]["compatible"] is True
     assert result["ready"] is True
     assert {item["name"] for item in result["prerequisites"]} >= {"python", "git", "bash", "make", "uv"}
@@ -1134,7 +1179,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.0"
+    assert project["stack_ref"] == "v0.3.1"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -1167,16 +1212,40 @@ def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Pa
     assert payload["next"] is None
 
 
-def test_release_preflight_is_local_and_version_synchronized():
+def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
+    subprocess.run(["git", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", str(ROOT / "scripts" / "release-check.sh"), "0.3.0"],
-        cwd=ROOT, text=True, capture_output=True, env=env,
+        ["bash", "scripts/release-check.sh", "0.3.1"],
+        cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.0" in result.stdout
+    assert "release preflight: v0.3.1" in result.stdout
     assert "publish: not performed" in result.stdout
+
+
+def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
+    subprocess.run(["git", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
+    (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
+    subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["GO_RELEASE_SKIP_TESTS"] = "1"
+
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.1"], cwd=repo, text=True, capture_output=True, env=env)
+    assert result.returncode == 1
+    assert "does not point to HEAD" in result.stderr
 
 
 def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_path: Path):
@@ -1213,7 +1282,7 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["stack_ref"] == "v0.3.0"
+    assert migrated["stack_ref"] == "v0.3.1"
     assert "epics" in json.loads(hierarchy_path.read_text(encoding="utf-8"))
 
     repeated = run_go("migrate", str(repo), "--json")

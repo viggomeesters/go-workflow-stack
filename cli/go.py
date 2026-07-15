@@ -2299,6 +2299,7 @@ def cmd_template_check(args: argparse.Namespace) -> int:
             )
             env = os.environ.copy()
             env["GO_STACK"] = str(STACK_ROOT)
+            env["GO_STACK_ALLOW_DEV"] = "1"
             executed = subprocess.run(
                 [sys.executable, str(SCRIPT_DIR / "go.py"), "auto", str(clone), "--max-tasks", "1", "--max-attempts", "1", "--execute", "--agent", "template-check", "--json"],
                 env=env,
@@ -3144,7 +3145,21 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     git_head = subprocess.run(
         ["git", "-C", str(STACK_ROOT), "rev-parse", "HEAD"], text=True, capture_output=True,
     ).stdout.strip()
-    ref_compatible = not required_ref or required_ref == STACK_REF or required_ref == git_head
+    if not required_ref:
+        pinned_commit = ""
+        exact_ref = True
+    elif re.fullmatch(r"[0-9a-f]{40}", required_ref):
+        pinned_commit = required_ref
+        exact_ref = git_head == pinned_commit
+    else:
+        pinned_commit = subprocess.run(
+            ["git", "-C", str(STACK_ROOT), "rev-parse", "-q", "--verify", f"refs/tags/{required_ref}^{{commit}}"],
+            text=True,
+            capture_output=True,
+        ).stdout.strip()
+        exact_ref = bool(pinned_commit) and git_head == pinned_commit
+    development_override = os.environ.get("GO_STACK_ALLOW_DEV") == "1" and not exact_ref
+    ref_compatible = exact_ref or development_override
     prerequisites: list[dict[str, Any]] = [
         {"name": "python", "available": sys.version_info >= (3, 11), "version": ".".join(str(part) for part in sys.version_info[:3]), "path": sys.executable},
     ]
@@ -3177,8 +3192,11 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "version": STACK_VERSION,
             "ref": STACK_REF,
             "git_head": git_head or None,
+            "pinned_commit": pinned_commit or None,
             "required_version": required_version,
             "required_ref": required_ref or None,
+            "exact_ref": exact_ref,
+            "development_override": development_override,
             "compatible": compatible and ref_compatible,
         },
         "contract": {"valid": not contract_errors, "errors": contract_errors},

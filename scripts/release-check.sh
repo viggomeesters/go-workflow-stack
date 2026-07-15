@@ -38,7 +38,18 @@ PY
 
 echo "release preflight: v$VERSION"
 if git -C "$ROOT" rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
-  echo "tag: v$VERSION already exists locally"
+  tag_type="$(git -C "$ROOT" cat-file -t "refs/tags/v$VERSION")"
+  if [ "$tag_type" != "tag" ]; then
+    echo "tag v$VERSION must be annotated, found $tag_type" >&2
+    exit 1
+  fi
+  tag_commit="$(git -C "$ROOT" rev-list -n 1 "v$VERSION")"
+  head_commit="$(git -C "$ROOT" rev-parse HEAD)"
+  if [ "$tag_commit" != "$head_commit" ]; then
+    echo "tag v$VERSION does not point to HEAD" >&2
+    exit 1
+  fi
+  echo "tag: annotated v$VERSION points to HEAD"
 else
   echo "tag: v$VERSION is ready to create after review"
 fi

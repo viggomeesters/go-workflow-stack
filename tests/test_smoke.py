@@ -93,18 +93,20 @@ def test_public_template_project_launcher_discovers_stack(tmp_path: Path):
     assert f"ok: {repo / '.go'}" in launched.stdout
 
 
-def test_template_bootstrap_fast_forwards_existing_clean_stack(tmp_path: Path):
+def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Path):
     source = tmp_path / "stack-source"
     remote = tmp_path / "stack.git"
     checkout = tmp_path / "go-workflow-stack"
     subprocess.run(["git", "init", "-q", "-b", "main", str(source)], check=True)
     (source / "cli").mkdir()
-    (source / "cli" / "go.py").write_text("VERSION = 1\n", encoding="utf-8")
+    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.2.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v1", "-q"], cwd=source, check=True)
+    subprocess.run(["git", "tag", "v0.2.0"], cwd=source, check=True)
     subprocess.run(["git", "clone", "--bare", "-q", str(source), str(remote)], check=True)
-    subprocess.run(["git", "clone", "-q", str(remote), str(checkout)], check=True)
-    (source / "cli" / "go.py").write_text("VERSION = 2\n", encoding="utf-8")
+    subprocess.run(["git", "clone", "--branch", "v0.2.0", "-q", str(remote), str(checkout)], check=True)
+    pinned_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
+    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v2", "-q"], cwd=source, check=True)
     subprocess.run(["git", "remote", "add", "origin", str(remote)], cwd=source, check=True)
@@ -118,23 +120,17 @@ def test_template_bootstrap_fast_forwards_existing_clean_stack(tmp_path: Path):
     bootstrapped = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
     assert bootstrapped.returncode == 0, bootstrapped.stderr + bootstrapped.stdout
-    assert (checkout / "cli" / "go.py").read_text() == "VERSION = 2\n"
+    assert (checkout / "cli" / "go.py").read_text() == 'STACK_VERSION = "0.2.0"\n'
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
-    origin = subprocess.run(["git", "rev-parse", "origin/main"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
-    assert head == origin
+    assert head == pinned_head
 
-    (checkout / "local.txt").write_text("local\n", encoding="utf-8")
-    subprocess.run(["git", "add", "."], cwd=checkout, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "local", "-q"], cwd=checkout, check=True)
-    (source / "remote.txt").write_text("remote\n", encoding="utf-8")
-    subprocess.run(["git", "add", "."], cwd=source, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v3", "-q"], cwd=source, check=True)
-    subprocess.run(["git", "push", "-q", "origin", "main"], cwd=source, check=True)
+    subprocess.run(["git", "fetch", "-q", "origin", "main"], cwd=checkout, check=True)
+    subprocess.run(["git", "checkout", "--detach", "-q", "origin/main"], cwd=checkout, check=True)
 
-    diverged = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
+    mismatched = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
-    assert diverged.returncode == 4
-    assert "diverged from origin/main" in diverged.stderr
+    assert mismatched.returncode == 4
+    assert "does not provide pinned runtime v0.2.0" in mismatched.stderr
 
 
 def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():

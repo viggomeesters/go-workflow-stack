@@ -1839,49 +1839,65 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             })
         else:
             project = load_json(root / "project.json")
-            vision = load_json(root / "vision.json")
-            done_tasks = [load_json(path) for path in sorted((root / "tasks" / "done").glob("*.json"))]
-            task_evidence_complete = bool(done_tasks) and all(bool(task.get("evidence")) for task in done_tasks)
-            contract_errors = validate_repo(repo)
-            goal_checks: list[dict[str, Any]] = []
-            if ensure_budget(result, max_commands, started_at, max_minutes, "goal completion verification"):
-                goal_checks = run_verification_commands(
-                    repo,
-                    {"id": "goal-completion", "verification": project.get("default_verification", [])},
-                    command_budget=max_commands - result["commands_run"],
-                    timeout_seconds=command_timeout_seconds,
+            if project.get("project_mode") == "template":
+                contract_errors = validate_repo(repo)
+                result["completion_audit"] = {
+                    "schema": "go-workflow.template-smoke-completion.v1",
+                    "setup_required": True,
+                    "contract_valid": not contract_errors,
+                    "contract_errors": contract_errors,
+                    "completed_example_tasks": list(result["completed_tasks"]),
+                }
+                if contract_errors:
+                    result.update({
+                        "status": "goal_incomplete",
+                        "summary": "The template smoke ran, but the starter contract is invalid.",
+                        "next_action": "repair the template contract before project customization",
+                    })
+            else:
+                vision = load_json(root / "vision.json")
+                done_tasks = [load_json(path) for path in sorted((root / "tasks" / "done").glob("*.json"))]
+                task_evidence_complete = bool(done_tasks) and all(bool(task.get("evidence")) for task in done_tasks)
+                contract_errors = validate_repo(repo)
+                goal_checks: list[dict[str, Any]] = []
+                if ensure_budget(result, max_commands, started_at, max_minutes, "goal completion verification"):
+                    goal_checks = run_verification_commands(
+                        repo,
+                        {"id": "goal-completion", "verification": project.get("default_verification", [])},
+                        command_budget=max_commands - result["commands_run"],
+                        timeout_seconds=command_timeout_seconds,
+                    )
+                    result["commands_run"] += len([check for check in goal_checks if check.get("command") and not check.get("budget_exhausted")])
+                    result["checks"].extend(goal_checks)
+                project_verification_passed = bool(goal_checks) and all(check.get("command") and check.get("returncode") == 0 for check in goal_checks)
+                completion_audit = {
+                    "schema": "go-workflow.goal-completion-audit.v1",
+                    "vision_status": vision.get("status"),
+                    "success_metrics": vision.get("success_metrics", []),
+                    "success_metrics_declared": bool(vision.get("success_metrics")),
+                    "contract_valid": not contract_errors,
+                    "contract_errors": contract_errors,
+                    "task_evidence_complete": task_evidence_complete,
+                    "project_verification": goal_checks,
+                    "project_verification_passed": project_verification_passed,
+                    "open_tasks": 0,
+                    "active_tasks": unfinished.get("active", []),
+                    "blocked_tasks": unfinished.get("blocked", []),
+                }
+                result["completion_audit"] = completion_audit
+                completion_proven = (
+                    completion_audit["vision_status"] == "active"
+                    and completion_audit["success_metrics_declared"]
+                    and completion_audit["contract_valid"]
+                    and completion_audit["task_evidence_complete"]
+                    and completion_audit["project_verification_passed"]
                 )
-                result["commands_run"] += len([check for check in goal_checks if check.get("command") and not check.get("budget_exhausted")])
-                result["checks"].extend(goal_checks)
-            project_verification_passed = bool(goal_checks) and all(check.get("command") and check.get("returncode") == 0 for check in goal_checks)
-            completion_audit = {
-                "schema": "go-workflow.goal-completion-audit.v1",
-                "vision_status": vision.get("status"),
-                "success_metrics": vision.get("success_metrics", []),
-                "success_metrics_declared": bool(vision.get("success_metrics")),
-                "contract_valid": not contract_errors,
-                "contract_errors": contract_errors,
-                "task_evidence_complete": task_evidence_complete,
-                "project_verification": goal_checks,
-                "project_verification_passed": project_verification_passed,
-                "open_tasks": 0,
-                "active_tasks": unfinished.get("active", []),
-                "blocked_tasks": unfinished.get("blocked", []),
-            }
-            result["completion_audit"] = completion_audit
-            completion_proven = (
-                completion_audit["vision_status"] == "active"
-                and completion_audit["success_metrics_declared"]
-                and completion_audit["contract_valid"]
-                and completion_audit["task_evidence_complete"]
-                and completion_audit["project_verification_passed"]
-            )
-            if not completion_proven and not result.get("budget_exhausted"):
-                result.update({
-                    "status": "goal_incomplete",
-                    "summary": "Tasks are exhausted, but the vision-level completion audit is not proven.",
-                    "next_action": "create a follow-up task for the failing completion-audit evidence and resume go-loop",
-                })
+                if not completion_proven and not result.get("budget_exhausted"):
+                    result.update({
+                        "status": "goal_incomplete",
+                        "summary": "Tasks are exhausted, but the vision-level completion audit is not proven.",
+                        "next_action": "create a follow-up task for the failing completion-audit evidence and resume go-loop",
+                    })
     append_jsonl(root / "reflections" / "events.jsonl", event("go-auto", "auto.reflected", args.agent, {"mode": mode, "status": result["status"], "completed_tasks": result["completed_tasks"], "blocked_task": result["blocked_task"], "next_action": result["next_action"]}))
     write_latest_run_state(repo, root, result, args, mode)
     if ship_policy != "none" and result.get("completed_tasks"):

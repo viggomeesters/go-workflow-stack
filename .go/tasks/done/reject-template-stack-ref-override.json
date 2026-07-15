@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "reject-template-stack-ref-override",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Reject template stack ref environment overrides",
+  "description": "Prove the template bootstrap treats .go/project.json as the only stack-ref source and rejects legacy GO_STACK_REF overrides.",
+  "scope": {
+    "read": [
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "tests/test_smoke.py",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "Stack smoke tests prove GO_STACK_REF cannot override a copied template project contract."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:29:02+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:30:57+02:00",
+      "agent": "codex",
+      "summary": "TDD RED proved GO_STACK_REF could replace .go/project.json and still return success. GREEN rejects the override; all bootstrap regressions pass. Verification: scripts/check-linux.sh 74 tests and pairing green; scripts/check-pilots.sh distribution and pilots green."
+    }
+  ]
+}

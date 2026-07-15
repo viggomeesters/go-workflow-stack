@@ -19,6 +19,13 @@ def template_repo() -> Path:
     return ROOT / "fixtures" / "minimal"
 
 
+def set_project_stack_ref(project: Path, ref: str, version: str) -> None:
+    path = project / ".go" / "project.json"
+    payload = json.loads(path.read_text(encoding="utf-8"))
+    payload.update({"stack_ref": ref, "required_stack_version": version})
+    path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+
+
 def test_template_validates():
     result = subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), "validate", str(template_repo())], text=True, capture_output=True)
     assert result.returncode == 0, result.stderr + result.stdout
@@ -99,6 +106,28 @@ def test_public_template_project_launcher_discovers_stack(tmp_path: Path):
     assert f"ok: {repo / '.go'}" in launched.stdout
 
 
+def test_template_bootstrap_rejects_stack_ref_environment_override(tmp_path: Path):
+    project = tmp_path / "project"
+    shutil.copytree(template_repo(), project, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    env = os.environ.copy()
+    env.update({
+        "GO_STACK": str(ROOT),
+        "GO_STACK_ALLOW_DEV": "1",
+        "GO_STACK_REF": "v9.9.9",
+    })
+
+    rejected = subprocess.run(
+        ["bash", "scripts/bootstrap-stack.sh"],
+        cwd=project,
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert rejected.returncode == 5
+    assert "GO_STACK_REF cannot override .go/project.json" in rejected.stderr
+
+
 def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Path):
     source = tmp_path / "stack-source"
     remote = tmp_path / "stack.git"
@@ -119,10 +148,10 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     subprocess.run(["git", "push", "-q", "origin", "main"], cwd=source, check=True)
     project = tmp_path / "project"
     shutil.copytree(template_repo(), project, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    set_project_stack_ref(project, "v0.3.0", "0.3.0")
     env = os.environ.copy()
     env["GO_STACK"] = str(checkout)
     env["GO_STACK_REMOTE"] = str(remote)
-    env["GO_STACK_REF"] = "v0.3.0"
 
     bootstrapped = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
@@ -157,8 +186,9 @@ def test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_overri
     subprocess.run(["git", "clone", "-q", str(remote), str(checkout)], check=True)
     project = tmp_path / "project"
     shutil.copytree(template_repo(), project, ignore=shutil.ignore_patterns(".git", ".DS_Store"))
+    set_project_stack_ref(project, "v0.3.0", "0.3.0")
     env = os.environ.copy()
-    env.update({"GO_STACK": str(checkout), "GO_STACK_REMOTE": str(remote), "GO_STACK_REF": "v0.3.0"})
+    env.update({"GO_STACK": str(checkout), "GO_STACK_REMOTE": str(remote)})
 
     rejected = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
     assert rejected.returncode == 4

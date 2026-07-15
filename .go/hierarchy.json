@@ -78,7 +78,8 @@
         "live-hermes-proof-contract",
         "proof-copy-requires-raw-evidence",
         "quote-native-adapter-repo-paths",
-        "quote-router-command-examples"
+        "quote-router-command-examples",
+        "reject-template-stack-ref-override"
       ]
     }
   ]

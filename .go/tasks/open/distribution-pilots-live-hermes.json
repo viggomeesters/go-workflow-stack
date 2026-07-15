@@ -1,0 +1,43 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "distribution-pilots-live-hermes",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Add standalone distribution, diverse project pilots, and a fail-closed live Hermes acceptance",
+  "description": "Add standalone distribution, diverse project pilots, and a fail-closed live Hermes acceptance",
+  "scope": {
+    "read": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "scripts/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "scripts/**",
+      "docs/**",
+      "pyproject.toml",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "The stack installs as a uv tool with a go-workflow console command independent of a sibling checkout",
+    "Local pilot fixtures cover Python, frontend-style, and existing-repo continuation contracts with recorded metrics",
+    "Live Hermes acceptance requires a real binary, records protocol evidence, and never reports proof when unavailable"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "bash scripts/check-pilots.sh",
+    "bash scripts/run-hermes-acceptance.sh"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

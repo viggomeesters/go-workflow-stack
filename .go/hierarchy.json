@@ -36,7 +36,10 @@
         "portable-runtime-hermes-selection",
         "wsl-doctor-launcher-version",
         "bootstrap-linux-hermes-campaign",
-        "modular-migrations-agent-protocol"
+        "modular-migrations-agent-protocol",
+        "modular-native-adapters",
+        "concurrent-atomic-state",
+        "distribution-pilots-live-hermes"
       ]
     },
     {
@@ -64,7 +67,9 @@
         "coordinated-cross-repo-publish",
         "local-only-wsl-foundation",
         "deterministic-runtime-template-mode",
-        "template-mode-pairing-audit"
+        "template-mode-pairing-audit",
+        "pin-release-integrity-v031",
+        "explicit-stack-update"
       ]
     }
   ]

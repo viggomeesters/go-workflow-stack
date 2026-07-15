@@ -1,0 +1,43 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "pin-release-integrity-v031",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Enforce exact immutable tag pins and fail-closed release tag verification",
+  "description": "Enforce exact immutable tag pins and fail-closed release tag verification",
+  "scope": {
+    "read": [
+      "cli/**",
+      "go_workflow/**",
+      "scripts/**",
+      "tests/**",
+      "docs/**",
+      "../go-project-template/scripts/**"
+    ],
+    "modify": [
+      "cli/**",
+      "go_workflow/**",
+      "scripts/**",
+      "tests/**",
+      "docs/**",
+      "README.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "A same-version checkout on the wrong commit is rejected for an immutable tag pin",
+    "Release preflight rejects a tag that does not dereference to HEAD",
+    "A deliberate local development override is explicit, visible, and never the default"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "bash scripts/release-check.sh 0.3.1"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

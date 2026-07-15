@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "modular-native-adapters",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Extract execution domains and make built-in adapters emit the native JSON protocol",
+  "description": "Extract execution domains and make built-in adapters emit the native JSON protocol",
+  "scope": {
+    "read": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**",
+      "pyproject.toml"
+    ]
+  },
+  "acceptance": [
+    "Routing, task state, and adapter execution have focused importable owners behind the compatible CLI facade",
+    "Codex and Hermes built-in adapters produce validated agent-adapter-result.v1 output without legacy wrapping",
+    "Malformed protocol-looking output fails closed"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

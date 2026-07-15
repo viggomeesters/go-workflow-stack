@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "concurrent-atomic-state",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Make task claims and JSON/JSONL state crash-safe and concurrency-safe",
+  "description": "Make task claims and JSON/JSONL state crash-safe and concurrency-safe",
+  "scope": {
+    "read": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**"
+    ]
+  },
+  "acceptance": [
+    "Concurrent claims cannot both acquire the same task",
+    "JSON state writes use atomic replacement and JSONL appends are process-locked",
+    "Stale locks are detected and recoverable without stealing a live lock"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

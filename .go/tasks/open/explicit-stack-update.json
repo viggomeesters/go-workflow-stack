@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "explicit-stack-update",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Add dry-run-first stack pin updates with compatibility checks and rollback",
+  "description": "Add dry-run-first stack pin updates with compatibility checks and rollback",
+  "scope": {
+    "read": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "docs/**",
+      "schemas/**"
+    ]
+  },
+  "acceptance": [
+    "go stack update plans an immutable version change without writing by default",
+    "Apply updates required_stack_version and stack_ref transactionally and records rollback data",
+    "Invalid, missing, or incompatible refs are rejected before project state changes"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

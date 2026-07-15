@@ -27,6 +27,13 @@ from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 STACK_ROOT = SCRIPT_DIR.parents[0]
+if str(STACK_ROOT) not in sys.path:
+    sys.path.insert(0, str(STACK_ROOT))
+
+from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
+from go_workflow.migrations import plan_contract_migration
+from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result
+
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
 FIXTURE_ROOT = CONTRACT_ROOT / "fixtures" / "minimal" / ".go"
@@ -37,8 +44,6 @@ VISION_SCHEMA = "go-workflow.repo-local.vision.v1"
 HIERARCHY_SCHEMA = "go-workflow.repo-local.hierarchy.v1"
 TASK_SCHEMA = "go-workflow.repo-local.task.v1"
 EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
-STACK_VERSION = "0.2.0"
-STACK_REF = f"v{STACK_VERSION}"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
@@ -110,6 +115,8 @@ def validate_project(data: dict[str, Any], rel: str) -> list[str]:
     require(bool(data.get("id")), errors, f"{rel}: id required")
     require(bool(data.get("name")), errors, f"{rel}: name required")
     require(data.get("source_of_truth") == "repo-local", errors, f"{rel}: source_of_truth must be repo-local")
+    contract_version = data.get("contract_version", 1)
+    require(isinstance(contract_version, int) and 1 <= contract_version <= CURRENT_CONTRACT_VERSION, errors, f"{rel}: contract_version must be between 1 and {CURRENT_CONTRACT_VERSION}")
     require(data.get("project_mode", "project") in {"project", "template"}, errors, f"{rel}: project_mode must be project or template")
     require(isinstance(data.get("default_verification"), list) and bool(data.get("default_verification")), errors, f"{rel}: default_verification must be a non-empty list")
     required_stack_version = data.get("required_stack_version")
@@ -540,6 +547,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         "id": project_id,
         "name": name,
         "source_of_truth": "repo-local",
+        "contract_version": CURRENT_CONTRACT_VERSION,
         "project_mode": "project",
         "required_stack_version": STACK_VERSION,
         "stack_ref": STACK_REF,
@@ -605,6 +613,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "id": project_id,
             "name": name,
             "source_of_truth": "repo-local",
+            "contract_version": CURRENT_CONTRACT_VERSION,
             "project_mode": "project",
             "required_stack_version": STACK_VERSION,
             "stack_ref": STACK_REF,
@@ -961,12 +970,16 @@ def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str,
 
 
 def format_hook_command(command: str, repo: Path, task: dict[str, Any], attempt: int, strategy: str) -> str:
-    return command.format(
-        repo=str(repo),
-        task_id=task.get("id", "unknown"),
-        attempt=attempt,
-        strategy=strategy,
-    )
+    replacements = {
+        "{repo}": str(repo),
+        "{task_id}": str(task.get("id", "unknown")),
+        "{attempt}": str(attempt),
+        "{strategy}": strategy,
+    }
+    rendered = command
+    for placeholder, value in replacements.items():
+        rendered = rendered.replace(placeholder, value)
+    return rendered
 
 
 def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
@@ -985,25 +998,21 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
 
 def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900) -> dict[str, Any]:
     rendered = format_hook_command(command, repo, task, attempt, strategy)
+    context = build_execution_context(repo, task)
+    request = build_adapter_request(repo, task, context, hook, attempt, strategy)
     env = os.environ.copy()
     env.update({
         "GO_REPO": str(repo),
         "GO_TASK_ID": str(task.get("id", "unknown")),
         "GO_TASK_JSON": json.dumps(task, ensure_ascii=False),
-        "GO_CONTEXT_JSON": json.dumps(build_execution_context(repo, task), ensure_ascii=False),
+        "GO_CONTEXT_JSON": json.dumps(context, ensure_ascii=False),
+        "GO_ADAPTER_REQUEST_JSON": json.dumps(request, ensure_ascii=False),
         "GO_ATTEMPT": str(attempt),
         "GO_STRATEGY": strategy,
         "GO_HOOK": hook,
     })
     completed = run_shell_with_timeout(repo, rendered, env, timeout_seconds)
-    return {
-        "hook": hook,
-        "command": rendered,
-        "returncode": completed["returncode"],
-        "stdout": completed["stdout"][-4000:],
-        "stderr": completed["stderr"][-4000:],
-        "timed_out": completed["timed_out"],
-    }
+    return normalize_adapter_result(hook, rendered, completed)
 
 
 def arg_str(args: argparse.Namespace, name: str, default: str = "") -> str:
@@ -1284,6 +1293,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "In repo {repo}, fix .go task {task_id} on attempt {attempt} using strategy {strategy}.",
         "Read GO_TASK_JSON from the environment.",
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
+        "Read GO_ADAPTER_REQUEST_JSON as the canonical versioned adapter request.",
         "Edit only paths allowed by the task scope.",
         "Run the task verification commands before exiting.",
         "Exit non-zero if you cannot safely repair within scope.",
@@ -1319,6 +1329,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "You are the build executor for a repo-local .go task.",
         "Work in {repo} on task {task_id}, attempt {attempt}, strategy {strategy}.",
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
+        "Read GO_ADAPTER_REQUEST_JSON as the canonical versioned adapter request.",
         "Implement the task, run focused verification, and leave only scoped changes.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
@@ -1342,6 +1353,7 @@ def run_default_critic_agent(
     prompt = " ".join([
         "You are the blocking critic for a repo-local .go task.",
         "Review the current repository result for task {task_id} against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff.",
+        "Use GO_ADAPTER_REQUEST_JSON as the canonical versioned adapter request.",
         "Do not edit files.",
         "Your first line must be exactly GO_CRITIC_VERDICT: PASS when there are no blocking findings, otherwise GO_CRITIC_VERDICT: BLOCK.",
         "After the first line, list concise evidence-backed findings.",
@@ -2396,6 +2408,50 @@ def cmd_init(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_migrate(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    try:
+        plan, documents = plan_contract_migration(
+            load_json(root / "project.json"),
+            load_json(root / "hierarchy.json"),
+        )
+    except ValueError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    if args.apply and plan["changes"]:
+        project_path = root / "project.json"
+        hierarchy_path = root / "hierarchy.json"
+        before_project = project_path.read_text(encoding="utf-8")
+        before_hierarchy = hierarchy_path.read_text(encoding="utf-8")
+        dump_json(project_path, documents["project.json"])
+        dump_json(hierarchy_path, documents["hierarchy.json"])
+        errors = validate_repo(repo)
+        if errors:
+            project_path.write_text(before_project, encoding="utf-8")
+            hierarchy_path.write_text(before_hierarchy, encoding="utf-8")
+            raise RepoLocalError("migration produced an invalid contract:\n- " + "\n- ".join(errors))
+        plan["applied"] = True
+        append_jsonl(
+            root / "runs" / "events.jsonl",
+            event("contract-migration", "run.checked", args.agent, {
+                "action": "contract.migrated",
+                "from_version": plan["from_version"],
+                "to_version": plan["to_version"],
+                "changes": plan["changes"],
+            }),
+        )
+    if args.json:
+        print(json.dumps(plan, indent=2, ensure_ascii=False))
+    else:
+        mode = "applied" if plan["applied"] else "dry-run"
+        print(f"migration {mode}: v{plan['from_version']} -> v{plan['to_version']}")
+        for change in plan["changes"]:
+            print(f"- {change['path']}: " + "; ".join(change["operations"]))
+        if not plan["changes"]:
+            print("- no changes")
+    return 0
+
+
 def cmd_validate(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     errors = validate_repo(repo)
@@ -2770,6 +2826,9 @@ def cmd_route(args: argparse.Namespace) -> int:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
+    version = sub.add_parser("version", help="Report the stack and contract runtime versions")
+    version.add_argument("--json", action="store_true")
+    version.set_defaults(func=cmd_version)
     adopt = sub.add_parser("adopt", help="Adopt a repo by creating real repo-local .go state")
     adopt.add_argument("repo", nargs="?", default=".")
     adopt.add_argument("--project-id")
@@ -2862,6 +2921,13 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
     auto.add_argument("--json", action="store_true")
     auto.set_defaults(func=cmd_auto)
+    adapter = sub.add_parser("adapter", help="Inspect and validate the versioned agent-adapter protocol")
+    adapter_sub = adapter.add_subparsers(dest="adapter_command", required=True)
+    adapter_validate = adapter_sub.add_parser("validate-result", help="Validate one adapter result JSON document")
+    adapter_validate.add_argument("result")
+    adapter_validate.add_argument("--phase", choices=["build", "critic", "repair"])
+    adapter_validate.add_argument("--json", action="store_true")
+    adapter_validate.set_defaults(func=cmd_adapter_validate_result)
     agent_check = sub.add_parser("agent-check", help="Report repair-agent adapter availability")
     agent_check.add_argument("--agent", action="append", choices=["codex", "hermes"], default=[])
     agent_check.add_argument("--json", action="store_true")
@@ -2951,6 +3017,12 @@ def build_parser() -> argparse.ArgumentParser:
     decision_create.add_argument("--agent", default="agent")
     decision_create.add_argument("--task-id", default="project-decision")
     decision_create.set_defaults(func=cmd_decision_create)
+    migrate = sub.add_parser("migrate", help="Plan or explicitly apply versioned .go contract migrations")
+    migrate.add_argument("repo", nargs="?", default=".")
+    migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")
+    migrate.add_argument("--agent", default="agent")
+    migrate.add_argument("--json", action="store_true")
+    migrate.set_defaults(func=cmd_migrate)
     init = sub.add_parser("init", help="Initialize .go fixture state in a repo")
     init.add_argument("repo", nargs="?", default=".")
     init.add_argument("--force", action="store_true")
@@ -3014,6 +3086,35 @@ def cmd_agent_check(args: argparse.Namespace) -> int:
             status = "available" if item["available"] else "missing"
             print(f"{item['agent']}: {status} {item.get('path') or ''}".rstrip())
     return 0
+
+
+def cmd_version(args: argparse.Namespace) -> int:
+    payload = {
+        "schema": "go-workflow.runtime-version.v1",
+        "stack_version": STACK_VERSION,
+        "stack_ref": STACK_REF,
+        "contract_version": CURRENT_CONTRACT_VERSION,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2))
+    else:
+        print(STACK_VERSION)
+    return 0
+
+
+def cmd_adapter_validate_result(args: argparse.Namespace) -> int:
+    data = load_json(Path(args.result))
+    errors = validate_adapter_result(data, expected_phase=args.phase)
+    payload = {
+        "schema": "go-workflow.agent-adapter-validation.v1",
+        "valid": not errors,
+        "errors": errors,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print("valid adapter result" if not errors else "invalid adapter result: " + "; ".join(errors))
+    return 0 if not errors else 1
 
 
 def semantic_version_tuple(value: str) -> tuple[int, int, int]:

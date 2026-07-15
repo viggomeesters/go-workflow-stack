@@ -30,6 +30,11 @@
     "source_of_truth": {
       "const": "repo-local"
     },
+    "contract_version": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2
+    },
     "project_mode": {
       "enum": [
         "project",

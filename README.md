@@ -18,7 +18,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 - **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
 
-For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md).
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
 
 Routing rule: when a target repo contains `.go/project.json`, repo-local `.go` state wins. AW Lite/vault state is fallback/control-plane only.
 
@@ -79,6 +79,8 @@ The apply command validates the paired template and then creates a project-speci
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
+- `migrate <repo> [--apply]`: plan a versioned `.go` migration without writes, or explicitly apply and validate it.
+- `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
 - `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
@@ -149,7 +151,7 @@ bash scripts/check.sh
 Prepare a version locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.2.0
+bash scripts/release-check.sh 0.3.0
 ```
 
 ## Privacy and security

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.migration-plan.v1",
+  "title": "Go Workflow Contract Migration Plan",
+  "type": "object",
+  "required": ["schema", "from_version", "to_version", "changes", "write_required", "applied"],
+  "properties": {
+    "schema": {"const": "go-workflow.migration-plan.v1"},
+    "from_version": {"type": "integer", "minimum": 1},
+    "to_version": {"type": "integer", "minimum": 1},
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "operations"],
+        "properties": {
+          "path": {"type": "string", "pattern": "^\\.go/"},
+          "operations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
+    "write_required": {"type": "boolean"},
+    "applied": {"type": "boolean"}
+  },
+  "additionalProperties": false
+}

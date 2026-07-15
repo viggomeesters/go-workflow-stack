@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.agent-adapter-request.v1",
+  "title": "Go Workflow Agent Adapter Request",
+  "type": "object",
+  "required": ["schema", "phase", "repo", "task_id", "attempt", "strategy", "task", "context", "result_schema"],
+  "properties": {
+    "schema": {"const": "go-workflow.agent-adapter-request.v1"},
+    "phase": {"enum": ["build", "critic", "repair"]},
+    "repo": {"type": "string", "minLength": 1},
+    "task_id": {"type": "string", "minLength": 1},
+    "attempt": {"type": "integer", "minimum": 1},
+    "strategy": {"type": "string", "minLength": 1},
+    "task": {"type": "object"},
+    "context": {"type": "object"},
+    "result_schema": {"const": "go-workflow.agent-adapter-result.v1"}
+  },
+  "additionalProperties": true
+}

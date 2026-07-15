@@ -99,14 +99,14 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     checkout = tmp_path / "go-workflow-stack"
     subprocess.run(["git", "init", "-q", "-b", "main", str(source)], check=True)
     (source / "cli").mkdir()
-    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.2.0"\n', encoding="utf-8")
+    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v1", "-q"], cwd=source, check=True)
-    subprocess.run(["git", "tag", "v0.2.0"], cwd=source, check=True)
+    subprocess.run(["git", "tag", "v0.3.0"], cwd=source, check=True)
     subprocess.run(["git", "clone", "--bare", "-q", str(source), str(remote)], check=True)
-    subprocess.run(["git", "clone", "--branch", "v0.2.0", "-q", str(remote), str(checkout)], check=True)
+    subprocess.run(["git", "clone", "--branch", "v0.3.0", "-q", str(remote), str(checkout)], check=True)
     pinned_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
-    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
+    (source / "cli" / "go.py").write_text('STACK_VERSION = "0.4.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v2", "-q"], cwd=source, check=True)
     subprocess.run(["git", "remote", "add", "origin", str(remote)], cwd=source, check=True)
@@ -120,7 +120,7 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     bootstrapped = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
     assert bootstrapped.returncode == 0, bootstrapped.stderr + bootstrapped.stdout
-    assert (checkout / "cli" / "go.py").read_text() == 'STACK_VERSION = "0.2.0"\n'
+    assert (checkout / "cli" / "go.py").read_text() == 'STACK_VERSION = "0.3.0"\n'
     head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()
     assert head == pinned_head
 
@@ -130,7 +130,7 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     mismatched = subprocess.run(["bash", "scripts/bootstrap-stack.sh"], cwd=project, text=True, capture_output=True, env=env)
 
     assert mismatched.returncode == 4
-    assert "does not provide pinned runtime v0.2.0" in mismatched.stderr
+    assert "does not provide pinned runtime v0.3.0" in mismatched.stderr
 
 
 def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():
@@ -769,6 +769,76 @@ def test_adapter_scope_violation_blocks_task(tmp_path: Path):
     assert (repo / ".go" / "tasks" / "blocked" / "scope-task.json").is_file()
 
 
+def test_custom_adapter_receives_and_returns_versioned_json_protocol(tmp_path: Path):
+    repo = tmp_path / "protocol-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "protocol", "--name", "Protocol")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    (repo / "result.txt").write_text("bad", encoding="utf-8")
+    verify = "python3 -c \"from pathlib import Path; import sys; sys.exit(0 if Path('result.txt').read_text() == 'good' else 1)\""
+    task = run_go(
+        "task", "create", str(repo), "--id", "protocol-task", "--summary", "Protocol task",
+        "--epic", "workflow", "--modify", "result.txt", "--acceptance", "Result becomes good",
+        "--verification", verify,
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"], cwd=repo, check=True)
+    repair = (
+        "python3 -c \"import json,os; from pathlib import Path; "
+        "r=json.loads(os.environ['GO_ADAPTER_REQUEST_JSON']); "
+        "assert r['schema']=='go-workflow.agent-adapter-request.v1' and r['phase']=='repair'; "
+        "Path('result.txt').write_text('good', encoding='utf-8'); "
+        "print(json.dumps({'schema':'go-workflow.agent-adapter-result.v1','phase':'repair','status':'success','summary':'repaired'}))\""
+    )
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "2", "--execute",
+        "--agent", "pytest", "--repair-command", repair, "--json",
+    )
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    adapter_result = result["attempts"][0]["repair"]["result"]
+    assert adapter_result["schema"] == "go-workflow.agent-adapter-result.v1"
+    assert adapter_result["phase"] == "repair"
+    assert adapter_result["status"] == "success"
+
+
+def test_adapter_result_validator_fails_closed_on_invalid_protocol(tmp_path: Path):
+    result_path = tmp_path / "adapter-result.json"
+    result_path.write_text(json.dumps({
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "repair",
+        "status": "success",
+        "summary": "repaired",
+    }), encoding="utf-8")
+    valid = run_go("adapter", "validate-result", str(result_path), "--phase", "repair", "--json")
+    assert valid.returncode == 0, valid.stderr + valid.stdout
+    assert json.loads(valid.stdout)["valid"] is True
+
+    result_path.write_text(json.dumps({"status": "ok"}), encoding="utf-8")
+    invalid = run_go("adapter", "validate-result", str(result_path), "--phase", "repair", "--json")
+    assert invalid.returncode == 1
+    assert json.loads(invalid.stdout)["valid"] is False
+
+
+def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
+    imported = subprocess.run(
+        [sys.executable, "-c", "from go_workflow import *; from go_workflow.adapter_protocol import *; print(STACK_VERSION, STACK_REF, CURRENT_CONTRACT_VERSION, ADAPTER_REQUEST_SCHEMA, ADAPTER_RESULT_SCHEMA)"],
+        cwd=ROOT, text=True, capture_output=True,
+    )
+    assert imported.returncode == 0, imported.stderr
+    assert imported.stdout.strip() == "0.3.0 v0.3.0 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    for path in [
+        ROOT / "schemas" / "agent-adapter-request.schema.json",
+        ROOT / "schemas" / "agent-adapter-result.schema.json",
+        ROOT / "schemas" / "migration-plan.schema.json",
+        ROOT / "docs" / "agent-adapter-protocol.md",
+        ROOT / "docs" / "contract-migrations.md",
+    ]:
+        assert path.is_file(), path
+
+
 def test_adapter_cannot_modify_read_only_path(tmp_path: Path):
     repo = tmp_path / "read-only-scope-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -998,6 +1068,7 @@ def test_resume_command_uses_relocated_stack_runtime(tmp_path: Path):
     relocated_stack = tmp_path / "relocated-stack"
     (relocated_stack / "cli").mkdir(parents=True)
     shutil.copy2(ROOT / "cli" / "go.py", relocated_stack / "cli" / "go.py")
+    shutil.copytree(ROOT / "go_workflow", relocated_stack / "go_workflow")
     env = os.environ.copy()
     env["GO_STACK"] = str(relocated_stack)
 
@@ -1047,9 +1118,9 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     result = json.loads(diagnosed.stdout)
     assert result["platform"]["kind"] == "wsl"
     assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
-    assert result["stack"]["version"] == "0.2.0"
-    assert result["stack"]["ref"] == "v0.2.0"
-    assert result["stack"]["required_ref"] == "v0.2.0"
+    assert result["stack"]["version"] == "0.3.0"
+    assert result["stack"]["ref"] == "v0.3.0"
+    assert result["stack"]["required_ref"] == "v0.3.0"
     assert result["stack"]["compatible"] is True
     assert result["ready"] is True
     assert {item["name"] for item in result["prerequisites"]} >= {"python", "git", "bash", "make", "uv"}
@@ -1063,7 +1134,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.2.0"
+    assert project["stack_ref"] == "v0.3.0"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -1100,12 +1171,71 @@ def test_release_preflight_is_local_and_version_synchronized():
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", str(ROOT / "scripts" / "release-check.sh"), "0.2.0"],
+        ["bash", str(ROOT / "scripts" / "release-check.sh"), "0.3.0"],
         cwd=ROOT, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.2.0" in result.stdout
+    assert "release preflight: v0.3.0" in result.stdout
     assert "publish: not performed" in result.stdout
+
+
+def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_path: Path):
+    repo = tmp_path / "legacy-contract"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "legacy", "--name", "Legacy")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    project.pop("project_mode", None)
+    project.pop("stack_ref", None)
+    project.pop("contract_version", None)
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    hierarchy_path = repo / ".go" / "hierarchy.json"
+    hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
+    hierarchy["feature_groups"] = hierarchy.pop("epics")
+    hierarchy_path.write_text(json.dumps(hierarchy, indent=2) + "\n", encoding="utf-8")
+    before = project_path.read_text(encoding="utf-8")
+
+    planned = run_go("migrate", str(repo), "--json")
+    assert planned.returncode == 0, planned.stderr + planned.stdout
+    plan = json.loads(planned.stdout)
+    assert plan["schema"] == "go-workflow.migration-plan.v1"
+    assert plan["from_version"] == 1
+    assert plan["to_version"] == 2
+    assert plan["applied"] is False
+    assert plan["changes"]
+    assert project_path.read_text(encoding="utf-8") == before
+
+    applied = run_go("migrate", str(repo), "--apply", "--json")
+    assert applied.returncode == 0, applied.stderr + applied.stdout
+    result = json.loads(applied.stdout)
+    assert result["applied"] is True
+    migrated = json.loads(project_path.read_text(encoding="utf-8"))
+    assert migrated["contract_version"] == 2
+    assert migrated["project_mode"] == "project"
+    assert migrated["stack_ref"] == "v0.3.0"
+    assert "epics" in json.loads(hierarchy_path.read_text(encoding="utf-8"))
+
+    repeated = run_go("migrate", str(repo), "--json")
+    assert json.loads(repeated.stdout)["changes"] == []
+
+
+def test_migrate_rolls_back_when_proposed_contract_is_invalid(tmp_path: Path):
+    repo = tmp_path / "invalid-legacy-contract"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "invalid", "--name", "Invalid")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    project.pop("contract_version", None)
+    project["project_mode"] = "unknown"
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    before = project_path.read_text(encoding="utf-8")
+
+    applied = run_go("migrate", str(repo), "--apply", "--json")
+    assert applied.returncode == 1
+    assert "migration produced an invalid contract" in applied.stderr
+    assert project_path.read_text(encoding="utf-8") == before
 
 
 def test_autonomous_execution_rejects_newer_required_stack_version(tmp_path: Path):

@@ -10,6 +10,8 @@ go-workflow-stack      reusable schemas + CLI + fixtures
 project repository ─── .go/ JSON + JSONL state
 ```
 
+The executable compatibility surface remains `cli/go.py`. Focused importable modules under `go_workflow/` own version constants, contract migrations, and the versioned agent-adapter protocol so those rules can evolve and be tested without expanding the CLI monolith.
+
 ## Source of truth
 
 - Stack repo owns the reusable command surface and schema examples.

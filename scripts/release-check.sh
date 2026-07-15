@@ -20,12 +20,12 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 expected = sys.argv[2]
-cli = (root / "cli" / "go.py").read_text(encoding="utf-8")
+constants = (root / "go_workflow" / "constants.py").read_text(encoding="utf-8")
 pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
 project = json.loads((root / ".go" / "project.json").read_text(encoding="utf-8"))
 
 values = {
-    "cli STACK_VERSION": re.search(r'^STACK_VERSION = "([^"]+)"', cli, re.M).group(1),
+    "runtime STACK_VERSION": re.search(r'^STACK_VERSION = "([^"]+)"', constants, re.M).group(1),
     "pyproject version": re.search(r'^version = "([^"]+)"', pyproject, re.M).group(1),
     ".go required_stack_version": project.get("required_stack_version"),
 }

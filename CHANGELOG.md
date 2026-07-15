@@ -1,10 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.3.0 - 2026-07-15
 
 - Replace hosted automation with a local Linux/WSL verification command.
 - Add immutable `stack_ref` pins and explicit template lifecycle status.
 - Add a local-only release preflight that never publishes.
+- Split version, migration, and adapter-protocol rules into importable modules.
+- Add transactional `.go` contract migrations and the shared versioned Codex/Hermes/custom adapter protocol.
 
 ## 0.2.0 - 2026-07-14
 

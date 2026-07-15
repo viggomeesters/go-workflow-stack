@@ -5,6 +5,8 @@
 - Enforce exact commit identity for immutable stack tags across bootstrap and doctor checks.
 - Reject release tags that are not annotated or do not dereference to the release commit.
 - Require a visible, explicit `GO_STACK_ALLOW_DEV=1` override for unpinned local development runtimes.
+- Extract importable routing, task-state, and native-adapter domains behind the CLI facade.
+- Require built-in Codex and Hermes phases to emit validated v1 JSON and fail closed on malformed protocol-looking output.
 
 ## 0.3.0 - 2026-07-15
 

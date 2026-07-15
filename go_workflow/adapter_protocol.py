@@ -54,17 +54,23 @@ def normalize_adapter_result(
     phase: str,
     command: str,
     completed: dict[str, Any],
+    require_protocol: bool = False,
 ) -> dict[str, Any]:
     stdout = str(completed.get("stdout") or "")
     protocol_result: dict[str, Any] | None = None
+    protocol_looking_result: dict[str, Any] | None = None
     for line in reversed([item.strip() for item in stdout.splitlines() if item.strip()]):
         try:
             candidate = json.loads(line)
         except json.JSONDecodeError:
             continue
-        if isinstance(candidate, dict) and candidate.get("schema") == ADAPTER_RESULT_SCHEMA:
-            protocol_result = candidate
-            break
+        if isinstance(candidate, dict):
+            if candidate.get("schema") == ADAPTER_RESULT_SCHEMA:
+                protocol_result = candidate
+                break
+            if "schema" in candidate or {"phase", "status", "summary"}.issubset(candidate):
+                protocol_looking_result = candidate
+                break
 
     returncode = int(completed.get("returncode") or 0)
     if protocol_result is not None:
@@ -77,6 +83,23 @@ def normalize_adapter_result(
                 "status": "failure",
                 "summary": "invalid adapter result: " + "; ".join(errors),
             }
+    elif protocol_looking_result is not None:
+        errors = validate_adapter_result(protocol_looking_result, expected_phase=phase)
+        returncode = returncode or 65
+        protocol_result = {
+            "schema": ADAPTER_RESULT_SCHEMA,
+            "phase": phase,
+            "status": "failure",
+            "summary": "invalid adapter result: " + "; ".join(errors),
+        }
+    elif require_protocol:
+        returncode = returncode or 65
+        protocol_result = {
+            "schema": ADAPTER_RESULT_SCHEMA,
+            "phase": phase,
+            "status": "failure",
+            "summary": "native adapter did not emit a versioned adapter result",
+        }
     else:
         protocol_result = {
             "schema": ADAPTER_RESULT_SCHEMA,

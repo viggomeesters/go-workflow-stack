@@ -7,6 +7,8 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
 
 def template_repo() -> Path:
@@ -618,7 +620,7 @@ def test_agent_mode_task_selects_safe_default_codex_executor(tmp_path: Path):
     bin_dir.mkdir()
     fake_codex = bin_dir / "codex"
     fake_codex.write_text(
-        "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"$GO_REPO/codex-args.txt\"\nout=''\nprevious=''\nfor arg in \"$@\"; do\n  if [ \"$previous\" = '-o' ]; then out=\"$arg\"; fi\n  previous=\"$arg\"\ndone\nif [ -n \"$out\" ]; then\n  count_file=\"$GO_REPO/.go/runs/fake-critic-count\"\n  count=0\n  if [ -f \"$count_file\" ]; then count=$(cat \"$count_file\"); fi\n  if [ \"$count\" -eq 0 ]; then\n    printf 'GO_CRITIC_VERDICT: BLOCK\\nExercise the repair loop once.\\n' > \"$out\"\n  else\n    printf 'GO_CRITIC_VERDICT: PASS\\nNo blocking findings.\\n' > \"$out\"\n  fi\n  echo $((count + 1)) > \"$count_file\"\nelse\n  printf 'built\\n' > \"$GO_REPO/built.txt\"\nfi\n",
+        "#!/bin/sh\nprintf '%s\\n' \"$@\" >> \"$GO_REPO/codex-args.txt\"\nif [ \"$GO_HOOK\" = 'critic' ]; then\n  count_file=\"$GO_REPO/.go/runs/fake-critic-count\"\n  count=0\n  if [ -f \"$count_file\" ]; then count=$(cat \"$count_file\"); fi\n  if [ \"$count\" -eq 0 ]; then\n    printf '{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"blocked\",\"summary\":\"Exercise the repair loop once\"}\\n'\n  else\n    printf '{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"No blocking findings\"}\\n'\n  fi\n  echo $((count + 1)) > \"$count_file\"\nelse\n  printf 'built\\n' > \"$GO_REPO/built.txt\"\n  printf '{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"%s\",\"status\":\"success\",\"summary\":\"native phase complete\"}\\n' \"$GO_HOOK\"\nfi\n",
         encoding="utf-8",
     )
     fake_codex.chmod(0o755)
@@ -650,7 +652,7 @@ def test_agent_mode_task_selects_safe_default_codex_executor(tmp_path: Path):
     assert result["attempts"][0]["build"]["status"] == "passed"
     assert result["attempts"][0]["critic"]["status"] == "blocking_findings"
     assert result["attempts"][1]["critic"]["status"] == "passed"
-    assert "GO_CRITIC_VERDICT: PASS" in result["attempts"][1]["critic"]["result"]["verdict_text"]
+    assert '"status":"success"' in result["attempts"][1]["critic"]["result"]["verdict_text"]
     args = (repo / "codex-args.txt").read_text()
     assert "--sandbox\nworkspace-write" in args
     assert "--sandbox\nread-only" in args
@@ -679,9 +681,9 @@ with (run_root / "adapter-invocations.log").open("a", encoding="utf-8") as handl
 if os.environ["GO_HOOK"] == "critic":
     counter = run_root / f"{task_id}.critic-count"
     count = int(counter.read_text()) if counter.exists() else 0
-    verdict = "BLOCK" if task_id == "parse-headings" and count == 0 else "PASS"
-    print(f"GO_CRITIC_VERDICT: {verdict}")
-    print("Add one repair pass." if verdict == "BLOCK" else "Evidence is sufficient.")
+    status = "blocked" if task_id == "parse-headings" and count == 0 else "success"
+    summary = "Add one repair pass." if status == "blocked" else "Evidence is sufficient."
+    print(json.dumps({"schema": "go-workflow.agent-adapter-result.v1", "phase": "critic", "status": status, "summary": summary}))
     counter.write_text(str(count + 1), encoding="utf-8")
 elif task_id == "parse-headings":
     (repo / "release_notes.py").write_text(
@@ -701,6 +703,8 @@ elif task_id == "render-json":
         "import unittest\\nfrom release_notes import headings, render_json\\n\\nclass TestReleaseNotes(unittest.TestCase):\\n    def test_headings(self):\\n        self.assertEqual(headings(chr(10).join(['# One', 'body', '# Two'])), ['One', 'Two'])\\n    def test_json(self):\\n        self.assertEqual(render_json('# Two'), '{\\\"headings\\\": [\\\"Two\\\"]}')\\n",
         encoding="utf-8",
     )
+if os.environ["GO_HOOK"] != "critic":
+    print(json.dumps({"schema": "go-workflow.agent-adapter-result.v1", "phase": os.environ["GO_HOOK"], "status": "success", "summary": "native phase complete"}))
 """,
         encoding="utf-8",
     )
@@ -853,6 +857,74 @@ def test_adapter_result_validator_fails_closed_on_invalid_protocol(tmp_path: Pat
     invalid = run_go("adapter", "validate-result", str(result_path), "--phase", "repair", "--json")
     assert invalid.returncode == 1
     assert json.loads(invalid.stdout)["valid"] is False
+
+
+def test_protocol_looking_adapter_output_never_falls_back_to_legacy_success():
+    from go_workflow.adapter_protocol import normalize_adapter_result
+
+    result = normalize_adapter_result("repair", "fake-agent", {
+        "returncode": 0,
+        "stdout": json.dumps({
+            "schema": "go-workflow.agent-adapter-result.v2",
+            "phase": "repair",
+            "status": "success",
+            "summary": "wrong protocol version",
+        }),
+        "stderr": "",
+        "timed_out": False,
+    })
+
+    assert result["status"] == "failure"
+    assert result["returncode"] == 65
+    assert "invalid adapter result" in result["summary"]
+
+    missing = normalize_adapter_result("build", "native-agent", {
+        "returncode": 0,
+        "stdout": "ordinary prose only",
+        "stderr": "",
+        "timed_out": False,
+    }, require_protocol=True)
+    assert missing["status"] == "failure"
+    assert missing["returncode"] == 65
+    assert "did not emit" in missing["summary"]
+
+
+def test_native_codex_and_hermes_commands_require_v1_result_output():
+    from go_workflow.adapters import native_agent_command
+
+    for agent in ("codex", "hermes"):
+        command = native_agent_command(agent, "repair")
+        assert command.startswith(agent + " ")
+        assert "go-workflow.agent-adapter-result.v1" in command
+        assert '"phase":"repair"' in command
+        assert "final non-empty line" in command
+
+
+def test_routing_and_task_state_domains_are_importable(tmp_path: Path):
+    from go_workflow.routing import normalize_router_command, recommend_route
+    from go_workflow.task_state import open_task_records, task_path, unfinished_task_ids
+
+    assert normalize_router_command("GOO") == "go"
+    recommendation = recommend_route("go-loop", "werk tot groen", {
+        "repo_exists": True,
+        "has_go": True,
+        "has_vision": True,
+        "has_principles": True,
+        "has_hierarchy": True,
+        "valid": True,
+        "open_task_count": 1,
+    })
+    assert recommendation["command"] == "go-loop"
+
+    root = tmp_path / ".go"
+    open_path = task_path(root, "open", "later")
+    open_path.parent.mkdir(parents=True)
+    open_path.write_text(json.dumps({"id": "later", "order": 2}), encoding="utf-8")
+    active_path = task_path(root, "active", "now")
+    active_path.parent.mkdir(parents=True)
+    active_path.write_text(json.dumps({"id": "now"}), encoding="utf-8")
+    assert [task["id"] for _, task in open_task_records(root)] == ["later"]
+    assert unfinished_task_ids(root) == {"active": ["now"], "blocked": []}
 
 
 def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():

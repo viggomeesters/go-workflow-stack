@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "modular-native-adapters",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Extract execution domains and make built-in adapters emit the native JSON protocol",
   "description": "Extract execution domains and make built-in adapters emit the native JSON protocol",
   "scope": {
@@ -32,8 +32,14 @@
     "make check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-07-15T12:38:40+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-15T12:45:11+02:00",
+      "agent": "codex",
+      "summary": "60 pytest tests and make check passed; routing, task-state, and native-adapter owners are importable; Codex/Hermes build, critic, and repair require validated agent-adapter-result.v1 output; malformed or missing native protocol fails closed while custom legacy adapters remain compatible."
+    }
+  ]
 }

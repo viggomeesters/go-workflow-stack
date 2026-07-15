@@ -8,6 +8,7 @@
 - Extract importable routing, task-state, and native-adapter domains behind the CLI facade.
 - Require built-in Codex and Hermes phases to emit validated v1 JSON and fail closed on malformed protocol-looking output.
 - Add dry-run-first `go stack update` with tag/runtime compatibility checks, atomic project writes, and durable rollback records.
+- Make JSON writes and task queue moves atomic, serialize JSONL appends, and add PID-aware process locks that recover dead owners without stealing live locks.
 
 ## 0.3.0 - 2026-07-15
 

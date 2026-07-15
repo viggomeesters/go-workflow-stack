@@ -942,6 +942,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         ROOT / "docs" / "agent-adapter-protocol.md",
         ROOT / "docs" / "contract-migrations.md",
         ROOT / "docs" / "stack-updates.md",
+        ROOT / "docs" / "state-safety.md",
     ]:
         assert path.is_file(), path
 
@@ -1326,6 +1327,71 @@ def test_stack_update_rejects_missing_and_incompatible_refs_before_writing(tmp_p
     assert "declares version 1.2.3" in incompatible.stderr
     assert project_path.read_text(encoding="utf-8") == before
 
+
+def test_concurrent_claims_have_exactly_one_winner(tmp_path: Path):
+    repo = tmp_path / "claim-race"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "race", "--name", "Race")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    task = run_go("task", "create", str(repo), "--id", "one", "--summary", "One", "--epic", "workflow")
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"], cwd=repo, check=True)
+    command = [sys.executable, str(ROOT / "cli" / "go.py"), "claim", "one", "--repo", str(repo), "--allow-dirty"]
+    first = subprocess.Popen(command + ["--agent", "first"], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    second = subprocess.Popen(command + ["--agent", "second"], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    results = [first.communicate(), second.communicate()]
+    returncodes = [first.returncode, second.returncode]
+
+    assert sorted(returncodes) == [0, 1], results
+    active = json.loads((repo / ".go" / "tasks" / "active" / "one.json").read_text(encoding="utf-8"))
+    assert active["claim"]["agent"] in {"first", "second"}
+    assert not (repo / ".go" / "tasks" / "open" / "one.json").exists()
+    claimed_events = [line for line in (repo / ".go" / "runs" / "events.jsonl").read_text().splitlines() if '"event": "task.claimed"' in line]
+    assert len(claimed_events) == 1
+
+
+def test_live_lock_is_not_stolen_and_dead_owner_is_recovered(tmp_path: Path):
+    from go_workflow.state_io import StateLockError, repository_lock
+
+    root = tmp_path / ".go"
+    script = (
+        "import sys,time; from pathlib import Path; "
+        "from go_workflow.state_io import repository_lock; "
+        "lock=repository_lock(Path(sys.argv[1]),'held'); lock.__enter__(); "
+        "print('locked', flush=True); time.sleep(30)"
+    )
+    holder = subprocess.Popen(
+        [sys.executable, "-c", script, str(root)], cwd=ROOT,
+        text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+    )
+    assert holder.stdout is not None and holder.stdout.readline().strip() == "locked"
+    try:
+        try:
+            with repository_lock(root, "held", timeout_seconds=0.1):
+                raise AssertionError("live lock was stolen")
+        except StateLockError as exc:
+            assert "live state lock" in str(exc)
+    finally:
+        holder.kill()
+        holder.wait(timeout=5)
+
+    with repository_lock(root, "held", timeout_seconds=1) as recovered:
+        assert recovered.recovered_stale is True
+
+
+def test_jsonl_appends_are_process_locked_and_parseable(tmp_path: Path):
+    path = tmp_path / ".go" / "runs" / "events.jsonl"
+    script = (
+        "import sys; from pathlib import Path; from go_workflow.state_io import append_jsonl_locked; "
+        "p=Path(sys.argv[1]); worker=int(sys.argv[2]); "
+        "[append_jsonl_locked(p, {'worker':worker,'index':i}) for i in range(30)]"
+    )
+    workers = [subprocess.Popen([sys.executable, "-c", script, str(path), str(index)], cwd=ROOT) for index in range(3)]
+    assert [worker.wait(timeout=15) for worker in workers] == [0, 0, 0]
+    events = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines()]
+    assert len(events) == 90
+    assert {(event["worker"], event["index"]) for event in events} == {(worker, index) for worker in range(3) for index in range(30)}
 
 def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Path):
     repo = tmp_path / "starter"

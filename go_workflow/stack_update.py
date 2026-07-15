@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 import subprocess
-import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+
+from .state_io import atomic_json
 
 STACK_UPDATE_SCHEMA = "go-workflow.stack-update-plan.v1"
 ROLLBACK_SCHEMA = "go-workflow.stack-update-rollback.v1"
@@ -22,21 +22,6 @@ class StackUpdateError(ValueError):
 
 def _git(stack_repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(["git", "-C", str(stack_repo), *args], text=True, capture_output=True)
-
-
-def _atomic_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    fd, temporary = tempfile.mkstemp(prefix=f".{path.name}.", dir=path.parent)
-    try:
-        with os.fdopen(fd, "w", encoding="utf-8") as handle:
-            json.dump(data, handle, indent=2, ensure_ascii=False)
-            handle.write("\n")
-            handle.flush()
-            os.fsync(handle.fileno())
-        os.replace(temporary, path)
-    except BaseException:
-        Path(temporary).unlink(missing_ok=True)
-        raise
 
 
 def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, Any]:
@@ -101,15 +86,15 @@ def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
         "before_project": plan["before_project"],
         "after_project": plan["after_project"],
     }
-    _atomic_json(rollback_path, rollback)
+    atomic_json(rollback_path, rollback)
     try:
-        _atomic_json(repo / ".go" / "project.json", plan["after_project"])
+        atomic_json(repo / ".go" / "project.json", plan["after_project"])
         rollback["status"] = "applied"
-        _atomic_json(rollback_path, rollback)
+        atomic_json(rollback_path, rollback)
     except BaseException:
-        _atomic_json(repo / ".go" / "project.json", plan["before_project"])
+        atomic_json(repo / ".go" / "project.json", plan["before_project"])
         rollback["status"] = "rolled_back"
-        _atomic_json(rollback_path, rollback)
+        atomic_json(rollback_path, rollback)
         raise
     result = {key: value for key, value in plan.items() if key not in {"before_project", "after_project"}}
     result.update({"mode": "applied", "rollback_record": str(rollback_path.relative_to(repo))})
@@ -119,6 +104,6 @@ def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
 def rollback_stack_update(repo: Path, rollback_record: str) -> None:
     path = repo / rollback_record
     data = json.loads(path.read_text(encoding="utf-8"))
-    _atomic_json(repo / ".go" / "project.json", data["before_project"])
+    atomic_json(repo / ".go" / "project.json", data["before_project"])
     data["status"] = "rolled_back"
-    _atomic_json(path, data)
+    atomic_json(path, data)

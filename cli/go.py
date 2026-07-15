@@ -38,6 +38,7 @@ from go_workflow.routing import detected_platform, normalize_router_command, rec
 from go_workflow.task_state import open_task_records, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
 from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
+from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, repository_lock
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -87,14 +88,11 @@ def load_json(path: Path) -> dict[str, Any]:
 
 
 def dump_json(path: Path, data: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    atomic_json(path, data)
 
 
 def append_jsonl(path: Path, event: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(event, ensure_ascii=False) + "\n")
+    append_jsonl_locked(path, event)
 
 
 def require(condition: bool, errors: list[str], message: str) -> None:
@@ -931,12 +929,14 @@ def run_verification_commands(repo: Path, task: dict[str, Any], command_budget: 
 
 
 def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, evidence_summary: str) -> Path:
-    task["status"] = "done"
-    task.setdefault("evidence", []).append({"created_at": now_iso(), "agent": agent, "summary": evidence_summary})
-    target = task_path(root, "done", task["id"])
-    dump_json(target, task)
-    active_path.unlink()
-    append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": evidence_summary}))
+    with repository_lock(root, f"task-{task['id']}"):
+        if not active_path.is_file():
+            raise StateLockError(f"active task disappeared before finish: {task['id']}")
+        task["status"] = "done"
+        task.setdefault("evidence", []).append({"created_at": now_iso(), "agent": agent, "summary": evidence_summary})
+        target = task_path(root, "done", task["id"])
+        atomic_move_json(active_path, target, task)
+        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": evidence_summary}))
     return target
 
 
@@ -947,18 +947,19 @@ def restore_active_after_failed_ship(
     evidence_path: Path,
     evidence_before: str,
 ) -> None:
-    done_path.unlink(missing_ok=True)
-    dump_json(active_path, active_task)
-    evidence_path.write_text(evidence_before, encoding="utf-8")
+    atomic_move_json(done_path, active_path, active_task)
+    atomic_write_text(evidence_path, evidence_before)
 
 
 def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, reason: str, checks: list[dict[str, Any]]) -> Path:
-    task["status"] = "blocked"
-    task["blocked"] = {"created_at": now_iso(), "agent": agent, "reason": reason}
-    target = task_path(root, "blocked", task["id"])
-    dump_json(target, task)
-    active_path.unlink()
-    append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.blocked", agent, {"reason": reason, "checks": checks}))
+    with repository_lock(root, f"task-{task['id']}"):
+        if not active_path.is_file():
+            raise StateLockError(f"active task disappeared before block: {task['id']}")
+        task["status"] = "blocked"
+        task["blocked"] = {"created_at": now_iso(), "agent": agent, "reason": reason}
+        target = task_path(root, "blocked", task["id"])
+        atomic_move_json(active_path, target, task)
+        append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.blocked", agent, {"reason": reason, "checks": checks}))
     return target
 
 
@@ -1216,7 +1217,7 @@ def record_attempt(repo: Path, root: Path, task: dict[str, Any], agent: str, att
         "judge_status": (attempt.get("judge") or {}).get("status"),
         "created_at": now_iso(),
     }
-    (attempt_dir / "verdict.json").write_text(json.dumps(verdict, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    dump_json(attempt_dir / "verdict.json", verdict)
     attempt["artifacts"] = {
         "prompt": str(attempt_dir.relative_to(root.parent) / "prompt.md"),
         "verify_log": str(attempt_dir.relative_to(root.parent) / "verify.log"),
@@ -1592,12 +1593,21 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             result["run_envelope"]["preflight"].setdefault("human_gate_blockers", []).extend(dirty["blocking"])
             append_jsonl(root / "runs" / "events.jsonl", event(task.get("id", "unknown"), "auto.safety_gate", args.agent, {"blockers": dirty["blocking"]}))
             return 1, result
-        task["status"] = "active"
-        task["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
-        active_path = task_path(root, "active", task["id"])
-        dump_json(active_path, task)
-        open_path.unlink()
-        append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
+        try:
+            with repository_lock(root, f"task-{task['id']}"):
+                if not open_path.is_file():
+                    continue
+                task = load_json(open_path)
+                if task.get("status") != "open" or task.get("claim", {}).get("agent"):
+                    continue
+                task["status"] = "active"
+                task["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
+                active_path = task_path(root, "active", task["id"])
+                atomic_move_json(open_path, active_path, task)
+                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
+        except StateLockError as exc:
+            result.update({"status": "safety_gate", "blocked_task": task.get("id"), "summary": str(exc), "next_action": "wait for the live task owner or recover the stale lock"})
+            break
         task_passed = False
         final_checks: list[dict[str, Any]] = []
         last_failed_command = "verification"
@@ -2378,8 +2388,8 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         dump_json(hierarchy_path, documents["hierarchy.json"])
         errors = validate_repo(repo)
         if errors:
-            project_path.write_text(before_project, encoding="utf-8")
-            hierarchy_path.write_text(before_hierarchy, encoding="utf-8")
+            atomic_write_text(project_path, before_project)
+            atomic_write_text(hierarchy_path, before_hierarchy)
             raise RepoLocalError("migration produced an invalid contract:\n- " + "\n- ".join(errors))
         plan["applied"] = True
         append_jsonl(
@@ -2433,20 +2443,23 @@ def cmd_next(args: argparse.Namespace) -> int:
 def cmd_claim(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
-    path, data = find_task(root, args.task_id)
-    if data.get("status") != "open":
-        raise RepoLocalError(f"task is not open: {data.get('status')}")
-    if data.get("claim", {}).get("agent"):
-        raise RepoLocalError(f"task already claimed by {data['claim']['agent']}")
-    dirty = classify_dirty(repo, data.get("scope", {}).get("modify", []))
-    if dirty["blocking"] and not args.allow_dirty:
-        raise RepoLocalError("blocking dirty state before claim:\n- " + "\n- ".join(dirty["blocking"]))
-    data["status"] = "active"
-    data["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
-    target = task_path(root, "active", data["id"])
-    dump_json(target, data)
-    path.unlink()
-    append_jsonl(root / "runs" / "events.jsonl", event(data["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"]}))
+    try:
+        with repository_lock(root, f"task-{args.task_id}"):
+            path, data = find_task(root, args.task_id)
+            if data.get("status") != "open":
+                raise RepoLocalError(f"task is not open: {data.get('status')}")
+            if data.get("claim", {}).get("agent"):
+                raise RepoLocalError(f"task already claimed by {data['claim']['agent']}")
+            dirty = classify_dirty(repo, data.get("scope", {}).get("modify", []))
+            if dirty["blocking"] and not args.allow_dirty:
+                raise RepoLocalError("blocking dirty state before claim:\n- " + "\n- ".join(dirty["blocking"]))
+            data["status"] = "active"
+            data["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
+            target = task_path(root, "active", data["id"])
+            atomic_move_json(path, target, data)
+            append_jsonl(root / "runs" / "events.jsonl", event(data["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"]}))
+    except StateLockError as exc:
+        raise RepoLocalError(str(exc)) from exc
     print(relative(repo, target))
     return 0
 
@@ -2454,19 +2467,22 @@ def cmd_claim(args: argparse.Namespace) -> int:
 def cmd_finish(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
-    path, data = find_task(root, args.task_id)
-    if data.get("status") != "active":
-        raise RepoLocalError(f"task is not active: {data.get('status')}")
-    if args.agent and data.get("claim", {}).get("agent") not in {args.agent, None, ""}:
-        raise RepoLocalError(f"task claimed by {data.get('claim', {}).get('agent')}, not {args.agent}")
-    if not args.evidence.strip():
-        raise RepoLocalError("finish requires evidence")
-    data["status"] = "done"
-    data.setdefault("evidence", []).append({"created_at": now_iso(), "agent": args.agent, "summary": args.evidence})
-    target = task_path(root, "done", data["id"])
-    dump_json(target, data)
-    path.unlink()
-    append_jsonl(root / "evidence" / "events.jsonl", event(data["id"], "task.finished", args.agent, {"evidence": args.evidence}))
+    try:
+        with repository_lock(root, f"task-{args.task_id}"):
+            path, data = find_task(root, args.task_id)
+            if data.get("status") != "active":
+                raise RepoLocalError(f"task is not active: {data.get('status')}")
+            if args.agent and data.get("claim", {}).get("agent") not in {args.agent, None, ""}:
+                raise RepoLocalError(f"task claimed by {data.get('claim', {}).get('agent')}, not {args.agent}")
+            if not args.evidence.strip():
+                raise RepoLocalError("finish requires evidence")
+            data["status"] = "done"
+            data.setdefault("evidence", []).append({"created_at": now_iso(), "agent": args.agent, "summary": args.evidence})
+            target = task_path(root, "done", data["id"])
+            atomic_move_json(path, target, data)
+            append_jsonl(root / "evidence" / "events.jsonl", event(data["id"], "task.finished", args.agent, {"evidence": args.evidence}))
+    except StateLockError as exc:
+        raise RepoLocalError(str(exc)) from exc
     print(relative(repo, target))
     return 0
 
@@ -2617,7 +2633,7 @@ def cmd_bundle_import(args: argparse.Namespace) -> int:
     if target.exists() and not args.force:
         raise RepoLocalError(f"import artifact already exists: {relative(repo, target)}; pass --force to replace")
     target.parent.mkdir(parents=True, exist_ok=True)
-    target.write_text(json.dumps({"plan": plan, "bundle": bundle}, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+    dump_json(target, {"plan": plan, "bundle": bundle})
     append_jsonl(root / "decisions" / "events.jsonl", event(
         args.task_id,
         "decision.recorded",
@@ -3201,7 +3217,7 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         return int(args.func(args))
-    except RepoLocalError as exc:
+    except (RepoLocalError, StateLockError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

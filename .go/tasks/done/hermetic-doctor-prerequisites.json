@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "hermetic-doctor-prerequisites",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make the doctor readiness test independent of host make",
+  "description": "The doctor test simulates Hermes and uv but accidentally relied on make being installed on the host.",
+  "scope": {
+    "read": [
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Doctor readiness fixture supplies every prerequisite it asserts"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest tests/test_smoke.py::test_doctor_reports_wsl_hermes_readiness_and_version_contract -q"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:06:25+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:06:37+02:00",
+      "agent": "codex",
+      "summary": "Focused doctor test passed with an explicit fake make prerequisite; no host make installation is assumed."
+    }
+  ]
+}

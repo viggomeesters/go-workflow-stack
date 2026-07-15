@@ -1215,6 +1215,9 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     fake_uv = bin_dir / "uv"
     fake_uv.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
     fake_uv.chmod(0o755)
+    fake_make = bin_dir / "make"
+    fake_make.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_make.chmod(0o755)
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "doctor", "--name", "Doctor")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout

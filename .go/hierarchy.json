@@ -73,7 +73,8 @@
         "capture-live-hermes-wsl-proof",
         "linux-pytest-fallback",
         "hermetic-annotated-tag-tests",
-        "quiet-linux-pytest-probe"
+        "quiet-linux-pytest-probe",
+        "hermetic-doctor-prerequisites"
       ]
     }
   ]

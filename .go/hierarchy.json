@@ -71,7 +71,8 @@
         "pin-release-integrity-v031",
         "explicit-stack-update",
         "capture-live-hermes-wsl-proof",
-        "linux-pytest-fallback"
+        "linux-pytest-fallback",
+        "hermetic-annotated-tag-tests"
       ]
     }
   ]

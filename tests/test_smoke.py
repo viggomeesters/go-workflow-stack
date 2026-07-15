@@ -148,7 +148,7 @@ def test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_overri
     (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "tag target", "-q"], cwd=source, check=True)
-    subprocess.run(["git", "tag", "-a", "v0.3.0", "-m", "v0.3.0"], cwd=source, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.0", "-m", "v0.3.0"], cwd=source, check=True)
     (source / "after-tag.txt").write_text("same declared version, different commit\n", encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "after tag", "-q"], cwd=source, check=True)
@@ -1327,7 +1327,7 @@ def test_stack_update_rejects_missing_and_incompatible_refs_before_writing(tmp_p
     )
     subprocess.run(["git", "add", "."], cwd=fake_stack, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "fake", "-q"], cwd=fake_stack, check=True)
-    subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=fake_stack, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=fake_stack, check=True)
     incompatible = run_go(
         "stack", "update", str(repo), "--to", "v9.9.9", "--stack-repo", str(fake_stack), "--apply", "--json",
     )
@@ -1431,7 +1431,7 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
@@ -1449,7 +1449,7 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.1", "-m", "v0.3.1"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)

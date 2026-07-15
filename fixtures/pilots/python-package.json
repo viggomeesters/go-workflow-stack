@@ -1,0 +1,9 @@
+{
+  "id": "pilot-python-package",
+  "style": "python",
+  "name": "Pilot Python Package",
+  "brief": "Continue a small Python parser package with tests and repo-local workflow state.",
+  "seed_file": "src/parser.py",
+  "seed_content": "def parse(value: str) -> str:\n    return value.strip()\n",
+  "tasks": ["parser-tests|Add focused parser tests", "parser-errors|Define invalid input behavior"]
+}

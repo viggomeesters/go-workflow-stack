@@ -168,9 +168,10 @@ def test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_overri
     assert "development override" in allowed.stderr
 
 
-def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():
+def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary(tmp_path: Path):
     env = os.environ.copy()
     env["GO_RUN_REAL_HERMES_E2E"] = "1"
+    env["GO_HERMES_E2E_ROOT"] = str(tmp_path)
     env["PATH"] = "/usr/bin:/bin"
 
     attempted = subprocess.run(
@@ -180,6 +181,11 @@ def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary():
 
     assert attempted.returncode == 2
     assert "NOT PROVEN: hermes is not available on PATH" in attempted.stderr
+    assert not (tmp_path / "proof.json").exists()
+    script = (ROOT / "scripts" / "run-hermes-acceptance.sh").read_text(encoding="utf-8")
+    assert "go-workflow.live-hermes-proof.v1" in script
+    assert "go-workflow.agent-adapter-result.v1" in script
+    assert "hermes --version" in script
 
 
 def test_spike_customizes_a_repository_created_from_public_template(tmp_path: Path):
@@ -611,7 +617,8 @@ def test_agent_check_reports_real_adapter_availability():
     agents = {item["agent"]: item for item in payload["agents"]}
     assert set(agents) == {"codex", "hermes"}
     assert all(isinstance(item["available"], bool) for item in agents.values())
-    assert "dangerously-bypass" not in (ROOT / "cli" / "go.py").read_text()
+    cli_text = (ROOT / "cli" / "go.py").read_text() + (ROOT / "go_workflow" / "cli.py").read_text()
+    assert "dangerously-bypass" not in cli_text
 
 
 def test_agent_mode_task_selects_safe_default_codex_executor(tmp_path: Path):

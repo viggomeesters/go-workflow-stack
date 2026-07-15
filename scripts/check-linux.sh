@@ -19,7 +19,7 @@ VERSION="$("${PYTHON[@]}" -c 'import sys; print(".".join(map(str, sys.version_in
 echo "local Linux/WSL verification with Python $VERSION"
 
 cd "$ROOT"
-"${PYTHON[@]}" -m py_compile cli/go.py
+"${PYTHON[@]}" -m py_compile cli/go.py go_workflow/cli.py
 "${PYTEST[@]}" tests/test_smoke.py -q
 "${PYTHON[@]}" cli/go.py validate .
 

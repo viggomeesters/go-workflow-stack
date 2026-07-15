@@ -69,7 +69,8 @@
         "deterministic-runtime-template-mode",
         "template-mode-pairing-audit",
         "pin-release-integrity-v031",
-        "explicit-stack-update"
+        "explicit-stack-update",
+        "capture-live-hermes-wsl-proof"
       ]
     }
   ]

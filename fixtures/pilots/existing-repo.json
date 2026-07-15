@@ -1,0 +1,9 @@
+{
+  "id": "pilot-existing-repo",
+  "style": "existing",
+  "name": "Pilot Existing Repository",
+  "brief": "Adopt and continue an existing repository without rewriting its seed history or source file.",
+  "seed_file": "legacy.txt",
+  "seed_content": "preserve this existing project state\n",
+  "tasks": ["document-contract|Document the continuation contract", "next-change|Prepare the next bounded change"]
+}

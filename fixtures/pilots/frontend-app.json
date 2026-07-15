@@ -1,0 +1,9 @@
+{
+  "id": "pilot-frontend-app",
+  "style": "frontend",
+  "name": "Pilot Frontend App",
+  "brief": "Continue a frontend-style application with accessible components and local verification.",
+  "seed_file": "src/App.tsx",
+  "seed_content": "export function App() { return <main>Hello</main>; }\n",
+  "tasks": ["accessible-shell|Add an accessible application shell", "component-test|Add a component behavior test"]
+}

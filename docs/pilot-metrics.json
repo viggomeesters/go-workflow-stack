@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.pilot-metrics.v1",
+  "pilots": [
+    {
+      "id": "pilot-existing-repo",
+      "style": "existing",
+      "contract_valid": true,
+      "route_mode": "repo-local",
+      "open_task_count": 2,
+      "seed_file_preserved": true,
+      "seed_commit_preserved": true,
+      "setup_required": false
+    },
+    {
+      "id": "pilot-frontend-app",
+      "style": "frontend",
+      "contract_valid": true,
+      "route_mode": "repo-local",
+      "open_task_count": 2,
+      "seed_file_preserved": true,
+      "seed_commit_preserved": true,
+      "setup_required": false
+    },
+    {
+      "id": "pilot-python-package",
+      "style": "python",
+      "contract_valid": true,
+      "route_mode": "repo-local",
+      "open_task_count": 2,
+      "seed_file_preserved": true,
+      "seed_commit_preserved": true,
+      "setup_required": false
+    }
+  ]
+}

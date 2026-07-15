@@ -5,7 +5,7 @@ test:
 	python3 -m pytest tests/test_smoke.py -q
 
 check:
-	python3 -m py_compile cli/go.py
+	python3 -m py_compile cli/go.py go_workflow/cli.py
 	TEMPLATE=$$(if [ -d ../go-project-template/.go ]; then printf '%s' ../go-project-template; else printf '%s' fixtures/minimal; fi); \
 	  python3 cli/go.py validate $$TEMPLATE; \
 	  python3 cli/go.py readback $$TEMPLATE; \

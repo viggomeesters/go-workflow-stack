@@ -42,6 +42,14 @@ cd go-workflow-stack
 make check
 ```
 
+Or install the standalone console command; its wheel carries the schemas and minimal fixture and needs no sibling checkout at runtime:
+
+```bash
+uv tool install --from . go-workflow-stack
+go-workflow version --json
+go-workflow validate /path/to/project
+```
+
 Run the CLI against a repo-local `.go/` project:
 
 ```bash
@@ -81,6 +89,7 @@ The apply command validates the paired template and then creates a project-speci
 - `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
 - `migrate <repo> [--apply]`: plan a versioned `.go` migration without writes, or explicitly apply and validate it.
 - `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.
+- `stack update <repo> --to vX.Y.Z [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply atomically with rollback data only when explicitly requested.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
 - `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
@@ -111,10 +120,11 @@ The apply command validates the paired template and then creates a project-speci
   evidence/*.jsonl
   decisions/*.jsonl
   imports/*.json
-  locks/
 ```
 
 JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Markdown is a human view only. Import bundles are review artifacts: they never overwrite existing project state unless a later explicit task chooses to reconcile them.
+
+Process locks live under `.git/go-workflow-locks` so they do not dirty Git state; non-Git fixtures use `.go/locks` as a fallback.
 
 Every executed run writes `.go/runs/latest.json` plus `.go/runs/resume.sh`. The JSON preserves effective budgets, adapters, critic, and ship flags as structured `resume_args`; the portable shell entrypoint resolves `GO_STACK` or a conventional sibling/home checkout at resume time. A campaign can therefore move between macOS and WSL without retaining the originating machine's absolute stack path.
 
@@ -137,6 +147,12 @@ A live-model acceptance is deliberately opt-in and never reports success when He
 GO_RUN_REAL_HERMES_E2E=1 bash scripts/run-hermes-acceptance.sh
 ```
 
+Run the standalone distribution check and the Python/frontend/existing-repo pilots:
+
+```bash
+bash scripts/check-pilots.sh
+```
+
 ## Development
 
 Use local validation before committing or publishing changes. The check compiles the Python CLI where applicable and validates the template repository contract.
@@ -157,8 +173,8 @@ bash scripts/release-check.sh 0.3.1
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-./go stack update --to v0.3.1 --json
-./go stack update --to v0.3.1 --apply --json
+go-workflow stack update . --to v0.3.1 --json
+go-workflow stack update . --to v0.3.1 --apply --json
 ```
 
 ## Privacy and security
@@ -167,7 +183,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Early public spike. The goal is to prove the repo-local contract before broad migration.
+Public v0.3.1 hardening candidate. Local stack, template, distribution, concurrency, and diverse-pilot contracts are executable; live Hermes proof remains explicitly machine-dependent and fail-closed.
 
 ## License
 

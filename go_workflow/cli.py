@@ -1125,6 +1125,10 @@ def shell_quote(value: str) -> str:
     return shlex.quote(str(value))
 
 
+def shell_join(*parts: object) -> str:
+    return " ".join(shell_quote(str(part)) for part in parts)
+
+
 def attempt_markdown(task: dict[str, Any], attempt: dict[str, Any], context: dict[str, Any]) -> str:
     vision = context.get("vision") or {}
     principles = (context.get("architecture_principles") or {}).get("principles") or []
@@ -2018,9 +2022,9 @@ def cmd_go(args: argparse.Namespace) -> int:
         "plan": None,
     }
     if not state["repo_exists"]:
-        result.update({"action": "spike", "reason": "repo missing; create repo-local .go contract first", "next_command": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{intent or '<intent>'}\""})
+        result.update({"action": "spike", "reason": "repo missing; create repo-local .go contract first", "next_command": shell_join("python3", Path(__file__).resolve(), "spike", repo, "--brief", intent or "<intent>")})
     elif not state["has_project"]:
-        result.update({"action": "spike", "reason": "repo has no .go/project.json; repair/adopt contract first", "next_command": f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{intent or '<intent>'}\" --skip-repo-complete"})
+        result.update({"action": "spike", "reason": "repo has no .go/project.json; repair/adopt contract first", "next_command": shell_join("python3", Path(__file__).resolve(), "spike", repo, "--brief", intent or "<intent>", "--skip-repo-complete")})
     else:
         errors = validate_repo(repo)
         if errors:
@@ -2155,11 +2159,14 @@ def cmd_router(args: argparse.Namespace) -> int:
     if recommended["command"] == "spike":
         repair = recommended.get("mode") != "create_repo"
         brief = args.intent or ("<repair intent>" if repair else "<intent>")
-        recommended["example"] = f"python3 {Path(__file__).resolve()} spike {repo} --brief \"{brief}\"" + (" --skip-repo-complete" if recommended.get("mode") == "repair_existing_repo" else "")
+        parts: list[object] = ["python3", Path(__file__).resolve(), "spike", repo, "--brief", brief]
+        if recommended.get("mode") == "repair_existing_repo":
+            parts.append("--skip-repo-complete")
+        recommended["example"] = shell_join(*parts)
     elif recommended["command"] in {"auto", "go-loop"}:
-        recommended["example"] = f"python3 {Path(__file__).resolve()} {recommended['command']} {repo} --max-tasks {args.max_tasks}"
+        recommended["example"] = shell_join("python3", Path(__file__).resolve(), recommended["command"], repo, "--max-tasks", args.max_tasks)
     elif recommended["command"] == "task create":
-        recommended["example"] = f"python3 {Path(__file__).resolve()} task create {repo} --summary \"<next task>\""
+        recommended["example"] = shell_join("python3", Path(__file__).resolve(), "task", "create", repo, "--summary", "<next task>")
     result = {
         "schema": "go-workflow.router.v1",
         "normalized_command": normalized,
@@ -2856,7 +2863,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--max-commands", type=int, default=120)
     go.add_argument("--command-timeout-seconds", type=int, default=900)
     go.add_argument("--max-attempts", type=int, default=5)
-    go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+    go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports safe {repo_shell}, raw {repo}, {task_id}, {attempt}, {strategy}")
     go.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     go.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
     go.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")
@@ -2878,7 +2885,7 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--max-commands", type=int, default=36)
     auto.add_argument("--command-timeout-seconds", type=int, default=900)
     auto.add_argument("--max-attempts", type=int, default=5)
-    auto.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+    auto.add_argument("--build-command", default="", help="optional adapter command run before verification; supports safe {repo_shell}, raw {repo}, {task_id}, {attempt}, {strategy}")
     auto.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     auto.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
     auto.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")
@@ -2941,7 +2948,7 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--max-commands", type=int, default=120)
         loop.add_argument("--command-timeout-seconds", type=int, default=900)
         loop.add_argument("--max-attempts", type=int, default=5)
-        loop.add_argument("--build-command", default="", help="optional adapter command run before verification; supports {repo}, {task_id}, {attempt}, {strategy}")
+        loop.add_argument("--build-command", default="", help="optional adapter command run before verification; supports safe {repo_shell}, raw {repo}, {task_id}, {attempt}, {strategy}")
         loop.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
         loop.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
         loop.add_argument("--repair-agent", choices=["codex", "hermes"], default="", help="use a built-in repair adapter command template")

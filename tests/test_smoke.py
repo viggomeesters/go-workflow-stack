@@ -1935,6 +1935,35 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     assert direct_loop_plan["recommended"]["command"] == "go-loop"
 
 
+def test_router_command_examples_shell_quote_paths_and_free_form_text(tmp_path: Path):
+    repo = tmp_path / "missing; touch PWNED; #'s project"
+    intent = 'brief; touch PWNED; "quoted"'
+
+    routed = run_go("router", str(repo), "--command", "go", "--intent", intent, "--json")
+    assert routed.returncode == 0, routed.stderr + routed.stdout
+    example = json.loads(routed.stdout)["recommended"]["example"]
+    assert shlex.split(example) == [
+        "python3",
+        str(ROOT / "go_workflow" / "cli.py"),
+        "spike",
+        str(repo.resolve()),
+        "--brief",
+        intent,
+    ]
+
+    bare_go = run_go("go", str(repo), "--intent", intent, "--json")
+    assert bare_go.returncode == 0, bare_go.stderr + bare_go.stdout
+    next_command = json.loads(bare_go.stdout)["next_command"]
+    assert shlex.split(next_command) == [
+        "python3",
+        str(ROOT / "go_workflow" / "cli.py"),
+        "spike",
+        str(repo.resolve()),
+        "--brief",
+        intent,
+    ]
+
+
 def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path: Path):
     repo = tmp_path / "bare-go-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

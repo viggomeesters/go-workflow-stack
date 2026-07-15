@@ -14,6 +14,7 @@
 - Formalize live Hermes proof as a packaged schema and fail-closed CLI contract with raw-result hash verification and explicit validated copying.
 - Require raw doctor/first/resume evidence verification whenever a live Hermes proof is copied for preservation.
 - Shell-quote native Codex repository paths and remove unsafe path interpolation from native agent prompts.
+- Shell-quote generated router commands and advertise the safe `{repo_shell}` placeholder for custom adapters.
 
 ## 0.3.0 - 2026-07-15
 

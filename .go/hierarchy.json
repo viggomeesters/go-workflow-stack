@@ -77,7 +77,8 @@
         "hermetic-doctor-prerequisites",
         "live-hermes-proof-contract",
         "proof-copy-requires-raw-evidence",
-        "quote-native-adapter-repo-paths"
+        "quote-native-adapter-repo-paths",
+        "quote-router-command-examples"
       ]
     }
   ]

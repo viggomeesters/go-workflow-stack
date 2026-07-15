@@ -71,6 +71,7 @@ import hashlib
 import json
 import pathlib
 import sys
+from datetime import datetime, timezone
 
 work = pathlib.Path(sys.argv[1])
 repo = pathlib.Path(sys.argv[2])
@@ -98,6 +99,7 @@ assert protocol, "no native Hermes protocol results were recorded"
 proof = {
     "schema": "go-workflow.live-hermes-proof.v1",
     "status": "proven",
+    "created_at": datetime.now(timezone.utc).isoformat(),
     "binary": str(binary),
     "binary_version": (work / "hermes-version.txt").read_text(encoding="utf-8", errors="replace").strip()[:500],
     "repo": str(repo),
@@ -112,4 +114,5 @@ proof = {
 PY
 
 test -s "$WORK_ROOT/proof.json"
+python3 "$STACK_ROOT/cli/go.py" proof validate "$WORK_ROOT/proof.json" --evidence-root "$WORK_ROOT" --json >"$WORK_ROOT/proof-validation.json"
 echo "PROVEN: live Hermes build/critic/repair/resume campaign completed; evidence: $WORK_ROOT/proof.json"

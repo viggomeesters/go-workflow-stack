@@ -11,6 +11,7 @@
 - Make JSON writes and task queue moves atomic, serialize JSONL appends, and add PID-aware process locks that recover dead owners without stealing live locks.
 - Ship a standalone `go-workflow` uv-tool entrypoint with packaged schemas/fixture, deterministic Python/frontend/existing-repo pilots, and fail-closed real-Hermes proof artifacts.
 - Fall back to an isolated uv runtime when the host has Python 3.11+ but no importable pytest.
+- Formalize live Hermes proof as a packaged schema and fail-closed CLI contract with raw-result hash verification and explicit validated copying.
 
 ## 0.3.0 - 2026-07-15
 

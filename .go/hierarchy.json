@@ -74,7 +74,8 @@
         "linux-pytest-fallback",
         "hermetic-annotated-tag-tests",
         "quiet-linux-pytest-probe",
-        "hermetic-doctor-prerequisites"
+        "hermetic-doctor-prerequisites",
+        "live-hermes-proof-contract"
       ]
     }
   ]

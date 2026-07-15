@@ -89,6 +89,7 @@ The apply command validates the paired template and then creates a project-speci
 - `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
 - `migrate <repo> [--apply]`: plan a versioned `.go` migration without writes, or explicitly apply and validate it.
 - `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.
+- `proof validate <proof.json> [--evidence-root dir] [--copy-to path]`: validate live Hermes evidence, optionally recompute raw-result hashes, and copy only after all proof gates pass.
 - `stack update <repo> --to vX.Y.Z [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply atomically with rollback data only when explicitly requested.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.

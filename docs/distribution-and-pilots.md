@@ -24,4 +24,16 @@ Run both distribution and pilot checks locally:
 bash scripts/check-pilots.sh
 ```
 
-Live Hermes evidence is separate. `scripts/run-hermes-acceptance.sh` requires explicit authorization, an executable Hermes binary with version output, two successful real agent tasks, resume completion, and validated native v1 adapter results. It writes `proof.json` only after every assertion succeeds; otherwise it exits with `NOT PROVEN` and no proof artifact.
+Live Hermes evidence is separate. `scripts/run-hermes-acceptance.sh` requires explicit authorization, an executable Hermes binary with version output, two successful real agent tasks, resume completion, and validated native v1 adapter results. It writes `proof.json` only after every assertion succeeds, recomputes the hashes of all three raw result files, verifies doctor/first-run/resume semantics, reconstructs the native protocol ledger from those raw files, and validates the artifact against the importable `go-workflow.live-hermes-proof.v1` contract before printing `PROVEN`. Otherwise it exits with `NOT PROVEN` and no accepted proof artifact.
+
+On the Hermes machine, preserve a reviewed proof only through the fail-closed CLI:
+
+```bash
+GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v031 \
+  bash scripts/run-hermes-acceptance.sh
+go-workflow proof validate /tmp/go-hermes-v031/proof.json \
+  --evidence-root /tmp/go-hermes-v031 \
+  --copy-to docs/live-hermes-proof.json --json
+```
+
+The copy is not created when the structure, timezone, native task/phase evidence, or a raw-result hash is invalid.

@@ -39,6 +39,7 @@ from go_workflow.task_state import open_task_records, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
 from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, repository_lock
+from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -2899,6 +2900,14 @@ def build_parser() -> argparse.ArgumentParser:
     adapter_validate.add_argument("--phase", choices=["build", "critic", "repair"])
     adapter_validate.add_argument("--json", action="store_true")
     adapter_validate.set_defaults(func=cmd_adapter_validate_result)
+    proof = sub.add_parser("proof", help="Validate and explicitly copy live runtime proof artifacts")
+    proof_sub = proof.add_subparsers(dest="proof_command", required=True)
+    proof_validate = proof_sub.add_parser("validate", help="Fail-closed validation for live Hermes proof")
+    proof_validate.add_argument("proof")
+    proof_validate.add_argument("--evidence-root", default="", help="recompute doctor/first/resumed hashes from this directory")
+    proof_validate.add_argument("--copy-to", default="", help="copy the proof only after successful validation")
+    proof_validate.add_argument("--json", action="store_true")
+    proof_validate.set_defaults(func=cmd_proof_validate)
     stack = sub.add_parser("stack", help="Plan or apply immutable project stack pin updates")
     stack_sub = stack.add_subparsers(dest="stack_command", required=True)
     stack_update = stack_sub.add_parser("update", help="Validate and update required_stack_version and stack_ref")
@@ -3129,6 +3138,34 @@ def cmd_adapter_validate_result(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2, ensure_ascii=False))
     else:
         print("valid adapter result" if not errors else "invalid adapter result: " + "; ".join(errors))
+    return 0 if not errors else 1
+
+
+def cmd_proof_validate(args: argparse.Namespace) -> int:
+    source = Path(args.proof).resolve()
+    data = load_json(source)
+    errors = validate_live_hermes_proof(data)
+    if args.evidence_root and not errors:
+        errors.extend(verify_live_hermes_evidence(data, Path(args.evidence_root).resolve()))
+    copied_to = None
+    if not errors and args.copy_to:
+        target = Path(args.copy_to).resolve()
+        atomic_json(target, data)
+        copied_to = str(target)
+    payload = {
+        "schema": "go-workflow.live-proof-validation.v1",
+        "proof": str(source),
+        "valid": not errors,
+        "errors": errors,
+        "evidence_root": str(Path(args.evidence_root).resolve()) if args.evidence_root else None,
+        "copied_to": copied_to,
+    }
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print("valid live Hermes proof" if not errors else "invalid live Hermes proof: " + "; ".join(errors))
+        if copied_to:
+            print(f"copied: {copied_to}")
     return 0 if not errors else 1
 
 

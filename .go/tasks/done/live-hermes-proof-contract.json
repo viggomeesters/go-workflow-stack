@@ -1,0 +1,47 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "live-hermes-proof-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Formalize and validate live Hermes proof artifacts",
+  "description": "The WSL handoff names go-workflow.live-hermes-proof.v1 but no schema or reusable validator currently exists, so copied proof cannot be independently checked.",
+  "scope": {
+    "read": [
+      "scripts/run-hermes-acceptance.sh",
+      "docs/distribution-and-pilots.md"
+    ],
+    "modify": [
+      "go_workflow/hermes_proof.py",
+      "go_workflow/cli.py",
+      "go_workflow/__init__.py",
+      "schemas/live-hermes-proof.schema.json",
+      "scripts/run-hermes-acceptance.sh",
+      "tests/test_smoke.py",
+      "docs/distribution-and-pilots.md",
+      "README.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "A versioned JSON schema and importable validator reject incomplete or not-proven artifacts",
+    "The CLI validates a proof file and can copy only a valid proof to an explicit output",
+    "The live campaign self-validates proof.json before printing PROVEN"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "bash scripts/check-pilots.sh"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:08:49+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:16:24+02:00",
+      "agent": "codex",
+      "summary": "TDD RED proved missing proof command, naive timestamp acceptance, unchecked hashes, malformed nested crash, and semantically empty raw results; GREEN provides packaged schema, importable validator, CLI copy gate, raw hash and doctor/run/protocol reconstruction. Verification: 70 pytest tests, make check, check-pilots, fail-closed missing-Hermes gate, and git diff check passed."
+    }
+  ]
+}

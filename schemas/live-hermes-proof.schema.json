@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/viggomeesters/go-workflow-stack/schemas/live-hermes-proof.schema.json",
+  "title": "Go Workflow live Hermes proof",
+  "type": "object",
+  "required": ["schema", "status", "created_at", "binary", "binary_version", "repo", "completed_tasks", "protocol_results", "result_sha256"],
+  "properties": {
+    "schema": {"const": "go-workflow.live-hermes-proof.v1"},
+    "status": {"const": "proven"},
+    "created_at": {"type": "string", "format": "date-time"},
+    "binary": {"type": "string", "minLength": 1},
+    "binary_version": {"type": "string", "minLength": 1},
+    "repo": {"type": "string", "minLength": 1},
+    "completed_tasks": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "uniqueItems": true,
+      "items": {"enum": ["phase-one", "phase-two"]}
+    },
+    "protocol_results": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["result_file", "task_id", "attempt", "phase", "status", "summary"],
+        "properties": {
+          "result_file": {"enum": ["first.json", "resumed.json"]},
+          "task_id": {"enum": ["phase-one", "phase-two"]},
+          "attempt": {"type": "integer", "minimum": 1},
+          "phase": {"enum": ["build", "critic", "repair"]},
+          "status": {"enum": ["success", "failure", "blocked"]},
+          "summary": {"type": "string", "minLength": 1}
+        },
+        "additionalProperties": false
+      }
+    },
+    "result_sha256": {
+      "type": "object",
+      "required": ["doctor.json", "first.json", "resumed.json"],
+      "properties": {
+        "doctor.json": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "first.json": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "resumed.json": {"type": "string", "pattern": "^[0-9a-f]{64}$"}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

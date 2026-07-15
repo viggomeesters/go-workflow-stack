@@ -23,7 +23,7 @@
   ],
   "verification": [
     "GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v031 bash scripts/run-hermes-acceptance.sh",
-    "python3 -m json.tool /tmp/go-hermes-v031/proof.json"
+    "python3 cli/go.py proof validate /tmp/go-hermes-v031/proof.json --evidence-root /tmp/go-hermes-v031 --copy-to docs/live-hermes-proof.json --json"
   ],
   "claim": {
     "agent": null,

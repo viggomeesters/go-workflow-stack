@@ -1,4 +1,5 @@
 import json
+import hashlib
 import os
 import shlex
 import shutil
@@ -169,6 +170,65 @@ def test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_overri
     assert "development override" in allowed.stderr
 
 
+def sample_live_hermes_proof() -> dict:
+    return {
+        "schema": "go-workflow.live-hermes-proof.v1",
+        "status": "proven",
+        "created_at": "2026-07-15T12:00:00+00:00",
+        "binary": "/home/viggo/.local/bin/hermes",
+        "binary_version": "hermes 1.2.3",
+        "repo": "/tmp/hermes-go-campaign",
+        "completed_tasks": ["phase-one", "phase-two"],
+        "protocol_results": [
+            {"result_file": "first.json", "task_id": "phase-one", "attempt": 1, "phase": "build", "status": "success", "summary": "built one"},
+            {"result_file": "first.json", "task_id": "phase-one", "attempt": 1, "phase": "critic", "status": "success", "summary": "reviewed one"},
+            {"result_file": "resumed.json", "task_id": "phase-two", "attempt": 1, "phase": "build", "status": "success", "summary": "built two"},
+            {"result_file": "resumed.json", "task_id": "phase-two", "attempt": 1, "phase": "critic", "status": "success", "summary": "reviewed two"},
+        ],
+        "result_sha256": {name: character * 64 for name, character in {
+            "doctor.json": "a", "first.json": "b", "resumed.json": "c",
+        }.items()},
+    }
+
+
+def write_live_hermes_raw_results(root: Path, proof: dict) -> None:
+    doctor = {
+        "schema": "go-workflow.doctor.v1",
+        "ready": True,
+        "agent": {"name": "hermes", "available": True, "path": proof["binary"]},
+    }
+    runs = {
+        "first.json": {
+            "schema": "go-workflow.auto-run-result.v1",
+            "status": "budget_exhausted",
+            "completed_tasks": ["phase-one"],
+            "attempts": [{
+                "task_id": "phase-one", "attempt": 1,
+                "build": {"result": {"schema": "go-workflow.agent-adapter-result.v1", "phase": "build", "status": "success", "summary": "built one"}},
+                "critic": {"result": {"schema": "go-workflow.agent-adapter-result.v1", "phase": "critic", "status": "success", "summary": "reviewed one"}},
+                "repair": {"status": "not_needed"},
+            }],
+        },
+        "resumed.json": {
+            "schema": "go-workflow.auto-run-result.v1",
+            "status": "done",
+            "completed_tasks": ["phase-two"],
+            "completion_audit": {"project_verification_passed": True},
+            "attempts": [{
+                "task_id": "phase-two", "attempt": 1,
+                "build": {"result": {"schema": "go-workflow.agent-adapter-result.v1", "phase": "build", "status": "success", "summary": "built two"}},
+                "critic": {"result": {"schema": "go-workflow.agent-adapter-result.v1", "phase": "critic", "status": "success", "summary": "reviewed two"}},
+                "repair": {"status": "not_needed"},
+            }],
+        },
+    }
+    payloads = {"doctor.json": doctor, **runs}
+    for name, payload in payloads.items():
+        path = root / name
+        path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+        proof["result_sha256"][name] = hashlib.sha256(path.read_bytes()).hexdigest()
+
+
 def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary(tmp_path: Path):
     env = os.environ.copy()
     env["GO_RUN_REAL_HERMES_E2E"] = "1"
@@ -187,6 +247,91 @@ def test_live_hermes_acceptance_refuses_to_claim_proof_without_binary(tmp_path: 
     assert "go-workflow.live-hermes-proof.v1" in script
     assert "go-workflow.agent-adapter-result.v1" in script
     assert "hermes --version" in script
+
+
+def test_live_hermes_proof_cli_validates_and_explicitly_copies_valid_evidence(tmp_path: Path):
+    proof = tmp_path / "proof.json"
+    copied = tmp_path / "reviewed" / "live-hermes-proof.json"
+    data = sample_live_hermes_proof()
+    write_live_hermes_raw_results(tmp_path, data)
+    proof.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+
+    validated = run_go(
+        "proof", "validate", str(proof), "--evidence-root", str(tmp_path),
+        "--copy-to", str(copied), "--json",
+    )
+
+    assert validated.returncode == 0, validated.stderr + validated.stdout
+    result = json.loads(validated.stdout)
+    assert result["valid"] is True
+    assert result["copied_to"] == str(copied.resolve())
+    assert json.loads(copied.read_text(encoding="utf-8"))["status"] == "proven"
+
+
+def test_live_hermes_proof_rejects_naive_timestamp_without_copying(tmp_path: Path):
+    proof = tmp_path / "naive-proof.json"
+    copied = tmp_path / "must-not-exist.json"
+    data = sample_live_hermes_proof()
+    data["created_at"] = "2026-07-15T12:00:00"
+    proof.write_text(json.dumps(data), encoding="utf-8")
+
+    rejected = run_go("proof", "validate", str(proof), "--copy-to", str(copied), "--json")
+
+    assert rejected.returncode == 1
+    result = json.loads(rejected.stdout)
+    assert result["valid"] is False
+    assert "timezone" in " ".join(result["errors"])
+    assert not copied.exists()
+
+
+def test_live_hermes_proof_recomputes_result_hashes_before_copy(tmp_path: Path):
+    proof = tmp_path / "proof.json"
+    copied = tmp_path / "must-not-exist.json"
+    proof.write_text(json.dumps(sample_live_hermes_proof()), encoding="utf-8")
+    for name in ("doctor.json", "first.json", "resumed.json"):
+        (tmp_path / name).write_text(f"actual {name}\n", encoding="utf-8")
+
+    rejected = run_go(
+        "proof", "validate", str(proof),
+        "--evidence-root", str(tmp_path), "--copy-to", str(copied), "--json",
+    )
+
+    assert rejected.returncode == 1
+    result = json.loads(rejected.stdout)
+    assert "hash mismatch" in " ".join(result["errors"])
+    assert not copied.exists()
+
+
+def test_live_hermes_proof_malformed_nested_values_fail_closed(tmp_path: Path):
+    proof = tmp_path / "malformed-proof.json"
+    data = sample_live_hermes_proof()
+    data["completed_tasks"] = [{"unexpected": "object"}]
+    proof.write_text(json.dumps(data), encoding="utf-8")
+
+    rejected = run_go("proof", "validate", str(proof), "--json")
+
+    assert rejected.returncode == 1, rejected.stderr + rejected.stdout
+    result = json.loads(rejected.stdout)
+    assert result["valid"] is False
+    assert "completed_tasks" in " ".join(result["errors"])
+
+
+def test_live_hermes_proof_rejects_correctly_hashed_but_semantically_empty_results(tmp_path: Path):
+    proof = tmp_path / "proof.json"
+    data = sample_live_hermes_proof()
+    for name in ("doctor.json", "first.json", "resumed.json"):
+        path = tmp_path / name
+        path.write_text("{}\n", encoding="utf-8")
+        data["result_sha256"][name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    proof.write_text(json.dumps(data), encoding="utf-8")
+
+    rejected = run_go("proof", "validate", str(proof), "--evidence-root", str(tmp_path), "--json")
+
+    assert rejected.returncode == 1
+    errors = " ".join(json.loads(rejected.stdout)["errors"])
+    assert "doctor.json" in errors
+    assert "first.json" in errors
+    assert "resumed.json" in errors
 
 
 def test_spike_customizes_a_repository_created_from_public_template(tmp_path: Path):
@@ -947,6 +1092,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         ROOT / "schemas" / "agent-adapter-result.schema.json",
         ROOT / "schemas" / "migration-plan.schema.json",
         ROOT / "schemas" / "stack-update-plan.schema.json",
+        ROOT / "schemas" / "live-hermes-proof.schema.json",
         ROOT / "docs" / "agent-adapter-protocol.md",
         ROOT / "docs" / "contract-migrations.md",
         ROOT / "docs" / "stack-updates.md",

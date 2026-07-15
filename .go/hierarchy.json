@@ -63,7 +63,8 @@
         "template-executable-pairing",
         "coordinated-cross-repo-publish",
         "local-only-wsl-foundation",
-        "deterministic-runtime-template-mode"
+        "deterministic-runtime-template-mode",
+        "template-mode-pairing-audit"
       ]
     }
   ]

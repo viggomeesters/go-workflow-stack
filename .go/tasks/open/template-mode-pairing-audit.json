@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "template-mode-pairing-audit",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Make template pairing completion aware of setup-only lifecycle state",
+  "description": "Make template pairing completion aware of setup-only lifecycle state",
+  "scope": {
+    "read": [
+      "cli/**",
+      "tests/**",
+      "../go-project-template/.go/**"
+    ],
+    "modify": [
+      "cli/**",
+      "tests/**",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "The bounded template smoke completes successfully without applying normal project goal-completion semantics",
+    "Real project completion audits remain unchanged"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest tests/test_smoke.py::test_template_check_command_reports_pairing_contract -q",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

@@ -334,6 +334,19 @@ def test_live_hermes_proof_rejects_correctly_hashed_but_semantically_empty_resul
     assert "resumed.json" in errors
 
 
+def test_live_hermes_proof_copy_requires_raw_evidence_root(tmp_path: Path):
+    proof = tmp_path / "proof.json"
+    copied = tmp_path / "must-not-exist.json"
+    proof.write_text(json.dumps(sample_live_hermes_proof()), encoding="utf-8")
+
+    rejected = run_go("proof", "validate", str(proof), "--copy-to", str(copied), "--json")
+
+    assert rejected.returncode == 1
+    errors = " ".join(json.loads(rejected.stdout)["errors"])
+    assert "--evidence-root" in errors
+    assert not copied.exists()
+
+
 def test_spike_customizes_a_repository_created_from_public_template(tmp_path: Path):
     repo = tmp_path / "customer-portal"
     shutil.copytree(template_repo(), repo, ignore=shutil.ignore_patterns(".git", ".DS_Store"))

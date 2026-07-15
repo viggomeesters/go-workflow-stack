@@ -36,4 +36,4 @@ go-workflow proof validate /tmp/go-hermes-v031/proof.json \
   --copy-to docs/live-hermes-proof.json --json
 ```
 
-The copy is not created when the structure, timezone, native task/phase evidence, or a raw-result hash is invalid.
+The copy is not created when `--evidence-root` is omitted, or when the structure, timezone, native task/phase evidence, raw run semantics, or a raw-result hash is invalid.

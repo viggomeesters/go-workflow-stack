@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "proof-copy-requires-raw-evidence",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Require raw result verification before preserving Hermes proof",
+  "description": "Structural validation alone must not authorize --copy-to; durable proof copying requires doctor/first/resumed hash and semantic checks through --evidence-root.",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "docs/distribution-and-pilots.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "docs/distribution-and-pilots.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "--copy-to without --evidence-root fails and creates no file",
+    "Validated raw evidence still permits explicit copying"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:17:48+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:18:48+02:00",
+      "agent": "codex",
+      "summary": "TDD RED proved structural-only proof could be copied without raw evidence; GREEN requires --evidence-root for --copy-to while valid raw doctor/first/resume evidence still copies. Verification: 71 tests, check-pilots, and diff check passed."
+    }
+  ]
+}

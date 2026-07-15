@@ -12,6 +12,7 @@
 - Ship a standalone `go-workflow` uv-tool entrypoint with packaged schemas/fixture, deterministic Python/frontend/existing-repo pilots, and fail-closed real-Hermes proof artifacts.
 - Fall back to an isolated uv runtime when the host has Python 3.11+ but no importable pytest.
 - Formalize live Hermes proof as a packaged schema and fail-closed CLI contract with raw-result hash verification and explicit validated copying.
+- Require raw doctor/first/resume evidence verification whenever a live Hermes proof is copied for preservation.
 
 ## 0.3.0 - 2026-07-15
 

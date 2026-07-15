@@ -2905,7 +2905,7 @@ def build_parser() -> argparse.ArgumentParser:
     proof_validate = proof_sub.add_parser("validate", help="Fail-closed validation for live Hermes proof")
     proof_validate.add_argument("proof")
     proof_validate.add_argument("--evidence-root", default="", help="recompute doctor/first/resumed hashes from this directory")
-    proof_validate.add_argument("--copy-to", default="", help="copy the proof only after successful validation")
+    proof_validate.add_argument("--copy-to", default="", help="copy only after successful validation with --evidence-root")
     proof_validate.add_argument("--json", action="store_true")
     proof_validate.set_defaults(func=cmd_proof_validate)
     stack = sub.add_parser("stack", help="Plan or apply immutable project stack pin updates")
@@ -3145,6 +3145,8 @@ def cmd_proof_validate(args: argparse.Namespace) -> int:
     source = Path(args.proof).resolve()
     data = load_json(source)
     errors = validate_live_hermes_proof(data)
+    if args.copy_to and not args.evidence_root:
+        errors.append("--copy-to requires --evidence-root so raw result hashes and semantics are verified")
     if args.evidence_root and not errors:
         errors.extend(verify_live_hermes_evidence(data, Path(args.evidence_root).resolve()))
     copied_to = None

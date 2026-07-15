@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}"
 
-if command -v python3 >/dev/null 2>&1 && python3 -c 'import sys, pytest; raise SystemExit(sys.version_info < (3, 11))'; then
+if command -v python3 >/dev/null 2>&1 && python3 -c 'import sys, pytest; raise SystemExit(sys.version_info < (3, 11))' 2>/dev/null; then
   PYTHON=(python3)
   PYTEST=(python3 -m pytest)
 elif command -v uv >/dev/null 2>&1; then

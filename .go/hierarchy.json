@@ -72,7 +72,8 @@
         "explicit-stack-update",
         "capture-live-hermes-wsl-proof",
         "linux-pytest-fallback",
-        "hermetic-annotated-tag-tests"
+        "hermetic-annotated-tag-tests",
+        "quiet-linux-pytest-probe"
       ]
     }
   ]

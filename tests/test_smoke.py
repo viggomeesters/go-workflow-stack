@@ -30,6 +30,7 @@ def test_stack_uses_local_only_linux_verification():
     text = verifier.read_text(encoding="utf-8")
     assert "Python 3.11+ required" in text
     assert "pytest" in text
+    assert "import sys, pytest" in text
     assert "template-check" in text
 
     documentation = "\n".join(

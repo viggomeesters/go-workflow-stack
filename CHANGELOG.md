@@ -10,6 +10,7 @@
 - Add dry-run-first `go stack update` with tag/runtime compatibility checks, atomic project writes, and durable rollback records.
 - Make JSON writes and task queue moves atomic, serialize JSONL appends, and add PID-aware process locks that recover dead owners without stealing live locks.
 - Ship a standalone `go-workflow` uv-tool entrypoint with packaged schemas/fixture, deterministic Python/frontend/existing-repo pilots, and fail-closed real-Hermes proof artifacts.
+- Fall back to an isolated uv runtime when the host has Python 3.11+ but no importable pytest.
 
 ## 0.3.0 - 2026-07-15
 

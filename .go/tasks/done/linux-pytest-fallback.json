@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "linux-pytest-fallback",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Use uv when system Python lacks pytest",
+  "description": "Fresh Debian verification exposed that check-linux selected Python by version alone and then failed on missing pytest.",
+  "scope": {
+    "read": [
+      "scripts/check-linux.sh"
+    ],
+    "modify": [
+      "scripts/check-linux.sh",
+      "tests/test_smoke.py",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "A Python 3.11+ host without pytest falls back to uv"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest tests/test_smoke.py::test_stack_uses_local_only_linux_verification -q",
+    "bash scripts/check-linux.sh"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:02:56+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:03:23+02:00",
+      "agent": "codex",
+      "summary": "Focused regression and full check-linux passed locally; system Python is now selected only when pytest imports, otherwise uv provides isolated Python plus pytest. Fresh Debian rerun follows from committed clone."
+    }
+  ]
+}

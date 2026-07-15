@@ -70,7 +70,8 @@
         "template-mode-pairing-audit",
         "pin-release-integrity-v031",
         "explicit-stack-update",
-        "capture-live-hermes-wsl-proof"
+        "capture-live-hermes-wsl-proof",
+        "linux-pytest-fallback"
       ]
     }
   ]

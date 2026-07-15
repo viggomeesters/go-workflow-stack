@@ -154,6 +154,13 @@ Prepare a version locally without publishing or invoking hosted automation:
 bash scripts/release-check.sh 0.3.1
 ```
 
+Review and explicitly apply an immutable project stack update:
+
+```bash
+./go stack update --to v0.3.1 --json
+./go stack update --to v0.3.1 --apply --json
+```
+
 ## Privacy and security
 
 The repository should contain only synthetic public fixtures. Do not commit private vault data, credentials, customer data, local runtime DBs, or generated machine state.

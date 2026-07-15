@@ -938,8 +938,10 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
         ROOT / "schemas" / "migration-plan.schema.json",
+        ROOT / "schemas" / "stack-update-plan.schema.json",
         ROOT / "docs" / "agent-adapter-protocol.md",
         ROOT / "docs" / "contract-migrations.md",
+        ROOT / "docs" / "stack-updates.md",
     ]:
         assert path.is_file(), path
 
@@ -1258,6 +1260,71 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     validated = run_go("validate", str(repo))
     assert validated.returncode == 1
     assert "stack_ref must be an immutable version tag" in validated.stderr
+
+
+def test_stack_update_is_dry_run_first_and_apply_records_rollback(tmp_path: Path):
+    repo = tmp_path / "update-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "update", "--name", "Update")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    project.update({"required_stack_version": "0.2.0", "stack_ref": "v0.2.0"})
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    before = project_path.read_text(encoding="utf-8")
+
+    planned = run_go("stack", "update", str(repo), "--to", "v0.3.0", "--json")
+    assert planned.returncode == 0, planned.stderr + planned.stdout
+    plan = json.loads(planned.stdout)
+    assert plan["schema"] == "go-workflow.stack-update-plan.v1"
+    assert plan["mode"] == "dry_run"
+    assert plan["from_ref"] == "v0.2.0"
+    assert plan["to_ref"] == "v0.3.0"
+    assert len(plan["resolved_commit"]) == 40
+    assert project_path.read_text(encoding="utf-8") == before
+    assert not (repo / ".go" / "updates").exists()
+
+    applied = run_go("stack", "update", str(repo), "--to", "v0.3.0", "--apply", "--json")
+    assert applied.returncode == 0, applied.stderr + applied.stdout
+    result = json.loads(applied.stdout)
+    assert result["mode"] == "applied"
+    updated = json.loads(project_path.read_text(encoding="utf-8"))
+    assert updated["required_stack_version"] == "0.3.0"
+    assert updated["stack_ref"] == "v0.3.0"
+    rollback = repo / result["rollback_record"]
+    rollback_data = json.loads(rollback.read_text(encoding="utf-8"))
+    assert rollback_data["before_project"]["stack_ref"] == "v0.2.0"
+    assert rollback_data["after_project"]["stack_ref"] == "v0.3.0"
+
+
+def test_stack_update_rejects_missing_and_incompatible_refs_before_writing(tmp_path: Path):
+    repo = tmp_path / "reject-update"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "reject", "--name", "Reject")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    before = project_path.read_text(encoding="utf-8")
+
+    missing = run_go("stack", "update", str(repo), "--to", "v99.0.0", "--apply", "--json")
+    assert missing.returncode == 1
+    assert "does not exist" in missing.stderr
+    assert project_path.read_text(encoding="utf-8") == before
+
+    fake_stack = tmp_path / "fake-stack"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(fake_stack)], check=True)
+    (fake_stack / "go_workflow").mkdir()
+    (fake_stack / "go_workflow" / "constants.py").write_text(
+        'STACK_VERSION = "1.2.3"\nCURRENT_CONTRACT_VERSION = 2\n', encoding="utf-8",
+    )
+    subprocess.run(["git", "add", "."], cwd=fake_stack, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "fake", "-q"], cwd=fake_stack, check=True)
+    subprocess.run(["git", "tag", "-a", "v9.9.9", "-m", "v9.9.9"], cwd=fake_stack, check=True)
+    incompatible = run_go(
+        "stack", "update", str(repo), "--to", "v9.9.9", "--stack-repo", str(fake_stack), "--apply", "--json",
+    )
+    assert incompatible.returncode == 1
+    assert "declares version 1.2.3" in incompatible.stderr
+    assert project_path.read_text(encoding="utf-8") == before
 
 
 def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Path):

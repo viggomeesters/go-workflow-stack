@@ -37,6 +37,7 @@ from go_workflow.adapters import native_agent_command
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
+from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -2878,6 +2879,16 @@ def build_parser() -> argparse.ArgumentParser:
     adapter_validate.add_argument("--phase", choices=["build", "critic", "repair"])
     adapter_validate.add_argument("--json", action="store_true")
     adapter_validate.set_defaults(func=cmd_adapter_validate_result)
+    stack = sub.add_parser("stack", help="Plan or apply immutable project stack pin updates")
+    stack_sub = stack.add_subparsers(dest="stack_command", required=True)
+    stack_update = stack_sub.add_parser("update", help="Validate and update required_stack_version and stack_ref")
+    stack_update.add_argument("repo", nargs="?", default=".")
+    stack_update.add_argument("--to", required=True, help="immutable target tag vX.Y.Z")
+    stack_update.add_argument("--stack-repo", default=str(STACK_ROOT), help="stack git checkout used to resolve and inspect the tag")
+    stack_update.add_argument("--apply", action="store_true", help="apply transaction; default is dry-run")
+    stack_update.add_argument("--agent", default="agent")
+    stack_update.add_argument("--json", action="store_true")
+    stack_update.set_defaults(func=cmd_stack_update)
     agent_check = sub.add_parser("agent-check", help="Report repair-agent adapter availability")
     agent_check.add_argument("--agent", action="append", choices=["codex", "hermes"], default=[])
     agent_check.add_argument("--json", action="store_true")
@@ -3049,6 +3060,40 @@ def cmd_version(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2))
     else:
         print(STACK_VERSION)
+    return 0
+
+
+def cmd_stack_update(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    stack_repo = Path(args.stack_repo).resolve()
+    try:
+        plan = plan_stack_update(repo, stack_repo, args.to)
+    except StackUpdateError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    result = plan
+    if args.apply:
+        result = apply_stack_update(repo, plan)
+        errors = validate_repo(repo)
+        if errors:
+            rollback_stack_update(repo, result["rollback_record"])
+            raise RepoLocalError("stack update rolled back because the resulting contract is invalid:\n- " + "\n- ".join(errors))
+        append_jsonl(
+            go_root(repo) / "runs" / "events.jsonl",
+            event("stack-update", "run.checked", args.agent, {
+                "action": "stack.updated",
+                "from_ref": result.get("from_ref"),
+                "to_ref": result["to_ref"],
+                "resolved_commit": result["resolved_commit"],
+                "rollback_record": result["rollback_record"],
+            }),
+        )
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"stack update {result['mode']}: {result.get('from_ref')} -> {result['to_ref']}")
+        print(f"commit: {result['resolved_commit']}")
+        if result.get("rollback_record"):
+            print(f"rollback: {result['rollback_record']}")
     return 0
 
 

@@ -7,6 +7,7 @@
 - Require a visible, explicit `GO_STACK_ALLOW_DEV=1` override for unpinned local development runtimes.
 - Extract importable routing, task-state, and native-adapter domains behind the CLI facade.
 - Require built-in Codex and Hermes phases to emit validated v1 JSON and fail closed on malformed protocol-looking output.
+- Add dry-run-first `go stack update` with tag/runtime compatibility checks, atomic project writes, and durable rollback records.
 
 ## 0.3.0 - 2026-07-15
 

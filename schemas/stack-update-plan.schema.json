@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/viggomeesters/go-workflow-stack/schemas/stack-update-plan.schema.json",
+  "title": "Go workflow stack update plan",
+  "type": "object",
+  "required": ["schema", "mode", "repo", "from_ref", "to_ref", "resolved_commit", "changes"],
+  "properties": {
+    "schema": {"const": "go-workflow.stack-update-plan.v1"},
+    "mode": {"enum": ["dry_run", "applied"]},
+    "repo": {"type": "string"},
+    "from_ref": {"type": ["string", "null"]},
+    "to_ref": {"type": "string", "pattern": "^v[0-9]+\\.[0-9]+\\.[0-9]+$"},
+    "resolved_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+    "changes": {"type": "array", "items": {"type": "string"}},
+    "rollback_record": {"type": "string"}
+  },
+  "additionalProperties": true
+}

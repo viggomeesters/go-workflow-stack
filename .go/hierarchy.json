@@ -76,7 +76,8 @@
         "quiet-linux-pytest-probe",
         "hermetic-doctor-prerequisites",
         "live-hermes-proof-contract",
-        "proof-copy-requires-raw-evidence"
+        "proof-copy-requires-raw-evidence",
+        "quote-native-adapter-repo-paths"
       ]
     }
   ]

@@ -29,7 +29,7 @@ def native_agent_command(agent: str, phase: str, instructions: str = "") -> str:
     prompt = shlex.quote(native_agent_prompt(phase, instructions))
     if agent == "codex":
         sandbox = "read-only" if phase == "critic" else "workspace-write"
-        return f"codex exec --sandbox {sandbox} --ephemeral -C {{repo}} {prompt}"
+        return f"codex exec --sandbox {sandbox} --ephemeral -C {{repo_shell}} {prompt}"
     if agent == "hermes":
         return f"hermes -p {prompt}"
     raise ValueError(f"unsupported native adapter: {agent}")

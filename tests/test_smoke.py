@@ -1064,6 +1064,45 @@ def test_native_codex_and_hermes_commands_require_v1_result_output():
         assert "go-workflow.agent-adapter-result.v1" in command
         assert '"phase":"repair"' in command
         assert "final non-empty line" in command
+        if agent == "codex":
+            assert "-C {repo_shell}" in command
+            assert "-C {repo} " not in command
+
+
+def test_native_codex_adapter_quotes_metacharacter_repository_path(tmp_path: Path):
+    repo = tmp_path / "agent repo; touch PWNED; #"
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_codex = bin_dir / "codex"
+    fake_codex.write_text(
+        "#!/bin/sh\n"
+        "if [ \"$GO_HOOK\" = build ]; then printf 'built\\n' > \"$GO_REPO/built.txt\"; fi\n"
+        "printf '{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"%s\",\"status\":\"success\",\"summary\":\"safe native phase\"}\\n' \"$GO_HOOK\"\n",
+        encoding="utf-8",
+    )
+    fake_codex.chmod(0o755)
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "quoted", "--name", "Quoted")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "agent-build", "--summary", "Agent build",
+        "--epic", "workflow", "--execution-mode", "agent", "--modify", "built.txt",
+        "--acceptance", "built.txt exists", "--verification", "test -f built.txt",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+
+    executed = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json"],
+        text=True, capture_output=True, env=env,
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    assert json.loads(executed.stdout)["status"] == "done"
+    assert not (repo / "PWNED").exists()
 
 
 def test_routing_and_task_state_domains_are_importable(tmp_path: Path):

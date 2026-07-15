@@ -13,6 +13,7 @@
 - Fall back to an isolated uv runtime when the host has Python 3.11+ but no importable pytest.
 - Formalize live Hermes proof as a packaged schema and fail-closed CLI contract with raw-result hash verification and explicit validated copying.
 - Require raw doctor/first/resume evidence verification whenever a live Hermes proof is copied for preservation.
+- Shell-quote native Codex repository paths and remove unsafe path interpolation from native agent prompts.
 
 ## 0.3.0 - 2026-07-15
 

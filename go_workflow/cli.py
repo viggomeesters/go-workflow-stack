@@ -971,6 +971,7 @@ def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str,
 def format_hook_command(command: str, repo: Path, task: dict[str, Any], attempt: int, strategy: str) -> str:
     replacements = {
         "{repo}": str(repo),
+        "{repo_shell}": shell_quote(str(repo)),
         "{task_id}": str(task.get("id", "unknown")),
         "{attempt}": str(attempt),
         "{strategy}": strategy,
@@ -1289,7 +1290,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         raise RepoLocalError(f"repair agent '{agent}' is not available on PATH")
     instructions = " ".join([
         "You are the repair adapter for go-workflow-stack.",
-        "In repo {repo}, fix .go task {task_id} on attempt {attempt} using strategy {strategy}.",
+        "In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "Read GO_TASK_JSON from the environment.",
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
@@ -1321,7 +1322,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
     selected = select_executor_agent(agent)
     instructions = " ".join([
         "You are the build executor for a repo-local .go task.",
-        "Work in {repo} on task {task_id}, attempt {attempt}, strategy {strategy}.",
+        "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",

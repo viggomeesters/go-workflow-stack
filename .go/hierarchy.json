@@ -35,7 +35,8 @@
         "campaign-resume-e2e",
         "portable-runtime-hermes-selection",
         "wsl-doctor-launcher-version",
-        "bootstrap-linux-hermes-campaign"
+        "bootstrap-linux-hermes-campaign",
+        "modular-migrations-agent-protocol"
       ]
     },
     {
@@ -60,7 +61,9 @@
         "scope-enforcement-integrity",
         "transactional-finish-ship",
         "template-executable-pairing",
-        "coordinated-cross-repo-publish"
+        "coordinated-cross-repo-publish",
+        "local-only-wsl-foundation",
+        "deterministic-runtime-template-mode"
       ]
     }
   ]

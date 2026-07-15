@@ -22,3 +22,7 @@ python3 cli/go.py template-check ../go-project-template --json
 ```
 
 Preserve unrelated user changes. Do not push unless the user explicitly requests it or the selected run has `--ship-policy push --allow-push`.
+
+## GitHub Actions boundary
+
+GitHub Actions are off limits. Do not create, edit, enable, trigger, dispatch, inspect, wait for, or use GitHub Actions workflows/checks as verification evidence. Existing files under `.github/workflows/` are not authorization to interact with GitHub Actions. Use local checks, a local Linux container, or another explicitly approved verification route instead.

@@ -21,6 +21,23 @@ def test_template_validates():
     assert result.returncode == 0, result.stderr + result.stdout
 
 
+def test_stack_uses_local_only_linux_verification():
+    assert not (ROOT / ".github" / "workflows").exists()
+    verifier = ROOT / "scripts" / "check-linux.sh"
+    assert verifier.is_file()
+    text = verifier.read_text(encoding="utf-8")
+    assert "Python 3.11+ required" in text
+    assert "pytest" in text
+    assert "template-check" in text
+
+    documentation = "\n".join(
+        path.read_text(encoding="utf-8")
+        for path in [ROOT / "README.md", ROOT / "docs" / "autonomy-benchmark.md"]
+    )
+    assert "Linux CI" not in documentation
+    assert "GitHub Actions" not in documentation
+
+
 def run_go(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), *args], cwd=cwd, text=True, capture_output=True)
 

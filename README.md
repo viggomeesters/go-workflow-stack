@@ -121,7 +121,13 @@ export GO_EXECUTOR_AGENT=hermes
 python3 cli/go.py go-loop ../my-project --execute --agent hermes
 ```
 
-Linux CI runs the full stack suite and a deterministic Hermes build → critic → repair → resume campaign. A live-model acceptance is deliberately opt-in and never reports success when Hermes is absent:
+Hosted CI is deliberately not part of this project. Run the complete Linux/WSL contract locally; it selects an installed Python 3.11+ or uses `uv`, executes the full suite, and verifies the stack/template pairing:
+
+```bash
+bash scripts/check-linux.sh
+```
+
+A live-model acceptance is deliberately opt-in and never reports success when Hermes is absent:
 
 ```bash
 GO_RUN_REAL_HERMES_E2E=1 bash scripts/run-hermes-acceptance.sh

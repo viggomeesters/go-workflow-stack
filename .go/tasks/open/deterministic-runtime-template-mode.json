@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "deterministic-runtime-template-mode",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Pin reproducible stack runtimes and expose template setup state",
+  "description": "Pin reproducible stack runtimes and expose template setup state",
+  "scope": {
+    "read": [
+      "cli/**",
+      "schemas/**",
+      "tests/**",
+      "scripts/**",
+      ".go/**"
+    ],
+    "modify": [
+      "cli/**",
+      "schemas/**",
+      "tests/**",
+      "scripts/**",
+      ".go/**",
+      "README.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "Projects can declare a deterministic stack_ref in addition to a minimum compatible version",
+    "Template repositories report setup_required instead of ordinary unfinished project work",
+    "A local release preflight synchronizes versions and proves tests without publishing"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "bash scripts/release-check.sh"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

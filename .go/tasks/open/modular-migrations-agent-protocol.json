@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "modular-migrations-agent-protocol",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Modularize the CLI and add schema migrations plus a stable agent adapter protocol",
+  "description": "Modularize the CLI and add schema migrations plus a stable agent adapter protocol",
+  "scope": {
+    "read": [
+      "cli/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "pyproject.toml"
+    ]
+  },
+  "acceptance": [
+    "Core version, migration, and adapter protocol logic lives in importable focused modules while cli/go.py remains compatible",
+    "go migrate supports dry-run and explicit apply for versioned .go contracts",
+    "Hermes, Codex, and custom adapters consume and emit one documented versioned JSON protocol"
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

@@ -1052,9 +1052,64 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     assert result["platform"]["kind"] == "wsl"
     assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
     assert result["stack"]["version"] == "0.2.0"
+    assert result["stack"]["ref"] == "v0.2.0"
+    assert result["stack"]["required_ref"] == "v0.2.0"
     assert result["stack"]["compatible"] is True
     assert result["ready"] is True
     assert {item["name"] for item in result["prerequisites"]} >= {"python", "git", "bash", "make", "uv"}
+
+
+def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Path):
+    repo = tmp_path / "pinned-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+
+    adopted = run_go("adopt", str(repo), "--project-id", "pinned", "--name", "Pinned")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    assert project["stack_ref"] == "v0.2.0"
+
+    project["stack_ref"] = "main"
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    validated = run_go("validate", str(repo))
+    assert validated.returncode == 1
+    assert "stack_ref must be an immutable version tag" in validated.stderr
+
+
+def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Path):
+    repo = tmp_path / "starter"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "starter", "--name", "Starter")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "example", "--summary", "Synthetic example",
+        "--epic", "workflow", "--acceptance", "Example is present", "--verification", "git diff --check",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    project["project_mode"] = "template"
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+
+    result = run_go("status", str(repo), "--json")
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads(result.stdout)
+    assert payload["project"]["mode"] == "template"
+    assert payload["setup_required"] is True
+    assert payload["setup_command"] == "./go spike . --brief \"<project intent>\""
+    assert payload["next"] is None
+
+
+def test_release_preflight_is_local_and_version_synchronized():
+    env = os.environ.copy()
+    env["GO_RELEASE_SKIP_TESTS"] = "1"
+    result = subprocess.run(
+        ["bash", str(ROOT / "scripts" / "release-check.sh"), "0.2.0"],
+        cwd=ROOT, text=True, capture_output=True, env=env,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "release preflight: v0.2.0" in result.stdout
+    assert "publish: not performed" in result.stdout
 
 
 def test_autonomous_execution_rejects_newer_required_stack_version(tmp_path: Path):

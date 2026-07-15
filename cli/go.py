@@ -38,6 +38,7 @@ HIERARCHY_SCHEMA = "go-workflow.repo-local.hierarchy.v1"
 TASK_SCHEMA = "go-workflow.repo-local.task.v1"
 EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
 STACK_VERSION = "0.2.0"
+STACK_REF = f"v{STACK_VERSION}"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
@@ -109,10 +110,15 @@ def validate_project(data: dict[str, Any], rel: str) -> list[str]:
     require(bool(data.get("id")), errors, f"{rel}: id required")
     require(bool(data.get("name")), errors, f"{rel}: name required")
     require(data.get("source_of_truth") == "repo-local", errors, f"{rel}: source_of_truth must be repo-local")
+    require(data.get("project_mode", "project") in {"project", "template"}, errors, f"{rel}: project_mode must be project or template")
     require(isinstance(data.get("default_verification"), list) and bool(data.get("default_verification")), errors, f"{rel}: default_verification must be a non-empty list")
     required_stack_version = data.get("required_stack_version")
     if required_stack_version is not None:
         require(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(required_stack_version))), errors, f"{rel}: required_stack_version must be semantic version X.Y.Z")
+    stack_ref = data.get("stack_ref")
+    if stack_ref is not None:
+        immutable_ref = bool(re.fullmatch(r"v\d+\.\d+\.\d+|[0-9a-f]{40}", str(stack_ref)))
+        require(immutable_ref, errors, f"{rel}: stack_ref must be an immutable version tag (vX.Y.Z) or full commit SHA")
     return errors
 
 
@@ -534,7 +540,9 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         "id": project_id,
         "name": name,
         "source_of_truth": "repo-local",
+        "project_mode": "project",
         "required_stack_version": STACK_VERSION,
+        "stack_ref": STACK_REF,
         "default_verification": default_verification,
         "links": {"repo": args.repo_url or ""},
     })
@@ -597,7 +605,9 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "id": project_id,
             "name": name,
             "source_of_truth": "repo-local",
+            "project_mode": "project",
             "required_stack_version": STACK_VERSION,
+            "stack_ref": STACK_REF,
             "default_verification": args.verification or ["make check"],
             "links": {"repo": args.repo_url or ""},
         })
@@ -2186,13 +2196,19 @@ def cmd_status(args: argparse.Namespace) -> int:
     if route["mode"] == "repo-local" and route["valid"]:
         root = go_root(repo)
         project = load_json(root / "project.json")
-        status["project"] = {"id": project.get("id"), "name": project.get("name")}
+        project_mode = str(project.get("project_mode") or "project")
+        status["project"] = {"id": project.get("id"), "name": project.get("name"), "mode": project_mode}
         counts = {}
         for state in ("open", "active", "blocked", "done"):
             counts[state] = len(list((root / "tasks" / state).glob("*.json")))
         status["tasks"] = counts
         tasks = open_tasks(repo)
-        status["next"] = None if not tasks else {"id": tasks[0][1].get("id"), "summary": tasks[0][1].get("summary")}
+        status["setup_required"] = project_mode == "template"
+        if status["setup_required"]:
+            status["setup_command"] = './go spike . --brief "<project intent>"'
+            status["next"] = None
+        else:
+            status["next"] = None if not tasks else {"id": tasks[0][1].get("id"), "summary": tasks[0][1].get("summary")}
         status["dirty"] = classify_dirty(repo, [".go/**"])
     if args.json:
         print(json.dumps(status, indent=2, ensure_ascii=False))
@@ -3006,7 +3022,12 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     project_path = go_root(repo) / "project.json"
     project = load_json(project_path) if project_path.is_file() else {}
     required_version = str(project.get("required_stack_version") or "0.0.0")
+    required_ref = str(project.get("stack_ref") or "")
     compatible = semantic_version_tuple(STACK_VERSION) >= semantic_version_tuple(required_version)
+    git_head = subprocess.run(
+        ["git", "-C", str(STACK_ROOT), "rev-parse", "HEAD"], text=True, capture_output=True,
+    ).stdout.strip()
+    ref_compatible = not required_ref or required_ref == STACK_REF or required_ref == git_head
     prerequisites: list[dict[str, Any]] = [
         {"name": "python", "available": sys.version_info >= (3, 11), "version": ".".join(str(part) for part in sys.version_info[:3]), "path": sys.executable},
     ]
@@ -3024,6 +3045,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         actions.append(f"install {args.agent} and make it available on PATH")
     if not compatible:
         actions.append(f"update go-workflow-stack to at least {required_version}")
+    if not ref_compatible:
+        actions.append(f"checkout the pinned go-workflow-stack ref {required_ref}")
     if contract_errors:
         actions.append("repair the .go project contract")
     ready = not actions
@@ -3033,7 +3056,14 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         "platform": detected_platform(args.platform),
         "prerequisites": prerequisites,
         "agent": agent,
-        "stack": {"version": STACK_VERSION, "required_version": required_version, "compatible": compatible},
+        "stack": {
+            "version": STACK_VERSION,
+            "ref": STACK_REF,
+            "git_head": git_head or None,
+            "required_version": required_version,
+            "required_ref": required_ref or None,
+            "compatible": compatible and ref_compatible,
+        },
         "contract": {"valid": not contract_errors, "errors": contract_errors},
         "ready": ready,
         "actions": actions,

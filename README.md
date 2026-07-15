@@ -6,6 +6,8 @@ Reusable tooling for repo-local agentic engineering.
 
 The stack contains schemas, validators, fixtures, and a small CLI for projects that keep their own `.go/` JSON/JSONL state next to the code.
 
+Projects may combine `required_stack_version` with an immutable `stack_ref` (`vX.Y.Z` or a full commit SHA). The minimum version protects compatibility; the ref makes bootstrap and cross-machine continuation reproducible.
+
 ## Why this exists
 
 Agent work should be clone-readable. A future agent should be able to inspect a repository and understand its project state without needing a central vault task database.
@@ -142,6 +144,12 @@ python3 -m pip install -e '.[test]'
 python3 -m pytest tests/test_smoke.py -q
 make check
 bash scripts/check.sh
+```
+
+Prepare a version locally without publishing or invoking hosted automation:
+
+```bash
+bash scripts/release-check.sh 0.2.0
 ```
 
 ## Privacy and security

@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "deterministic-runtime-template-mode",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Pin reproducible stack runtimes and expose template setup state",
   "description": "Pin reproducible stack runtimes and expose template setup state",
   "scope": {
@@ -35,8 +35,14 @@
     "bash scripts/release-check.sh"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-07-15T08:53:06+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-15T08:56:57+02:00",
+      "agent": "codex",
+      "summary": "TDD: stack_ref and template-status tests failed before implementation and now pass. Full regression: 50 tests. Release preflight verified v0.2.0 synchronization and explicitly performed no publish. Doctor now reports required immutable ref compatibility."
+    }
+  ]
 }

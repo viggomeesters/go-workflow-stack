@@ -4,7 +4,9 @@
   "id": "go-workflow-stack",
   "name": "Go Workflow Stack",
   "source_of_truth": "repo-local",
+  "project_mode": "project",
   "required_stack_version": "0.2.0",
+  "stack_ref": "v0.2.0",
   "default_verification": [
     "uv run --no-project --with pytest pytest -q",
     "make check"

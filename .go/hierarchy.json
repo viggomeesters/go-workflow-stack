@@ -79,7 +79,8 @@
         "proof-copy-requires-raw-evidence",
         "quote-native-adapter-repo-paths",
         "quote-router-command-examples",
-        "reject-template-stack-ref-override"
+        "reject-template-stack-ref-override",
+        "normalize-data-file-modes"
       ]
     }
   ]

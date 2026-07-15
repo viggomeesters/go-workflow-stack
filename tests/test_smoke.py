@@ -49,6 +49,28 @@ def test_stack_uses_local_only_linux_verification():
     assert "GitHub Actions" not in documentation
 
 
+def test_tracked_data_contracts_are_not_executable():
+    repositories = [ROOT]
+    if (template_repo() / ".git").exists():
+        repositories.append(template_repo())
+    data_suffixes = {".json", ".jsonl", ".yaml", ".yml", ".md", ".svg"}
+
+    executable_data: list[str] = []
+    for repository in repositories:
+        tracked = subprocess.run(
+            ["git", "ls-files", "-z"],
+            cwd=repository,
+            capture_output=True,
+            check=True,
+        ).stdout.decode().rstrip("\0").split("\0")
+        for path in tracked:
+            artifact = repository / path
+            if artifact.suffix.lower() in data_suffixes and artifact.stat().st_mode & 0o111:
+                executable_data.append(f"{repository.name}/{path}")
+
+    assert executable_data == []
+
+
 def run_go(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
     return subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), *args], cwd=cwd, text=True, capture_output=True)
 

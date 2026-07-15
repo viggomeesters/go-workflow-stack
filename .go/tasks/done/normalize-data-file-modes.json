@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "normalize-data-file-modes",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Normalize workflow data file modes",
+  "description": "Remove executable bits from schemas and JSON/JSONL fixtures and enforce the invariant in tests.",
+  "scope": {
+    "read": [
+      "schemas",
+      "fixtures"
+    ],
+    "modify": [
+      "schemas",
+      "fixtures",
+      "tests/test_smoke.py",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "Tracked JSON, JSONL, YAML, Markdown, and schema artifacts are not executable."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-15T13:31:45+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-15T13:33:17+02:00",
+      "agent": "codex",
+      "summary": "TDD RED listed 18 executable data contracts across stack/template. GREEN normalizes all tracked JSON/JSONL/YAML/Markdown/SVG data artifacts and preserves true executable scripts. Verification: scripts/check-linux.sh 75 tests and pairing green; pilots green."
+    }
+  ]
+}

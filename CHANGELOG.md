@@ -16,6 +16,7 @@
 - Shell-quote native Codex repository paths and remove unsafe path interpolation from native agent prompts.
 - Shell-quote generated router commands and advertise the safe `{repo_shell}` placeholder for custom adapters.
 - Prove template bootstrap cannot override its repo-local stack ref through `GO_STACK_REF`.
+- Normalize tracked workflow data and schema artifacts to non-executable file modes, with a paired-repository regression gate.
 
 ## 0.3.0 - 2026-07-15
 

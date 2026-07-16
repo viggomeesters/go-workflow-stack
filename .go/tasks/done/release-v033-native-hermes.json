@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "release-v033-native-hermes",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Release v0.3.3 with native Hermes capability detection and live proof",
   "description": "Promote the post-v0.3.2 Hermes prompt-capability repair and validated WSL proof into an immutable annotated v0.3.3 stack release so downstream repos no longer require GO_STACK_ALLOW_DEV=1.",
   "scope": {
@@ -42,5 +42,11 @@
     "agent": "hermes",
     "claimed_at": "2026-07-16T10:43:18+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-16T10:54:49+02:00",
+      "agent": "hermes",
+      "summary": "R-1 complete: runtime, package, project contract, tests, README, stack-update docs, distribution smoke, and changelog consistently identify 0.3.3/v0.3.3. R-2 complete: post-commit scripts/check-linux.sh passed 78 tests with .go valid and template pairing ok; scripts/release-check.sh 0.3.3 passed. R-3 complete: annotated tag v0.3.3 has tag object 4cba07420f7c071a9d4778f0f29c6fc535a54672 and peels exactly to release commit 697f89baa8d43105a715b662c6f3b46d37ba8a4b; remote main and peeled tag both resolve to that commit; ahead/behind 0/0. Fresh-eyes Hermes review verdict A."
+    }
+  ]
 }

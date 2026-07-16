@@ -82,7 +82,8 @@
         "reject-template-stack-ref-override",
         "normalize-data-file-modes",
         "hermetic-doctor-ref-fixture",
-        "release-v032-hotfix"
+        "release-v032-hotfix",
+        "hermes-prompt-capability-detection"
       ]
     }
   ]

@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "hermes-prompt-capability-detection",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Detect the installed Hermes prompt interface before native execution",
+  "description": "Fix the live WSL acceptance blocker by detecting whether the installed Hermes CLI accepts prompts through -z or legacy -p, using that exact interface for native build/critic/repair commands, and failing doctor/preflight before retry loops when neither contract is supported.",
+  "scope": {
+    "read": [
+      "go_workflow/adapters.py",
+      "go_workflow/cli.py",
+      "scripts/run-hermes-acceptance.sh",
+      "docs/agent-adapter-protocol.md"
+    ],
+    "modify": [
+      "go_workflow/adapters.py",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "docs/agent-adapter-protocol.md"
+    ]
+  },
+  "acceptance": [
+    "R-1: Hermes prompt capability detects current -z and legacy -p interfaces from the real executable help output.",
+    "R-2: Native Hermes build critic and repair commands use the detected prompt flag and reject incompatible binaries before consuming loop retries.",
+    "R-3: Doctor and agent-check expose Hermes prompt compatibility with focused regressions and the full local Linux gate green."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k 'hermes and (native or doctor or agent_check)'",
+    "bash scripts/check-linux.sh"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

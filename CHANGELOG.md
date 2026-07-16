@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.3.2 - 2026-07-16
 
 - Make the doctor mismatch fixture independent of which release tags already exist in the checkout.
 

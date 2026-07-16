@@ -29,10 +29,10 @@ Live Hermes evidence is separate. `scripts/run-hermes-acceptance.sh` requires ex
 On the Hermes machine, preserve a reviewed proof only through the fail-closed CLI:
 
 ```bash
-GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v031 \
+GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v032 \
   bash scripts/run-hermes-acceptance.sh
-go-workflow proof validate /tmp/go-hermes-v031/proof.json \
-  --evidence-root /tmp/go-hermes-v031 \
+go-workflow proof validate /tmp/go-hermes-v032/proof.json \
+  --evidence-root /tmp/go-hermes-v032 \
   --copy-to docs/live-hermes-proof.json --json
 ```
 

@@ -16,6 +16,6 @@ python3 - "$WORK/version.json" <<'PY'
 import json, sys
 result = json.load(open(sys.argv[1], encoding="utf-8"))
 assert result["schema"] == "go-workflow.runtime-version.v1"
-assert result["stack_version"] == "0.3.1"
+assert result["stack_version"] == "0.3.2"
 PY
 echo "standalone uv tool distribution: ok"

@@ -5,7 +5,7 @@
   "id": "capture-live-hermes-wsl-proof",
   "project": "go-workflow-stack",
   "status": "open",
-  "summary": "Run the v0.3.1 live Hermes acceptance on the Hermes WSL machine",
+  "summary": "Run the v0.3.2 live Hermes acceptance on the Hermes WSL machine",
   "description": "Pull the release-candidate commits on the Hermes WSL PC, run the authorized real-Hermes campaign, and preserve the generated proof.json or record the concrete external blocker without substituting fake adapter evidence.",
   "scope": {
     "read": [
@@ -22,8 +22,8 @@
     "docs/live-hermes-proof.json validates as go-workflow.live-hermes-proof.v1 with native protocol evidence"
   ],
   "verification": [
-    "GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v031 bash scripts/run-hermes-acceptance.sh",
-    "python3 cli/go.py proof validate /tmp/go-hermes-v031/proof.json --evidence-root /tmp/go-hermes-v031 --copy-to docs/live-hermes-proof.json --json"
+    "GO_RUN_REAL_HERMES_E2E=1 GO_HERMES_E2E_ROOT=/tmp/go-hermes-v032 bash scripts/run-hermes-acceptance.sh",
+    "python3 cli/go.py proof validate /tmp/go-hermes-v032/proof.json --evidence-root /tmp/go-hermes-v032 --copy-to docs/live-hermes-proof.json --json"
   ],
   "claim": {
     "agent": null,

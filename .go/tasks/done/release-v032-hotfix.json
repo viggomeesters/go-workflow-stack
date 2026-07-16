@@ -1,0 +1,46 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "release-v032-hotfix",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release v0.3.2 doctor-fixture hotfix",
+  "description": "Synchronize runtime/package/project/docs/tests at 0.3.2, update live Hermes proof instructions, and prepare an annotated hotfix tag without rewriting v0.3.1.",
+  "scope": {
+    "read": [
+      "CHANGELOG.md",
+      "scripts/release-check.sh"
+    ],
+    "modify": [
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      ".go/project.json",
+      ".go/tasks/open/capture-live-hermes-wsl-proof.json",
+      "tests/test_smoke.py",
+      "scripts/check-distribution.sh",
+      "README.md",
+      "docs/stack-updates.md",
+      "docs/distribution-and-pilots.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "Runtime, package, project contract, current docs, and version-sensitive tests consistently declare 0.3.2/v0.3.2.",
+    "v0.3.1 remains unchanged and release-check 0.3.2 is green before publication."
+  ],
+  "verification": [
+    "bash scripts/release-check.sh 0.3.2"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-07-16T07:02:30+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-16T07:04:03+02:00",
+      "agent": "codex",
+      "summary": "RED: public version contract test expected 0.3.2 and observed 0.3.1. GREEN: runtime/package/project/current docs/tests and live Hermes v032 paths synchronized. Verification: focused version test, 75-test check-linux, template pairing, standalone distribution, and diverse pilots passed."
+    }
+  ]
+}

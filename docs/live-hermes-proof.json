@@ -1,0 +1,51 @@
+{
+  "schema": "go-workflow.live-hermes-proof.v1",
+  "status": "proven",
+  "created_at": "2026-07-16T08:36:36.785816+00:00",
+  "binary": "/home/viggo/.local/bin/hermes",
+  "binary_version": "Hermes Agent v0.18.2 (2026.7.7.2) · upstream 0f239f49 · local 27a38dee (+13 carried commits)\nInstall directory: /home/viggo/.hermes/hermes-agent\nInstall method: pip\nPython: 3.11.15\nOpenAI SDK: 2.24.0\nUpdate available: 9 commits behind — run 'uv pip install --upgrade hermes-agent'",
+  "repo": "/tmp/go-hermes-v032/hermes-go-campaign",
+  "completed_tasks": [
+    "phase-one",
+    "phase-two"
+  ],
+  "protocol_results": [
+    {
+      "result_file": "first.json",
+      "task_id": "phase-one",
+      "attempt": 1,
+      "phase": "build",
+      "status": "success",
+      "summary": "Created scoped phase-one.txt with exact content 'phase one complete'; focused grep, content, newline, and scope checks passed."
+    },
+    {
+      "result_file": "first.json",
+      "task_id": "phase-one",
+      "attempt": 1,
+      "phase": "critic",
+      "status": "success",
+      "summary": "No blocking findings: phase-one.txt exactly contains 'phase one complete'; declared grep verification passes; product diff stays within scope, while .go changes are consistent claim bookkeeping; JSON/JSONL parse and task-state checks pass. Project default verification awaits phase-two and is not a phase-one blocker."
+    },
+    {
+      "result_file": "resumed.json",
+      "task_id": "phase-two",
+      "attempt": 1,
+      "phase": "build",
+      "status": "success",
+      "summary": "Created scoped phase-two.txt with required content; focused grep and project default verification both passed."
+    },
+    {
+      "result_file": "resumed.json",
+      "task_id": "phase-two",
+      "attempt": 1,
+      "phase": "critic",
+      "status": "success",
+      "summary": "No blocking findings: phase-two.txt exactly contains 'phase two complete'; task and project verification pass; stack validate/readback succeed; JSON/JSONL state parses; canonical request matches context and active task; product change is scoped to phase-two.txt with consistent .go claim bookkeeping."
+    }
+  ],
+  "result_sha256": {
+    "doctor.json": "d8bd4d02f151061e72e50707692dfc63f02bfdefff057addd3838fbbf8afb6df",
+    "first.json": "8cde399b63d804439948a9d0c894c6c6dddcb0a9f57c024ab82e8bf639213ae2",
+    "resumed.json": "3f01d04aa052390db07d7bba5ba42478a9f008eedac529899e1e4699ea2a41b5"
+  }
+}

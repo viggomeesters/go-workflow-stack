@@ -9,6 +9,8 @@
     "id",
     "name",
     "source_of_truth",
+    "required_stack_version",
+    "stack_ref",
     "default_verification"
   ],
   "additionalProperties": true,

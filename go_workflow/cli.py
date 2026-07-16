@@ -40,6 +40,7 @@ from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_
 from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, repository_lock
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
+from go_workflow.runtime_identity import resolve_runtime_identity
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -128,12 +129,10 @@ def validate_project(data: dict[str, Any], rel: str) -> list[str]:
     require(data.get("project_mode", "project") in {"project", "template"}, errors, f"{rel}: project_mode must be project or template")
     require(isinstance(data.get("default_verification"), list) and bool(data.get("default_verification")), errors, f"{rel}: default_verification must be a non-empty list")
     required_stack_version = data.get("required_stack_version")
-    if required_stack_version is not None:
-        require(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(required_stack_version))), errors, f"{rel}: required_stack_version must be semantic version X.Y.Z")
+    require(bool(re.fullmatch(r"\d+\.\d+\.\d+", str(required_stack_version or ""))), errors, f"{rel}: required_stack_version must be semantic version X.Y.Z")
     stack_ref = data.get("stack_ref")
-    if stack_ref is not None:
-        immutable_ref = bool(re.fullmatch(r"v\d+\.\d+\.\d+|[0-9a-f]{40}", str(stack_ref)))
-        require(immutable_ref, errors, f"{rel}: stack_ref must be an immutable version tag (vX.Y.Z) or full commit SHA")
+    immutable_ref = bool(re.fullmatch(r"v\d+\.\d+\.\d+|[0-9a-f]{40}", str(stack_ref or "")))
+    require(immutable_ref, errors, f"{rel}: stack_ref must be an immutable version tag (vX.Y.Z) or full commit SHA")
     return errors
 
 
@@ -3237,22 +3236,10 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     required_version = str(project.get("required_stack_version") or "0.0.0")
     required_ref = str(project.get("stack_ref") or "")
     compatible = semantic_version_tuple(STACK_VERSION) >= semantic_version_tuple(required_version)
-    git_head = subprocess.run(
-        ["git", "-C", str(STACK_ROOT), "rev-parse", "HEAD"], text=True, capture_output=True,
-    ).stdout.strip()
-    if not required_ref:
-        pinned_commit = ""
-        exact_ref = True
-    elif re.fullmatch(r"[0-9a-f]{40}", required_ref):
-        pinned_commit = required_ref
-        exact_ref = git_head == pinned_commit
-    else:
-        pinned_commit = subprocess.run(
-            ["git", "-C", str(STACK_ROOT), "rev-parse", "-q", "--verify", f"refs/tags/{required_ref}^{{commit}}"],
-            text=True,
-            capture_output=True,
-        ).stdout.strip()
-        exact_ref = bool(pinned_commit) and git_head == pinned_commit
+    identity = resolve_runtime_identity(STACK_ROOT, required_ref, expected_version=STACK_VERSION)
+    git_head = identity["git_head"]
+    pinned_commit = identity["pinned_commit"]
+    exact_ref = identity["exact_ref"]
     development_override = os.environ.get("GO_STACK_ALLOW_DEV") == "1" and not exact_ref
     ref_compatible = exact_ref or development_override
     prerequisites: list[dict[str, Any]] = [
@@ -3296,6 +3283,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             "ref": STACK_REF,
             "git_head": git_head or None,
             "pinned_commit": pinned_commit or None,
+            "identity_source": identity["source"],
+            "provenance_requested_ref": identity["requested_ref"],
             "required_version": required_version,
             "required_ref": required_ref or None,
             "exact_ref": exact_ref,

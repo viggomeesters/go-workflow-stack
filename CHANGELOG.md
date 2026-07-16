@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.4 - 2026-07-16
+
+- Accept standalone VCS package installations as exact immutable runtimes only when PEP 610 provenance records Git, the required tag, its resolved full commit, and the matching package version.
+- Keep source checkouts authoritative and fail closed instead of masking a mismatched checkout with unrelated installed-package metadata.
+- Expose the selected runtime identity source and provenance ref through `doctor` for operator readback.
+
 ## 0.3.3 - 2026-07-16
 
 - Detect the installed Hermes prompt interface exactly, preferring `-z PROMPT` while retaining explicit legacy `-p PROMPT` support without confusing `-p PROVIDER`.

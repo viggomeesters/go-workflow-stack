@@ -1272,7 +1272,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.3 v0.3.3 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.4 v0.3.4 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1285,6 +1285,18 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         ROOT / "docs" / "state-safety.md",
     ]:
         assert path.is_file(), path
+
+
+def test_project_schema_requires_runtime_version_and_immutable_ref():
+    schema = json.loads((ROOT / "schemas" / "project.schema.json").read_text(encoding="utf-8"))
+    required = set(schema["required"])
+    assert {"required_stack_version", "stack_ref"} <= required
+
+    project = json.loads((ROOT / ".go" / "project.json").read_text(encoding="utf-8"))
+    for field in ("required_stack_version", "stack_ref"):
+        incomplete = {key: value for key, value in project.items() if key != field}
+        missing = [name for name in schema["required"] if name not in incomplete]
+        assert missing == [field]
 
 
 def test_adapter_cannot_modify_read_only_path(tmp_path: Path):
@@ -1537,6 +1549,279 @@ def test_repair_agent_codex_option_is_available():
     assert "codex" in help_result.stdout
 
 
+class FakeDistribution:
+    def __init__(self, version: str, direct_url: object, installed_root: Path | None = None):
+        self.version = version
+        self.direct_url = direct_url
+        self.installed_root = installed_root
+        self.files = [Path("go_workflow/__init__.py")]
+
+    def read_text(self, filename: str) -> str | None:
+        if filename != "direct_url.json" or self.direct_url is None:
+            return None
+        if isinstance(self.direct_url, str):
+            return self.direct_url
+        return json.dumps(self.direct_url)
+
+    def locate_file(self, path: Path) -> Path:
+        return (self.installed_root or Path("/unrelated/site-packages")) / path
+
+
+def test_package_runtime_provenance_accepts_exact_pep610_git_tag_without_checkout(tmp_path: Path):
+    from go_workflow.runtime_identity import resolve_runtime_identity
+
+    commit = "a" * 40
+    package_root = tmp_path / "site-packages"
+    distribution = FakeDistribution(
+        "0.3.4",
+        {
+            "url": "https://github.com/viggomeesters/go-workflow-stack.git",
+            "vcs_info": {
+                "vcs": "git",
+                "requested_revision": "v0.3.4",
+                "commit_id": commit,
+            },
+        },
+        installed_root=package_root,
+    )
+
+    identity = resolve_runtime_identity(
+        package_root,
+        "v0.3.4",
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: distribution,
+    )
+
+    assert identity == {
+        "source": "pep610-vcs",
+        "git_head": None,
+        "pinned_commit": commit,
+        "requested_ref": "v0.3.4",
+        "exact_ref": True,
+    }
+
+
+def test_package_runtime_provenance_rejects_untrusted_or_mismatched_metadata(tmp_path: Path):
+    from go_workflow.runtime_identity import resolve_runtime_identity
+
+    package_root = tmp_path / "site-packages"
+    valid = {
+        "url": "https://github.com/viggomeesters/go-workflow-stack.git",
+        "vcs_info": {
+            "vcs": "git",
+            "requested_revision": "v0.3.4",
+            "commit_id": "b" * 40,
+        },
+    }
+    cases = [
+        FakeDistribution("0.3.4", None),
+        FakeDistribution("0.3.4", "not-json"),
+        FakeDistribution("0.3.4", {**valid, "url": "http://github.com/viggomeesters/go-workflow-stack.git"}),
+        FakeDistribution("0.3.4", {**valid, "url": "https://example.com/not-the-stack.git"}),
+        FakeDistribution("0.3.4", {**valid, "url": None}),
+        FakeDistribution("0.3.4", {"url": valid["url"], "archive_info": {}}),
+        FakeDistribution("0.3.4", {**valid, "vcs_info": {**valid["vcs_info"], "vcs": "hg"}}),
+        FakeDistribution("0.3.4", {**valid, "vcs_info": {**valid["vcs_info"], "requested_revision": "main"}}),
+        FakeDistribution("0.3.4", {**valid, "vcs_info": {**valid["vcs_info"], "commit_id": "short"}}),
+        FakeDistribution("9.9.9", valid),
+    ]
+    for distribution in cases:
+        distribution.installed_root = package_root
+    cases.append(FakeDistribution("0.3.4", valid))
+
+    for distribution in cases:
+        identity = resolve_runtime_identity(
+            package_root,
+            "v0.3.4",
+            expected_version="0.3.4",
+            distribution_lookup=lambda _, value=distribution: value,
+        )
+        assert identity["source"] == "unverified"
+        assert identity["exact_ref"] is False
+
+    wrong_tag = FakeDistribution(
+        "0.3.4",
+        {**valid, "vcs_info": {**valid["vcs_info"], "requested_revision": "v9.9.9"}},
+        installed_root=package_root,
+    )
+    identity = resolve_runtime_identity(
+        package_root,
+        "v9.9.9",
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: wrong_tag,
+    )
+    assert identity["source"] == "unverified"
+    assert identity["exact_ref"] is False
+
+    sha_ref = "b" * 40
+    sha_distribution = FakeDistribution(
+        "0.3.4",
+        {**valid, "vcs_info": {**valid["vcs_info"], "requested_revision": "main"}},
+        installed_root=package_root,
+    )
+    identity = resolve_runtime_identity(
+        package_root,
+        sha_ref,
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: sha_distribution,
+    )
+    assert identity["source"] == "unverified"
+    assert identity["exact_ref"] is False
+
+    identity = resolve_runtime_identity(
+        package_root,
+        "",
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: FakeDistribution("0.3.4", None, installed_root=package_root),
+    )
+    assert identity["source"] == "unverified"
+    assert identity["exact_ref"] is False
+
+
+def test_package_runtime_provenance_does_not_hide_mismatched_source_checkout(tmp_path: Path):
+    from go_workflow.runtime_identity import resolve_runtime_identity
+
+    checkout = tmp_path / "checkout"
+    checkout.mkdir()
+    subprocess.run(["git", "init", "-q"], cwd=checkout, check=True)
+    (checkout / "README.md").write_text("checkout\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README.md"], cwd=checkout, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"],
+        cwd=checkout,
+        check=True,
+    )
+    distribution = FakeDistribution(
+        "0.3.4",
+        {
+            "url": "https://github.com/viggomeesters/go-workflow-stack.git",
+            "vcs_info": {
+                "vcs": "git",
+                "requested_revision": "v0.3.4",
+                "commit_id": "c" * 40,
+            },
+        },
+    )
+
+    identity = resolve_runtime_identity(
+        checkout,
+        "v0.3.4",
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: distribution,
+    )
+
+    assert identity["source"] == "git-checkout"
+    assert identity["git_head"]
+    assert identity["exact_ref"] is False
+
+
+def test_package_runtime_provenance_ignores_unrelated_parent_git_checkout(tmp_path: Path):
+    from go_workflow.runtime_identity import resolve_runtime_identity
+
+    parent = tmp_path / "consumer"
+    package_root = parent / ".venv" / "lib" / "python3.11" / "site-packages"
+    package_root.mkdir(parents=True)
+    subprocess.run(["git", "init", "-q"], cwd=parent, check=True)
+    distribution = FakeDistribution(
+        "0.3.4",
+        {
+            "url": "https://github.com/viggomeesters/go-workflow-stack.git",
+            "vcs_info": {
+                "vcs": "git",
+                "requested_revision": "v0.3.4",
+                "commit_id": "d" * 40,
+            },
+        },
+        installed_root=package_root,
+    )
+
+    identity = resolve_runtime_identity(
+        package_root,
+        "v0.3.4",
+        expected_version="0.3.4",
+        distribution_lookup=lambda _: distribution,
+    )
+
+    assert identity["source"] == "pep610-vcs"
+    assert identity["exact_ref"] is True
+
+
+def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path: Path):
+    source = tmp_path / "release-source"
+    shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=source, check=True)
+    subprocess.run(["git", "add", "."], cwd=source, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=source,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"],
+        cwd=source,
+        check=True,
+    )
+    release_commit = subprocess.run(
+        ["git", "rev-parse", "HEAD"], cwd=source, text=True, capture_output=True, check=True,
+    ).stdout.strip()
+
+    tool_dir = tmp_path / "tools"
+    bin_dir = tmp_path / "bin"
+    env = os.environ.copy()
+    env.update({
+        "UV_TOOL_DIR": str(tool_dir),
+        "UV_TOOL_BIN_DIR": str(bin_dir),
+        "GIT_CONFIG_COUNT": "1",
+        "GIT_CONFIG_KEY_0": f"url.file://{source}.insteadOf",
+        "GIT_CONFIG_VALUE_0": "https://github.com/viggomeesters/go-workflow-stack.git",
+    })
+    install = subprocess.run(
+        [
+            "uv", "tool", "install", "--from",
+            "git+https://github.com/viggomeesters/go-workflow-stack.git@v0.3.4",
+            "go-workflow-stack",
+        ],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    assert install.returncode == 0, install.stderr + install.stdout
+
+    fake_hermes = bin_dir / "hermes"
+    fake_hermes.write_text(
+        "#!/bin/sh\nif [ \"${1:-}\" = --help ]; then printf '%s\\n' 'usage: hermes [-z PROMPT] [--cli]'; fi\nexit 0\n",
+        encoding="utf-8",
+    )
+    fake_hermes.chmod(0o755)
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+    env.pop("GO_STACK_ALLOW_DEV", None)
+    project = tmp_path / "consumer"
+    subprocess.run(["git", "init", "-q", str(project)], check=True)
+    adopted = subprocess.run(
+        [str(bin_dir / "go-workflow"), "adopt", str(project), "--project-id", "consumer", "--name", "Consumer"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+
+    diagnosed = subprocess.run(
+        [str(bin_dir / "go-workflow"), "doctor", str(project), "--platform", "wsl", "--agent", "hermes", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert diagnosed.returncode == 0, diagnosed.stderr + diagnosed.stdout
+    result = json.loads(diagnosed.stdout)
+    assert result["ready"] is True
+    assert result["stack"]["identity_source"] == "pep610-vcs"
+    assert result["stack"]["provenance_requested_ref"] == "v0.3.4"
+    assert result["stack"]["pinned_commit"] == release_commit
+    assert result["stack"]["exact_ref"] is True
+    assert result["stack"]["development_override"] is False
+
+
 def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path):
     repo = tmp_path / "doctor-project"
     bin_dir = tmp_path / "bin"
@@ -1591,8 +1876,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.3"
-    assert result["stack"]["ref"] == "v0.3.3"
+    assert result["stack"]["version"] == "0.3.4"
+    assert result["stack"]["ref"] == "v0.3.4"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -1622,13 +1907,19 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.3"
+    assert project["stack_ref"] == "v0.3.4"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
     validated = run_go("validate", str(repo))
     assert validated.returncode == 1
     assert "stack_ref must be an immutable version tag" in validated.stderr
+
+    project.pop("stack_ref")
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+    missing = run_go("validate", str(repo))
+    assert missing.returncode == 1
+    assert "stack_ref must be an immutable version tag" in missing.stderr
 
 
 def test_stack_update_is_dry_run_first_and_apply_records_rollback(tmp_path: Path):
@@ -1791,15 +2082,15 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.3", "-m", "v0.3.3"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.3"],
+        ["bash", "scripts/release-check.sh", "0.3.4"],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.3" in result.stdout
+    assert "release preflight: v0.3.4" in result.stdout
     assert "publish: not performed" in result.stdout
 
 
@@ -1809,14 +2100,14 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.3", "-m", "v0.3.3"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
 
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.3"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.4"], cwd=repo, text=True, capture_output=True, env=env)
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
 
@@ -1855,7 +2146,7 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["stack_ref"] == "v0.3.3"
+    assert migrated["stack_ref"] == "v0.3.4"
     assert "epics" in json.loads(hierarchy_path.read_text(encoding="utf-8"))
 
     repeated = run_go("migrate", str(repo), "--json")

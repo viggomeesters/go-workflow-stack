@@ -1,0 +1,46 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "release-v033-native-hermes",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Release v0.3.3 with native Hermes capability detection and live proof",
+  "description": "Promote the post-v0.3.2 Hermes prompt-capability repair and validated WSL proof into an immutable annotated v0.3.3 stack release so downstream repos no longer require GO_STACK_ALLOW_DEV=1.",
+  "scope": {
+    "read": [
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/stack-updates.md",
+      "tests/test_smoke.py",
+      "scripts/check-distribution.sh"
+    ],
+    "modify": [
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/stack-updates.md",
+      "tests/test_smoke.py",
+      "scripts/check-distribution.sh",
+      ".go/project.json"
+    ]
+  },
+  "acceptance": [
+    "R-1: Runtime, package, project contract, tests, and user-facing release references consistently identify 0.3.3 and v0.3.3.",
+    "R-2: The local Linux/WSL and release preflight gates pass at the release commit.",
+    "R-3: An annotated v0.3.3 tag resolves exactly to the pushed release commit and remote main/tag readback is clean."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh",
+    "bash scripts/release-check.sh 0.3.3",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

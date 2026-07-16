@@ -83,7 +83,8 @@
         "normalize-data-file-modes",
         "hermetic-doctor-ref-fixture",
         "release-v032-hotfix",
-        "hermes-prompt-capability-detection"
+        "hermes-prompt-capability-detection",
+        "release-v033-native-hermes"
       ]
     }
   ]

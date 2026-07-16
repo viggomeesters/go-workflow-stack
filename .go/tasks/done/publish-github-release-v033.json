@@ -1,0 +1,44 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "publish-github-release-v033",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Publish GitHub Release v0.3.3",
+  "description": "Publish the existing annotated v0.3.3 tag as a non-draft, non-prerelease GitHub Release with notes grounded in CHANGELOG.md and the validated native Hermes proof. GitHub Actions remain off limits.",
+  "scope": {
+    "read": [
+      "CHANGELOG.md",
+      "docs/live-hermes-proof.json",
+      ".go/tasks/done/release-v033-native-hermes.json"
+    ],
+    "modify": [
+      ".go/hierarchy.json",
+      ".go/tasks/active/publish-github-release-v033.json",
+      ".go/tasks/done/publish-github-release-v033.json",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl"
+    ]
+  },
+  "acceptance": [
+    "R-1: GitHub Release v0.3.3 exists for the existing annotated tag and is neither draft nor prerelease.",
+    "R-2: Release notes accurately summarize native Hermes prompt capability detection and the validated WSL proof without synthetic claims.",
+    "R-3: Remote release and tag readback confirm the published URL and exact release commit; GitHub Actions are not used."
+  ],
+  "verification": [
+    "gh release view v0.3.3 --json tagName,name,isDraft,isPrerelease,url,publishedAt,targetCommitish,body",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-16T11:11:40+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-16T11:13:10+02:00",
+      "agent": "hermes",
+      "summary": "R-1 complete: GitHub Release v0.3.3 exists at https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.3 and remote readback reports draft=false, prerelease=false, latest_tag=v0.3.3. R-2 complete: release notes are grounded in CHANGELOG.md and docs/live-hermes-proof.json; consistency check confirmed the real Hermes path /home/viggo/.local/bin/hermes, Hermes Agent v0.18.2, and four successful native protocol phases. R-3 complete: remote annotated tag object 4cba07420f7c071a9d4778f0f29c6fc535a54672 peels exactly to release commit 697f89baa8d43105a715b662c6f3b46d37ba8a4b. GitHub Actions were not used. Validation and git diff --check passed."
+    }
+  ]
+}

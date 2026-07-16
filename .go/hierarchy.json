@@ -85,7 +85,8 @@
         "release-v032-hotfix",
         "hermes-prompt-capability-detection",
         "release-v033-native-hermes",
-        "publish-github-release-v033"
+        "publish-github-release-v033",
+        "package-runtime-provenance-v034"
       ]
     }
   ]

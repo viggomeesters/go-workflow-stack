@@ -1,0 +1,58 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "package-runtime-provenance-v034",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prove package-installed runtime identity and release v0.3.4",
+  "description": "Make doctor accept an immutable VCS package installation when PEP 610 direct_url provenance proves the requested tag and resolved commit, while preserving strict source-checkout behavior. Release and publish v0.3.4 without GitHub Actions.",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "go_workflow/constants.py",
+      "tests/test_smoke.py",
+      "README.md",
+      "docs/stack-updates.md",
+      "CHANGELOG.md",
+      "pyproject.toml"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/runtime_identity.py",
+      "go_workflow/constants.py",
+      "tests/test_smoke.py",
+      "README.md",
+      "docs/stack-updates.md",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "scripts/check-distribution.sh",
+      "schemas/project.schema.json",
+      ".go/project.json"
+    ]
+  },
+  "acceptance": [
+    "R-1: A package install with valid PEP 610 VCS provenance for the required immutable tag reports exact_ref=true and ready=true without a Git checkout.",
+    "R-2: Missing malformed mismatched or non-VCS package provenance remains fail-closed and source-checkout exact-tag behavior is unchanged.",
+    "R-3: Runtime version package metadata docs tests and distribution checks consistently identify 0.3.4 and v0.3.4.",
+    "R-4: Local Linux and release gates pass; annotated v0.3.4 resolves to the release commit; a fresh uv tool install from the public tag passes doctor without GO_STACK_ALLOW_DEV.",
+    "R-5: GitHub Release v0.3.4 is published and remote main tag release metadata are verified without GitHub Actions."
+  ],
+  "verification": [
+    "python3 -m pytest -q tests/test_smoke.py -k 'package_runtime_provenance or doctor_exact_ref'",
+    "bash scripts/check-linux.sh",
+    "bash scripts/release-check.sh 0.3.4",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-16T12:28:53+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-16T13:04:35+02:00",
+      "agent": "hermes",
+      "summary": "v0.3.4 payload e3fc0adb352eeda9a69e04890486db1eb49482b7; annotated tag object 8dbaa31d61dd63c2b35ac7d95375d1fb849651c4 peels to payload; local Linux/WSL 84 passed; public-tag uv install doctor ready=true exact_ref=true identity_source=pep610-vcs development_override=false with Hermes 0.18.2; doctor sha256 dc530398f6549a0b1ca0fad1bf9bfa7227f009ecb4aa8afad3c8d3e3b94a0e1b; direct_url sha256 31f139ce1c1b502f66a63410b0e36ae34ccc8c034391780a6e3efaae215307b5; GitHub Release published and read back; GitHub Actions unused"
+    }
+  ]
+}

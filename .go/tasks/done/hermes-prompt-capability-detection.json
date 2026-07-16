@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "hermes-prompt-capability-detection",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Detect the installed Hermes prompt interface before native execution",
   "description": "Fix the live WSL acceptance blocker by detecting whether the installed Hermes CLI accepts prompts through -z or legacy -p, using that exact interface for native build/critic/repair commands, and failing doctor/preflight before retry loops when neither contract is supported.",
   "scope": {
@@ -31,8 +31,14 @@
     "bash scripts/check-linux.sh"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-16T10:02:15+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-16T10:25:57+02:00",
+      "agent": "hermes",
+      "summary": "R-1/R-2/R-3 complete: detected current -z PROMPT and legacy -p PROMPT without confusing -p PROVIDER; native build/critic/repair use detected flag and incompatible Hermes fails before retry; doctor and explicit agent-check expose compatibility. Verification: focused 5 passed; scripts/check-linux.sh 78 passed, .go valid, template pairing ok; real doctor reported /home/viggo/.local/bin/hermes compatible=true prompt_flag=-z; fresh-eyes Hermes review verdict A."
+    }
+  ]
 }

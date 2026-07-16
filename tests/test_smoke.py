@@ -890,6 +890,10 @@ import os
 import sys
 from pathlib import Path
 
+if "--help" in sys.argv:
+    print("usage: hermes [-z PROMPT] [--cli]")
+    raise SystemExit(0)
+
 repo = Path(os.environ["GO_REPO"])
 task_id = os.environ["GO_TASK_ID"]
 run_root = repo / ".go" / "runs"
@@ -1119,6 +1123,84 @@ def test_native_codex_and_hermes_commands_require_v1_result_output():
         if agent == "codex":
             assert "-C {repo_shell}" in command
             assert "-C {repo} " not in command
+        else:
+            assert command.startswith("hermes -z ")
+
+
+def test_native_hermes_prompt_capability_detects_current_and_legacy_interfaces(tmp_path: Path):
+    from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
+
+    current = tmp_path / "hermes-current"
+    current.write_text("#!/bin/sh\nprintf '%s\\n' 'usage: hermes [-z PROMPT] [--cli]'\n", encoding="utf-8")
+    current.chmod(0o755)
+    legacy = tmp_path / "hermes-legacy"
+    legacy.write_text("#!/bin/sh\nprintf '%s\\n' 'usage: hermes [-p PROMPT] [--cli]'\n", encoding="utf-8")
+    legacy.chmod(0o755)
+    incompatible = tmp_path / "hermes-incompatible"
+    incompatible.write_text("#!/bin/sh\nprintf '%s\\n' 'usage: hermes [-p PROVIDER] chat'\n", encoding="utf-8")
+    incompatible.chmod(0o755)
+
+    assert detect_hermes_prompt_flag(str(current)) == "-z"
+    assert detect_hermes_prompt_flag(str(legacy)) == "-p"
+    assert detect_hermes_prompt_flag(str(incompatible)) is None
+    assert native_agent_command("hermes", "build", hermes_prompt_flag="-p").startswith("hermes -p ")
+
+
+def test_hermes_agent_check_availability_reports_prompt_compatibility(tmp_path: Path, monkeypatch):
+    from go_workflow.cli import repair_agent_available
+
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_hermes = bin_dir / "hermes"
+    fake_hermes.write_text("#!/bin/sh\nprintf '%s\\n' 'usage: hermes [-z PROMPT] [--cli]'\n", encoding="utf-8")
+    fake_hermes.chmod(0o755)
+    monkeypatch.setenv("PATH", str(bin_dir))
+
+    result = repair_agent_available("hermes")
+
+    assert result["available"] is True
+    assert result["compatible"] is True
+    assert result["prompt_flag"] == "-z"
+
+
+def test_hermes_agent_check_fails_closed_for_incompatible_prompt_interface(tmp_path: Path):
+    bin_dir = tmp_path / "bin"
+    bin_dir.mkdir()
+    fake_hermes = bin_dir / "hermes"
+    fake_hermes.write_text("#!/bin/sh\nprintf '%s\\n' 'usage: hermes [-p PROVIDER] chat'\n", encoding="utf-8")
+    fake_hermes.chmod(0o755)
+    env = os.environ.copy()
+    env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
+
+    checked = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "agent-check", "--agent", "hermes", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    plain = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "agent-check", "--agent", "hermes"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+    overview = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "agent-check", "--json"],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert checked.returncode == 1
+    result = json.loads(checked.stdout)["agents"][0]
+    assert result["available"] is True
+    assert result["compatible"] is False
+    assert result["prompt_flag"] is None
+    assert plain.returncode == 1
+    assert "incompatible" in plain.stdout
+    assert overview.returncode == 0
+    overview_agents = {item["agent"]: item for item in json.loads(overview.stdout)["agents"]}
+    assert overview_agents["hermes"]["compatible"] is False
 
 
 def test_native_codex_adapter_quotes_metacharacter_repository_path(tmp_path: Path):
@@ -1460,7 +1542,12 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     bin_dir = tmp_path / "bin"
     bin_dir.mkdir()
     fake_hermes = bin_dir / "hermes"
-    fake_hermes.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
+    fake_hermes.write_text(
+        "#!/bin/sh\n"
+        "if [ \"${1:-}\" = --help ]; then printf '%s\\n' 'usage: hermes [-z PROMPT] [--cli]'; fi\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
     fake_hermes.chmod(0o755)
     fake_uv = bin_dir / "uv"
     fake_uv.write_text("#!/bin/sh\nexit 0\n", encoding="utf-8")
@@ -1497,7 +1584,13 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     assert diagnosed.returncode == 0, diagnosed.stderr + diagnosed.stdout
     result = json.loads(diagnosed.stdout)
     assert result["platform"]["kind"] == "wsl"
-    assert result["agent"] == {"name": "hermes", "available": True, "path": str(fake_hermes)}
+    assert result["agent"] == {
+        "name": "hermes",
+        "available": True,
+        "compatible": True,
+        "path": str(fake_hermes),
+        "prompt_flag": "-z",
+    }
     assert result["stack"]["version"] == "0.3.2"
     assert result["stack"]["ref"] == "v0.3.2"
     assert result["stack"]["required_ref"] == "v9.9.9"
@@ -1506,6 +1599,19 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
     assert result["stack"]["compatible"] is True
     assert result["ready"] is True
     assert {item["name"] for item in result["prerequisites"]} >= {"python", "git", "bash", "make", "uv"}
+
+    fake_hermes.write_text(
+        "#!/bin/sh\n"
+        "if [ \"${1:-}\" = --help ]; then printf '%s\\n' 'usage: hermes [-p PROVIDER] chat'; fi\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    incompatible = subprocess.run(
+        [sys.executable, str(ROOT / "cli" / "go.py"), "doctor", str(repo), "--platform", "wsl", "--agent", "hermes"],
+        text=True, capture_output=True, env=env,
+    )
+    assert incompatible.returncode == 1
+    assert "agent: hermes (incompatible)" in incompatible.stdout
 
 
 def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Path):

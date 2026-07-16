@@ -33,7 +33,7 @@ if str(STACK_ROOT) not in sys.path:
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result
-from go_workflow.adapters import native_agent_command
+from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
@@ -1285,13 +1285,24 @@ def builtin_semantic_findings(repo: Path, task: dict[str, Any], checks: list[dic
 def repair_agent_available(agent: str) -> dict[str, Any]:
     binary = "codex" if agent == "codex" else "hermes" if agent == "hermes" else agent
     path = shutil.which(binary)
-    return {"agent": agent, "binary": binary, "available": bool(path), "path": path}
+    prompt_flag = detect_hermes_prompt_flag(path) if agent == "hermes" and path else None
+    compatible = bool(path) and (agent != "hermes" or prompt_flag is not None)
+    return {
+        "agent": agent,
+        "binary": binary,
+        "available": bool(path),
+        "compatible": compatible,
+        "path": path,
+        "prompt_flag": prompt_flag,
+    }
 
 
 def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
     availability = repair_agent_available(agent)
     if not availability["available"]:
         raise RepoLocalError(f"repair agent '{agent}' is not available on PATH")
+    if not availability["compatible"]:
+        raise RepoLocalError(f"repair agent '{agent}' has no supported prompt interface (-z or -p)")
     instructions = " ".join([
         "You are the repair adapter for go-workflow-stack.",
         "In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
@@ -1301,18 +1312,26 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Run the task verification commands before exiting.",
         "Exit non-zero if you cannot safely repair within scope.",
     ])
-    return native_agent_command(agent, "repair", instructions)
+    return native_agent_command(
+        agent,
+        "repair",
+        instructions,
+        hermes_prompt_flag=availability["prompt_flag"] or "-z",
+    )
 
 
 def select_executor_agent(requested: str) -> str:
     if requested == "none":
         return ""
     if requested in {"codex", "hermes"}:
-        if not repair_agent_available(requested)["available"]:
+        availability = repair_agent_available(requested)
+        if not availability["available"]:
             raise RepoLocalError(f"executor agent '{requested}' is not available on PATH")
+        if not availability["compatible"]:
+            raise RepoLocalError(f"executor agent '{requested}' has no supported prompt interface (-z or -p)")
         return requested
     for candidate in ("codex", "hermes"):
-        if repair_agent_available(candidate)["available"]:
+        if repair_agent_available(candidate)["compatible"]:
             return candidate
     raise RepoLocalError("no Codex or Hermes executor agent is available on PATH")
 
@@ -1324,6 +1343,7 @@ def executor_agent_default() -> str:
 
 def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
     selected = select_executor_agent(agent)
+    availability = repair_agent_available(selected)
     instructions = " ".join([
         "You are the build executor for a repo-local .go task.",
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
@@ -1331,7 +1351,12 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Implement the task, run focused verification, and leave only scoped changes.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
-    return native_agent_command(selected, "build", instructions)
+    return native_agent_command(
+        selected,
+        "build",
+        instructions,
+        hermes_prompt_flag=availability["prompt_flag"] or "-z",
+    )
 
 
 def run_default_critic_agent(
@@ -1350,7 +1375,17 @@ def run_default_critic_agent(
         "Do not edit files.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
-    command = native_agent_command(agent, "critic", instructions)
+    availability = repair_agent_available(agent)
+    if not availability["available"]:
+        raise RepoLocalError(f"critic agent '{agent}' is not available on PATH")
+    if not availability["compatible"]:
+        raise RepoLocalError(f"critic agent '{agent}' has no supported prompt interface (-z or -p)")
+    command = native_agent_command(
+        agent,
+        "critic",
+        instructions,
+        hermes_prompt_flag=availability["prompt_flag"] or "-z",
+    )
     result = run_hook_command(repo, command, task, attempt, strategy, "critic", timeout_seconds, require_protocol=True)
     output.write_text(result.get("stdout") or "", encoding="utf-8")
     verdict_text = output.read_text(encoding="utf-8") if output.is_file() else ""
@@ -3075,15 +3110,24 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def cmd_agent_check(args: argparse.Namespace) -> int:
-    agents = args.agent or ["codex", "hermes"]
+    requested_agents = args.agent
+    agents = requested_agents or ["codex", "hermes"]
     payload = {"schema": "go-workflow.agent-check.v1", "agents": [repair_agent_available(agent) for agent in agents]}
     if args.json:
         print(json.dumps(payload, indent=2))
     else:
         for item in payload["agents"]:
-            status = "available" if item["available"] else "missing"
-            print(f"{item['agent']}: {status} {item.get('path') or ''}".rstrip())
-    return 0
+            if not item["available"]:
+                status = "missing"
+            elif not item["compatible"]:
+                status = "incompatible"
+            else:
+                status = "available"
+            detail = item.get("prompt_flag") or item.get("path") or ""
+            print(f"{item['agent']}: {status} {detail}".rstrip())
+    if not requested_agents:
+        return 0
+    return 0 if all(item["compatible"] for item in payload["agents"]) else 1
 
 
 def cmd_version(args: argparse.Namespace) -> int:
@@ -3218,7 +3262,13 @@ def cmd_doctor(args: argparse.Namespace) -> int:
         path = shutil.which(name)
         prerequisites.append({"name": name, "available": bool(path), "path": path})
     agent_availability = repair_agent_available(args.agent)
-    agent = {"name": args.agent, "available": agent_availability["available"], "path": agent_availability["path"]}
+    agent = {
+        "name": args.agent,
+        "available": agent_availability["available"],
+        "compatible": agent_availability["compatible"],
+        "path": agent_availability["path"],
+        "prompt_flag": agent_availability["prompt_flag"],
+    }
     contract_errors = validate_repo(repo) if project_path.is_file() else [".go/project.json is missing"]
     actions: list[str] = []
     for item in prerequisites:
@@ -3226,6 +3276,8 @@ def cmd_doctor(args: argparse.Namespace) -> int:
             actions.append(f"install {item['name']}")
     if not agent["available"]:
         actions.append(f"install {args.agent} and make it available on PATH")
+    elif not agent["compatible"]:
+        actions.append(f"install a compatible {args.agent} CLI with a supported prompt interface (-z or -p)")
     if not compatible:
         actions.append(f"update go-workflow-stack to at least {required_version}")
     if not ref_compatible:
@@ -3259,7 +3311,13 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     else:
         print(f"platform: {payload['platform']['kind']}")
         print(f"stack: {STACK_VERSION} (required {required_version})")
-        print(f"agent: {args.agent} ({'available' if agent['available'] else 'missing'})")
+        if not agent["available"]:
+            agent_status = "missing"
+        elif not agent["compatible"]:
+            agent_status = "incompatible"
+        else:
+            agent_status = f"available, prompt {agent['prompt_flag']}" if agent["prompt_flag"] else "available"
+        print(f"agent: {args.agent} ({agent_status})")
         print("ready" if ready else "not ready: " + "; ".join(actions))
     return 0 if ready else 1
 

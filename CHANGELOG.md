@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.3 - 2026-07-16
+
+- Detect the installed Hermes prompt interface exactly, preferring `-z PROMPT` while retaining explicit legacy `-p PROMPT` support without confusing `-p PROVIDER`.
+- Apply the detected prompt capability consistently to native build, critic, and repair phases and fail closed before retry when Hermes is incompatible.
+- Expose Hermes compatibility and prompt capability through `agent-check` and `doctor`, with truthful overview-versus-explicit readiness semantics.
+- Preserve validated WSL proof from a real two-task Hermes build/critic/resume campaign, including native protocol-result hashes.
+
 ## 0.3.2 - 2026-07-16
 
 - Make the doctor mismatch fixture independent of which release tags already exist in the checkout.

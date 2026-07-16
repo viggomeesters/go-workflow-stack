@@ -4,7 +4,7 @@
   "execution_mode": "mechanical",
   "id": "release-v033-native-hermes",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Release v0.3.3 with native Hermes capability detection and live proof",
   "description": "Promote the post-v0.3.2 Hermes prompt-capability repair and validated WSL proof into an immutable annotated v0.3.3 stack release so downstream repos no longer require GO_STACK_ALLOW_DEV=1.",
   "scope": {
@@ -39,8 +39,8 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-16T10:43:18+02:00"
   },
   "evidence": []
 }

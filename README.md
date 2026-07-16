@@ -168,14 +168,14 @@ bash scripts/check.sh
 Prepare a version locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.3.2
+bash scripts/release-check.sh 0.3.3
 ```
 
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-go-workflow stack update . --to v0.3.2 --json
-go-workflow stack update . --to v0.3.2 --apply --json
+go-workflow stack update . --to v0.3.3 --json
+go-workflow stack update . --to v0.3.3 --apply --json
 ```
 
 ## Privacy and security
@@ -184,7 +184,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Public v0.3.2 hotfix candidate. Local stack, template, distribution, concurrency, and diverse-pilot contracts are executable; live Hermes proof remains explicitly machine-dependent and fail-closed.
+Public v0.3.3 release. Local stack, template, distribution, concurrency, diverse-pilot, and native Hermes adapter contracts are executable; the tracked WSL proof was produced by the real Hermes binary and validated fail-closed from native protocol evidence.
 
 ## License
 

@@ -2385,6 +2385,41 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     assert direct_loop_plan["recommended"]["command"] == "go-loop"
 
 
+def test_route_without_go_contract_fails_closed_without_vault_fallback(tmp_path: Path):
+    repo = tmp_path / "existing-without-go"
+    repo.mkdir()
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+
+    routed = run_go("route", str(repo), "--json")
+
+    assert routed.returncode == 1
+    payload = json.loads(routed.stdout)
+    assert payload["mode"] == "missing-local-contract"
+    assert payload["valid"] is False
+    assert payload["state_root"] is None
+    assert payload["fallback"] is None
+    assert payload["next_command"].endswith(f" adopt {shlex.quote(str(repo))}")
+    assert "vault" not in routed.stdout.lower()
+    assert "system/agent-workflow" not in routed.stdout
+
+
+def test_public_guidance_does_not_advertise_vault_workflow_fallback():
+    guidance = [
+        ROOT / "README.md",
+        ROOT / "docs" / "authoring-primitives.md",
+        ROOT / "docs" / "practical-architecture.md",
+        ROOT / "docs" / "export-import-bundles.md",
+        ROOT / "docs" / "go-bridge-status.md",
+        ROOT / "skills" / "repo-local-agent-workflow" / "SKILL.md",
+    ]
+    forbidden = ("aw-lite-fallback", "aw lite/vault", "vault-first")
+
+    for path in guidance:
+        content = path.read_text(encoding="utf-8").lower()
+        for phrase in forbidden:
+            assert phrase not in content, f"{path.relative_to(ROOT)} still advertises {phrase!r}"
+
+
 def test_router_command_examples_shell_quote_paths_and_free_form_text(tmp_path: Path):
     repo = tmp_path / "missing; touch PWNED; #'s project"
     intent = 'brief; touch PWNED; "quoted"'

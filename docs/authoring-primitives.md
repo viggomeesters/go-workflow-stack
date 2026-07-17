@@ -94,7 +94,7 @@ python3 ~/github/go-workflow-stack/cli/go.py status <repo>
 python3 ~/github/go-workflow-stack/cli/go.py status <repo> --json
 ```
 
-Use this before deciding whether a `$go-*` request should be repo-local or AW Lite fallback.
+Use this before executing a `$go-*` request. A missing `.go/project.json` is a fail-closed adoption or spike case, never a reason to route execution elsewhere.
 
 ## `epic create`
 
@@ -164,4 +164,4 @@ Import is dry-run by default. `--write` stores an immutable review artifact unde
 
 ## Current boundary
 
-These commands author and move single-repo `.go` state. They do not replace AW Lite multi-repo orchestration and they do not migrate historical AW Lite plans/tasks. When `.go/project.json` exists, repo-local `.go` wins; AW Lite remains fallback/control-plane.
+These commands author and move single-repo `.go` state. They do not migrate historical plans or tasks. Every participating repository must own its `.go` contract; cross-repo work coordinates explicit repo-local contracts and bundles instead of introducing a central execution database.

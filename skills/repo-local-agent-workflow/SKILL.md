@@ -1,21 +1,7 @@
 ---
 name: repo-local-agent-workflow
 description: "Use when shaping, planning, or implementing self-contained repo-local agent workflow systems: go-workflow-stack tooling, go-project-template adoption, .go contracts, JSON/JSONL project state, repo-local task lifecycle, scoped dirty/lock policy, or migration away from central vault/AW Lite execution state."
-version: 1.1.0
-author: Hermes Agent
 license: MIT
-user-invocable: false
-triggers:
-  - repo-local go workflow
-  - repo-local agent workflow
-  - self-contained agentic engineering
-  - .go contract
-  - go-workflow-stack
-  - go-project-template
-  - schema + CLI spike
-  - AW lock
-  - dirty repo dogma
-  - vault-first task state
 metadata:
   hermes:
     tags: [agent-workflow, repo-local, jsonl, planning, cli, schemas, dirty-state]
@@ -26,7 +12,7 @@ metadata:
 
 ## Overview
 
-Use this skill for the class of work where Viggo is designing or implementing a self-contained agent workflow contract inside each project repo, rather than operating ordinary vault-first Agent Workflow Lite state.
+Use this skill when Viggo is designing or implementing a self-contained agent workflow contract inside each project repository. Repository execution requires repo-local `.go` state and fails closed when that contract is absent.
 
 The current source split is concrete:
 
@@ -226,7 +212,7 @@ For public or reusable repo-local workflow work, prefer this deliverable shape:
 - **Stack repo:** reusable CLI, schemas, validators, fixtures, docs, checks, releases, and this Hermes skill.
 - **Template repo:** copyable minimal `.go/` project state, synthetic examples, local check, marked as a GitHub template when public.
 
-The AW Lite/vault plan can coordinate execution, but the proof must include real repo paths/remotes, public metadata when requested, releases, and fresh-clone validation across the pair.
+Cross-repo coordination must name each real repository path/remote and operate through that repository's own `.go` contract. Use clone-safe bundles or explicit references for handoff; never mirror execution state into a vault. Proof must include public metadata when requested, releases, and fresh-clone validation across the pair.
 
 ## Dirty / lock policy
 

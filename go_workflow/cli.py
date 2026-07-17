@@ -2803,19 +2803,20 @@ def route_repo(repo: Path) -> dict[str, Any]:
             "project_name": project_name,
             "valid": not errors,
             "reason": ".go/project.json exists",
-            "fallback": "aw-lite",
+            "fallback": None,
             "errors": errors,
         }
     return {
         "repo": str(repo),
-        "mode": "aw-lite-fallback",
-        "state_root": "system/agent-workflow",
+        "mode": "missing-local-contract",
+        "state_root": None,
         "project_id": "",
         "project_name": "",
-        "valid": True,
-        "reason": "no .go/project.json in target repo",
-        "fallback": "aw-lite",
-        "errors": [],
+        "valid": False,
+        "reason": "no .go/project.json in target repo; adopt or spike the repository before durable workflow work",
+        "fallback": None,
+        "next_command": shell_join("python3", Path(__file__).resolve(), "adopt", repo),
+        "errors": ["repo-local .go/project.json is required"],
     }
 
 
@@ -3085,7 +3086,7 @@ def build_parser() -> argparse.ArgumentParser:
     readback = sub.add_parser("readback", help="Summarize a repo from .go state only")
     readback.add_argument("repo", nargs="?", default=".")
     readback.set_defaults(func=cmd_readback)
-    route = sub.add_parser("route", help="Classify a target repo as repo-local .go or AW Lite fallback")
+    route = sub.add_parser("route", help="Classify a target repo as repo-local .go or fail closed on a missing local contract")
     route.add_argument("repo", nargs="?", default=".")
     route.add_argument("--json", action="store_true")
     route.set_defaults(func=cmd_route)

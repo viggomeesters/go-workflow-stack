@@ -49,7 +49,9 @@
         {
           "id": "repo-local-workflow",
           "title": "Repo-local workflow",
-          "tasks": []
+          "tasks": [
+            "retire-aw-lite-fallback"
+          ]
         }
       ],
       "tasks": [

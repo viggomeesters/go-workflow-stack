@@ -38,7 +38,7 @@ If the same bundle id already exists, write mode refuses to replace it. `--force
 
 ## Routing boundary
 
-When `<repo>/.go/project.json` exists, repo-local `.go` state wins. AW Lite/vault is fallback/control-plane only. This prevents the old failure mode where a repo-local task request created an unrelated vault task.
+When `<repo>/.go/project.json` exists, repo-local `.go` state is authoritative. Without it, workflow execution fails closed until `adopt` or `spike` creates the contract. This prevents a repo-local task request from creating unrelated state outside the repository.
 
 ## Verification
 

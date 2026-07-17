@@ -20,7 +20,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 
 For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
 
-Routing rule: when a target repo contains `.go/project.json`, repo-local `.go` state wins. AW Lite/vault state is fallback/control-plane only.
+Routing rule: a target repo must own a valid `.go/project.json` before workflow execution starts. Repositories without that contract fail closed and must use `adopt` or `spike`; a vault is never an execution fallback.
 
 ## Practical architecture in one minute
 
@@ -101,7 +101,7 @@ The apply command validates the paired template and then creates a project-speci
 - `finish <task-id> --repo <repo> --agent <name> --evidence <text>`: move an active task to done and append evidence.
 - `dirty-check <repo>`: classify dirty Git state against owned paths.
 - `readback <repo>`: summarize the project from `.go/` only.
-- `route <repo> [--json]`: classify the target as `repo-local` when `.go/project.json` exists, otherwise `aw-lite-fallback`.
+- `route <repo> [--json]`: classify a valid `.go` target as `repo-local`; otherwise return `missing-local-contract` with a non-zero exit and an `adopt` command.
 - `bundle export <repo> [--output bundle.json]`: export a compact `.go` readback/task/history bundle without vault access.
 - `bundle import <repo> bundle.json [--write]`: validate a bundle and, only with `--write`, store it under `.go/imports/` as a review/reconcile artifact.
 

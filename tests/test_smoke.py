@@ -2518,6 +2518,58 @@ def test_go_loop_intent_creates_task_even_when_backlog_exists_and_records_task_c
     assert created[-1]["data"]["intent"] == "New loop instruction"
 
 
+def test_go_intent_preserves_numbered_items_as_semantic_acceptance_without_blind_task_splitting(tmp_path: Path):
+    repo = tmp_path / "semantic-intent-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "semantic", "--name", "Semantic")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    (repo / "go_workflow").mkdir()
+    (repo / "go_workflow" / "runtime.py").write_text("# runtime\n", encoding="utf-8")
+
+    intent = """Improve release safety
+
+1. Require a clean verification run
+2. Record the resulting commit
+3. Refuse publishing when evidence is missing
+"""
+    created = run_go("go", str(repo), "--intent", intent, "--write", "--json")
+
+    assert created.returncode == 0, created.stderr + created.stdout
+    payload = json.loads(created.stdout)
+    task_path = repo / payload["created_task"]["path"]
+    task = json.loads(task_path.read_text(encoding="utf-8"))
+    assert task["summary"] == "Improve release safety"
+    assert [item["text"] for item in task["requested_outcomes"]] == [
+        "Require a clean verification run",
+        "Record the resulting commit",
+        "Refuse publishing when evidence is missing",
+    ]
+    assert task["acceptance"][:3] == [
+        "R1: Require a clean verification run",
+        "R2: Record the resulting commit",
+        "R3: Refuse publishing when evidence is missing",
+    ]
+    assert task["decomposition_policy"]["mode"] == "semantic"
+    assert task["decomposition_policy"]["default"] == "bundle_when_coherent"
+    assert "go_workflow/**" in task["scope"]["modify"]
+    assert len(list((repo / ".go" / "tasks" / "open").glob("*.json"))) == 1
+
+
+def test_go_intent_recognizes_plain_numbered_lines_without_requiring_punctuation(tmp_path: Path):
+    repo = tmp_path / "plain-numbered-intent-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "plain-numbered", "--name", "Plain Numbered")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+
+    created = run_go("go", str(repo), "--intent", "1 doe x\n2 doe y", "--write", "--json")
+
+    assert created.returncode == 0, created.stderr + created.stdout
+    payload = json.loads(created.stdout)
+    task = json.loads((repo / payload["created_task"]["path"]).read_text(encoding="utf-8"))
+    assert task["summary"] == "Implement 2 requested outcomes"
+    assert [item["text"] for item in task["requested_outcomes"]] == ["doe x", "doe y"]
+
+
 def test_direct_go_loop_execute_without_open_task_fails_closed(tmp_path: Path):
     repo = tmp_path / "empty-loop-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

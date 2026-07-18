@@ -1,0 +1,47 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "implement-semantic-go-task-decomposition-preserv",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Implement semantic GO task decomposition: preserve every numbered or bulleted request item as traceable task acceptance while allowing the agent to bundle coherent items or split independent work instead of blindly creating one task per number.",
+  "description": "Created from bare go intent: Implement semantic GO task decomposition: preserve every numbered or bulleted request item as traceable task acceptance while allowing the agent to bundle coherent items or split independent work instead of blindly creating one task per number.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "go_workflow/**",
+      "tests/**"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "go_workflow/**",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "A GO intent with numbered or bulleted items preserves every meaningful item as explicit, traceable requested-outcome metadata and acceptance coverage before product edits.",
+    "The runtime does not blindly create one task per list item; it records a semantic decomposition policy that permits bundling coherent items and splitting independent outcomes.",
+    "Single-paragraph intents retain concise task summaries and valid non-generic acceptance criteria.",
+    "Focused regression tests and the full repository checks pass."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-18T11:55:05+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-18T12:01:28+02:00",
+      "agent": "hermes",
+      "summary": "TDD RED proved numbered intents collapsed into one opaque summary and plain numbered lines were not parsed. GREEN preserves requested_outcomes/R1..Rn acceptance, semantic bundle/split policy, detected repo code paths, 91 pytest tests passed, make check passed, validate passed."
+    }
+  ]
+}

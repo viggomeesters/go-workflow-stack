@@ -1994,13 +1994,81 @@ def build_agent_handoff(repo: Path, args: argparse.Namespace, mode: str) -> dict
 
 
 
+INTENT_LIST_ITEM_RE = re.compile(r"^\s*(?:\d+(?:[.)])?|[-*+])\s+(.+?)\s*$")
+
+
+def intent_task_contract(intent: str) -> dict[str, Any]:
+    """Turn free-form GO input into traceable outcomes without syntactic task spam."""
+    normalized = intent.strip() or "Continue toward project goal"
+    preface: list[str] = []
+    items: list[str] = []
+    current_item: list[str] | None = None
+    for raw_line in normalized.splitlines():
+        line = raw_line.strip()
+        if not line:
+            continue
+        match = INTENT_LIST_ITEM_RE.match(line)
+        if match:
+            if current_item:
+                items.append(" ".join(current_item))
+            current_item = [match.group(1).strip()]
+        elif current_item is not None:
+            current_item.append(line)
+        else:
+            preface.append(line)
+    if current_item:
+        items.append(" ".join(current_item))
+
+    if items:
+        summary = " ".join(preface) if preface else f"Implement {len(items)} requested outcomes"
+        outcomes = items
+        source = "numbered_or_bulleted_item"
+    else:
+        summary = " ".join(normalized.split())
+        outcomes = [summary]
+        source = "intent"
+    requested_outcomes = [
+        {"id": f"R{index}", "text": text, "source": source}
+        for index, text in enumerate(outcomes, start=1)
+    ]
+    return {
+        "summary": summary,
+        "requested_outcomes": requested_outcomes,
+        "acceptance": [f"{item['id']}: {item['text']}" for item in requested_outcomes]
+        + ["All requested outcomes are verified or explicitly blocked with evidence."],
+        "decomposition_policy": {
+            "mode": "semantic",
+            "default": "bundle_when_coherent",
+            "split_when": [
+                "outcomes_can_ship_independently",
+                "outcomes_require_different_verification",
+                "outcomes_touch_distinct_components_or_repositories",
+                "combined_scope_is_too_large_for_one_safe_claim",
+            ],
+            "rule": "List numbering is acceptance coverage, not an automatic task boundary.",
+        },
+    }
+
+
+def intent_task_scope(repo: Path) -> dict[str, list[str]]:
+    paths = [".go/**", "README.md", "docs/**", "tests/**"]
+    for directory in ("src", "go_workflow", "scripts", "cli", "schemas"):
+        if (repo / directory).is_dir():
+            paths.append(f"{directory}/**")
+    for filename in ("pyproject.toml", "Makefile"):
+        if (repo / filename).is_file():
+            paths.append(filename)
+    return {"read": paths.copy(), "modify": paths.copy()}
+
+
 def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> dict[str, Any]:
     root = go_root(repo)
     errors = validate_repo(repo)
     if errors:
         raise RepoLocalError("cannot create intent task in invalid .go state:\n- " + "\n- ".join(errors))
     project = load_json(root / "project.json")
-    summary = intent.strip() or "Continue toward project goal"
+    contract = intent_task_contract(intent)
+    summary = contract["summary"]
     task_id = slugify(summary).lower()[:48].strip("-") or "continue-project-goal"
     base_id = task_id
     index = 2
@@ -2017,9 +2085,11 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
         "project": project["id"],
         "status": "open",
         "summary": summary,
-        "description": f"Created from bare go intent: {summary}",
-        "scope": {"read": [".go/**", "README.md", "docs/**", "src/**", "tests/**"], "modify": [".go/**", "README.md", "docs/**", "src/**", "tests/**"]},
-        "acceptance": ["Intent is implemented or explicitly blocked with evidence.", "Result is verified and summarized compactly."],
+        "description": f"Created from bare go intent:\n\n{intent.strip() or summary}",
+        "scope": intent_task_scope(repo),
+        "requested_outcomes": contract["requested_outcomes"],
+        "decomposition_policy": contract["decomposition_policy"],
+        "acceptance": contract["acceptance"],
         "verification": verification,
         "claim": {"agent": None, "claimed_at": None},
         "evidence": [],
@@ -2034,12 +2104,24 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
             epics[0]["tasks"].append(task_id)
         set_hierarchy_epics(hierarchy, epics)
         dump_json(root / "hierarchy.json", hierarchy)
-    append_jsonl(root / "runs" / "events.jsonl", event(task_id, "task.created", agent, {"action": "task.created_from_go_intent", "intent": summary, "path": relative(repo, target)}))
+    append_jsonl(root / "runs" / "events.jsonl", event(task_id, "task.created", agent, {
+        "action": "task.created_from_go_intent",
+        "intent": intent.strip() or summary,
+        "path": relative(repo, target),
+        "requested_outcome_count": len(contract["requested_outcomes"]),
+        "decomposition_mode": contract["decomposition_policy"]["mode"],
+    }))
     errors = validate_repo(repo)
     if errors:
         target.unlink(missing_ok=True)
         raise RepoLocalError("created intent task invalidated .go state:\n- " + "\n- ".join(errors))
-    return {"id": task_id, "summary": summary, "path": relative(repo, target)}
+    return {
+        "id": task_id,
+        "summary": summary,
+        "path": relative(repo, target),
+        "requested_outcome_count": len(contract["requested_outcomes"]),
+        "decomposition_mode": contract["decomposition_policy"]["mode"],
+    }
 
 
 def cmd_go(args: argparse.Namespace) -> int:
@@ -2078,10 +2160,14 @@ def cmd_go(args: argparse.Namespace) -> int:
             if intent and may_write_intent_task:
                 result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
             elif intent:
-                proposed_id = slugify(intent).lower()[:48].strip("-") or "continue-project-goal"
+                contract = intent_task_contract(intent)
+                proposed_id = slugify(contract["summary"]).lower()[:48].strip("-") or "continue-project-goal"
                 result["proposed_task"] = {
                     "id": proposed_id,
-                    "summary": intent,
+                    "summary": contract["summary"],
+                    "requested_outcomes": contract["requested_outcomes"],
+                    "decomposition_policy": contract["decomposition_policy"],
+                    "acceptance": contract["acceptance"],
                     "write_required": True,
                     "write_flag": "--write",
                 }

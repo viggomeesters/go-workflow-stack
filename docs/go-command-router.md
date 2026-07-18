@@ -113,6 +113,7 @@ The target UX is that Viggo says only `go` and the agent does the routing.
 - If a repo has `.go/project.json`, repo-local `.go` wins.
 - If `.go` is missing or incomplete, repair the contract first: vision, design principles, hierarchy, concrete task, goal/acceptance/verification.
 - Every non-empty new GO instruction must create a `.go/tasks/open/*.json` task plus a `task.created` event before execution starts. Existing backlog is not a reason to skip task creation.
+- Numbered and bulleted request items are preserved as explicit `requested_outcomes` and `R1`, `R2`, ... acceptance criteria. Numbering is traceability, not an automatic task boundary: bundle items that form one outcome/commit/verification unit; split only when outcomes can ship independently, require different verification, touch distinct components or repos, or exceed one safe claim.
 - If `.go` is valid and work exists, enter the autonomous loop. Do **not** make Viggo type `go` again after every phase.
 - Direct `go-loop --execute` with no open task fails closed. Route a new instruction through `go --intent ... --loop --write --execute` or create a task explicitly first.
 

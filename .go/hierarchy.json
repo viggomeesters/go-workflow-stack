@@ -39,7 +39,8 @@
         "modular-migrations-agent-protocol",
         "modular-native-adapters",
         "concurrent-atomic-state",
-        "distribution-pilots-live-hermes"
+        "distribution-pilots-live-hermes",
+        "implement-semantic-go-task-decomposition-preserv"
       ]
     },
     {

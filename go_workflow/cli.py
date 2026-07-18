@@ -2271,6 +2271,17 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0 if route["valid"] else 1
 
 
+def template_check_environment(source: dict[str, str], stack_root: Path) -> dict[str, str]:
+    env = source.copy()
+    if (stack_root / ".git").is_dir():
+        env["GO_STACK"] = str(stack_root)
+        env["GO_STACK_ALLOW_DEV"] = "1"
+    else:
+        env.pop("GO_STACK", None)
+        env.pop("GO_STACK_ALLOW_DEV", None)
+    return env
+
+
 def cmd_template_check(args: argparse.Namespace) -> int:
     """Validate that a project template still works with this stack checkout."""
     template = Path(args.template_repo).resolve()
@@ -2311,9 +2322,7 @@ def cmd_template_check(args: argparse.Namespace) -> int:
                 capture_output=True,
                 check=False,
             )
-            env = os.environ.copy()
-            env["GO_STACK"] = str(STACK_ROOT)
-            env["GO_STACK_ALLOW_DEV"] = "1"
+            env = template_check_environment(os.environ, STACK_ROOT)
             executed = subprocess.run(
                 [sys.executable, str(Path(__file__).resolve()), "auto", str(clone), "--max-tasks", "1", "--max-attempts", "1", "--execute", "--agent", "template-check", "--json"],
                 env=env,

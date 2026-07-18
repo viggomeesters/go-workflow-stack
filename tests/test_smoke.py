@@ -90,6 +90,21 @@ def test_template_check_command_reports_pairing_contract():
         assert checks["check_script_bootstraps_stack"]["ok"] is True
 
 
+def test_template_check_environment_does_not_treat_packaged_site_packages_as_git_checkout(tmp_path: Path):
+    from go_workflow.cli import template_check_environment
+
+    packaged_root = tmp_path / "site-packages"
+    packaged_root.mkdir()
+    env = template_check_environment(
+        {"GO_STACK": "/stale/override", "GO_STACK_ALLOW_DEV": "1", "KEEP": "yes"},
+        packaged_root,
+    )
+
+    assert "GO_STACK" not in env
+    assert "GO_STACK_ALLOW_DEV" not in env
+    assert env["KEEP"] == "yes"
+
+
 def test_public_template_first_auto_executes_declared_task(tmp_path: Path):
     repo = tmp_path / "fresh-template"
     shutil.copytree(template_repo(), repo, ignore=shutil.ignore_patterns(".git", ".DS_Store"))

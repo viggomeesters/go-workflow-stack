@@ -1287,7 +1287,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.6 v0.3.6 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.7 v0.3.7 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1882,8 +1882,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.6"
-    assert result["stack"]["ref"] == "v0.3.6"
+    assert result["stack"]["version"] == "0.3.7"
+    assert result["stack"]["ref"] == "v0.3.7"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -1913,7 +1913,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.6"
+    assert project["stack_ref"] == "v0.3.7"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -1991,6 +1991,36 @@ def test_stack_update_rejects_missing_and_incompatible_refs_before_writing(tmp_p
     assert incompatible.returncode == 1
     assert "declares version 1.2.3" in incompatible.stderr
     assert project_path.read_text(encoding="utf-8") == before
+
+
+def test_installed_style_stack_update_honors_go_stack_and_rejects_site_packages_as_checkout(tmp_path: Path):
+    repo = tmp_path / "installed-update-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "installed-update", "--name", "Installed Update")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    fake_site_packages = tmp_path / "site-packages"
+    fake_site_packages.mkdir()
+    runner = (
+        "import sys; from pathlib import Path; import go_workflow.cli as cli; "
+        "cli.STACK_ROOT = Path(sys.argv[1]); "
+        "sys.argv = ['go-workflow', *sys.argv[2:]]; "
+        "raise SystemExit(cli.main())"
+    )
+    command = [
+        sys.executable, "-c", runner, str(fake_site_packages),
+        "stack", "update", str(repo), "--to", "v0.3.6", "--json",
+    ]
+
+    without_source = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, env={**os.environ, "GO_STACK": ""})
+    assert without_source.returncode == 1
+    assert "requires a go-workflow-stack Git checkout" in without_source.stderr
+    assert str(fake_site_packages) not in without_source.stderr
+
+    with_source = subprocess.run(command, cwd=ROOT, text=True, capture_output=True, env={**os.environ, "GO_STACK": str(ROOT)})
+    assert with_source.returncode == 0, with_source.stderr + with_source.stdout
+    plan = json.loads(with_source.stdout)
+    assert plan["stack_repo"] == str(ROOT)
+    assert plan["to_ref"] == "v0.3.6"
 
 
 def test_concurrent_claims_have_exactly_one_winner(tmp_path: Path):
@@ -2088,15 +2118,15 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.6", "-m", "v0.3.6"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.7", "-m", "v0.3.7"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.6"],
+        ["bash", "scripts/release-check.sh", "0.3.7"],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.6" in result.stdout
+    assert "release preflight: v0.3.7" in result.stdout
     assert "publish: not performed" in result.stdout
 
 
@@ -2106,14 +2136,14 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.6", "-m", "v0.3.6"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.7", "-m", "v0.3.7"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
 
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.6"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.7"], cwd=repo, text=True, capture_output=True, env=env)
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
 
@@ -2160,8 +2190,8 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["required_stack_version"] == "0.3.6"
-    assert migrated["stack_ref"] == "v0.3.6"
+    assert migrated["required_stack_version"] == "0.3.7"
+    assert migrated["stack_ref"] == "v0.3.7"
     migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
     assert "epics" in migrated_hierarchy
     assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]

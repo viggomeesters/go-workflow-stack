@@ -3059,7 +3059,7 @@ def build_parser() -> argparse.ArgumentParser:
     stack_update = stack_sub.add_parser("update", help="Validate and update required_stack_version and stack_ref")
     stack_update.add_argument("repo", nargs="?", default=".")
     stack_update.add_argument("--to", required=True, help="immutable target tag vX.Y.Z")
-    stack_update.add_argument("--stack-repo", default=str(STACK_ROOT), help="stack git checkout used to resolve and inspect the tag")
+    stack_update.add_argument("--stack-repo", help="stack git checkout used to resolve and inspect the tag; defaults to GO_STACK or the source checkout")
     stack_update.add_argument("--apply", action="store_true", help="apply transaction; default is dry-run")
     stack_update.add_argument("--agent", default="agent")
     stack_update.add_argument("--json", action="store_true")
@@ -3249,7 +3249,16 @@ def cmd_version(args: argparse.Namespace) -> int:
 
 def cmd_stack_update(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
-    stack_repo = Path(args.stack_repo).resolve()
+    configured_stack = args.stack_repo or os.environ.get("GO_STACK")
+    if configured_stack:
+        stack_repo = Path(configured_stack).expanduser().resolve()
+    elif (STACK_ROOT / ".git").is_dir():
+        stack_repo = STACK_ROOT
+    else:
+        raise RepoLocalError(
+            "stack update requires a go-workflow-stack Git checkout; "
+            "set GO_STACK or pass --stack-repo"
+        )
     try:
         plan = plan_stack_update(repo, stack_repo, args.to)
     except StackUpdateError as exc:

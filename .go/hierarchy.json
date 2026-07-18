@@ -41,7 +41,8 @@
         "concurrent-atomic-state",
         "distribution-pilots-live-hermes",
         "implement-semantic-go-task-decomposition-preserv",
-        "release-go-workflow-stack-v0.3.6-so-semantic-go"
+        "release-go-workflow-stack-v0.3.6-so-semantic-go",
+        "fix-installed-stack-update-source-resolution"
       ]
     },
     {

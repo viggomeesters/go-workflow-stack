@@ -168,14 +168,14 @@ bash scripts/check.sh
 Prepare a version locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.3.6
+bash scripts/release-check.sh 0.3.7
 ```
 
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-go-workflow stack update . --to v0.3.6 --json
-go-workflow stack update . --to v0.3.6 --apply --json
+go-workflow stack update . --to v0.3.7 --json
+go-workflow stack update . --to v0.3.7 --apply --json
 ```
 
 ## Privacy and security
@@ -184,7 +184,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Public v0.3.6 release. Every new GO instruction is durable task-first repo-local work; list items become traceable outcomes without forced task spam; missing contracts fail closed; and legacy migration repairs historical task linkage.
+Public v0.3.7 release. Every new GO instruction is durable task-first repo-local work; list items become traceable outcomes without forced task spam; installed runtimes honor `GO_STACK` for immutable updates; and missing contracts fail closed.
 
 ## License
 

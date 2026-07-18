@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.7 - 2026-07-18
+
+- Honor `GO_STACK` and explicit `--stack-repo` when an installed runtime resolves immutable tags for `stack update`.
+- Refuse to treat wheel/site-packages content as a Git checkout and return an actionable source-checkout error instead.
+- Add installed-style regression coverage for template stack updates.
+
 ## 0.3.6 - 2026-07-18
 
 - Preserve numbered, plain-numbered, and bulleted GO input as explicit `requested_outcomes` plus `R1`, `R2`, ... acceptance criteria before execution.

@@ -45,6 +45,8 @@ python3 ~/github/go-workflow-stack/cli/go.py spike ~/github/marktplaats-bot \
 Hand off control for autonomous execution:
 
 ```bash
+python3 ~/github/go-workflow-stack/cli/go.py go <repo> --intent "<new instruction>" --write --execute --agent hermes --json
+python3 ~/github/go-workflow-stack/cli/go.py go <repo> --intent "<new instruction>" --loop --write --execute --agent hermes --json
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --json
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --emit-handoff --json
 python3 ~/github/go-workflow-stack/cli/go.py auto ~/github/marktplaats-bot --max-tasks 3 --execute --agent hermes --json
@@ -66,7 +68,8 @@ python3 ~/github/go-workflow-stack/cli/go.py go-loop ~/github/marktplaats-bot --
 | No repo directory | `spike` (`mode=create_repo`) | Create repo, Git, repo-complete basics, `.go` contract, first tasks |
 | Repo exists, no `.go/project.json` | `spike` (`mode=repair_existing_repo`) | Retrofit repo-local state without broad migration; example includes `--skip-repo-complete` |
 | `.go` exists but vision/principles/hierarchy invalid or missing | `spike` repair path | Complete the repo-local contract first |
-| Valid `.go`, open tasks exist | `auto` | Hand off control for bounded autonomous execution |
+| Valid `.go`, new intent supplied | create task first, then `auto`/`go-loop` | Every new instruction becomes durable `.go` work, even when a backlog already exists |
+| Valid `.go`, open tasks exist and no new intent | `auto` | Continue the existing durable backlog |
 | `auto` finds follow-up work, failed review, or first green is not trustworthy | `go-loop` | Continue autonomously through repair/self-reflect until blocker |
 | Valid `.go`, no open tasks | `task create` / feedback ingestion | Convert new Viggo input into tasks/decisions |
 | Dirty owned scope / conflict / secret-looking path | block | Human/repair gate before autonomous changes |
@@ -109,7 +112,9 @@ The target UX is that Viggo says only `go` and the agent does the routing.
 - If the request is a small loose command, handle it directly.
 - If a repo has `.go/project.json`, repo-local `.go` wins.
 - If `.go` is missing or incomplete, repair the contract first: vision, design principles, hierarchy, concrete task, goal/acceptance/verification.
+- Every non-empty new GO instruction must create a `.go/tasks/open/*.json` task plus a `task.created` event before execution starts. Existing backlog is not a reason to skip task creation.
 - If `.go` is valid and work exists, enter the autonomous loop. Do **not** make Viggo type `go` again after every phase.
+- Direct `go-loop --execute` with no open task fails closed. Route a new instruction through `go --intent ... --loop --write --execute` or create a task explicitly first.
 
 See [`go-autonomous-loop.md`](go-autonomous-loop.md) for the full contract.
 
@@ -131,7 +136,7 @@ Operationally:
 6. Finish only with evidence.
 7. Self-reflect: should vision, principles, hierarchy, or tasks be improved?
 8. Summarize compactly for Viggo.
-9. Convert Viggo's next feedback into new tasks/decisions, then repeat on the next `go auto`.
+9. Convert every new Viggo instruction into a task before product edits, then execute it through `go auto` or `go loop`.
 
 `go auto` may invoke `go loop` when:
 

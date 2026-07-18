@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "release-v035-task-first",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Release v0.3.5 with fail-closed routing and task-first GO execution",
+  "description": "Release v0.3.5 with fail-closed routing and task-first GO execution",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/**",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "v0.3.5 contains the July 17 fail-closed routing fix, packaged-runtime template check fix, and task-first GO regression coverage",
+    "Annotated v0.3.5 tag and GitHub release point to the verified release commit"
+  ],
+  "verification": [
+    "bash scripts/release-check.sh 0.3.5"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

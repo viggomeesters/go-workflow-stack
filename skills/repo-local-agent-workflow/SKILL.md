@@ -138,6 +138,8 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 
 **No-command-spam rule:** when Viggo says `go`, `go auto`, or `go-loop` in a repo-local context, the invoking coding agent must start the tool-call train immediately. Do not reply with a list of commands for Viggo to run. The default action is: inspect route/status, repair/confirm the `.go` contract, create or claim the next task, execute inside scope, verify, critic/recheck, repair, finish with evidence, and continue until done/repository-gate/budget.
 
+**Task-first invariant:** every non-empty new GO instruction becomes a new repo-local task before product execution, even when other open tasks already exist. Invoke `go <repo> --intent "<instruction>" --write [--loop] --execute`; this must append `task.created`, then claim the task before any build adapter or product diff. Use direct `go-loop` only to continue already-materialized open tasks. Direct loop execution with no open task fails closed.
+
 Ask only when the emitted preflight reports an active repository gate, external authority is required, the outcome is genuinely ambiguous, or a real scope/product tradeoff needs direction. Do not inject inactive gate scenarios into every ordinary handoff. Everything else is agent work.
 
 Before implementation, the agent must ensure the repo-local contract is good enough to execute:

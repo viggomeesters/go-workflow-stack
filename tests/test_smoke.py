@@ -1502,7 +1502,8 @@ def test_executor_agent_environment_default_is_persisted(tmp_path: Path):
         [sys.executable, str(ROOT / "cli" / "go.py"), "go-loop", str(repo), "--execute", "--executor-agent", "codex", "--agent", "pytest", "--json"],
         text=True, capture_output=True, env=env,
     )
-    assert explicit.returncode == 0, explicit.stderr + explicit.stdout
+    assert explicit.returncode == 1, explicit.stderr + explicit.stdout
+    assert json.loads(explicit.stdout)["status"] == "task_required"
     latest = json.loads((repo / ".go" / "runs" / "latest.json").read_text())
     assert latest["effective_flags"]["executor_agent"] == "codex"
 
@@ -2476,6 +2477,42 @@ def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path
     written_payload = json.loads(written.stdout)
     assert written_payload["created_task"]["id"] == "add-bare-go-task-routing"
     assert (repo / ".go" / "tasks" / "open" / "add-bare-go-task-routing.json").is_file()
+
+
+def test_go_loop_intent_creates_task_even_when_backlog_exists_and_records_task_created_first(tmp_path: Path):
+    repo = tmp_path / "task-first-loop-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "task-first", "--name", "Task First")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+
+    first = run_go("go", str(repo), "--intent", "Existing backlog item", "--write", "--json")
+    assert first.returncode == 0, first.stderr + first.stdout
+
+    second = run_go("go", str(repo), "--intent", "New loop instruction", "--loop", "--write", "--json")
+    assert second.returncode == 0, second.stderr + second.stdout
+    payload = json.loads(second.stdout)
+    assert payload["action"] == "go-loop"
+    assert payload["created_task"]["id"] == "new-loop-instruction"
+    assert (repo / ".go" / "tasks" / "open" / "existing-backlog-item.json").is_file()
+    assert (repo / ".go" / "tasks" / "open" / "new-loop-instruction.json").is_file()
+
+    events = [json.loads(line) for line in (repo / ".go" / "runs" / "events.jsonl").read_text().splitlines()]
+    created = [event for event in events if event.get("task_id") == "new-loop-instruction"]
+    assert created[-1]["event"] == "task.created"
+    assert created[-1]["data"]["intent"] == "New loop instruction"
+
+
+def test_direct_go_loop_execute_without_open_task_fails_closed(tmp_path: Path):
+    repo = tmp_path / "empty-loop-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "empty-loop", "--name", "Empty Loop")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+
+    executed = run_go("go-loop", str(repo), "--execute", "--agent", "pytest", "--json")
+    assert executed.returncode == 1
+    payload = json.loads(executed.stdout)
+    assert payload["status"] == "task_required"
+    assert "--intent" in payload["next_action"]
 
 
 def test_autonomy_benchmark_tracks_ralph_equivalence_with_adapter_boundary():

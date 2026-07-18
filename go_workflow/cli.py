@@ -227,7 +227,7 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     errors: list[str] = []
     require(data.get("schema") == EVENT_SCHEMA, errors, f"{prefix}: schema mismatch")
     require(data.get("kind") == "event", errors, f"{prefix}: kind must be event")
-    require(data.get("event") in {"task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
+    require(data.get("event") in {"task.created", "task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
     require(bool(data.get("created_at")), errors, f"{prefix}: created_at required")
     require(bool(data.get("task_id")), errors, f"{prefix}: task_id required")
     return errors
@@ -1580,6 +1580,15 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         return 1, result
 
     initial_unfinished = preflight.get("unfinished_tasks", {})
+    if not plan.get("next_tasks") and not (initial_unfinished.get("active") or initial_unfinished.get("blocked")):
+        result.update({
+            "status": "task_required",
+            "summary": "GO execution requires a repo-local task; no open task is available.",
+            "next_action": "run go <repo> --intent '<instruction>' --loop --write --execute, or create a task first",
+        })
+        write_latest_run_state(repo, root, result, args, mode)
+        return 1, result
+
     if not plan.get("next_tasks") and (initial_unfinished.get("active") or initial_unfinished.get("blocked")):
         blocked_id = (initial_unfinished.get("blocked") or initial_unfinished.get("active") or [None])[0]
         result.update({
@@ -2025,7 +2034,7 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
             epics[0]["tasks"].append(task_id)
         set_hierarchy_epics(hierarchy, epics)
         dump_json(root / "hierarchy.json", hierarchy)
-    append_jsonl(root / "runs" / "events.jsonl", event(task_id, "run.checked", agent, {"action": "task.created_from_go_intent", "intent": summary, "path": relative(repo, target)}))
+    append_jsonl(root / "runs" / "events.jsonl", event(task_id, "task.created", agent, {"action": "task.created_from_go_intent", "intent": summary, "path": relative(repo, target)}))
     errors = validate_repo(repo)
     if errors:
         target.unlink(missing_ok=True)
@@ -2065,12 +2074,10 @@ def cmd_go(args: argparse.Namespace) -> int:
             result.update({"action": "contract_repair_required", "reason": "repo-local .go contract is invalid", "errors": errors})
         else:
             mode = "go-loop" if args.loop or any(word in intent.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
-            has_open_tasks = bool(open_tasks(repo))
             may_write_intent_task = bool(args.write or args.execute)
-            if not has_open_tasks and intent and may_write_intent_task:
+            if intent and may_write_intent_task:
                 result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
-                has_open_tasks = True
-            elif not has_open_tasks and intent:
+            elif intent:
                 proposed_id = slugify(intent).lower()[:48].strip("-") or "continue-project-goal"
                 result["proposed_task"] = {
                     "id": proposed_id,

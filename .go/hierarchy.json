@@ -50,7 +50,10 @@
           "id": "repo-local-workflow",
           "title": "Repo-local workflow",
           "tasks": [
-            "retire-aw-lite-fallback"
+            "retire-aw-lite-fallback",
+            "fix-template-check-packaged-runtime",
+            "enforce-go-intent-task-first",
+            "release-v035-task-first"
           ]
         }
       ],

@@ -1,0 +1,34 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "fix-template-check-packaged-runtime",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Fix template-check with installed uv package runtime",
+  "description": "Fix template-check with installed uv package runtime",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "tests/**",
+      "../go-project-template/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "tests/**"
+    ]
+  },
+  "acceptance": [
+    "go-workflow template-check succeeds when STACK_ROOT is an installed uv site-packages directory",
+    "Fresh-template auto execution uses a real immutable stack checkout or package-safe launcher without cloning into site-packages"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py::test_template_check_command_reports_pairing_contract -q",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

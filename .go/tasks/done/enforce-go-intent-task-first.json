@@ -1,0 +1,43 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "enforce-go-intent-task-first",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Guarantee every new GO intent creates a repo-local task before execution",
+  "description": "Guarantee every new GO intent creates a repo-local task before execution",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "tests/**",
+      "docs/**",
+      "skills/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "tests/**",
+      "docs/**",
+      "skills/**"
+    ]
+  },
+  "acceptance": [
+    "Bare Go and Go loop with a new intent materialize a .go/tasks/open task and task.created event before any product diff",
+    "Direct go-loop without an existing task fails closed with an instruction to supply intent through go or create a task",
+    "No product execution can begin without a claimed active task"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-18T09:27:19+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-18T09:32:35+02:00",
+      "agent": "hermes",
+      "summary": "RED: two new regressions failed because GO ignored intent when backlog existed and empty direct go-loop reported completion. GREEN: four focused task-first/router tests passed. Broad: 87/88 smoke tests passed; sole remaining failure is the unreleased v0.3.4 provenance pin and is owned by release-v035-task-first. Docs and active stack skill now require task.created before execution and direct empty loop fails closed."
+    }
+  ]
+}

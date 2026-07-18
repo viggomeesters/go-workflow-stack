@@ -4,7 +4,7 @@
   "execution_mode": "agent",
   "id": "harden-go-multi-item-execution-closure",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Harden GO multi-item execution closure",
   "description": "Created from bare go intent:\n\nHarden GO multi-item execution closure\n\n1. Durably link the exact source instruction used to create a GO task, including a stable content hash and optional source reference for separate Telegram-message handoff.\n2. Track every requested outcome R# as verified, blocked, or rejected with evidence.\n3. Refuse manual and autonomous finish while any requested outcome lacks an explicit terminal disposition and evidence.\n4. Add end-to-end regressions proving 7/8 outcomes blocks completion and 8/8 permits completion.",
   "scope": {
@@ -123,5 +123,11 @@
     "agent": "hermes",
     "claimed_at": "2026-07-18T15:39:53+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-18T16:39:50+02:00",
+      "agent": "hermes",
+      "summary": "RED: autonomous 7/8 regression initially failed due adapter selection; corrected no-op build boundary. GREEN: focused 2 tests passed. Regression: full 94 tests passed; make check passed; .go validate and intent SHA readback passed. R1-R4 each verified with item-specific evidence. Recheck: docs/skill require exact prior-message text plus durable source_ref; changelog updated. Ship: implementation commit 14aa498; no push/release requested."
+    }
+  ]
 }

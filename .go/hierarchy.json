@@ -91,7 +91,8 @@
         "hermes-prompt-capability-detection",
         "release-v033-native-hermes",
         "publish-github-release-v033",
-        "package-runtime-provenance-v034"
+        "package-runtime-provenance-v034",
+        "fix-v1-contract-migration"
       ]
     }
   ]

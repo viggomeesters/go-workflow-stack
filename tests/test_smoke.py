@@ -1764,21 +1764,10 @@ def test_package_runtime_provenance_ignores_unrelated_parent_git_checkout(tmp_pa
 
 def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path: Path):
     source = tmp_path / "release-source"
-    shutil.copytree(ROOT, source, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
-    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=source, check=True)
-    subprocess.run(["git", "add", "."], cwd=source, check=True)
-    subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
-        cwd=source,
-        check=True,
-    )
-    subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"],
-        cwd=source,
-        check=True,
-    )
+    subprocess.run(["git", "clone", "-q", "--no-hardlinks", str(ROOT), str(source)], check=True)
+    subprocess.run(["git", "checkout", "-q", "v0.3.5"], cwd=source, check=True)
     release_commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"], cwd=source, text=True, capture_output=True, check=True,
+        ["git", "rev-parse", "v0.3.5^{}"], cwd=source, text=True, capture_output=True, check=True,
     ).stdout.strip()
 
     tool_dir = tmp_path / "tools"
@@ -2134,14 +2123,22 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "legacy", "--name", "Legacy")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "legacy-history", "--summary", "Legacy history",
+        "--epic", "workflow", "--acceptance", "History is retained",
+        "--verification", "python3 -c 'print(1)'",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
     project.pop("project_mode", None)
     project.pop("stack_ref", None)
+    project.pop("required_stack_version", None)
     project.pop("contract_version", None)
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
     hierarchy_path = repo / ".go" / "hierarchy.json"
     hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
+    hierarchy["epics"][0]["tasks"].remove("legacy-history")
     hierarchy["feature_groups"] = hierarchy.pop("epics")
     hierarchy_path.write_text(json.dumps(hierarchy, indent=2) + "\n", encoding="utf-8")
     before = project_path.read_text(encoding="utf-8")
@@ -2163,8 +2160,11 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
+    assert migrated["required_stack_version"] == "0.3.5"
     assert migrated["stack_ref"] == "v0.3.5"
-    assert "epics" in json.loads(hierarchy_path.read_text(encoding="utf-8"))
+    migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
+    assert "epics" in migrated_hierarchy
+    assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]
 
     repeated = run_go("migrate", str(repo), "--json")
     assert json.loads(repeated.stdout)["changes"] == []

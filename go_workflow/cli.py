@@ -2439,6 +2439,7 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         plan, documents = plan_contract_migration(
             load_json(root / "project.json"),
             load_json(root / "hierarchy.json"),
+            sorted(path.stem for path in (root / "tasks").glob("*/*.json")),
         )
     except ValueError as exc:
         raise RepoLocalError(str(exc)) from exc

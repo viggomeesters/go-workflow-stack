@@ -59,6 +59,7 @@ EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
+OUTCOME_TERMINAL_STATUSES = {"verified", "blocked", "rejected"}
 
 
 class RepoLocalError(Exception):
@@ -199,6 +200,29 @@ def validate_hierarchy(data: dict[str, Any], rel: str) -> list[str]:
     return errors
 
 
+def outcome_completion_findings(task: dict[str, Any]) -> list[str]:
+    if task.get("outcome_tracking_version") != 1:
+        return []
+    findings: list[str] = []
+    outcomes = task.get("requested_outcomes")
+    if not isinstance(outcomes, list) or not outcomes:
+        return ["outcome tracking requires requested_outcomes"]
+    for index, outcome in enumerate(outcomes, start=1):
+        if not isinstance(outcome, dict):
+            findings.append(f"outcome {index} must be an object")
+            continue
+        outcome_id = str(outcome.get("id") or f"#{index}")
+        status = outcome.get("status")
+        evidence = outcome.get("evidence")
+        if status not in OUTCOME_TERMINAL_STATUSES:
+            findings.append(f"{outcome_id} has no terminal disposition")
+        if not isinstance(evidence, list) or not evidence or not all(
+            isinstance(item, dict) and bool(str(item.get("summary") or "").strip()) for item in evidence
+        ):
+            findings.append(f"{outcome_id} has no evidence")
+    return findings
+
+
 def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = None) -> list[str]:
     errors: list[str] = []
     require(data.get("schema") == TASK_SCHEMA, errors, f"{rel}: schema mismatch")
@@ -219,6 +243,23 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
         require(isinstance(scope.get("modify"), list), errors, f"{rel}: scope.modify must be a list")
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
+    if data.get("outcome_tracking_version") == 1:
+        source = data.get("intent_source")
+        require(isinstance(source, dict), errors, f"{rel}: intent_source must be an object")
+        if isinstance(source, dict):
+            text = str(source.get("text") or "")
+            require(bool(text), errors, f"{rel}: intent_source.text required")
+            require(source.get("sha256") == hashlib.sha256(text.encode("utf-8")).hexdigest(), errors, f"{rel}: intent_source.sha256 mismatch")
+        outcomes = data.get("requested_outcomes")
+        require(isinstance(outcomes, list) and bool(outcomes), errors, f"{rel}: requested_outcomes must be a non-empty list")
+        if isinstance(outcomes, list):
+            for index, outcome in enumerate(outcomes, start=1):
+                require(isinstance(outcome, dict), errors, f"{rel}: outcome {index} must be an object")
+                if isinstance(outcome, dict):
+                    require(outcome.get("status") in ({"pending"} | OUTCOME_TERMINAL_STATUSES), errors, f"{rel}: outcome {index} has invalid status")
+                    require(isinstance(outcome.get("evidence"), list), errors, f"{rel}: outcome {index} evidence must be a list")
+        if expected_status == "done":
+            errors.extend(f"{rel}: {finding}" for finding in outcome_completion_findings(data))
     return errors
 
 
@@ -1309,6 +1350,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
         "Run the task verification commands before exiting.",
+        "For tasks with requested_outcomes, record every R# disposition and evidence with `go-workflow task outcome` before exiting.",
         "Exit non-zero if you cannot safely repair within scope.",
     ])
     return native_agent_command(
@@ -1348,6 +1390,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
+        "For tasks with requested_outcomes, record every R# as verified, blocked, or rejected with concrete evidence using `go-workflow task outcome` before exiting.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
     return native_agent_command(
@@ -1830,6 +1873,17 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             block_task_record(repo, root, active_path, task, args.agent, block_reason, final_checks)
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Bounded executor attempts failed; critic/repair evidence recorded and task moved to blocked.", "next_action": "repair failing gate or configure build/critic/repair adapter, then rerun go-loop"})
             break
+        task = load_json(active_path)
+        outcome_findings = outcome_completion_findings(task)
+        if outcome_findings:
+            result.update({
+                "status": "blocked",
+                "blocked_task": task["id"],
+                "outcome_findings": outcome_findings,
+                "summary": "Verification passed, but requested-outcome closure is incomplete; task remains active.",
+                "next_action": "record every R# with `go-workflow task outcome` and evidence, then rerun go-loop",
+            })
+            break
         evidence_summary = "; ".join(check["command"] or "no verification configured" for check in final_checks)
         ship_blocker = ship_policy_blocker(ship_policy, allow_push)
         if ship_blocker:
@@ -2028,7 +2082,7 @@ def intent_task_contract(intent: str) -> dict[str, Any]:
         outcomes = [summary]
         source = "intent"
     requested_outcomes = [
-        {"id": f"R{index}", "text": text, "source": source}
+        {"id": f"R{index}", "text": text, "source": source, "status": "pending", "evidence": []}
         for index, text in enumerate(outcomes, start=1)
     ]
     return {
@@ -2061,7 +2115,7 @@ def intent_task_scope(repo: Path) -> dict[str, list[str]]:
     return {"read": paths.copy(), "modify": paths.copy()}
 
 
-def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> dict[str, Any]:
+def create_task_from_intent(repo: Path, intent: str, agent: str = "agent", source_ref: str = "") -> dict[str, Any]:
     root = go_root(repo)
     errors = validate_repo(repo)
     if errors:
@@ -2077,6 +2131,12 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
         task_id = (base_id[: 48 - len(suffix)] + suffix).strip("-")
         index += 1
     verification = project.get("default_verification") or ["git diff --check"]
+    source_text = intent.strip() or summary
+    intent_source = {
+        "text": source_text,
+        "sha256": hashlib.sha256(source_text.encode("utf-8")).hexdigest(),
+        "source_ref": source_ref.strip() or None,
+    }
     task = {
         "schema": TASK_SCHEMA,
         "kind": "task",
@@ -2085,8 +2145,10 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
         "project": project["id"],
         "status": "open",
         "summary": summary,
-        "description": f"Created from bare go intent:\n\n{intent.strip() or summary}",
+        "description": f"Created from bare go intent:\n\n{source_text}",
         "scope": intent_task_scope(repo),
+        "outcome_tracking_version": 1,
+        "intent_source": intent_source,
         "requested_outcomes": contract["requested_outcomes"],
         "decomposition_policy": contract["decomposition_policy"],
         "acceptance": contract["acceptance"],
@@ -2106,7 +2168,9 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
         dump_json(root / "hierarchy.json", hierarchy)
     append_jsonl(root / "runs" / "events.jsonl", event(task_id, "task.created", agent, {
         "action": "task.created_from_go_intent",
-        "intent": intent.strip() or summary,
+        "intent": source_text,
+        "intent_sha256": intent_source["sha256"],
+        "intent_source_ref": intent_source["source_ref"],
         "path": relative(repo, target),
         "requested_outcome_count": len(contract["requested_outcomes"]),
         "decomposition_mode": contract["decomposition_policy"]["mode"],
@@ -2121,6 +2185,8 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent") -> di
         "path": relative(repo, target),
         "requested_outcome_count": len(contract["requested_outcomes"]),
         "decomposition_mode": contract["decomposition_policy"]["mode"],
+        "intent_sha256": intent_source["sha256"],
+        "intent_source_ref": intent_source["source_ref"],
     }
 
 
@@ -2158,7 +2224,7 @@ def cmd_go(args: argparse.Namespace) -> int:
             mode = "go-loop" if args.loop or any(word in intent.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
             may_write_intent_task = bool(args.write or args.execute)
             if intent and may_write_intent_task:
-                result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent)
+                result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent, source_ref=args.intent_source_ref)
             elif intent:
                 contract = intent_task_contract(intent)
                 proposed_id = slugify(contract["summary"]).lower()[:48].strip("-") or "continue-project-goal"
@@ -2505,6 +2571,42 @@ def cmd_task_create(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_task_outcome(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    try:
+        with repository_lock(root, f"task-{args.task_id}"):
+            path, task = find_task(root, args.task_id)
+            if task.get("status") == "done":
+                raise RepoLocalError("cannot change outcome disposition on a done task")
+            if task.get("outcome_tracking_version") != 1:
+                raise RepoLocalError("task does not use requested-outcome tracking")
+            outcomes = task.get("requested_outcomes") or []
+            outcome = next((item for item in outcomes if isinstance(item, dict) and item.get("id") == args.outcome), None)
+            if outcome is None:
+                raise RepoLocalError(f"unknown requested outcome: {args.outcome}")
+            evidence = args.evidence.strip()
+            if not evidence:
+                raise RepoLocalError("outcome disposition requires evidence")
+            outcome["status"] = args.status
+            outcome.setdefault("evidence", []).append({
+                "created_at": now_iso(),
+                "agent": args.agent,
+                "summary": evidence,
+            })
+            dump_json(path, task)
+            append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "evidence.appended", args.agent, {
+                "action": "outcome.disposition_recorded",
+                "outcome_id": args.outcome,
+                "status": args.status,
+                "evidence": evidence,
+            }))
+    except StateLockError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    print(f"{args.task_id}:{args.outcome}={args.status}")
+    return 0
+
+
 def cmd_init(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     repo.mkdir(parents=True, exist_ok=True)
@@ -2626,6 +2728,9 @@ def cmd_finish(args: argparse.Namespace) -> int:
                 raise RepoLocalError(f"task claimed by {data.get('claim', {}).get('agent')}, not {args.agent}")
             if not args.evidence.strip():
                 raise RepoLocalError("finish requires evidence")
+            outcome_findings = outcome_completion_findings(data)
+            if outcome_findings:
+                raise RepoLocalError("finish blocked by incomplete requested outcomes:\n- " + "\n- ".join(outcome_findings))
             data["status"] = "done"
             data.setdefault("evidence", []).append({"created_at": now_iso(), "agent": args.agent, "summary": args.evidence})
             target = task_path(root, "done", data["id"])
@@ -2992,6 +3097,7 @@ def build_parser() -> argparse.ArgumentParser:
     go = sub.add_parser("go", help="Bare go universal router: loose command vs repo-local .go autonomous loop")
     go.add_argument("repo", nargs="?", default=".")
     go.add_argument("--intent", default="")
+    go.add_argument("--intent-source-ref", default="", help="optional durable source reference, for example telegram:<chat>:<message>")
     go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
     go.add_argument("--write", action="store_true", help="materialize intent-created tasks; default --json/plan mode is non-mutating")
     go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")
@@ -3132,6 +3238,14 @@ def build_parser() -> argparse.ArgumentParser:
     task_create.add_argument("--acceptance", action="append", default=[])
     task_create.add_argument("--verification", action="append", default=[])
     task_create.set_defaults(func=cmd_task_create)
+    task_outcome = task_sub.add_parser("outcome", help="Record one requested-outcome disposition with evidence")
+    task_outcome.add_argument("repo")
+    task_outcome.add_argument("--task-id", required=True)
+    task_outcome.add_argument("--outcome", required=True, help="requested outcome id such as R1")
+    task_outcome.add_argument("--status", choices=sorted(OUTCOME_TERMINAL_STATUSES), required=True)
+    task_outcome.add_argument("--evidence", required=True)
+    task_outcome.add_argument("--agent", default="agent")
+    task_outcome.set_defaults(func=cmd_task_outcome)
     epic = sub.add_parser("epic", help="Author repo-local epics")
     epic_sub = epic.add_subparsers(dest="epic_command", required=True)
     epic_create = epic_sub.add_parser("create", help="Create an epic in hierarchy.json")

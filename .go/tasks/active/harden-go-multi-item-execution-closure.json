@@ -1,0 +1,127 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "harden-go-multi-item-execution-closure",
+  "project": "go-workflow-stack",
+  "status": "active",
+  "summary": "Harden GO multi-item execution closure",
+  "description": "Created from bare go intent:\n\nHarden GO multi-item execution closure\n\n1. Durably link the exact source instruction used to create a GO task, including a stable content hash and optional source reference for separate Telegram-message handoff.\n2. Track every requested outcome R# as verified, blocked, or rejected with evidence.\n3. Refuse manual and autonomous finish while any requested outcome lacks an explicit terminal disposition and evidence.\n4. Add end-to-end regressions proving 7/8 outcomes blocks completion and 8/8 permits completion.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "skills/**",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "Makefile"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "skills/**",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "Makefile"
+    ]
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Nu kopieer ik het dus vaak eronder omdat ik merk dat het anders fout gaat.\n\nGO\n\nMaar twee gaten blijven:\n\n1. Losse berichten: grote tekst → later apart go werkt nu via chatcontext, maar er is geen harde koppeling die bewijst dat exact die vorige tekst als intent is gebruikt.\n2. Afronding: finish vereist alleen algemene evidence. Het controleert niet hard dat R1 t/m R8 individueel uitgevoerd of expliciet geblokkeerd zijn. Dus theoretisch kan 6/8 gedaan zijn terwijl tests groen zijn.\n\nBenodigde hardening:\n\n- vorige Telegram-opdracht duurzaam koppelen aan de GO-taak;\n- per R#: verified | blocked | rejected plus evidence;\n- finish weigeren zolang één punt onbehandeld is;\n- regressietest: 7/8 uitgevoerd → blocked, 8/8 → done.",
+    "sha256": "492b02f31f89596d99bb1f4b96a869414ab5c4c6a5a6fa6c7fcf999b9c4f2eb1",
+    "source_ref": "hermes-session:20260718_091833_1863e8cf#message-399346"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Durably link the exact source instruction used to create a GO task, including a stable content hash and optional source reference for separate Telegram-message handoff.",
+      "source": "numbered_or_bulleted_item",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-07-18T16:38:22+02:00",
+          "agent": "hermes",
+          "summary": "Intent-created tasks persist exact text, SHA-256, and source_ref; source linkage asserted by test_go_intent_links_exact_source_and_manual_finish_requires_all_outcomes."
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Track every requested outcome R# as verified, blocked, or rejected with evidence.",
+      "source": "numbered_or_bulleted_item",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-07-18T16:38:23+02:00",
+          "agent": "hermes",
+          "summary": "task outcome CLI records verified|blocked|rejected plus timestamped agent evidence and appends outcome.disposition_recorded evidence events."
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Refuse manual and autonomous finish while any requested outcome lacks an explicit terminal disposition and evidence.",
+      "source": "numbered_or_bulleted_item",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-07-18T16:38:23+02:00",
+          "agent": "hermes",
+          "summary": "Manual finish calls outcome_completion_findings; autonomous loop returns blocked and leaves task active when any R# is pending or lacks evidence."
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Add end-to-end regressions proving 7/8 outcomes blocks completion and 8/8 permits completion.",
+      "source": "numbered_or_bulleted_item",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-07-18T16:38:23+02:00",
+          "agent": "hermes",
+          "summary": "Focused regressions passed: 7/8 returns blocked with R8 findings; 8/8 returns done and moves task to done."
+        }
+      ]
+    }
+  ],
+  "decomposition_policy": {
+    "mode": "semantic",
+    "default": "bundle_when_coherent",
+    "split_when": [
+      "outcomes_can_ship_independently",
+      "outcomes_require_different_verification",
+      "outcomes_touch_distinct_components_or_repositories",
+      "combined_scope_is_too_large_for_one_safe_claim"
+    ],
+    "rule": "List numbering is acceptance coverage, not an automatic task boundary."
+  },
+  "acceptance": [
+    "R1: Durably link the exact source instruction used to create a GO task, including a stable content hash and optional source reference for separate Telegram-message handoff.",
+    "R2: Track every requested outcome R# as verified, blocked, or rejected with evidence.",
+    "R3: Refuse manual and autonomous finish while any requested outcome lacks an explicit terminal disposition and evidence.",
+    "R4: Add end-to-end regressions proving 7/8 outcomes blocks completion and 8/8 permits completion.",
+    "All requested outcomes are verified or explicitly blocked with evidence."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-18T15:39:53+02:00"
+  },
+  "evidence": []
+}

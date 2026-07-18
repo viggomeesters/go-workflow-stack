@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- Persist exact GO intent text, SHA-256, and an optional durable source reference on intent-created tasks and creation events.
+- Track every requested outcome as `verified`, `blocked`, or `rejected` with item-specific evidence.
+- Refuse manual and autonomous completion while any tracked outcome remains pending or lacks evidence; regressions prove 7/8 blocks and 8/8 completes.
+
 ## 0.3.7 - 2026-07-18
 
 - Honor `GO_STACK` and explicit `--stack-repo` when an installed runtime resolves immutable tags for `stack update`.

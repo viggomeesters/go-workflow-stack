@@ -140,6 +140,10 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 
 **Task-first invariant:** every non-empty new GO instruction becomes a new repo-local task before product execution, even when other open tasks already exist. Invoke `go <repo> --intent "<instruction>" --write [--loop] --execute`; this must append `task.created`, then claim the task before any build adapter or product diff. Use direct `go-loop` only to continue already-materialized open tasks. Direct loop execution with no open task fails closed.
 
+**Separate-message provenance invariant:** when Viggo sends a substantial instruction and later sends a standalone `GO`, use the exact earlier message text as `--intent` and pass a durable `--intent-source-ref` (Telegram message reference when available; otherwise a stable Hermes session/message reference). The created task must store the text, SHA-256, and source reference in `intent_source`, and the `task.created` event must repeat the hash/reference. Do not silently substitute a chat summary or inferred paraphrase.
+
+**Requested-outcome closure invariant:** intent-created tasks track every semantic requirement as `R1`, `R2`, etc. Before finish, record each item with `task outcome <repo> --task-id <id> --outcome R# --status verified|blocked|rejected --evidence "<proof>"`. General task evidence does not replace per-R# evidence. Manual finish and `go-loop --execute` must fail closed while any item is pending or lacks evidence; 7/8 is blocked, 8/8 can finish.
+
 Ask only when the emitted preflight reports an active repository gate, external authority is required, the outcome is genuinely ambiguous, or a real scope/product tradeoff needs direction. Do not inject inactive gate scenarios into every ordinary handoff. Everything else is agent work.
 
 Before implementation, the agent must ensure the repo-local contract is good enough to execute:

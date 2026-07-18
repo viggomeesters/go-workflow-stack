@@ -2602,6 +2602,78 @@ def test_go_intent_recognizes_plain_numbered_lines_without_requiring_punctuation
     assert [item["text"] for item in task["requested_outcomes"]] == ["doe x", "doe y"]
 
 
+def test_go_intent_links_exact_source_and_manual_finish_requires_all_outcomes(tmp_path: Path):
+    repo = tmp_path / "outcome-finish-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "outcome-finish", "--name", "Outcome Finish")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    intent = "\n".join(f"{index}. outcome {index}" for index in range(1, 9))
+    created = run_go(
+        "go", str(repo), "--intent", intent, "--intent-source-ref", "telegram:8340627826:12345", "--write", "--json",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    payload = json.loads(created.stdout)
+    task_id = payload["created_task"]["id"]
+    task_path = repo / payload["created_task"]["path"]
+    task = json.loads(task_path.read_text(encoding="utf-8"))
+    assert task["intent_source"] == {
+        "text": intent,
+        "sha256": hashlib.sha256(intent.encode("utf-8")).hexdigest(),
+        "source_ref": "telegram:8340627826:12345",
+    }
+    assert [item["status"] for item in task["requested_outcomes"]] == ["pending"] * 8
+    claimed = run_go("claim", task_id, "--repo", str(repo), "--agent", "pytest", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    for index in range(1, 8):
+        recorded = run_go(
+            "task", "outcome", str(repo), "--task-id", task_id, "--outcome", f"R{index}",
+            "--status", "verified", "--evidence", f"proof {index}", "--agent", "pytest",
+        )
+        assert recorded.returncode == 0, recorded.stderr + recorded.stdout
+    premature = run_go("finish", task_id, "--repo", str(repo), "--agent", "pytest", "--evidence", "seven complete")
+    assert premature.returncode == 1
+    assert "R8 has no terminal disposition" in premature.stderr
+    assert "R8 has no evidence" in premature.stderr
+    final_outcome = run_go(
+        "task", "outcome", str(repo), "--task-id", task_id, "--outcome", "R8",
+        "--status", "verified", "--evidence", "proof 8", "--agent", "pytest",
+    )
+    assert final_outcome.returncode == 0, final_outcome.stderr + final_outcome.stdout
+    finished = run_go("finish", task_id, "--repo", str(repo), "--agent", "pytest", "--evidence", "all eight complete")
+    assert finished.returncode == 0, finished.stderr + finished.stdout
+
+
+def test_go_loop_blocks_seven_of_eight_and_finishes_eight_of_eight(tmp_path: Path):
+    for completed_count, expected_status in ((7, "blocked"), (8, "done")):
+        repo = tmp_path / f"auto-outcomes-{completed_count}"
+        subprocess.run(["git", "init", "-q", str(repo)], check=True)
+        adopted = run_go("adopt", str(repo), "--project-id", f"auto-{completed_count}", "--name", f"Auto {completed_count}")
+        assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+        intent = "\n".join(f"{index}. outcome {index}" for index in range(1, 9))
+        created = run_go("go", str(repo), "--intent", intent, "--write", "--json")
+        assert created.returncode == 0, created.stderr + created.stdout
+        task_id = json.loads(created.stdout)["created_task"]["id"]
+        for index in range(1, completed_count + 1):
+            recorded = run_go(
+                "task", "outcome", str(repo), "--task-id", task_id, "--outcome", f"R{index}",
+                "--status", "verified", "--evidence", f"proof {index}", "--agent", "pytest",
+            )
+            assert recorded.returncode == 0, recorded.stderr + recorded.stdout
+        executed = run_go(
+            "go-loop", str(repo), "--execute", "--max-tasks", "1", "--build-command", "true",
+            "--agent", "pytest", "--allow-dirty", "--json",
+        )
+        result = json.loads(executed.stdout)
+        assert result["status"] == expected_status
+        if completed_count == 7:
+            assert executed.returncode == 1
+            assert "R8 has no terminal disposition" in result["outcome_findings"]
+            assert (repo / ".go" / "tasks" / "active" / f"{task_id}.json").is_file()
+        else:
+            assert executed.returncode == 0, executed.stderr + executed.stdout
+            assert (repo / ".go" / "tasks" / "done" / f"{task_id}.json").is_file()
+
+
 def test_direct_go_loop_execute_without_open_task_fails_closed(tmp_path: Path):
     repo = tmp_path / "empty-loop-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

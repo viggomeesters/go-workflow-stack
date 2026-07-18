@@ -4,7 +4,7 @@
   "execution_mode": "agent",
   "id": "release-v035-task-first",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Release v0.3.5 with fail-closed routing and task-first GO execution",
   "description": "Release v0.3.5 with fail-closed routing and task-first GO execution",
   "scope": {
@@ -28,8 +28,8 @@
     "bash scripts/release-check.sh 0.3.5"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-18T09:34:42+02:00"
   },
   "evidence": []
 }

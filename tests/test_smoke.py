@@ -1287,7 +1287,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.4 v0.3.4 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.5 v0.3.5 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1773,7 +1773,7 @@ def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"],
         cwd=source,
         check=True,
     )
@@ -1787,6 +1787,7 @@ def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path
     env.update({
         "UV_TOOL_DIR": str(tool_dir),
         "UV_TOOL_BIN_DIR": str(bin_dir),
+        "UV_CACHE_DIR": str(tmp_path / "uv-cache"),
         "GIT_CONFIG_COUNT": "1",
         "GIT_CONFIG_KEY_0": f"url.file://{source}.insteadOf",
         "GIT_CONFIG_VALUE_0": "https://github.com/viggomeesters/go-workflow-stack.git",
@@ -1794,7 +1795,7 @@ def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path
     install = subprocess.run(
         [
             "uv", "tool", "install", "--from",
-            "git+https://github.com/viggomeesters/go-workflow-stack.git@v0.3.4",
+            "git+https://github.com/viggomeesters/go-workflow-stack.git@v0.3.5",
             "go-workflow-stack",
         ],
         text=True,
@@ -1832,7 +1833,7 @@ def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path
     result = json.loads(diagnosed.stdout)
     assert result["ready"] is True
     assert result["stack"]["identity_source"] == "pep610-vcs"
-    assert result["stack"]["provenance_requested_ref"] == "v0.3.4"
+    assert result["stack"]["provenance_requested_ref"] == "v0.3.5"
     assert result["stack"]["pinned_commit"] == release_commit
     assert result["stack"]["exact_ref"] is True
     assert result["stack"]["development_override"] is False
@@ -1892,8 +1893,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.4"
-    assert result["stack"]["ref"] == "v0.3.4"
+    assert result["stack"]["version"] == "0.3.5"
+    assert result["stack"]["ref"] == "v0.3.5"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -1923,7 +1924,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.4"
+    assert project["stack_ref"] == "v0.3.5"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -2098,15 +2099,15 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.4"],
+        ["bash", "scripts/release-check.sh", "0.3.5"],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.4" in result.stdout
+    assert "release preflight: v0.3.5" in result.stdout
     assert "publish: not performed" in result.stdout
 
 
@@ -2116,14 +2117,14 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.4", "-m", "v0.3.4"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
 
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.4"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.5"], cwd=repo, text=True, capture_output=True, env=env)
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
 
@@ -2162,7 +2163,7 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["stack_ref"] == "v0.3.4"
+    assert migrated["stack_ref"] == "v0.3.5"
     assert "epics" in json.loads(hierarchy_path.read_text(encoding="utf-8"))
 
     repeated = run_go("migrate", str(repo), "--json")

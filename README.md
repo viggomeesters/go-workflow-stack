@@ -168,14 +168,14 @@ bash scripts/check.sh
 Prepare a version locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.3.4
+bash scripts/release-check.sh 0.3.5
 ```
 
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-go-workflow stack update . --to v0.3.4 --json
-go-workflow stack update . --to v0.3.4 --apply --json
+go-workflow stack update . --to v0.3.5 --json
+go-workflow stack update . --to v0.3.5 --apply --json
 ```
 
 ## Privacy and security
@@ -184,7 +184,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Public v0.3.4 release. Source checkouts and PEP 610 Git package installs both prove immutable runtime identity fail-closed; local stack, template, distribution, concurrency, diverse-pilot, and native Hermes adapter contracts remain executable.
+Public v0.3.5 release. Every new GO instruction is durable task-first repo-local work, missing contracts fail closed without a vault fallback, and template pairing works from both source and standalone package runtimes.
 
 ## License
 

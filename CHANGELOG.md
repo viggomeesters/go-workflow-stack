@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.5 - 2026-07-18
+
+- Fail closed when a repository has no valid local `.go` contract; never route execution to an AW Lite or vault fallback.
+- Make every non-empty GO intent create a repo-local task and `task.created` event before autonomous execution, even when backlog tasks already exist.
+- Reject direct empty `go-loop --execute` runs with a task-required result instead of claiming false completion.
+- Fix `template-check` for standalone `uv tool` package installs by avoiding Git bootstrap into site-packages.
+- Add regression coverage for task-first GO loop routing and packaged template execution.
+
 ## 0.3.4 - 2026-07-16
 
 - Accept standalone VCS package installations as exact immutable runtimes only when PEP 610 provenance records Git, the required tag, its resolved full commit, and the matching package version.

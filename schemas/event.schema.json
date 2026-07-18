@@ -20,11 +20,16 @@
     },
     "event": {
       "enum": [
+        "task.created",
         "task.claimed",
         "task.finished",
+        "task.blocked",
         "evidence.appended",
         "decision.recorded",
-        "run.checked"
+        "run.checked",
+        "auto.safety_gate",
+        "auto.reflected",
+        "auto.attempt"
       ]
     },
     "created_at": {

@@ -40,7 +40,8 @@
         "modular-native-adapters",
         "concurrent-atomic-state",
         "distribution-pilots-live-hermes",
-        "implement-semantic-go-task-decomposition-preserv"
+        "implement-semantic-go-task-decomposition-preserv",
+        "release-go-workflow-stack-v0.3.6-so-semantic-go"
       ]
     },
     {

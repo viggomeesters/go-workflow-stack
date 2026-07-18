@@ -1,7 +1,7 @@
 
 [project]
 name = "go-workflow-stack"
-version = "0.3.5"
+version = "0.3.6"
 description = "Repo-local .go JSON/JSONL workflow stack spike"
 requires-python = ">=3.11"
 

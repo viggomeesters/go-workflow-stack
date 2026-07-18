@@ -1,0 +1,75 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "release-go-workflow-stack-v0.3.6-so-semantic-go",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+  "description": "Created from bare go intent:\n\nRelease go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "CHANGELOG.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "pyproject.toml",
+      "Makefile"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "CHANGELOG.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "pyproject.toml",
+      "Makefile"
+    ]
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Release go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+      "source": "intent"
+    }
+  ],
+  "decomposition_policy": {
+    "mode": "semantic",
+    "default": "bundle_when_coherent",
+    "split_when": [
+      "outcomes_can_ship_independently",
+      "outcomes_require_different_verification",
+      "outcomes_touch_distinct_components_or_repositories",
+      "combined_scope_is_too_large_for_one_safe_claim"
+    ],
+    "rule": "List numbering is acceptance coverage, not an automatic task boundary."
+  },
+  "acceptance": [
+    "R1: Release go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+    "All requested outcomes are verified or explicitly blocked with evidence."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-18T12:02:20+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-18T12:14:41+02:00",
+      "agent": "hermes",
+      "summary": "release-check v0.3.6 passed: 91 tests, .go validation, template pairing, Linux/WSL check; semantic GO outcomes, dynamic release scope, version alignment, changelog, and migration regression verified"
+    }
+  ]
+}

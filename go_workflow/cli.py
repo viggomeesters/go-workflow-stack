@@ -2055,7 +2055,7 @@ def intent_task_scope(repo: Path) -> dict[str, list[str]]:
     for directory in ("src", "go_workflow", "scripts", "cli", "schemas"):
         if (repo / directory).is_dir():
             paths.append(f"{directory}/**")
-    for filename in ("pyproject.toml", "Makefile"):
+    for filename in ("CHANGELOG.md", "pyproject.toml", "Makefile"):
         if (repo / filename).is_file():
             paths.append(filename)
     return {"read": paths.copy(), "modify": paths.copy()}

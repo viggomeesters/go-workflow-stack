@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.6 - 2026-07-18
+
+- Preserve numbered, plain-numbered, and bulleted GO input as explicit `requested_outcomes` plus `R1`, `R2`, ... acceptance criteria before execution.
+- Treat list numbering as traceability rather than an automatic task boundary: bundle coherent outcomes and split only on independent delivery, verification, component/repository, or safe-scope boundaries.
+- Generate intent-task scope from actual repository code/config directories so created tasks can safely modify the implementation they describe.
+- Repair v1 contract migration by adding the required stack version and linking historical task files before validation.
+
 ## 0.3.5 - 2026-07-18
 
 - Fail closed when a repository has no valid local `.go` contract; never route execution to an AW Lite or vault fallback.

@@ -1287,7 +1287,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.5 v0.3.5 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.6 v0.3.6 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1882,8 +1882,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.5"
-    assert result["stack"]["ref"] == "v0.3.5"
+    assert result["stack"]["version"] == "0.3.6"
+    assert result["stack"]["ref"] == "v0.3.6"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -1913,7 +1913,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.5"
+    assert project["stack_ref"] == "v0.3.6"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -2088,15 +2088,15 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.6", "-m", "v0.3.6"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.5"],
+        ["bash", "scripts/release-check.sh", "0.3.6"],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.5" in result.stdout
+    assert "release preflight: v0.3.6" in result.stdout
     assert "publish: not performed" in result.stdout
 
 
@@ -2106,14 +2106,14 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.5", "-m", "v0.3.5"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.6", "-m", "v0.3.6"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
 
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.5"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.6"], cwd=repo, text=True, capture_output=True, env=env)
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
 
@@ -2160,8 +2160,8 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["required_stack_version"] == "0.3.5"
-    assert migrated["stack_ref"] == "v0.3.5"
+    assert migrated["required_stack_version"] == "0.3.6"
+    assert migrated["stack_ref"] == "v0.3.6"
     migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
     assert "epics" in migrated_hierarchy
     assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]
@@ -2525,6 +2525,7 @@ def test_go_intent_preserves_numbered_items_as_semantic_acceptance_without_blind
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     (repo / "go_workflow").mkdir()
     (repo / "go_workflow" / "runtime.py").write_text("# runtime\n", encoding="utf-8")
+    (repo / "CHANGELOG.md").write_text("# Changelog\n", encoding="utf-8")
 
     intent = """Improve release safety
 
@@ -2552,6 +2553,7 @@ def test_go_intent_preserves_numbered_items_as_semantic_acceptance_without_blind
     assert task["decomposition_policy"]["mode"] == "semantic"
     assert task["decomposition_policy"]["default"] == "bundle_when_coherent"
     assert "go_workflow/**" in task["scope"]["modify"]
+    assert "CHANGELOG.md" in task["scope"]["modify"]
     assert len(list((repo / ".go" / "tasks" / "open").glob("*.json"))) == 1
 
 

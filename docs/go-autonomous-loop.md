@@ -58,6 +58,14 @@ REFLECT: should vision/principles/hierarchy/tasks/skills improve?
 CONTINUE to next task unless done, blocked, or budget exhausted
 ```
 
+## Capacity policy
+
+The autonomous loop defaults to **solo** or **lead-plus-one-worker** execution. More agents are not automatically better: parallel builders are allowed only when selected tasks have disjoint `scope.modify` paths or a caller provides an explicit override.
+
+The emitted `auto` / `go-loop` handoff exposes `execution_policy.capacity` so a Hermes, Codex, Claude, or Gemini conductor can see whether it should run solo, keep one reviewer lane open, or fan out to disjoint builders. Broad or overlapping scopes collapse back to serial execution with a reviewer lane.
+
+See [`agent-team-capacity-patterns.md`](agent-team-capacity-patterns.md) for the mined public-safe pattern and rollout order.
+
 This is the old go-workflow phase discipline in a lighter repo-local form:
 
 ```text

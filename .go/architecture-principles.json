@@ -32,6 +32,12 @@
       "statement": "A task is not done at first passing verification; recheck/devil/critic and repair/self-reflect must run for non-trivial work.",
       "rationale": "Viggo consistently finds gaps after recheck/selfimprove, so the loop must internalize that review stack.",
       "enforcement": "loop conductor requires critic verdict before finish for code/docs/contracts/public behavior"
+    },
+    {
+      "id": "capacity-before-parallelism",
+      "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes or an explicit override and reviewer lane.",
+      "rationale": "More agents can increase context burn, file collisions, and false progress unless capacity and review are explicit.",
+      "enforcement": "auto/go-loop handoff exposes execution_policy.capacity and regression tests cover solo, serial-review, and disjoint-parallel cases"
     }
   ]
 }

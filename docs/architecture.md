@@ -25,3 +25,5 @@ The executable compatibility surface remains `cli/go.py`. Focused importable mod
 - JSONL for append-only evidence and lifecycle events.
 - Scoped dirty policy instead of clean-repo absolutism.
 - Synthetic public fixtures only.
+- Capacity before parallelism: default solo or lead-plus-one-worker, only parallelize disjoint modify scopes.
+- Review, attribution, and evidence gates before any multi-agent UI expansion.

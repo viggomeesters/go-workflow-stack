@@ -4,7 +4,7 @@
   "execution_mode": "agent",
   "id": "agent-team-pattern-docs-and-migration",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Document Agent Teams mining and rollout order",
   "description": "Capture the Agent Teams AI mining outcome as public-safe docs/ADR-style guidance and define the rollout order across capacity policy, review lifecycle, evidence gates, and usage attribution. No AGPL code copied.",
   "scope": {
@@ -32,8 +32,14 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-26T08:27:16+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "created_at": "2026-07-26T08:30:13+02:00",
+      "agent": "hermes",
+      "summary": "docs=docs/agent-team-capacity-patterns.md,docs/go-autonomous-loop.md,docs/architecture.md; provenance=777genius/agent-teams-ai AGPL-3.0 pattern-mining only no source copied; validation=python3 cli/go.py validate . ok; diff_check=git diff --check ok; template=python3 cli/go.py template-check ../go-project-template --json ok"
+    }
+  ]
 }

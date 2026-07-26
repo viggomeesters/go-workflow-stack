@@ -2743,6 +2743,61 @@ def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
     assert evidence["review"]["outcome"].startswith("skipped")
 
 
+def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserves_history(tmp_path: Path):
+    repo = tmp_path / "review-lifecycle-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "review-lifecycle", "--name", "Review Lifecycle")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "review-me", "--summary", "Review me",
+        "--epic", "workflow", "--execution-mode", "agent", "--modify", "review.txt",
+        "--acceptance", "Completed work is not approved until review transition",
+        "--verification", "python3 -c \"print('verified')\"",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    task = json.loads((repo / ".go" / "tasks" / "open" / "review-me.json").read_text(encoding="utf-8"))
+    assert task["work_status"] == "pending"
+    assert task["review_status"] == "none"
+    claimed = run_go("claim", "review-me", "--repo", str(repo), "--agent", "builder", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    active = json.loads((repo / ".go" / "tasks" / "active" / "review-me.json").read_text(encoding="utf-8"))
+    assert active["work_status"] == "in_progress"
+
+    finished = run_go(
+        "finish", "review-me", "--repo", str(repo), "--agent", "builder",
+        "--evidence", "no_diff=true; verification=python3 -c print verified rc=0; critic=passed",
+    )
+    assert finished.returncode == 0, finished.stderr + finished.stdout
+    done_task = json.loads((repo / ".go" / "tasks" / "done" / "review-me.json").read_text(encoding="utf-8"))
+    assert done_task["work_status"] == "completed"
+    assert done_task["review_status"] == "review"
+
+    needs_fix = run_go(
+        "task", "review", str(repo), "--task-id", "review-me", "--status", "needs_fix",
+        "--evidence", "missing edge-case evidence", "--agent", "critic", "--owner", "builder",
+    )
+    assert needs_fix.returncode == 0, needs_fix.stderr + needs_fix.stdout
+    returned = json.loads((repo / ".go" / "tasks" / "active" / "review-me.json").read_text(encoding="utf-8"))
+    assert returned["status"] == "active"
+    assert returned["work_status"] == "in_progress"
+    assert returned["review_status"] == "needs_fix"
+    assert returned["review_history"][-1]["evidence"] == "missing edge-case evidence"
+
+    refinish = run_go(
+        "finish", "review-me", "--repo", str(repo), "--agent", "builder",
+        "--evidence", "no_diff=true; verification=python3 -c print verified rc=0; critic=passed after fix",
+    )
+    assert refinish.returncode == 0, refinish.stderr + refinish.stdout
+    approved = run_go(
+        "task", "review", str(repo), "--task-id", "review-me", "--status", "approved",
+        "--evidence", "critic approved after fix", "--agent", "critic",
+    )
+    assert approved.returncode == 0, approved.stderr + approved.stdout
+    approved_task = json.loads((repo / ".go" / "tasks" / "done" / "review-me.json").read_text(encoding="utf-8"))
+    assert approved_task["review_status"] == "approved"
+    assert [item["status"] for item in approved_task["review_history"]] == ["needs_fix", "approved"]
+
+
 def test_go_loop_blocks_seven_of_eight_and_finishes_eight_of_eight(tmp_path: Path):
     for completed_count, expected_status in ((7, "blocked"), (8, "done")):
         repo = tmp_path / f"auto-outcomes-{completed_count}"

@@ -244,6 +244,12 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
         require(isinstance(scope.get("modify"), list), errors, f"{rel}: scope.modify must be a list")
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
+    if "work_status" in data:
+        require(data.get("work_status") in {"pending", "in_progress", "completed"}, errors, f"{rel}: invalid work_status")
+    if "review_status" in data:
+        require(data.get("review_status") in {"none", "review", "needs_fix", "approved"}, errors, f"{rel}: invalid review_status")
+    if "review_history" in data:
+        require(isinstance(data.get("review_history"), list), errors, f"{rel}: review_history must be a list")
     if data.get("outcome_tracking_version") == 1:
         source = data.get("intent_source")
         require(isinstance(source, dict), errors, f"{rel}: intent_source must be an object")
@@ -269,7 +275,7 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     errors: list[str] = []
     require(data.get("schema") == EVENT_SCHEMA, errors, f"{prefix}: schema mismatch")
     require(data.get("kind") == "event", errors, f"{prefix}: kind must be event")
-    require(data.get("event") in {"task.created", "task.claimed", "task.finished", "task.blocked", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
+    require(data.get("event") in {"task.created", "task.claimed", "task.finished", "task.blocked", "task.reviewed", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
     require(bool(data.get("created_at")), errors, f"{prefix}: created_at required")
     require(bool(data.get("task_id")), errors, f"{prefix}: task_id required")
     return errors
@@ -1070,6 +1076,8 @@ def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str
         if findings:
             raise RepoLocalError("finish blocked by incomplete evidence attribution:\n- " + "\n- ".join(findings))
         task["status"] = "done"
+        task["work_status"] = "completed"
+        task["review_status"] = "review" if task_requires_review_evidence(task) else "approved"
         task.setdefault("evidence", []).append(finish_evidence)
         target = task_path(root, "done", task["id"])
         atomic_move_json(active_path, target, task)
@@ -1789,6 +1797,9 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 if task.get("status") != "open" or task.get("claim", {}).get("agent"):
                     continue
                 task["status"] = "active"
+                task["work_status"] = "in_progress"
+                task.setdefault("review_status", "none")
+                task.setdefault("review_history", [])
                 task["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
                 active_path = task_path(root, "active", task["id"])
                 atomic_move_json(open_path, active_path, task)
@@ -2644,6 +2655,9 @@ def cmd_task_create(args: argparse.Namespace) -> int:
         "acceptance": acceptance,
         "verification": verification,
         "claim": {"agent": None, "claimed_at": None},
+        "work_status": "pending",
+        "review_status": "none",
+        "review_history": [],
         "evidence": [],
     }
     if args.feature and args.epic:
@@ -2701,6 +2715,47 @@ def cmd_task_outcome(args: argparse.Namespace) -> int:
     except StateLockError as exc:
         raise RepoLocalError(str(exc)) from exc
     print(f"{args.task_id}:{args.outcome}={args.status}")
+    return 0
+
+
+def cmd_task_review(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    if not args.evidence.strip():
+        raise RepoLocalError("review transition requires evidence")
+    try:
+        with repository_lock(root, f"task-{args.task_id}"):
+            path, task = find_task(root, args.task_id)
+            if args.status == "approved":
+                if task.get("status") != "done" or task.get("work_status") != "completed":
+                    raise RepoLocalError("approval requires completed work in done state")
+                task["review_status"] = "approved"
+                target_state = "done"
+            else:
+                task["review_status"] = "needs_fix"
+                task["work_status"] = "in_progress"
+                task["status"] = "active"
+                target_state = "active"
+                task.setdefault("claim", {})["agent"] = task.get("claim", {}).get("agent") or args.owner or args.agent
+                task.setdefault("claim", {})["claimed_at"] = task.get("claim", {}).get("claimed_at") or now_iso()
+            record = {
+                "created_at": now_iso(),
+                "agent": args.agent,
+                "status": args.status,
+                "evidence": args.evidence,
+            }
+            if args.owner:
+                record["owner"] = args.owner
+            task.setdefault("review_history", []).append(record)
+            target = task_path(root, target_state, task["id"])
+            if target != path:
+                atomic_move_json(path, target, task)
+            else:
+                dump_json(path, task)
+            append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.reviewed", args.agent, record))
+    except StateLockError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    print(relative(repo, target))
     return 0
 
 
@@ -2803,6 +2858,9 @@ def cmd_claim(args: argparse.Namespace) -> int:
             if dirty["blocking"] and not args.allow_dirty:
                 raise RepoLocalError("blocking dirty state before claim:\n- " + "\n- ".join(dirty["blocking"]))
             data["status"] = "active"
+            data["work_status"] = "in_progress"
+            data.setdefault("review_status", "none")
+            data.setdefault("review_history", [])
             data["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
             target = task_path(root, "active", data["id"])
             atomic_move_json(path, target, data)
@@ -2833,6 +2891,8 @@ def cmd_finish(args: argparse.Namespace) -> int:
             if evidence_findings:
                 raise RepoLocalError("finish blocked by incomplete evidence attribution:\n- " + "\n- ".join(evidence_findings))
             data["status"] = "done"
+            data["work_status"] = "completed"
+            data["review_status"] = "review" if task_requires_review_evidence(data) else "approved"
             data.setdefault("evidence", []).append(finish_evidence)
             target = task_path(root, "done", data["id"])
             atomic_move_json(path, target, data)
@@ -3347,6 +3407,14 @@ def build_parser() -> argparse.ArgumentParser:
     task_outcome.add_argument("--evidence", required=True)
     task_outcome.add_argument("--agent", default="agent")
     task_outcome.set_defaults(func=cmd_task_outcome)
+    task_review = task_sub.add_parser("review", help="Approve completed work or send it back as needs_fix")
+    task_review.add_argument("repo")
+    task_review.add_argument("--task-id", required=True)
+    task_review.add_argument("--status", choices=["approved", "needs_fix"], required=True)
+    task_review.add_argument("--evidence", required=True)
+    task_review.add_argument("--agent", default="agent")
+    task_review.add_argument("--owner", default="", help="owner/assignee for needs_fix return path")
+    task_review.set_defaults(func=cmd_task_review)
     epic = sub.add_parser("epic", help="Author repo-local epics")
     epic_sub = epic.add_subparsers(dest="epic_command", required=True)
     epic_create = epic_sub.add_parser("create", help="Create an epic in hierarchy.json")

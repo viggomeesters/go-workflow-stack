@@ -29,6 +29,15 @@ Adopt these semantics in this order:
 5. **Template rollout last** — after the stack semantics are stable, update the
    public starter template so new projects inherit the same defaults.
 
+## Review lifecycle
+
+Task completion and task approval are separate axes:
+
+- `work_status`: `pending` → `in_progress` → `completed`.
+- `review_status`: `none` → `review` → `approved`, with `needs_fix` as a return path.
+
+A finished non-trivial task is completed work waiting for review; it is not approval by stealth. `go task review --status needs_fix` sends the task back to the owner while preserving `review_history`, and `--status approved` records the explicit approval transition.
+
 ## Operational defaults
 
 | Situation | Default |

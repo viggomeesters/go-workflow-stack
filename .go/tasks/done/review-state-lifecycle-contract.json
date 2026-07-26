@@ -1,0 +1,72 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "review-state-lifecycle-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Separate work status from review status",
+  "description": "Add task lifecycle semantics so completed work is not treated as accepted work. Model work_status separately from review_status and make needs_fix a first-class path back to the owner.",
+  "scope": {
+    "read": [
+      ".go/project.json",
+      ".go/hierarchy.json",
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Task state model distinguishes work_status values such as pending/in_progress/completed from review_status values such as none/review/needs_fix/approved.",
+    "A completed task cannot become approved without an explicit review/approval transition or documented skip policy.",
+    "needs_fix returns work to the owner with required comment/evidence and does not erase review history.",
+    "Regression coverage proves completed-without-review cannot be reported as approved."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-26T08:37:13+02:00"
+  },
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-07-26T08:41:48+02:00",
+      "task_id": "review-state-lifecycle-contract",
+      "agent": "hermes",
+      "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py,docs/agent-team-capacity-patterns.md; verification=uv run --no-project --with pytest pytest -q -> 99 passed; validation=python3 cli/go.py validate . ok; make_check=make check passed; runtime=hermes; critic=manual recheck passed: completed work remains review_status=review until task review approves, needs_fix preserves review_history",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        "docs/agent-team-capacity-patterns.md"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "uv run --no-project --with pytest pytest -q -> 99 passed",
+        "result": "uv run --no-project --with pytest pytest -q -> 99 passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": null
+      },
+      "review": {
+        "outcome": "manual recheck passed: completed work remains review_status=review until task review approves, needs_fix preserves review_history",
+        "skip_reason": null
+      }
+    }
+  ],
+  "work_status": "completed",
+  "review_status": "review"
+}

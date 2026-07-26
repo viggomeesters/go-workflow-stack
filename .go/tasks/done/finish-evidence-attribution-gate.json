@@ -4,7 +4,7 @@
   "execution_mode": "agent",
   "id": "finish-evidence-attribution-gate",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Require finish evidence attribution",
   "description": "Harden finish/approval gates so task completion carries durable proof: task id, changed files or explicit no-diff result, verification output, runtime/model/agent attribution where available, and reviewer/critic outcome.",
   "scope": {
@@ -34,8 +34,35 @@
     "uv run --no-project --with pytest pytest -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "hermes",
+    "claimed_at": "2026-07-26T08:30:31+02:00"
   },
-  "evidence": []
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-07-26T08:35:50+02:00",
+      "task_id": "finish-evidence-attribution-gate",
+      "agent": "hermes",
+      "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py; verification=uv run --no-project --with pytest pytest -q -> 98 passed; validation=python3 cli/go.py validate . ok; diff_check=git diff --check ok and git diff --cached --check ok; runtime=hermes; critic=manual recheck passed: finish gate now rejects missing attribution and stores schema go-workflow.finish-evidence.v1",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "uv run --no-project --with pytest pytest -q -> 98 passed",
+        "result": "uv run --no-project --with pytest pytest -q -> 98 passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": null
+      },
+      "review": {
+        "outcome": "manual recheck passed: finish gate now rejects missing attribution and stores schema go-workflow.finish-evidence.v1",
+        "skip_reason": null
+      }
+    }
+  ]
 }

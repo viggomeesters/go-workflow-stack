@@ -2694,8 +2694,53 @@ def test_go_intent_links_exact_source_and_manual_finish_requires_all_outcomes(tm
         "--status", "verified", "--evidence", "proof 8", "--agent", "pytest",
     )
     assert final_outcome.returncode == 0, final_outcome.stderr + final_outcome.stdout
-    finished = run_go("finish", task_id, "--repo", str(repo), "--agent", "pytest", "--evidence", "all eight complete")
+    finished = run_go(
+        "finish", task_id, "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=outcome records R1-R8 rc=0; critic=skipped manual outcome-only close",
+    )
     assert finished.returncode == 0, finished.stderr + finished.stdout
+    done_task = json.loads((repo / ".go" / "tasks" / "done" / f"{task_id}.json").read_text(encoding="utf-8"))
+    evidence = done_task["evidence"][-1]
+    assert evidence["schema"] == "go-workflow.finish-evidence.v1"
+    assert evidence["task_id"] == task_id
+    assert evidence["no_diff"] is True
+    assert evidence["verification"]["command"]
+    assert evidence["runtime"]["agent"] == "pytest"
+    assert evidence["review"]["outcome"].startswith("skipped")
+
+
+def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
+    repo = tmp_path / "finish-attribution-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "finish-attribution", "--name", "Finish Attribution")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "needs-proof", "--summary", "Needs proof",
+        "--epic", "workflow", "--modify", "proof.txt",
+        "--acceptance", "Finish rejects missing evidence attribution",
+        "--verification", "python3 -c \"print('verified')\"",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    claimed = run_go("claim", "needs-proof", "--repo", str(repo), "--agent", "pytest", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+
+    rejected = run_go("finish", "needs-proof", "--repo", str(repo), "--agent", "pytest", "--evidence", "done")
+
+    assert rejected.returncode == 1
+    assert "finish evidence must record verification command and result" in rejected.stderr
+    assert "reviewer/critic outcome" in rejected.stderr
+    assert (repo / ".go" / "tasks" / "active" / "needs-proof.json").is_file()
+
+    accepted = run_go(
+        "finish", "needs-proof", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=python3 -c print verified rc=0; critic=skipped test fixture",
+    )
+    assert accepted.returncode == 0, accepted.stderr + accepted.stdout
+    done_task = json.loads((repo / ".go" / "tasks" / "done" / "needs-proof.json").read_text(encoding="utf-8"))
+    evidence = done_task["evidence"][-1]
+    assert evidence["changed_files"] == []
+    assert evidence["verification"]["result"].endswith("rc=0")
+    assert evidence["review"]["outcome"].startswith("skipped")
 
 
 def test_go_loop_blocks_seven_of_eight_and_finishes_eight_of_eight(tmp_path: Path):

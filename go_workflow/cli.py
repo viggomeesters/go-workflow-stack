@@ -479,6 +479,92 @@ def git_status(repo: Path) -> list[tuple[str, str]]:
     return entries
 
 
+def parse_finish_evidence_fields(summary: str) -> dict[str, str]:
+    """Parse compact `key=value; key=value` finish evidence without making prose illegal."""
+    fields: dict[str, str] = {}
+    for part in re.split(r"[;\n]", summary):
+        if "=" not in part:
+            continue
+        key, value = part.split("=", 1)
+        key = re.sub(r"[^a-z0-9_]+", "_", key.strip().lower()).strip("_")
+        value = value.strip()
+        if key and value:
+            fields[key] = value
+    return fields
+
+
+def split_evidence_list(value: str) -> list[str]:
+    return [item.strip() for item in re.split(r"[,|]", value) if item.strip()]
+
+
+def finish_changed_files(repo: Path, fields: dict[str, str]) -> tuple[list[str], bool]:
+    explicit = fields.get("changed_files") or fields.get("changed") or fields.get("files")
+    if explicit:
+        return split_evidence_list(explicit), False
+    no_diff_value = (fields.get("no_diff") or fields.get("no_changes") or "").lower()
+    status_paths = [path for _code, path in git_status(repo)]
+    if no_diff_value in {"1", "true", "yes", "ok"}:
+        return [], True
+    return status_paths, not status_paths
+
+
+def task_requires_review_evidence(task: dict[str, Any]) -> bool:
+    if task.get("execution_mode", "mechanical") == "agent":
+        return True
+    modify_scope = [str(item) for item in task.get("scope", {}).get("modify", []) or []]
+    return any(not item.startswith(".go/") for item in modify_scope)
+
+
+def build_finish_evidence(repo: Path, task: dict[str, Any], agent: str, summary: str) -> dict[str, Any]:
+    fields = parse_finish_evidence_fields(summary)
+    changed_files, no_diff = finish_changed_files(repo, fields)
+    verification_text = fields.get("verification") or fields.get("validation") or fields.get("verify") or fields.get("check")
+    result_text = fields.get("verification_result") or fields.get("result") or fields.get("status")
+    critic_text = fields.get("critic") or fields.get("critic_outcome") or fields.get("review") or fields.get("reviewer") or fields.get("reviewer_outcome")
+    skip_reason = fields.get("review_skip_reason") or fields.get("critic_skip_reason") or fields.get("skip_reason")
+    return {
+        "schema": "go-workflow.finish-evidence.v1",
+        "created_at": now_iso(),
+        "task_id": task.get("id"),
+        "agent": agent,
+        "summary": summary,
+        "changed_files": changed_files,
+        "no_diff": no_diff,
+        "verification": {
+            "command": fields.get("verification_command") or fields.get("command") or verification_text,
+            "result": result_text or verification_text,
+        },
+        "runtime": {
+            "agent": agent,
+            "runtime": fields.get("runtime"),
+            "model": fields.get("model"),
+            "billing_mode": fields.get("billing_mode"),
+        },
+        "review": {
+            "outcome": critic_text or ("skipped" if skip_reason else None),
+            "skip_reason": skip_reason,
+        },
+    }
+
+
+def finish_evidence_findings(task: dict[str, Any], evidence: dict[str, Any]) -> list[str]:
+    findings: list[str] = []
+    if evidence.get("task_id") != task.get("id"):
+        findings.append("finish evidence must record matching task id")
+    if not evidence.get("changed_files") and not evidence.get("no_diff"):
+        findings.append("finish evidence must record changed_files or no_diff=true")
+    verification = evidence.get("verification") or {}
+    if not verification.get("command") or not verification.get("result"):
+        findings.append("finish evidence must record verification command and result")
+    runtime = evidence.get("runtime") or {}
+    if not runtime.get("agent"):
+        findings.append("finish evidence must record runtime/agent attribution")
+    review = evidence.get("review") or {}
+    if task_requires_review_evidence(task) and not (review.get("outcome") or review.get("skip_reason")):
+        findings.append("non-trivial finish evidence must record reviewer/critic outcome or explicit skip reason")
+    return findings
+
+
 def managed_task_transition(repo: Path, path: str) -> bool:
     if not path.startswith(".go/tasks/"):
         return False
@@ -979,11 +1065,15 @@ def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str
     with repository_lock(root, f"task-{task['id']}"):
         if not active_path.is_file():
             raise StateLockError(f"active task disappeared before finish: {task['id']}")
+        finish_evidence = build_finish_evidence(repo, task, agent, evidence_summary)
+        findings = finish_evidence_findings(task, finish_evidence)
+        if findings:
+            raise RepoLocalError("finish blocked by incomplete evidence attribution:\n- " + "\n- ".join(findings))
         task["status"] = "done"
-        task.setdefault("evidence", []).append({"created_at": now_iso(), "agent": agent, "summary": evidence_summary})
+        task.setdefault("evidence", []).append(finish_evidence)
         target = task_path(root, "done", task["id"])
         atomic_move_json(active_path, target, task)
-        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": evidence_summary}))
+        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": finish_evidence}))
     return target
 
 
@@ -1886,7 +1976,12 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 "next_action": "record every R# with `go-workflow task outcome` and evidence, then rerun go-loop",
             })
             break
-        evidence_summary = "; ".join(check["command"] or "no verification configured" for check in final_checks)
+        verification_summary = " | ".join(
+            f"{check['command'] or 'no verification configured'} rc={check.get('returncode')}"
+            for check in final_checks
+        )
+        critic_status = str((result["attempts"][-1].get("critic") or {}).get("status") or "passed") if result["attempts"] else "passed"
+        evidence_summary = f"verification={verification_summary}; critic={critic_status}; runtime={mode}"
         ship_blocker = ship_policy_blocker(ship_policy, allow_push)
         if ship_blocker:
             result.update({
@@ -1900,7 +1995,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         active_task_before_finish = json.loads(json.dumps(task))
         evidence_path = root / "evidence" / "events.jsonl"
         evidence_before_finish = evidence_path.read_text(encoding="utf-8") if evidence_path.exists() else ""
-        done_path = finish_task_record(repo, root, active_path, task, args.agent, f"auto-execute verified: {evidence_summary}")
+        done_path = finish_task_record(repo, root, active_path, task, args.agent, evidence_summary)
         ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
         result["ship"].append({"task_id": task["id"], **ship})
         if ship.get("status") in {"blocked", "failed"}:
@@ -1908,7 +2003,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship failed; verified task was restored to active.", "next_action": ship.get("reason") or ship.get("stderr")})
             break
         result["completed_tasks"].append(task["id"])
-        result["evidence"].append({"task_id": task["id"], "summary": f"auto-execute verified: {evidence_summary}"})
+        result["evidence"].append({"task_id": task["id"], "summary": evidence_summary})
         if ship.get("status") == "push_failed":
             result.update({"status": "ship_pending", "summary": "Task is complete in a local commit, but push failed.", "next_action": "repair the remote/push failure and run git push"})
             break
@@ -2733,11 +2828,15 @@ def cmd_finish(args: argparse.Namespace) -> int:
             outcome_findings = outcome_completion_findings(data)
             if outcome_findings:
                 raise RepoLocalError("finish blocked by incomplete requested outcomes:\n- " + "\n- ".join(outcome_findings))
+            finish_evidence = build_finish_evidence(repo, data, args.agent, args.evidence)
+            evidence_findings = finish_evidence_findings(data, finish_evidence)
+            if evidence_findings:
+                raise RepoLocalError("finish blocked by incomplete evidence attribution:\n- " + "\n- ".join(evidence_findings))
             data["status"] = "done"
-            data.setdefault("evidence", []).append({"created_at": now_iso(), "agent": args.agent, "summary": args.evidence})
+            data.setdefault("evidence", []).append(finish_evidence)
             target = task_path(root, "done", data["id"])
             atomic_move_json(path, target, data)
-            append_jsonl(root / "evidence" / "events.jsonl", event(data["id"], "task.finished", args.agent, {"evidence": args.evidence}))
+            append_jsonl(root / "evidence" / "events.jsonl", event(data["id"], "task.finished", args.agent, {"evidence": finish_evidence}))
     except StateLockError as exc:
         raise RepoLocalError(str(exc)) from exc
     print(relative(repo, target))

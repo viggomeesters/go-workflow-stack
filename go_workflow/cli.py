@@ -34,6 +34,7 @@ from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VER
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
+from go_workflow.capacity_policy import plan_capacity
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
@@ -793,6 +794,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
     execution_policy = {
         "ask_policy": "do-not-ask-when-safe-default-exists",
         "authority": "high-autonomy-bounded-by-repo-scope-and-human-gates",
+        "capacity": plan_capacity(tasks, requested_parallel_builders=max_tasks),
         "may_create_follow_up_tasks": True,
         "may_continue_after_self_reflect": True,
         "may_escalate_to_go_loop": not is_loop,

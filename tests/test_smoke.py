@@ -75,6 +75,61 @@ def run_go(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[s
     return subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), *args], cwd=cwd, text=True, capture_output=True)
 
 
+def test_capacity_policy_defaults_to_solo_or_serial_review_lane():
+    from go_workflow.capacity_policy import plan_capacity
+
+    single = plan_capacity([
+        {"id": "one", "scope": {"modify": ["src/feature.py"]}},
+    ], requested_parallel_builders=4)
+
+    assert single["mode"] == "solo"
+    assert single["builder_slots"] == 1
+    assert single["reviewer_lane"] is True
+    assert single["parallel_builders_allowed"] is False
+
+    overlapping = plan_capacity([
+        {"id": "left", "scope": {"modify": ["src/**"]}},
+        {"id": "right", "scope": {"modify": ["src/api.py"]}},
+    ], requested_parallel_builders=2)
+
+    assert overlapping["mode"] == "serial-with-reviewer-lane"
+    assert overlapping["builder_slots"] == 1
+    assert overlapping["reviewer_lane"] is True
+    assert overlapping["overlaps"] == [{"left": "left", "right": "right"}]
+
+
+def test_capacity_policy_allows_parallel_only_for_disjoint_modify_scopes():
+    from go_workflow.capacity_policy import plan_capacity
+
+    plan = plan_capacity([
+        {"id": "docs", "scope": {"modify": ["docs/guide.md"]}},
+        {"id": "cli", "scope": {"modify": ["cli/go.py"]}},
+    ], requested_parallel_builders=3)
+
+    assert plan["mode"] == "parallel-disjoint-builders"
+    assert plan["builder_slots"] == 2
+    assert plan["parallel_builders_allowed"] is True
+    assert plan["reviewer_lane"] is True
+
+
+def test_go_auto_handoff_exposes_capacity_policy(tmp_path: Path):
+    repo = tmp_path / "capacity"
+    adopt = run_go("adopt", str(repo), "--project-id", "capacity", "--name", "Capacity")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    first = run_go("task", "create", str(repo), "--id", "docs", "--summary", "Docs", "--epic", "workflow", "--modify", "docs/guide.md", "--acceptance", "docs are updated", "--verification", "git diff --check")
+    second = run_go("task", "create", str(repo), "--id", "cli", "--summary", "CLI", "--epic", "workflow", "--modify", "cli/go.py", "--acceptance", "cli is updated", "--verification", "git diff --check")
+    assert first.returncode == 0, first.stderr + first.stdout
+    assert second.returncode == 0, second.stderr + second.stdout
+
+    handoff = run_go("auto", str(repo), "--emit-handoff", "--max-tasks", "2", "--json")
+    assert handoff.returncode == 0, handoff.stderr + handoff.stdout
+    payload = json.loads(handoff.stdout)
+    capacity = payload["execution_policy"]["capacity"]
+    assert capacity["mode"] == "parallel-disjoint-builders"
+    assert capacity["builder_slots"] == 2
+    assert capacity["parallel_builders_allowed"] is True
+
+
 def test_template_check_command_reports_pairing_contract():
     result = run_go("template-check", str(template_repo()), "--json")
     assert result.returncode == 0, result.stderr + result.stdout

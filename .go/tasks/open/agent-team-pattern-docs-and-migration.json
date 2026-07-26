@@ -1,0 +1,39 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "agent-team-pattern-docs-and-migration",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Document Agent Teams mining and rollout order",
+  "description": "Capture the Agent Teams AI mining outcome as public-safe docs/ADR-style guidance and define the rollout order across capacity policy, review lifecycle, evidence gates, and usage attribution. No AGPL code copied.",
+  "scope": {
+    "read": [
+      "README.md",
+      "docs/**",
+      ".go/architecture-principles.json",
+      ".go/hierarchy.json",
+      ".go/tasks/open/*.json"
+    ],
+    "modify": [
+      "docs/**",
+      ".go/architecture-principles.json",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Docs name the mined patterns and provenance without copying AGPL source code.",
+    "Rollout order explains why capacity policy and review lifecycle come before broad multi-agent UI/workflow expansion.",
+    "Docs include operational guidance for default solo mode, reviewer lane use, and when worktree isolation is justified.",
+    "Validation confirms the .go hierarchy links all split tasks and keeps them open/unclaimed."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

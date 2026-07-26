@@ -43,7 +43,12 @@
         "implement-semantic-go-task-decomposition-preserv",
         "release-go-workflow-stack-v0.3.6-so-semantic-go",
         "fix-installed-stack-update-source-resolution",
-        "harden-go-multi-item-execution-closure"
+        "harden-go-multi-item-execution-closure",
+        "agent-capacity-policy-contract",
+        "review-state-lifecycle-contract",
+        "finish-evidence-attribution-gate",
+        "usage-capacity-attribution-ledger",
+        "agent-team-pattern-docs-and-migration"
       ]
     },
     {

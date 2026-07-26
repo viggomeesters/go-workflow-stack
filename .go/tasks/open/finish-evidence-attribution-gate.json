@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "finish-evidence-attribution-gate",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Require finish evidence attribution",
+  "description": "Harden finish/approval gates so task completion carries durable proof: task id, changed files or explicit no-diff result, verification output, runtime/model/agent attribution where available, and reviewer/critic outcome.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      ".go/evidence/events.jsonl",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Finish evidence records task id, changed files or explicit no-diff result, and verification command/result.",
+    "Finish evidence records runtime/model/agent attribution where available without blocking mechanical tasks that lack model metadata.",
+    "Non-trivial tasks require reviewer/critic outcome or explicit skip reason before approval.",
+    "Regression coverage rejects finish/approval attempts with missing evidence fields."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

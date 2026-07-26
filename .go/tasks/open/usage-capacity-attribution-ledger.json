@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "usage-capacity-attribution-ledger",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Track usage and billing mode by task/run",
+  "description": "Design and implement lightweight usage/capacity attribution for go runs: runtime kind, billing mode, task/run owner, token/context estimate or API-equivalent cost. Subscription usage must not be presented as invoice cost.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Run or evidence records can expose runtime kind, billing mode, task/run owner, and token/context or API-equivalent cost estimate when available.",
+    "Billing mode distinguishes api, subscription, free, and unknown.",
+    "Subscription/free usage may show API-equivalent cost but is not labeled as provider invoice cost.",
+    "Regression coverage proves cost/billing labels preserve the distinction."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "evidence": []
+}

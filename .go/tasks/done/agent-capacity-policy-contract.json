@@ -1,0 +1,51 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "agent-capacity-policy-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add default agent capacity policy contract",
+  "description": "Implement the orchestration policy mined from Agent Teams AI: default to solo or lead-plus-one-worker, and expand only when task scopes are provably independent or a reviewer lane is explicitly needed. This should reduce bottleneck/context burn without copying AGPL code.",
+  "scope": {
+    "read": [
+      "README.md",
+      "AGENTS.md",
+      ".go/vision.json",
+      ".go/architecture-principles.json",
+      ".go/hierarchy.json",
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**",
+      ".go/architecture-principles.json",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Planner/executor policy defaults to solo or lead-plus-one-worker for ambiguous work.",
+    "Parallel builders require disjoint modify scopes, explicit independent tasks, or a documented override reason.",
+    "Risky broad edits route to a reviewer/critic lane instead of adding more builders.",
+    "Regression coverage proves ambiguous overlapping scopes are serialized or review-gated while disjoint scopes may parallelize."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-26T08:22:32+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-07-26T08:26:47+02:00",
+      "agent": "hermes",
+      "summary": "Implemented capacity policy module and exposed it in auto/go-loop handoff execution_policy.capacity. Evidence: targeted pytest capacity tests 3 passed; full uv pytest 97 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed; current handoff serializes overlapping broad tasks and allows disjoint scopes."
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "usage-capacity-attribution-ledger",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Track usage and billing mode by task/run",
+  "description": "Design and implement lightweight usage/capacity attribution for go runs: runtime kind, billing mode, task/run owner, token/context estimate or API-equivalent cost. Subscription usage must not be presented as invoice cost.",
+  "scope": {
+    "read": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      "docs/**"
+    ],
+    "modify": [
+      "cli/go.py",
+      "go_workflow/**",
+      "tests/test_smoke.py",
+      "docs/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Run or evidence records can expose runtime kind, billing mode, task/run owner, and token/context or API-equivalent cost estimate when available.",
+    "Billing mode distinguishes api, subscription, free, and unknown.",
+    "Subscription/free usage may show API-equivalent cost but is not labeled as provider invoice cost.",
+    "Regression coverage proves cost/billing labels preserve the distinction."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-26T08:41:54+02:00"
+  },
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-07-26T08:44:24+02:00",
+      "task_id": "usage-capacity-attribution-ledger",
+      "agent": "hermes",
+      "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py,docs/agent-team-capacity-patterns.md; verification=uv run --no-project --with pytest pytest -q -> 100 passed; validation=python3 cli/go.py validate . ok; make_check=make check passed; runtime=hermes; billing_mode=subscription; owner=viggo; api_equivalent_cost_usd=unknown; critic=manual recheck passed: subscription/free costs labeled api_equivalent_not_invoice_cost not invoice cost",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        "docs/agent-team-capacity-patterns.md"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "uv run --no-project --with pytest pytest -q -> 100 passed",
+        "result": "uv run --no-project --with pytest pytest -q -> 100 passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "subscription",
+        "owner": "viggo",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": "unknown",
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "manual recheck passed: subscription/free costs labeled api_equivalent_not_invoice_cost not invoice cost",
+        "skip_reason": null
+      }
+    }
+  ],
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": []
+}

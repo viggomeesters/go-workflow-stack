@@ -528,6 +528,22 @@ def build_finish_evidence(repo: Path, task: dict[str, Any], agent: str, summary:
     result_text = fields.get("verification_result") or fields.get("result") or fields.get("status")
     critic_text = fields.get("critic") or fields.get("critic_outcome") or fields.get("review") or fields.get("reviewer") or fields.get("reviewer_outcome")
     skip_reason = fields.get("review_skip_reason") or fields.get("critic_skip_reason") or fields.get("skip_reason")
+    billing_mode = (fields.get("billing_mode") or "unknown").lower()
+    if billing_mode not in {"api", "subscription", "free", "unknown"}:
+        billing_mode = "unknown"
+    api_equivalent_cost = fields.get("api_equivalent_cost_usd") or fields.get("api_equivalent_cost")
+    provider_invoice_cost = fields.get("provider_invoice_cost_usd") or fields.get("provider_invoice_cost")
+    usage = {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": fields.get("runtime_kind") or fields.get("runtime") or "unknown",
+        "billing_mode": billing_mode,
+        "owner": fields.get("owner") or fields.get("run_owner") or fields.get("task_owner") or agent,
+        "model": fields.get("model"),
+        "token_estimate": fields.get("token_estimate") or fields.get("tokens") or fields.get("context_tokens"),
+        "api_equivalent_cost_usd": api_equivalent_cost,
+        "provider_invoice_cost_usd": provider_invoice_cost if billing_mode == "api" else None,
+        "cost_label": "provider_invoice_cost_usd" if billing_mode == "api" else "api_equivalent_not_invoice_cost",
+    }
     return {
         "schema": "go-workflow.finish-evidence.v1",
         "created_at": now_iso(),
@@ -544,8 +560,9 @@ def build_finish_evidence(repo: Path, task: dict[str, Any], agent: str, summary:
             "agent": agent,
             "runtime": fields.get("runtime"),
             "model": fields.get("model"),
-            "billing_mode": fields.get("billing_mode"),
+            "billing_mode": billing_mode,
         },
+        "usage": usage,
         "review": {
             "outcome": critic_text or ("skipped" if skip_reason else None),
             "skip_reason": skip_reason,

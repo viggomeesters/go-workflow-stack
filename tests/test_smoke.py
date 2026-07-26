@@ -2743,6 +2743,40 @@ def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
     assert evidence["review"]["outcome"].startswith("skipped")
 
 
+def test_finish_usage_attribution_distinguishes_subscription_from_invoice_cost(tmp_path: Path):
+    repo = tmp_path / "usage-attribution-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "usage-attribution", "--name", "Usage Attribution")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "usage-proof", "--summary", "Usage proof",
+        "--epic", "workflow", "--modify", "usage.txt",
+        "--acceptance", "Usage attribution preserves billing labels",
+        "--verification", "python3 -c \"print('verified')\"",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    claimed = run_go("claim", "usage-proof", "--repo", str(repo), "--agent", "pytest", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+
+    finished = run_go(
+        "finish", "usage-proof", "--repo", str(repo), "--agent", "pytest",
+        "--evidence",
+        "no_diff=true; verification=python3 -c print verified rc=0; critic=skipped usage fixture; "
+        "runtime=codex; billing_mode=subscription; owner=team-a; model=gpt-x; token_estimate=1234; "
+        "api_equivalent_cost_usd=0.42; provider_invoice_cost_usd=99.99",
+    )
+    assert finished.returncode == 0, finished.stderr + finished.stdout
+    done_task = json.loads((repo / ".go" / "tasks" / "done" / "usage-proof.json").read_text(encoding="utf-8"))
+    usage = done_task["evidence"][-1]["usage"]
+    assert usage["schema"] == "go-workflow.usage-attribution.v1"
+    assert usage["runtime_kind"] == "codex"
+    assert usage["billing_mode"] == "subscription"
+    assert usage["owner"] == "team-a"
+    assert usage["api_equivalent_cost_usd"] == "0.42"
+    assert usage["provider_invoice_cost_usd"] is None
+    assert usage["cost_label"] == "api_equivalent_not_invoice_cost"
+
+
 def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserves_history(tmp_path: Path):
     repo = tmp_path / "review-lifecycle-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)

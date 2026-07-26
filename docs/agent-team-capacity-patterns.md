@@ -38,6 +38,12 @@ Task completion and task approval are separate axes:
 
 A finished non-trivial task is completed work waiting for review; it is not approval by stealth. `go task review --status needs_fix` sends the task back to the owner while preserving `review_history`, and `--status approved` records the explicit approval transition.
 
+## Usage attribution
+
+Finish evidence can include `runtime`, `billing_mode`, `owner`, `model`, token/context estimates, and cost fields. Billing mode is explicit: `api`, `subscription`, `free`, or `unknown`.
+
+Subscription and free runs may carry `api_equivalent_cost_usd` for planning, but they are labeled `api_equivalent_not_invoice_cost`; only `billing_mode=api` may populate `provider_invoice_cost_usd` as invoice-like cost.
+
 ## Operational defaults
 
 | Situation | Default |

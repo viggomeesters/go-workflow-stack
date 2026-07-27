@@ -2,9 +2,17 @@
 
 ## Unreleased
 
+## 0.3.8 - 2026-07-27
+
 - Persist exact GO intent text, SHA-256, and an optional durable source reference on intent-created tasks and creation events.
 - Track every requested outcome as `verified`, `blocked`, or `rejected` with item-specific evidence.
 - Refuse manual and autonomous completion while any tracked outcome remains pending or lacks evidence; regressions prove 7/8 blocks and 8/8 completes.
+- Add conservative agent-capacity planning: one task defaults to a solo builder plus reviewer lane, while parallel builders require disjoint modify scopes.
+- Separate completed work from review disposition with explicit `review`, `approved`, and `needs_fix` lifecycle state; manual finish remains pending while an autonomous passed critic records explicit approval.
+- Require attributed finish evidence with changed/no-diff state, verification, runtime, billing mode, ownership, and usage fields.
+- Distinguish subscription/free usage from provider invoice cost; API-equivalent estimates are labeled as estimates rather than billed cost.
+- Validate the standalone installed distribution during release checks and keep its packaged starter fixture pinned to the release version.
+- Document the provenance-first adoption of useful agent-team patterns without copying AGPL implementation code.
 
 ## 0.3.7 - 2026-07-18
 

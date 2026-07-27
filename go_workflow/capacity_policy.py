@@ -9,6 +9,7 @@ for broad or risky work.
 from __future__ import annotations
 
 import fnmatch
+import posixpath
 from typing import Any
 
 
@@ -18,7 +19,7 @@ BROAD_SCOPE_PATTERNS = {"**", "*", ".", "./", ".go/**", "docs/**"}
 def normalize_scope(patterns: list[str] | None) -> list[str]:
     normalized: list[str] = []
     for pattern in patterns or []:
-        value = str(pattern).strip().replace("\\", "/")
+        value = posixpath.normpath(str(pattern).strip().replace("\\", "/"))
         if value:
             normalized.append(value)
     return normalized
@@ -30,6 +31,11 @@ def _scope_prefix(pattern: str) -> str:
         if marker in value:
             value = value.split(marker, 1)[0]
     return value.rstrip("/")
+
+
+def _glob_static_prefix(pattern: str) -> str:
+    positions = [position for marker in "*?[" if (position := pattern.find(marker)) >= 0]
+    return pattern[: min(positions)] if positions else pattern
 
 
 def scopes_overlap(left: list[str] | None, right: list[str] | None) -> bool:
@@ -60,6 +66,11 @@ def scopes_overlap(left: list[str] | None, right: list[str] | None) -> bool:
                 return True
             if fnmatch.fnmatch(left_prefix, right_pattern) or fnmatch.fnmatch(right_prefix, left_pattern):
                 return True
+            left_static = _glob_static_prefix(left_pattern)
+            right_static = _glob_static_prefix(right_pattern)
+            if left_static != left_pattern or right_static != right_pattern:
+                if left_static.startswith(right_static) or right_static.startswith(left_static):
+                    return True
     return False
 
 

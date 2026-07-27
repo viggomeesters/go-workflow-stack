@@ -10,7 +10,7 @@ import tempfile
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 
 class StateLockError(RuntimeError):
@@ -157,3 +157,27 @@ def append_jsonl_locked(path: Path, event: dict[str, Any], timeout_seconds: floa
             handle.flush()
             os.fsync(handle.fileno())
     return lock.recovered_stale
+
+
+def remove_jsonl_events_locked(
+    path: Path,
+    remove: Callable[[dict[str, Any]], bool],
+    timeout_seconds: float = 10.0,
+) -> int:
+    """Remove matching events without overwriting concurrent appends from other transactions."""
+    digest = hashlib.sha256(str(path.resolve()).encode("utf-8")).hexdigest()[:16]
+    with repository_lock(_go_root_for(path), f"jsonl-{digest}", timeout_seconds=timeout_seconds):
+        if not path.exists():
+            return 0
+        kept: list[str] = []
+        removed = 0
+        for line in path.read_text(encoding="utf-8").splitlines():
+            if not line.strip():
+                continue
+            payload = json.loads(line)
+            if isinstance(payload, dict) and remove(payload):
+                removed += 1
+            else:
+                kept.append(line)
+        atomic_write_text(path, "".join(f"{line}\n" for line in kept))
+        return removed

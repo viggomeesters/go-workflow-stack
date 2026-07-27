@@ -28,3 +28,12 @@ def unfinished_task_ids(root: Path) -> dict[str, list[str]]:
         state: [str(_load_task(path).get("id") or path.stem) for path in sorted((root / "tasks" / state).glob("*.json"))]
         for state in ("active", "blocked")
     }
+
+
+def pending_review_task_ids(root: Path) -> list[str]:
+    pending: list[str] = []
+    for path in sorted((root / "tasks" / "done").glob("*.json")):
+        task = _load_task(path)
+        if task.get("work_status") == "completed" and task.get("review_status") in {"review", "needs_fix"}:
+            pending.append(str(task.get("id") or path.stem))
+    return pending

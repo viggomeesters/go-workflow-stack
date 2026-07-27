@@ -21,6 +21,7 @@ import subprocess
 import sys
 import tempfile
 import time
+import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -36,10 +37,10 @@ from go_workflow.adapter_protocol import build_adapter_request, normalize_adapte
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.capacity_policy import plan_capacity
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
-from go_workflow.task_state import open_task_records, task_path
+from go_workflow.task_state import open_task_records, pending_review_task_ids as task_state_pending_review_task_ids, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
 from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
-from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, repository_lock
+from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, remove_jsonl_events_locked, repository_lock
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
 
@@ -470,7 +471,13 @@ def path_matches(path: str, patterns: list[str]) -> bool:
 
 
 def git_status(repo: Path) -> list[tuple[str, str]]:
-    result = subprocess.run(["git", "status", "--porcelain"], cwd=repo, text=True, capture_output=True, check=False)
+    result = subprocess.run(
+        ["git", "status", "--porcelain", "--untracked-files=all"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
     if result.returncode != 0:
         return []
     entries: list[tuple[str, str]] = []
@@ -510,6 +517,19 @@ def finish_changed_files(repo: Path, fields: dict[str, str]) -> tuple[list[str],
     no_diff_value = (fields.get("no_diff") or fields.get("no_changes") or "").lower()
     status_paths = [path for _code, path in git_status(repo)]
     if no_diff_value in {"1", "true", "yes", "ok"}:
+        lifecycle_prefixes = (
+            ".go/tasks/",
+            ".go/runs/",
+            ".go/evidence/",
+            ".go/reflections/",
+        )
+        lifecycle_files = {".go/hierarchy.json"}
+        product_paths = [
+            path for path in status_paths
+            if path not in lifecycle_files and not path.startswith(lifecycle_prefixes)
+        ]
+        if product_paths:
+            raise RepoLocalError("no_diff=true contradicts dirty worktree paths: " + ", ".join(product_paths))
         return [], True
     return status_paths, not status_paths
 
@@ -978,6 +998,10 @@ def unfinished_task_ids(repo: Path) -> dict[str, list[str]]:
     return task_state_unfinished_task_ids(go_root(repo))
 
 
+def pending_review_task_ids(repo: Path) -> list[str]:
+    return task_state_pending_review_task_ids(go_root(repo))
+
+
 def build_auto_preflight(repo: Path, selected_tasks: list[dict[str, Any]], max_tasks: int) -> dict[str, Any]:
     root = go_root(repo)
     dirty_entries: list[str] = []
@@ -1084,7 +1108,15 @@ def run_verification_commands(repo: Path, task: dict[str, Any], command_budget: 
     return checks
 
 
-def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, evidence_summary: str) -> Path:
+def finish_task_record(
+    repo: Path,
+    root: Path,
+    active_path: Path,
+    task: dict[str, Any],
+    agent: str,
+    evidence_summary: str,
+    transaction_id: str | None = None,
+) -> Path:
     with repository_lock(root, f"task-{task['id']}"):
         if not active_path.is_file():
             raise StateLockError(f"active task disappeared before finish: {task['id']}")
@@ -1098,19 +1130,75 @@ def finish_task_record(repo: Path, root: Path, active_path: Path, task: dict[str
         task.setdefault("evidence", []).append(finish_evidence)
         target = task_path(root, "done", task["id"])
         atomic_move_json(active_path, target, task)
-        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, {"evidence": finish_evidence}))
+        event_data: dict[str, Any] = {"evidence": finish_evidence}
+        if transaction_id:
+            event_data["transaction_id"] = transaction_id
+        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.finished", agent, event_data))
     return target
 
 
+def approve_task_after_passed_critic(
+    root: Path,
+    done_path: Path,
+    task_id: str,
+    agent: str,
+    transaction_id: str | None = None,
+) -> None:
+    with repository_lock(root, f"task-{task_id}"):
+        task = load_json(done_path)
+        if task.get("status") != "done" or task.get("work_status") != "completed":
+            raise RepoLocalError("critic approval requires completed work in done state")
+        if task.get("review_status") != "review":
+            return
+        record = {
+            "created_at": now_iso(),
+            "agent": agent,
+            "status": "approved",
+            "evidence": "go-loop critic phase passed with no blocking findings",
+        }
+        if transaction_id:
+            record["transaction_id"] = transaction_id
+        task["review_status"] = "approved"
+        task.setdefault("review_history", []).append(record)
+        dump_json(done_path, task)
+        event_data = dict(record)
+        if transaction_id:
+            event_data["transaction_id"] = transaction_id
+        append_jsonl(root / "evidence" / "events.jsonl", event(task_id, "task.reviewed", agent, event_data))
+
+
 def restore_active_after_failed_ship(
+    root: Path,
     active_path: Path,
     done_path: Path,
     active_task: dict[str, Any],
     evidence_path: Path,
-    evidence_before: str,
+    transaction_id: str,
 ) -> None:
-    atomic_move_json(done_path, active_path, active_task)
-    atomic_write_text(evidence_path, evidence_before)
+    with repository_lock(root, f"task-{active_task['id']}"):
+        if done_path.is_file():
+            current = load_json(done_path)
+            baseline_history = active_task.get("review_history", []) or []
+            concurrent_history = [
+                record for record in (current.get("review_history", []) or [])[len(baseline_history):]
+                if record.get("transaction_id") != transaction_id
+            ]
+            restored = json.loads(json.dumps(active_task))
+            if concurrent_history:
+                restored.setdefault("review_history", []).extend(concurrent_history)
+                restored["review_status"] = current.get("review_status", restored.get("review_status", "none"))
+            atomic_move_json(done_path, active_path, restored)
+        elif active_path.is_file():
+            current = load_json(active_path)
+            if current.get("status") != "active" or current.get("work_status") != "in_progress":
+                atomic_json(active_path, active_task)
+        else:
+            atomic_json(active_path, active_task)
+        remove_jsonl_events_locked(
+            evidence_path,
+            lambda payload: payload.get("task_id") == active_task.get("id")
+            and (payload.get("data") or {}).get("transaction_id") == transaction_id,
+        )
 
 
 def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str, Any], agent: str, reason: str, checks: list[dict[str, Any]]) -> Path:
@@ -1740,6 +1828,18 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         return 1, result
 
     initial_unfinished = preflight.get("unfinished_tasks", {})
+    initial_pending_reviews = pending_review_task_ids(repo)
+    if not plan.get("next_tasks") and initial_pending_reviews and not (
+        initial_unfinished.get("active") or initial_unfinished.get("blocked")
+    ):
+        result.update({
+            "status": "review_pending",
+            "blocked_task": initial_pending_reviews[0],
+            "summary": "Work is complete, but explicit review approval is still pending.",
+            "next_action": "review completed work and record `go-workflow task review --status approved` or `needs_fix`",
+        })
+        write_latest_run_state(repo, root, result, args, mode)
+        return 1, result
     if not plan.get("next_tasks") and not (initial_unfinished.get("active") or initial_unfinished.get("blocked")):
         result.update({
             "status": "task_required",
@@ -2022,12 +2122,33 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             break
         active_task_before_finish = json.loads(json.dumps(task))
         evidence_path = root / "evidence" / "events.jsonl"
-        evidence_before_finish = evidence_path.read_text(encoding="utf-8") if evidence_path.exists() else ""
-        done_path = finish_task_record(repo, root, active_path, task, args.agent, evidence_summary)
+        finish_transaction_id = uuid.uuid4().hex
+        done_path = task_path(root, "done", task["id"])
+        try:
+            done_path = finish_task_record(
+                repo, root, active_path, task, args.agent, evidence_summary, transaction_id=finish_transaction_id,
+            )
+            if critic_status == "passed":
+                approve_task_after_passed_critic(
+                    root, done_path, task["id"], args.agent, transaction_id=finish_transaction_id,
+                )
+        except Exception as exc:
+            restore_active_after_failed_ship(
+                root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
+            )
+            result.update({
+                "status": "blocked",
+                "blocked_task": task["id"],
+                "summary": "Finish or review transition failed; task and evidence were restored to active.",
+                "next_action": str(exc),
+            })
+            break
         ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
         result["ship"].append({"task_id": task["id"], **ship})
         if ship.get("status") in {"blocked", "failed"}:
-            restore_active_after_failed_ship(active_path, done_path, active_task_before_finish, evidence_path, evidence_before_finish)
+            restore_active_after_failed_ship(
+                root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
+            )
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship failed; verified task was restored to active.", "next_action": ship.get("reason") or ship.get("stderr")})
             break
         result["completed_tasks"].append(task["id"])
@@ -2052,14 +2173,23 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         })
     elif result.get("status") == "done":
         unfinished = unfinished_task_ids(repo)
-        if unfinished.get("active") or unfinished.get("blocked"):
-            blocked_id = (unfinished.get("blocked") or unfinished.get("active") or [None])[0]
-            result.update({
-                "status": "blocked",
-                "blocked_task": blocked_id,
-                "summary": "Open work is exhausted, but active or blocked task state prevents goal completion.",
-                "next_action": "repair, requeue, or explicitly resolve the unfinished task",
-            })
+        pending_reviews = pending_review_task_ids(repo)
+        if unfinished.get("active") or unfinished.get("blocked") or pending_reviews:
+            blocked_id = (unfinished.get("blocked") or unfinished.get("active") or pending_reviews or [None])[0]
+            if pending_reviews and not (unfinished.get("active") or unfinished.get("blocked")):
+                result.update({
+                    "status": "review_pending",
+                    "blocked_task": blocked_id,
+                    "summary": "Work is complete, but explicit review approval is still pending.",
+                    "next_action": "review completed work and record `go-workflow task review --status approved` or `needs_fix`",
+                })
+            else:
+                result.update({
+                    "status": "blocked",
+                    "blocked_task": blocked_id,
+                    "summary": "Open work is exhausted, but active or blocked task state prevents goal completion.",
+                    "next_action": "repair, requeue, or explicitly resolve the unfinished task",
+                })
         else:
             project = load_json(root / "project.json")
             if project.get("project_mode") == "template":

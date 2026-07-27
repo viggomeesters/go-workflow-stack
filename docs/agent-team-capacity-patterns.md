@@ -14,9 +14,9 @@ attribution.
 Adopt these semantics in this order:
 
 1. **Capacity policy first** — default to solo or lead-plus-one-worker. Parallel
-   builders are only safe when selected task modify scopes are disjoint, tasks
-   can ship independently, or a human/CLI override records why parallelism is
-   worth the collision risk.
+   builders are only allowed when normalized selected-task modify scopes are
+   disjoint. A caller may request fewer or more slots, but cannot override an
+   overlap into a supposedly safe parallel plan.
 2. **Review lifecycle second** — work completion is not approval. Model the task
    as work status plus review status so `completed` cannot silently become
    `approved`.
@@ -36,7 +36,7 @@ Task completion and task approval are separate axes:
 - `work_status`: `pending` → `in_progress` → `completed`.
 - `review_status`: `none` → `review` → `approved`, with `needs_fix` as a return path.
 
-A finished non-trivial task is completed work waiting for review; it is not approval by stealth. `go task review --status needs_fix` sends the task back to the owner while preserving `review_history`, and `--status approved` records the explicit approval transition.
+A manually finished non-trivial task is completed work waiting for review; it is not approval by stealth. `go task review --status needs_fix` sends the task back to the owner while preserving `review_history`, and `--status approved` records the explicit approval transition. An autonomous `go-loop` may record that same explicit approval only after its separate critic phase passes without blocking findings.
 
 ## Usage attribution
 

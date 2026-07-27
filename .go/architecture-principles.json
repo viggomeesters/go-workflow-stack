@@ -35,7 +35,7 @@
     },
     {
       "id": "capacity-before-parallelism",
-      "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes or an explicit override and reviewer lane.",
+      "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes and a reviewer lane, while overlapping modify scopes remain serial.",
       "rationale": "More agents can increase context burn, file collisions, and false progress unless capacity and review are explicit.",
       "enforcement": "auto/go-loop handoff exposes execution_policy.capacity and regression tests cover solo, serial-review, and disjoint-parallel cases"
     }

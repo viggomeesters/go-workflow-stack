@@ -4,6 +4,9 @@
   "id": "repo-local-spike-fixture",
   "name": "Repo Local Spike Fixture",
   "source_of_truth": "repo-local",
+  "contract_version": 2,
+  "required_stack_version": "0.3.8",
+  "stack_ref": "v0.3.8",
   "default_verification": [
     "python -m pytest"
   ]

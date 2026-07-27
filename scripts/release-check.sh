@@ -37,6 +37,8 @@ if project.get("stack_ref") != f"v{expected}":
 PY
 
 echo "release preflight: v$VERSION"
+SOURCE_ROOT="$ROOT"
+ARCHIVE_WORK=""
 if git -C "$ROOT" rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
   tag_type="$(git -C "$ROOT" cat-file -t "refs/tags/v$VERSION")"
   if [ "$tag_type" != "tag" ]; then
@@ -49,13 +51,26 @@ if git -C "$ROOT" rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
     echo "tag v$VERSION does not point to HEAD" >&2
     exit 1
   fi
-  echo "tag: annotated v$VERSION points to HEAD"
+  if [ -n "$(git -C "$ROOT" status --porcelain)" ]; then
+    echo "release worktree must be clean when validating tag v$VERSION" >&2
+    exit 1
+  fi
+  ARCHIVE_WORK="$(mktemp -d)"
+  trap 'rm -rf "$ARCHIVE_WORK"' EXIT
+  git -C "$ROOT" archive "v$VERSION" | tar -x -C "$ARCHIVE_WORK"
+  SOURCE_ROOT="$ARCHIVE_WORK"
+  echo "tag: annotated v$VERSION points to HEAD; tests use its archived payload"
 else
-  echo "tag: v$VERSION is ready to create after review"
+  if [ "${GO_RELEASE_ALLOW_CANDIDATE:-0}" != "1" ]; then
+    echo "annotated tag v$VERSION is required; use GO_RELEASE_ALLOW_CANDIDATE=1 only for the pre-tag candidate gate" >&2
+    exit 1
+  fi
+  echo "tag: v$VERSION candidate mode; final gate still requires the annotated tag"
 fi
 
 if [ "${GO_RELEASE_SKIP_TESTS:-0}" != "1" ]; then
-  bash "$ROOT/scripts/check-linux.sh"
+  GO_PROJECT_TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}" bash "$SOURCE_ROOT/scripts/check-linux.sh"
+  bash "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
 fi
 
 echo "publish: not performed"

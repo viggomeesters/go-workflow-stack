@@ -60,7 +60,7 @@ CONTINUE to next task unless done, blocked, or budget exhausted
 
 ## Capacity policy
 
-The autonomous loop defaults to **solo** or **lead-plus-one-worker** execution. More agents are not automatically better: parallel builders are allowed only when selected tasks have disjoint `scope.modify` paths or a caller provides an explicit override.
+The autonomous loop defaults to **solo** or **lead-plus-one-worker** execution. More agents are not automatically better: parallel builders are allowed only when normalized selected-task `scope.modify` paths are disjoint. Requested builder count never overrides detected overlap.
 
 The emitted `auto` / `go-loop` handoff exposes `execution_policy.capacity` so a Hermes, Codex, Claude, or Gemini conductor can see whether it should run solo, keep one reviewer lane open, or fan out to disjoint builders. Broad or overlapping scopes collapse back to serial execution with a reviewer lane.
 
@@ -100,7 +100,7 @@ Tasks declare `execution_mode: mechanical|agent`. Mechanical tasks execute only 
 
 The built-in semantic critic is enabled by default. A structurally valid task with generic acceptance is stopped by a pre-claim `contract_gate`; it is not moved to active or blocked and no verification command runs. If a task budget expires while open work remains, the result is `budget_exhausted` with a persisted resume command, never `done`.
 
-After the final task, the conductor runs a goal-completion audit. `done` requires: no open, active, or blocked tasks; valid project/vision/principle/hierarchy/task links; evidence on every done task; declared vision success metrics; and passing project-level default verification. A failing final check returns `goal_incomplete` and requires concrete follow-up work. This is a structural and executable audit; semantic proof of free-text success metrics still belongs to a deep critic adapter.
+After the final task, the conductor runs a goal-completion audit. `done` requires: no open, active, or blocked tasks; no completed work still waiting for review disposition; valid project/vision/principle/hierarchy/task links; evidence on every done task; declared vision success metrics; and passing project-level default verification. Manual finish therefore remains review-pending until an explicit review command records `approved` or `needs_fix`. Autonomous `go-loop` records approval only after its separate critic phase passes without blocking findings. A failing final check returns `goal_incomplete` and requires concrete follow-up work. This is a structural and executable audit; semantic proof of free-text success metrics still belongs to a deep critic adapter.
 
 At each stop, `.go/runs/latest.json` stores effective budgets, adapter selection, critic settings, ship policy, and structured resume arguments. Its command invokes `.go/runs/resume.sh`, which resolves the current machine's stack through `GO_STACK`, a sibling checkout, `~/github/go-workflow-stack`, or `~/Dev/go-workflow-stack`. A deterministic two-task campaign moves the project to a new path, selects a relocated runtime, executes the resume command, and proves the remaining task and final goal audit complete.
 

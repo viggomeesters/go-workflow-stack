@@ -7,9 +7,13 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
+
+from go_workflow.task_state import pending_review_task_ids
 
 
 def template_repo() -> Path:
@@ -110,6 +114,21 @@ def test_capacity_policy_allows_parallel_only_for_disjoint_modify_scopes():
     assert plan["builder_slots"] == 2
     assert plan["parallel_builders_allowed"] is True
     assert plan["reviewer_lane"] is True
+
+    from go_workflow.capacity_policy import scopes_overlap
+
+    assert scopes_overlap(["./src/a.py"], ["src/a.py"]) is True
+    assert scopes_overlap(["src/../README.md"], ["README.md"]) is True
+    assert scopes_overlap(["a//b.py"], ["a/b.py"]) is True
+    assert scopes_overlap(["src/a*.py"], ["src/ab*.py"]) is True
+    assert scopes_overlap(["src/a*.py"], ["tests/a*.py"]) is False
+
+    ambiguous_globs = plan_capacity([
+        {"id": "left", "scope": {"modify": ["src/a*.py"]}},
+        {"id": "right", "scope": {"modify": ["src/ab*.py"]}},
+    ], requested_parallel_builders=2)
+    assert ambiguous_globs["mode"] == "serial-with-reviewer-lane"
+    assert ambiguous_globs["parallel_builders_allowed"] is False
 
 
 def test_go_auto_handoff_exposes_capacity_policy(tmp_path: Path):
@@ -853,9 +872,15 @@ def test_blocked_ship_keeps_verified_task_active(tmp_path: Path):
     result = json.loads(executed.stdout)
     assert result["status"] == "blocked"
     assert result["completed_tasks"] == []
-    assert (repo / ".go" / "tasks" / "active" / "ship-blocked.json").is_file()
+    active_path = repo / ".go" / "tasks" / "active" / "ship-blocked.json"
+    assert active_path.is_file()
     assert not (repo / ".go" / "tasks" / "done" / "ship-blocked.json").exists()
-    assert not any("task.finished" in line for line in (repo / ".go" / "evidence" / "events.jsonl").read_text().splitlines())
+    active_task = json.loads(active_path.read_text(encoding="utf-8"))
+    assert active_task["review_status"] == "none"
+    assert active_task["review_history"] == []
+    evidence_lines = (repo / ".go" / "evidence" / "events.jsonl").read_text().splitlines()
+    assert not any("task.finished" in line for line in evidence_lines)
+    assert not any("task.reviewed" in line for line in evidence_lines)
 
 
 def test_failed_local_commit_restores_verified_task_to_active(tmp_path: Path):
@@ -889,6 +914,158 @@ def test_failed_local_commit_restores_verified_task_to_active(tmp_path: Path):
     assert (repo / ".go" / "tasks" / "active" / "commit-fails.json").is_file()
     assert not (repo / ".go" / "tasks" / "done" / "commit-fails.json").exists()
     assert not any("task.finished" in line for line in (repo / ".go" / "evidence" / "events.jsonl").read_text().splitlines())
+
+
+def test_failed_autonomous_review_append_restores_task_and_evidence(tmp_path: Path, monkeypatch, capsys):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "failed-review-append-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "failedreviewappend", "--name", "Failed Review Append")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "review-append-fails", "--summary", "Review append fails",
+        "--epic", "workflow", "--execution-mode", "agent", "--acceptance", "Verification passes",
+        "--verification", "python3 -c 'print(7)'",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+
+    real_append = cli.append_jsonl
+
+    def fail_review_append(path, payload):
+        if payload.get("event") == "task.reviewed":
+            real_append(path, cli.event("unrelated", "evidence.appended", "other-agent", {"proof": "preserve me"}))
+            raise OSError("injected task.reviewed append failure")
+        return real_append(path, payload)
+
+    monkeypatch.setattr(cli, "append_jsonl", fail_review_append)
+    monkeypatch.setattr(sys, "argv", [
+        "go-workflow", "go-loop", str(repo), "--execute", "--max-tasks", "1",
+        "--build-command", "true", "--agent", "pytest", "--allow-dirty", "--json",
+    ])
+    returncode = cli.main()
+    result = json.loads(capsys.readouterr().out)
+
+    assert returncode == 1
+    assert result["status"] == "blocked"
+    assert "restored to active" in result["summary"]
+    active_path = repo / ".go" / "tasks" / "active" / "review-append-fails.json"
+    assert active_path.is_file()
+    active_task = json.loads(active_path.read_text(encoding="utf-8"))
+    assert active_task["status"] == "active"
+    assert active_task["work_status"] == "in_progress"
+    assert active_task["review_status"] == "none"
+    assert active_task["review_history"] == []
+    assert active_task["evidence"] == []
+    assert not (repo / ".go" / "tasks" / "done" / "review-append-fails.json").exists()
+    evidence_lines = (repo / ".go" / "evidence" / "events.jsonl").read_text(encoding="utf-8").splitlines()
+    assert not any("task.finished" in line for line in evidence_lines)
+    assert not any("task.reviewed" in line for line in evidence_lines)
+    assert any('"task_id": "unrelated"' in line and "preserve me" in line for line in evidence_lines)
+
+
+def test_failed_ship_rollback_preserves_concurrent_needs_fix_review(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "concurrent-review-rollback-project"
+    root = repo / ".go"
+    active_path = root / "tasks" / "active" / "review-race.json"
+    done_path = root / "tasks" / "done" / "review-race.json"
+    evidence_path = root / "evidence" / "events.jsonl"
+    active_path.parent.mkdir(parents=True)
+    evidence_path.parent.mkdir(parents=True)
+    original = {
+        "id": "review-race",
+        "status": "active",
+        "work_status": "in_progress",
+        "review_status": "none",
+        "review_history": [],
+        "evidence": [],
+    }
+    concurrent = {
+        **original,
+        "review_status": "needs_fix",
+        "review_history": [{"status": "needs_fix", "agent": "critic", "evidence": "repair this"}],
+    }
+    active_path.write_text(json.dumps(concurrent), encoding="utf-8")
+    transaction_id = "failed-autonomous-transaction"
+    evidence_path.write_text(
+        "\n".join([
+            json.dumps(cli.event("review-race", "task.finished", "builder", {"transaction_id": transaction_id})),
+            json.dumps(cli.event("review-race", "task.reviewed", "critic", {"status": "needs_fix", "evidence": "repair this"})),
+        ]) + "\n",
+        encoding="utf-8",
+    )
+
+    cli.restore_active_after_failed_ship(
+        root, active_path, done_path, original, evidence_path, transaction_id,
+    )
+
+    restored = json.loads(active_path.read_text(encoding="utf-8"))
+    assert restored["review_status"] == "needs_fix"
+    assert restored["review_history"][-1]["evidence"] == "repair this"
+    remaining = [json.loads(line) for line in evidence_path.read_text(encoding="utf-8").splitlines()]
+    assert len(remaining) == 1
+    assert remaining[0]["event"] == "task.reviewed"
+    assert remaining[0]["data"]["status"] == "needs_fix"
+
+
+def test_failed_ship_rollback_preserves_concurrent_done_approval(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "concurrent-done-approval-project"
+    root = repo / ".go"
+    active_path = root / "tasks" / "active" / "approval-race.json"
+    done_path = root / "tasks" / "done" / "approval-race.json"
+    evidence_path = root / "evidence" / "events.jsonl"
+    done_path.parent.mkdir(parents=True)
+    evidence_path.parent.mkdir(parents=True)
+    original = {
+        "id": "approval-race",
+        "status": "active",
+        "work_status": "in_progress",
+        "review_status": "none",
+        "review_history": [],
+        "evidence": [],
+    }
+    concurrent_approval = {
+        **original,
+        "status": "done",
+        "work_status": "completed",
+        "review_status": "approved",
+        "review_history": [{"status": "approved", "agent": "critic", "evidence": "concurrent approval"}],
+    }
+    done_path.write_text(json.dumps(concurrent_approval), encoding="utf-8")
+
+    cli.restore_active_after_failed_ship(
+        root, active_path, done_path, original, evidence_path, "failed-transaction",
+    )
+
+    restored = json.loads(active_path.read_text(encoding="utf-8"))
+    assert restored["status"] == "active"
+    assert restored["work_status"] == "in_progress"
+    assert restored["review_status"] == "approved"
+    assert restored["review_history"][-1]["evidence"] == "concurrent approval"
+    assert not done_path.exists()
+
+
+def test_no_diff_rejects_substantive_go_contract_changes(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "substantive-go-change-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    project_path = repo / ".go" / "project.json"
+    project_path.parent.mkdir(parents=True)
+    project_path.write_text('{"required_stack_version":"0.3.8"}\n', encoding="utf-8")
+    subprocess.run(["git", "add", ".go/project.json"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed contract", "-q",
+    ], cwd=repo, check=True)
+    project_path.write_text('{"required_stack_version":"9.9.9"}\n', encoding="utf-8")
+
+    with pytest.raises(cli.RepoLocalError, match=".go/project.json"):
+        cli.finish_changed_files(repo, {"no_diff": "true"})
 
 
 def test_agent_check_reports_real_adapter_availability():
@@ -1342,7 +1519,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.7 v0.3.7 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.8 v0.3.8 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -1937,8 +2114,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.7"
-    assert result["stack"]["ref"] == "v0.3.7"
+    assert result["stack"]["version"] == "0.3.8"
+    assert result["stack"]["ref"] == "v0.3.8"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -1968,7 +2145,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.7"
+    assert project["stack_ref"] == "v0.3.8"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -2143,6 +2320,40 @@ def test_jsonl_appends_are_process_locked_and_parseable(tmp_path: Path):
     assert len(events) == 90
     assert {(event["worker"], event["index"]) for event in events} == {(worker, index) for worker in range(3) for index in range(30)}
 
+
+def test_concurrent_autonomous_approvals_share_the_evidence_ledger_lock(tmp_path: Path):
+    root = tmp_path / ".go"
+    done_dir = root / "tasks" / "done"
+    done_dir.mkdir(parents=True)
+    for task_id in ("approval-one", "approval-two"):
+        (done_dir / f"{task_id}.json").write_text(json.dumps({
+            "id": task_id,
+            "status": "done",
+            "work_status": "completed",
+            "review_status": "review",
+            "review_history": [],
+        }, indent=2) + "\n", encoding="utf-8")
+    script = (
+        "import sys; from pathlib import Path; "
+        "from go_workflow.cli import approve_task_after_passed_critic; "
+        "root=Path(sys.argv[1]); task_id=sys.argv[2]; "
+        "approve_task_after_passed_critic(root, root/'tasks'/'done'/f'{task_id}.json', task_id, 'pytest')"
+    )
+    workers = [
+        subprocess.Popen([sys.executable, "-c", script, str(root), task_id], cwd=ROOT)
+        for task_id in ("approval-one", "approval-two")
+    ]
+    assert [worker.wait(timeout=15) for worker in workers] == [0, 0]
+    events = [json.loads(line) for line in (root / "evidence" / "events.jsonl").read_text(encoding="utf-8").splitlines()]
+    assert {(item["task_id"], item["event"]) for item in events} == {
+        ("approval-one", "task.reviewed"),
+        ("approval-two", "task.reviewed"),
+    }
+    for task_id in ("approval-one", "approval-two"):
+        task = json.loads((done_dir / f"{task_id}.json").read_text(encoding="utf-8"))
+        assert task["review_status"] == "approved"
+
+
 def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Path):
     repo = tmp_path / "starter"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -2173,15 +2384,15 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.7", "-m", "v0.3.7"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.7"],
+        ["bash", "scripts/release-check.sh", "0.3.8"],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.7" in result.stdout
+    assert "release preflight: v0.3.8" in result.stdout
     assert "publish: not performed" in result.stdout
 
 
@@ -2191,14 +2402,14 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.7", "-m", "v0.3.7"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_RELEASE_SKIP_TESTS"] = "1"
 
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.7"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.8"], cwd=repo, text=True, capture_output=True, env=env)
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
 
@@ -2245,8 +2456,8 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["required_stack_version"] == "0.3.7"
-    assert migrated["stack_ref"] == "v0.3.7"
+    assert migrated["required_stack_version"] == "0.3.8"
+    assert migrated["stack_ref"] == "v0.3.8"
     migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
     assert "epics" in migrated_hierarchy
     assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]
@@ -2662,6 +2873,11 @@ def test_go_intent_links_exact_source_and_manual_finish_requires_all_outcomes(tm
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "outcome-finish", "--name", "Outcome Finish")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "track workflow baseline", "-q",
+    ], cwd=repo, check=True)
     intent = "\n".join(f"{index}. outcome {index}" for index in range(1, 9))
     created = run_go(
         "go", str(repo), "--intent", intent, "--intent-source-ref", "telegram:8340627826:12345", "--write", "--json",
@@ -2714,6 +2930,11 @@ def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "finish-attribution", "--name", "Finish Attribution")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "track workflow baseline", "-q",
+    ], cwd=repo, check=True)
     created = run_go(
         "task", "create", str(repo), "--id", "needs-proof", "--summary", "Needs proof",
         "--epic", "workflow", "--modify", "proof.txt",
@@ -2730,6 +2951,15 @@ def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
     assert "finish evidence must record verification command and result" in rejected.stderr
     assert "reviewer/critic outcome" in rejected.stderr
     assert (repo / ".go" / "tasks" / "active" / "needs-proof.json").is_file()
+
+    (repo / "proof.txt").write_text("unreported change\n", encoding="utf-8")
+    contradicted = run_go(
+        "finish", "needs-proof", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=python3 -c print verified rc=0; critic=skipped test fixture",
+    )
+    assert contradicted.returncode == 1
+    assert "no_diff=true contradicts dirty worktree paths: proof.txt" in contradicted.stderr
+    (repo / "proof.txt").unlink()
 
     accepted = run_go(
         "finish", "needs-proof", "--repo", str(repo), "--agent", "pytest",
@@ -2748,6 +2978,11 @@ def test_finish_usage_attribution_distinguishes_subscription_from_invoice_cost(t
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "usage-attribution", "--name", "Usage Attribution")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "track workflow baseline", "-q",
+    ], cwd=repo, check=True)
     created = run_go(
         "task", "create", str(repo), "--id", "usage-proof", "--summary", "Usage proof",
         "--epic", "workflow", "--modify", "usage.txt",
@@ -2782,6 +3017,11 @@ def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserve
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "review-lifecycle", "--name", "Review Lifecycle")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "track workflow state", "-q",
+    ], cwd=repo, check=True)
     created = run_go(
         "task", "create", str(repo), "--id", "review-me", "--summary", "Review me",
         "--epic", "workflow", "--execution-mode", "agent", "--modify", "review.txt",
@@ -2805,6 +3045,14 @@ def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserve
     done_task = json.loads((repo / ".go" / "tasks" / "done" / "review-me.json").read_text(encoding="utf-8"))
     assert done_task["work_status"] == "completed"
     assert done_task["review_status"] == "review"
+    assert pending_review_task_ids(repo / ".go") == ["review-me"]
+
+    pending = run_go("go-loop", str(repo), "--execute", "--agent", "pytest", "--json")
+    assert pending.returncode == 1, pending.stderr + pending.stdout
+    pending_result = json.loads(pending.stdout)
+    assert pending_result["status"] == "review_pending"
+    assert pending_result["blocked_task"] == "review-me"
+    assert "explicit review approval" in pending_result["summary"]
 
     needs_fix = run_go(
         "task", "review", str(repo), "--task-id", "review-me", "--status", "needs_fix",
@@ -2830,9 +3078,10 @@ def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserve
     approved_task = json.loads((repo / ".go" / "tasks" / "done" / "review-me.json").read_text(encoding="utf-8"))
     assert approved_task["review_status"] == "approved"
     assert [item["status"] for item in approved_task["review_history"]] == ["needs_fix", "approved"]
+    assert pending_review_task_ids(repo / ".go") == []
 
 
-def test_go_loop_blocks_seven_of_eight_and_finishes_eight_of_eight(tmp_path: Path):
+def test_go_loop_blocks_seven_of_eight_and_approves_eight_of_eight_after_critic(tmp_path: Path):
     for completed_count, expected_status in ((7, "blocked"), (8, "done")):
         repo = tmp_path / f"auto-outcomes-{completed_count}"
         subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -2859,8 +3108,51 @@ def test_go_loop_blocks_seven_of_eight_and_finishes_eight_of_eight(tmp_path: Pat
             assert "R8 has no terminal disposition" in result["outcome_findings"]
             assert (repo / ".go" / "tasks" / "active" / f"{task_id}.json").is_file()
         else:
-            assert executed.returncode == 0, executed.stderr + executed.stdout
-            assert (repo / ".go" / "tasks" / "done" / f"{task_id}.json").is_file()
+            assert executed.returncode == 0
+            done_path = repo / ".go" / "tasks" / "done" / f"{task_id}.json"
+            assert done_path.is_file()
+            done_task = json.loads(done_path.read_text(encoding="utf-8"))
+            assert done_task["review_status"] == "approved"
+            assert done_task["review_history"][-1]["status"] == "approved"
+            assert "critic phase passed" in done_task["review_history"][-1]["evidence"]
+
+
+def test_go_loop_blocks_goal_completion_when_an_earlier_manual_finish_still_needs_review(tmp_path: Path):
+    repo = tmp_path / "pending-review-goal-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "pending-review-goal", "--name", "Pending Review Goal")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "track workflow baseline", "-q",
+    ], cwd=repo, check=True)
+    for task_id in ("manual-review", "auto-finish"):
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", task_id.replace("-", " ").title(),
+            "--epic", "workflow", "--execution-mode", "agent", "--acceptance", "Verification passes",
+            "--verification", "python3 -c \"print('verified')\"",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+
+    claimed = run_go("claim", "manual-review", "--repo", str(repo), "--agent", "builder", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    finished = run_go(
+        "finish", "manual-review", "--repo", str(repo), "--agent", "builder",
+        "--evidence", "no_diff=true; verification=python3 -c print verified rc=0; critic=passed",
+    )
+    assert finished.returncode == 0, finished.stderr + finished.stdout
+
+    executed = run_go(
+        "go-loop", str(repo), "--execute", "--max-tasks", "1", "--build-command", "true",
+        "--agent", "pytest", "--allow-dirty", "--json",
+    )
+    result = json.loads(executed.stdout)
+    assert executed.returncode == 1
+    assert result["status"] == "review_pending"
+    assert result["blocked_task"] == "manual-review"
+    assert "explicit review approval" in result["summary"]
+    assert (repo / ".go" / "tasks" / "done" / "auto-finish.json").is_file()
 
 
 def test_direct_go_loop_execute_without_open_task_fails_closed(tmp_path: Path):

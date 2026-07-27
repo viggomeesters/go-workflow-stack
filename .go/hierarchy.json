@@ -48,7 +48,8 @@
         "review-state-lifecycle-contract",
         "finish-evidence-attribution-gate",
         "usage-capacity-attribution-ledger",
-        "agent-team-pattern-docs-and-migration"
+        "agent-team-pattern-docs-and-migration",
+        "release-v038-agent-capacity"
       ]
     },
     {

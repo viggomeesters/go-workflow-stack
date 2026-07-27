@@ -167,17 +167,23 @@ make check
 bash scripts/check.sh
 ```
 
-Prepare a version locally without publishing or invoking hosted automation:
+Run the pre-tag candidate gate locally without publishing or invoking hosted automation:
 
 ```bash
-bash scripts/release-check.sh 0.3.7
+GO_RELEASE_ALLOW_CANDIDATE=1 bash scripts/release-check.sh 0.3.8
+```
+
+After committing and creating the annotated tag, run the mandatory final gate. It requires a clean tree and tests the archived tag payload rather than the mutable checkout:
+
+```bash
+bash scripts/release-check.sh 0.3.8
 ```
 
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-go-workflow stack update . --to v0.3.7 --json
-go-workflow stack update . --to v0.3.7 --apply --json
+go-workflow stack update . --to v0.3.8 --json
+go-workflow stack update . --to v0.3.8 --apply --json
 ```
 
 ## Privacy and security
@@ -186,7 +192,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Public v0.3.7 release. Every new GO instruction is durable task-first repo-local work; list items become traceable outcomes without forced task spam; installed runtimes honor `GO_STACK` for immutable updates; and missing contracts fail closed.
+Public v0.3.8 release. GO runs now plan builder/reviewer capacity from task scope, keep work completion separate from review approval, and require attributed finish evidence. Subscription usage remains explicitly distinct from provider invoice cost.
 
 ## License
 

@@ -48,8 +48,14 @@ if git -C "$ROOT" rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
   tag_commit="$(git -C "$ROOT" rev-list -n 1 "v$VERSION")"
   head_commit="$(git -C "$ROOT" rev-parse HEAD)"
   if [ "$tag_commit" != "$head_commit" ]; then
-    echo "tag v$VERSION does not point to HEAD" >&2
-    exit 1
+    if [ "${GO_RELEASE_VALIDATE_EXISTING:-0}" != "1" ]; then
+      echo "tag v$VERSION does not point to HEAD" >&2
+      exit 1
+    fi
+    if ! git -C "$ROOT" merge-base --is-ancestor "$tag_commit" "$head_commit"; then
+      echo "tag v$VERSION is not an ancestor of HEAD; refusing existing-tag validation" >&2
+      exit 1
+    fi
   fi
   if [ -n "$(git -C "$ROOT" status --porcelain)" ]; then
     echo "release worktree must be clean when validating tag v$VERSION" >&2
@@ -57,9 +63,26 @@ if git -C "$ROOT" rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
   fi
   ARCHIVE_WORK="$(mktemp -d)"
   trap 'rm -rf "$ARCHIVE_WORK"' EXIT
-  git -C "$ROOT" archive "v$VERSION" | tar -x -C "$ARCHIVE_WORK"
-  SOURCE_ROOT="$ARCHIVE_WORK"
-  echo "tag: annotated v$VERSION points to HEAD; tests use its archived payload"
+  SOURCE_ROOT="$ARCHIVE_WORK/go-workflow-stack"
+  mkdir -p "$SOURCE_ROOT"
+  git -C "$ROOT" archive "v$VERSION" | tar -x -C "$SOURCE_ROOT"
+  git -C "$SOURCE_ROOT" init -q
+  git -C "$SOURCE_ROOT" remote add release-source "$ROOT"
+  git -C "$SOURCE_ROOT" fetch -q --tags release-source
+  git -C "$SOURCE_ROOT" reset -q --mixed "$tag_commit"
+  if [ -n "$(git -C "$SOURCE_ROOT" status --porcelain)" ]; then
+    echo "archived payload differs from tag v$VERSION" >&2
+    exit 1
+  fi
+  if [ -d "$ROOT/../go-project-template/.go" ]; then
+    mkdir -p "$ARCHIVE_WORK/go-project-template"
+    cp -a "$ROOT/../go-project-template/." "$ARCHIVE_WORK/go-project-template/"
+    rm -rf "$ARCHIVE_WORK/go-project-template/.git"
+    if [ -z "${GO_PROJECT_TEMPLATE:-}" ]; then
+      GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/go-project-template"
+    fi
+  fi
+  echo "tag: annotated v$VERSION payload reconstructed from git archive with tag refs"
 else
   if [ "${GO_RELEASE_ALLOW_CANDIDATE:-0}" != "1" ]; then
     echo "annotated tag v$VERSION is required; use GO_RELEASE_ALLOW_CANDIDATE=1 only for the pre-tag candidate gate" >&2

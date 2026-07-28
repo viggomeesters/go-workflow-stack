@@ -167,17 +167,47 @@ make check
 bash scripts/check.sh
 ```
 
+Install the committed launcher as the root-managed release trust anchor. Do not treat the mutable repo copy as its own security proof:
+
+```bash
+set -euo pipefail
+RELEASE_REPO="$PWD"
+RELEASE_COMMIT="$(
+  /usr/bin/env -i HOME=/tmp PATH=/usr/bin:/bin LANG=C.UTF-8 \
+    GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null GIT_CONFIG_NOSYSTEM=1 \
+    GIT_NO_REPLACE_OBJECTS=1 \
+    /usr/bin/git --no-replace-objects -C "$RELEASE_REPO" rev-parse --verify 'HEAD^{commit}'
+)"
+RELEASE_LAUNCHER="$(/usr/bin/mktemp /tmp/go-release-launcher.XXXXXX)"
+trap '/bin/rm -f "$RELEASE_LAUNCHER"' EXIT
+/usr/bin/env -i HOME=/tmp PATH=/usr/bin:/bin LANG=C.UTF-8 \
+  GIT_CONFIG_GLOBAL=/dev/null GIT_CONFIG_SYSTEM=/dev/null GIT_CONFIG_NOSYSTEM=1 \
+  GIT_NO_REPLACE_OBJECTS=1 \
+  /usr/bin/git --no-replace-objects --no-pager -C "$RELEASE_REPO" \
+  show "$RELEASE_COMMIT:scripts/release-check.sh" >"$RELEASE_LAUNCHER"
+sudo /usr/bin/install -o root -g root -m 0755 \
+  "$RELEASE_LAUNCHER" /usr/local/bin/go-workflow-release-check
+```
+
 Run the pre-tag candidate gate locally without publishing or invoking hosted automation:
 
 ```bash
-GO_RELEASE_ALLOW_CANDIDATE=1 bash scripts/release-check.sh 0.3.8
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.8 --allow-candidate
 ```
 
-After committing and creating the annotated tag, run the mandatory final gate. It requires a clean tree and tests the archived tag payload rather than the mutable checkout:
+After committing and creating the annotated tag, run the mandatory final gate. It is intentionally local, can run before the release commit or tag is pushed, requires a clean tree, and tests the archived tag payload rather than the mutable checkout:
 
 ```bash
-bash scripts/release-check.sh 0.3.8
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.8
 ```
+
+If a later repair commit must revalidate an existing immutable tag, opt in explicitly:
+
+```bash
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.8 --validate-existing
+```
+
+Existing-tag validation proves that the tag is an ancestor of `HEAD`. A shallow checkout is hydrated in an isolated temporary clone from the canonical HTTPS `viggomeesters/go-workflow-stack` origin so the working checkout remains untouched and historical tag regressions remain available. The historical stack payload is tested without pairing an adjacent or explicitly supplied project template: `--validate-existing` refuses `GO_PROJECT_TEMPLATE`, because executing a historical gate against external mutable state would violate checkout isolation. Validate template compatibility separately against the current stack. An isolated `/usr/bin/python3 -I` launcher builds a minimal environment before Bash starts, so inherited shell functions and startup files cannot affect path resolution. When installed outside the repository, the launcher rejects untrusted origins before executing repository code; existing-tag mode also proves the selected `HEAD` is reachable from an origin branch and loads the inner validator from that isolated remote clone. Release tools must resolve from the root-managed system path `/usr/local/bin:/usr/bin:/bin`; install `uv` there for historical distribution checks instead of relying on a user-writable `~/.local/bin`. Release modes are selected only through explicit command-line flags, not inherited shell variables. SSH origins, arbitrary forks, remote helpers, Git replacement refs, Git config injection, Git hooks inherited through environment config, and transport proxy/SSL overrides are rejected or ignored. Local filesystem remotes are accepted only for fixtures with `--allow-local-origin`.
 
 Review and explicitly apply an immutable project stack update:
 

@@ -1997,6 +1997,11 @@ def test_package_runtime_provenance_ignores_unrelated_parent_git_checkout(tmp_pa
 def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path: Path):
     source = tmp_path / "release-source"
     subprocess.run(["git", "clone", "-q", "--no-hardlinks", str(ROOT), str(source)], check=True)
+    source_shallow = source / ".git" / "shallow"
+    if source_shallow.is_file():
+        shutil.copytree(ROOT / ".git" / "objects", source / ".git" / "objects", dirs_exist_ok=True)
+        source_shallow.unlink()
+        subprocess.run(["git", "fsck", "--full", "--no-progress"], cwd=source, check=True, capture_output=True)
     subprocess.run(["git", "checkout", "-q", "v0.3.5"], cwd=source, check=True)
     release_commit = subprocess.run(
         ["git", "rev-parse", "v0.3.5^{}"], cwd=source, text=True, capture_output=True, check=True,
@@ -2380,20 +2385,263 @@ def test_status_reports_template_setup_instead_of_next_project_work(tmp_path: Pa
 
 def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    attacker = tmp_path / "attacker"
+    attacker_exec = tmp_path / "attacker-exec"
+    attacker_marker = tmp_path / "git-helper-invoked"
+    release_tmp = tmp_path / "release-tmp"
+    release_tmp.mkdir()
+    attacker_exec.mkdir()
+    upload_pack = attacker_exec / "git-upload-pack"
+    upload_pack.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(attacker_marker))}\nexit 99\n",
+        encoding="utf-8",
+    )
+    upload_pack.chmod(0o755)
     shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"], cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "init", "-q", "--bare", str(attacker)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
     env = os.environ.copy()
-    env["GO_RELEASE_SKIP_TESTS"] = "1"
+    env["GIT_CONFIG_PARAMETERS"] = f"'url.{attacker}.insteadOf'='{origin}'"
+    env["GIT_EXEC_PATH"] = str(attacker_exec)
+    env["TMPDIR"] = str(release_tmp)
     result = subprocess.run(
-        ["bash", "scripts/release-check.sh", "0.3.8"],
+        [
+            "./scripts/release-check.sh", "0.3.8",
+            "--validate-existing", "--allow-local-origin",
+        ],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
     assert "release preflight: v0.3.8" in result.stdout
     assert "publish: not performed" in result.stdout
+    assert not attacker_marker.exists()
+    assert list(release_tmp.iterdir()) == []
+
+
+def test_release_preflight_allows_normal_tag_gate_before_origin_push(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "base"], cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+    (repo / "release-marker.txt").write_text("release candidate\n", encoding="utf-8")
+    subprocess.run(["git", "add", "release-marker.txt"], cwd=repo, check=True)
+    subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo, check=True,
+    )
+    assert subprocess.run(
+        ["git", "--git-dir", str(origin), "show-ref", "--verify", "--quiet", "refs/tags/v0.3.8"],
+    ).returncode != 0
+
+    upload_pack_marker = tmp_path / "release-source-upload-pack-invoked"
+    upload_pack = tmp_path / "attacker-upload-pack"
+    upload_pack.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(upload_pack_marker))}\nexit 99\n",
+        encoding="utf-8",
+    )
+    upload_pack.chmod(0o755)
+    fsmonitor_marker = tmp_path / "release-reset-fsmonitor-invoked"
+    fsmonitor = tmp_path / "attacker-fsmonitor"
+    fsmonitor.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(fsmonitor_marker))}\nexit 0\n",
+        encoding="utf-8",
+    )
+    fsmonitor.chmod(0o755)
+    env = os.environ.copy()
+    env["GIT_CONFIG_COUNT"] = "2"
+    env["GIT_CONFIG_KEY_0"] = "remote.release-source.uploadpack"
+    env["GIT_CONFIG_VALUE_0"] = str(upload_pack)
+    env["GIT_CONFIG_KEY_1"] = "core.fsmonitor"
+    env["GIT_CONFIG_VALUE_1"] = str(fsmonitor)
+    index_path = repo / ".git" / "index"
+    index_before = hashlib.sha256(index_path.read_bytes()).hexdigest()
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo, text=True, capture_output=True, env=env,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "payload reconstructed from git archive with tag refs" in result.stdout
+    assert not upload_pack_marker.exists()
+    assert not fsmonitor_marker.exists()
+    assert hashlib.sha256(index_path.read_bytes()).hexdigest() == index_before
+
+
+def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    hook_dir = tmp_path / "attacker-hooks"
+    hook_marker = tmp_path / "pre-commit-invoked"
+    hook_dir.mkdir()
+    hook = hook_dir / "pre-commit"
+    hook.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(hook_marker))}\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    fsmonitor_marker = tmp_path / "bash-env-fsmonitor-invoked"
+    fsmonitor = tmp_path / "bash-env-fsmonitor"
+    fsmonitor.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(fsmonitor_marker))}\nexit 0\n",
+        encoding="utf-8",
+    )
+    fsmonitor.chmod(0o755)
+    path_attacker = tmp_path / "path-attacker"
+    path_marker = tmp_path / "path-bash-invoked"
+    path_attacker.mkdir()
+    fake_bash = path_attacker / "bash"
+    fake_bash.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(path_marker))}\nexit 0\n",
+        encoding="utf-8",
+    )
+    fake_bash.chmod(0o755)
+    fake_home = tmp_path / "attacker-home"
+    fake_home_bin = fake_home / ".local" / "bin"
+    fake_home_bin.mkdir(parents=True)
+    fake_uv_marker = tmp_path / "path-uv-invoked"
+    fake_uv = fake_home_bin / "uv"
+    fake_uv.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(fake_uv_marker))}\nexit 0\n",
+        encoding="utf-8",
+    )
+    fake_uv.chmod(0o755)
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    (repo / "scripts" / "check-linux.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "echo release-gate-ran\n"
+        "test ! -e \"${GO_PROJECT_TEMPLATE:-}\"\n"
+        "python3 -c 'import site; assert not site.ENABLE_USER_SITE'\n"
+        "test -z \"$(find \"$ROOT\" -mindepth 1 -maxdepth 1 -name 'tmp.*' -print -quit)\"\n"
+        "tmp=$(mktemp -d)\n"
+        "git -C \"$tmp\" init -q\n"
+        "printf checked > \"$tmp/checked.txt\"\n"
+        "git -C \"$tmp\" add checked.txt\n"
+        "git -C \"$tmp\" -c user.name=Pytest -c user.email=pytest@example.com commit -qm checked\n",
+        encoding="utf-8",
+    )
+    (repo / "scripts" / "check-distribution.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "case :$PATH: in *:$HOME/.local/bin:*) exit 91 ;; esac\n"
+        "python3 --version >/dev/null\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    origin = tmp_path / "origin"
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+    (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
+    subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(["git", "push", "-q", "origin", "main"], cwd=repo, check=True)
+
+    env = os.environ.copy()
+    env["GIT_CONFIG_COUNT"] = "1"
+    env["GIT_CONFIG_KEY_0"] = "core.hooksPath"
+    env["GIT_CONFIG_VALUE_0"] = str(hook_dir)
+    env["PATH"] = f"{path_attacker}:{env.get('PATH', '')}"
+    env["HOME"] = str(fake_home)
+    env["TMPDIR"] = str(repo)
+    exported_function_marker = tmp_path / "exported-function-invoked"
+    env["BASH_FUNC_pwd%%"] = f"() {{ printf invoked > {shlex.quote(str(exported_function_marker))}; }}"
+    env["BASH_FUNC_cd%%"] = f"() {{ printf invoked > {shlex.quote(str(exported_function_marker))}; builtin cd \"$@\"; }}"
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert not hook_marker.exists()
+    assert not path_marker.exists()
+    assert not fake_uv_marker.exists()
+    assert not exported_function_marker.exists()
+    assert "release-gate-ran" in result.stdout
+
+    explicit_template_result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "GO_PROJECT_TEMPLATE": str(hook_dir)},
+    )
+    assert explicit_template_result.returncode == 2
+    assert "refuses GO_PROJECT_TEMPLATE" in explicit_template_result.stderr
+    assert "release-gate-ran" not in explicit_template_result.stdout
+
+    empty_template_result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "GO_PROJECT_TEMPLATE": ""},
+    )
+    assert empty_template_result.returncode == 2
+    assert "refuses GO_PROJECT_TEMPLATE" in empty_template_result.stderr
+    assert "release-gate-ran" not in empty_template_result.stdout
+
+    bash_env = tmp_path / "bash-env"
+    bash_env_marker = tmp_path / "bash-env-startup-invoked"
+    bash_env.write_text(
+        f"printf invoked > {shlex.quote(str(bash_env_marker))}\n"
+        "export GIT_CONFIG_COUNT=2\n"
+        "export GIT_CONFIG_KEY_0=core.hooksPath\n"
+        f"export GIT_CONFIG_VALUE_0={shlex.quote(str(hook_dir))}\n"
+        "export GIT_CONFIG_KEY_1=core.fsmonitor\n"
+        f"export GIT_CONFIG_VALUE_1={shlex.quote(str(fsmonitor))}\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    bash_env_result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "BASH_ENV": str(bash_env)},
+    )
+    assert bash_env_result.returncode == 0, bash_env_result.stderr + bash_env_result.stdout
+    assert not hook_marker.exists()
+    assert not fsmonitor_marker.exists()
+    assert not bash_env_marker.exists()
+    assert "release-gate-ran" in bash_env_result.stdout
 
 
 def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Path):
@@ -2407,11 +2655,534 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
-    env["GO_RELEASE_SKIP_TESTS"] = "1"
-
-    result = subprocess.run(["bash", "scripts/release-check.sh", "0.3.8"], cwd=repo, text=True, capture_output=True, env=env)
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo, text=True, capture_output=True, env=env,
+    )
     assert result.returncode == 1
     assert "does not point to HEAD" in result.stderr
+
+
+def test_release_preflight_rejects_explicit_template_before_historical_gate_execution(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    unsafe_output = tmp_path / "must-not-be-written.json"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    (repo / "scripts" / "check-linux.sh").write_text(
+        f"#!/usr/bin/env bash\nset -euo pipefail\nprintf clobbered > {shlex.quote(str(unsafe_output))}\n",
+        encoding="utf-8",
+    )
+    (repo / "scripts" / "check-linux.sh").chmod(0o755)
+    (repo / "scripts" / "check-distribution.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "unsafe historical release"], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
+    subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
+    subprocess.run([*commit, "-m", "later"], cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        env={**os.environ, "GO_PROJECT_TEMPLATE": str(repo)},
+    )
+
+    assert result.returncode == 2
+    assert "refuses GO_PROJECT_TEMPLATE" in result.stderr
+    assert not unsafe_output.exists()
+
+
+def test_release_preflight_fails_closed_when_git_status_cannot_read_index(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    (repo / ".git" / "index").write_bytes(b"broken")
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 1
+    assert "could not inspect the caller worktree" in result.stderr
+    assert "index file smaller than expected" in result.stderr
+
+
+def test_release_preflight_does_not_execute_repo_local_clean_filter(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    filter_marker = tmp_path / "clean-filter-invoked"
+    clean_filter = tmp_path / "clean-filter"
+    clean_filter.write_text(
+        "#!/bin/sh\n"
+        f"printf invoked > {shlex.quote(str(filter_marker))}\n"
+        "cat\n",
+        encoding="utf-8",
+    )
+    clean_filter.chmod(0o755)
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
+    (repo / ".gitattributes").write_text("*.txt filter=attack\n", encoding="utf-8")
+    (repo / "payload.txt").write_text("release payload\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(["git", "config", "--local", "filter.attack.clean", str(clean_filter)], cwd=repo, check=True)
+    (repo / "payload.txt").write_text("attack probe\n", encoding="utf-8")
+    subprocess.run(
+        ["git", "hash-object", "--path=payload.txt", "payload.txt"],
+        cwd=repo,
+        check=True,
+        stdout=subprocess.DEVNULL,
+    )
+    assert filter_marker.exists(), "fixture must prove Git can execute the configured clean filter"
+    filter_marker.unlink()
+    (repo / "payload.txt").write_text("release payload\n", encoding="utf-8")
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert not filter_marker.exists()
+
+
+@pytest.mark.parametrize("index_flag", ["--assume-unchanged", "--skip-worktree"])
+def test_release_preflight_cannot_hide_modified_file_with_index_flag(tmp_path: Path, index_flag: str):
+    repo = tmp_path / "release-repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
+    (repo / "payload.txt").write_text("release payload\n", encoding="utf-8")
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(["git", "update-index", index_flag, "payload.txt"], cwd=repo, check=True)
+    (repo / "payload.txt").write_text("modified payload\n", encoding="utf-8")
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 1
+    assert "release worktree must be clean" in result.stderr
+
+
+def test_historical_release_gate_cannot_write_relative_file_into_caller_checkout(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    marker_name = "caller-checkout-mutated.txt"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    (repo / "scripts" / "check-linux.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        f"printf attempted > {shlex.quote(marker_name)}\n",
+        encoding="utf-8",
+    )
+    (repo / "scripts" / "check-distribution.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
+    subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
+    subprocess.run([*commit, "-m", "later"], cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert not (repo / marker_name).exists()
+
+
+def test_release_launcher_refuses_hidden_modified_inner_payload(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    marker = tmp_path / "mutable-inner-executed"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(
+        ["git", "update-index", "--assume-unchanged", "scripts/release-check-inner.sh"],
+        cwd=repo,
+        check=True,
+    )
+    (repo / "scripts" / "release-check-inner.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        f"printf invoked > {shlex.quote(str(marker))}\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode != 0
+    assert "differs from HEAD" in result.stderr
+    assert not marker.exists()
+
+
+def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    trusted_launcher = tmp_path / "go-workflow-release-check"
+    launcher_marker = tmp_path / "replacement-launcher-executed"
+    inner_marker = tmp_path / "replacement-inner-executed"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    for check_name in ("check-linux.sh", "check-distribution.sh"):
+        (repo / "scripts" / check_name).write_text(
+            "#!/usr/bin/env bash\nset -euo pipefail\n",
+            encoding="utf-8",
+        )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
+    original_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+
+    (repo / "scripts" / "release-check.sh").write_text(
+        "#!/usr/bin/python3 -I\n"
+        f"from pathlib import Path\nPath({str(launcher_marker)!r}).write_text('invoked')\n",
+        encoding="utf-8",
+    )
+    (repo / "scripts" / "release-check-inner.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        f"printf invoked > {shlex.quote(str(inner_marker))}\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    subprocess.run(
+        ["git", "add", "scripts/release-check.sh", "scripts/release-check-inner.sh"],
+        cwd=repo,
+        check=True,
+    )
+    subprocess.run([*commit, "-m", "replacement payload"], cwd=repo, check=True)
+    replacement_commit = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
+    subprocess.run(["git", "checkout", "-q", "--detach", original_head], cwd=repo, check=True)
+    subprocess.run(["git", "replace", original_head, replacement_commit], cwd=repo, check=True)
+
+    clean_git_env = {
+        "HOME": str(tmp_path),
+        "PATH": "/usr/bin:/bin",
+        "LANG": "C.UTF-8",
+        "GIT_CONFIG_GLOBAL": "/dev/null",
+        "GIT_CONFIG_SYSTEM": "/dev/null",
+        "GIT_CONFIG_NOSYSTEM": "1",
+        "GIT_NO_REPLACE_OBJECTS": "1",
+    }
+    release_commit = subprocess.check_output(
+        ["/usr/bin/git", "--no-replace-objects", "-C", str(repo), "rev-parse", "--verify", "HEAD^{commit}"],
+        text=True,
+        env=clean_git_env,
+    ).strip()
+    assert release_commit == original_head
+    trusted_launcher.write_bytes(
+        subprocess.check_output(
+            [
+                "/usr/bin/git", "--no-replace-objects", "--no-pager", "-C", str(repo),
+                "show", f"{release_commit}:scripts/release-check.sh",
+            ],
+            env=clean_git_env,
+        )
+    )
+    trusted_launcher.chmod(0o755)
+
+    result = subprocess.run(
+        [str(trusted_launcher), "--repo", str(repo), "0.3.8", "--allow-local-origin"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert not launcher_marker.exists()
+    assert not inner_marker.exists()
+
+
+def test_external_release_launcher_rejects_unproven_head_before_inner_execution(tmp_path: Path):
+    repo = tmp_path / "attacker-repo"
+    trusted_launcher = tmp_path / "go-workflow-release-check"
+    marker = tmp_path / "unproven-inner-executed"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    shutil.copy2(ROOT / "scripts" / "release-check.sh", trusted_launcher)
+    trusted_launcher.chmod(0o755)
+    (repo / "scripts" / "release-check-inner.sh").write_text(
+        "#!/usr/bin/env bash\n"
+        f"printf invoked > {shlex.quote(str(marker))}\n"
+        "exit 0\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "attacker head", "-q"],
+        cwd=repo,
+        check=True,
+    )
+
+    result = subprocess.run(
+        [str(trusted_launcher), "--repo", str(repo), "0.3.8", "--allow-candidate"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+    )
+
+    assert result.returncode != 0
+    assert "remote.origin.url" in result.stderr or "origin" in result.stderr
+    assert not marker.exists()
+
+
+def test_release_preflight_cannot_hide_untracked_files_with_git_config(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    redirected_worktree = tmp_path / "redirected-worktree"
+    redirected_worktree.mkdir()
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo, check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo, check=True,
+    )
+    (repo / "untracked-release-input.txt").write_text("must be detected\n", encoding="utf-8")
+    fsmonitor_marker = tmp_path / "fsmonitor-invoked"
+    fsmonitor = tmp_path / "fsmonitor-hook"
+    fsmonitor.write_text(
+        f"#!/bin/sh\nprintf invoked > {shlex.quote(str(fsmonitor_marker))}\nexit 0\n",
+        encoding="utf-8",
+    )
+    fsmonitor.chmod(0o755)
+    subprocess.run(["git", "config", "--local", "core.fsmonitor", str(fsmonitor)], cwd=repo, check=True)
+    subprocess.run(["git", "config", "--local", "core.worktree", str(redirected_worktree)], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["GIT_CONFIG_PARAMETERS"] = "'status.showUntrackedFiles'='no'"
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8"],
+        cwd=repo, text=True, capture_output=True, env=env,
+    )
+    assert result.returncode == 1
+    assert "release worktree must be clean" in result.stderr
+    assert not fsmonitor_marker.exists()
+
+
+def test_release_preflight_validates_existing_tag_from_separate_shallow_tips(tmp_path: Path):
+    origin = tmp_path / "origin"
+    repo = tmp_path / "release-repo"
+    shallow = tmp_path / "shallow"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    (repo / "scripts" / "check-linux.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\nROOT=$(cd \"$(dirname \"${BASH_SOURCE[0]}\")/..\" && pwd)\ngit -C \"$ROOT\" show-ref --verify --quiet refs/tags/v0.3.7\n",
+        encoding="utf-8",
+    )
+    (repo / "scripts" / "check-distribution.sh").write_text(
+        "#!/usr/bin/env bash\nset -euo pipefail\n",
+        encoding="utf-8",
+    )
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "historical"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.7", "-m", "v0.3.7"], cwd=repo, check=True)
+    (repo / "release.txt").write_text("release\n", encoding="utf-8")
+    subprocess.run(["git", "add", "release.txt"], cwd=repo, check=True)
+    subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"], cwd=repo, check=True)
+    (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
+    subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
+    subprocess.run([*commit, "-m", "later"], cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(["git", "clone", "-q", "--depth", "1", "--no-tags", f"file://{origin}", str(shallow)], check=True)
+    subprocess.run(["git", "remote", "set-url", "origin", "../origin"], cwd=shallow, check=True)
+    assert subprocess.run(
+        ["git", "show-ref", "--verify", "--quiet", "refs/tags/v0.3.8"], cwd=shallow,
+    ).returncode != 0
+    assert subprocess.run(
+        ["git", "merge-base", "--is-ancestor", "v0.3.8", "HEAD"], cwd=shallow,
+    ).returncode != 0
+
+    result = subprocess.run(
+        ["./scripts/release-check.sh", "0.3.8", "--validate-existing", "--allow-local-origin"],
+        cwd=shallow, text=True, capture_output=True,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert "payload reconstructed from git archive with tag refs" in result.stdout
+
+
+@pytest.mark.parametrize(
+    ("origin_url", "allow_local", "expected_error"),
+    [
+        ("https://example.com/attacker/go-workflow-stack.git", False, "refuses non-official origin"),
+        ("ext::malicious-helper", True, "refuses remote-helper origin"),
+        ("git+https://github.com/viggomeesters/go-workflow-stack.git", False, "refuses remote-helper origin"),
+        ("Git+https://github.com/viggomeesters/go-workflow-stack.git", False, "refuses remote-helper origin"),
+        ("git@github.com:viggomeesters/go-workflow-stack.git", False, "requires the official HTTPS origin"),
+    ],
+)
+def test_release_preflight_rejects_untrusted_origin(
+    tmp_path: Path, origin_url: str, allow_local: bool, expected_error: str,
+):
+    repo = tmp_path / "release-repo"
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"],
+        cwd=repo, check=True,
+    )
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"],
+        cwd=repo, check=True,
+    )
+    subprocess.run(["git", "remote", "add", "origin", origin_url], cwd=repo, check=True)
+    if "::" in origin_url:
+        subprocess.run(["git", "config", "--local", f"url.{repo}.insteadOf", origin_url], cwd=repo, check=True)
+        rewritten = subprocess.run(
+            ["git", "remote", "get-url", "origin"], cwd=repo, text=True, capture_output=True, check=True,
+        )
+        assert rewritten.stdout.strip() == str(repo)
+    env = os.environ.copy()
+    command = [
+        "./scripts/release-check.sh", "0.3.8",
+        "--validate-existing",
+    ]
+    if allow_local:
+        command.append("--allow-local-origin")
+    result = subprocess.run(
+        command,
+        cwd=repo, text=True, capture_output=True, env=env,
+    )
+    assert result.returncode == 1
+    assert expected_error in result.stderr
+
+
+def test_release_preflight_rejects_rewritten_annotated_tag_object(tmp_path: Path):
+    repo = tmp_path / "release-repo"
+    origin = tmp_path / "origin"
+    release_tmp = tmp_path / "release-tmp"
+    release_tmp.mkdir()
+    shutil.copytree(ROOT, repo, ignore=shutil.ignore_patterns(".git", ".pytest_cache", "__pycache__"))
+    subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "add", "."], cwd=repo, check=True)
+    commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
+    subprocess.run([*commit, "-m", "remote release"], cwd=repo, check=True)
+    tag = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.8", "-m", "v0.3.8"]
+    subprocess.run(tag, cwd=repo, check=True)
+    subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-f", "-a", "v0.3.8", "-m", "rewritten metadata", "HEAD"],
+        cwd=repo, check=True,
+    )
+    subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
+    env = os.environ.copy()
+    env["TMPDIR"] = str(release_tmp)
+    result = subprocess.run(
+        [
+            "./scripts/release-check.sh", "0.3.8",
+            "--validate-existing", "--allow-local-origin",
+        ],
+        cwd=repo, text=True, capture_output=True, env=env,
+    )
+    assert result.returncode == 1
+    assert "origin tag object v0.3.8 does not match local annotated tag" in result.stderr
+    assert list(release_tmp.iterdir()) == []
 
 
 def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_path: Path):

@@ -20,8 +20,10 @@
       "docs/stack-updates.md",
       "docs/agent-team-capacity-patterns.md",
       "docs/go-autonomous-loop.md",
+      "scripts/check-linux.sh",
       "scripts/check-distribution.sh",
       "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
       "fixtures/minimal/.go/project.json",
       "tests/test_smoke.py"
     ],
@@ -40,8 +42,10 @@
       "docs/stack-updates.md",
       "docs/agent-team-capacity-patterns.md",
       "docs/go-autonomous-loop.md",
+      "scripts/check-linux.sh",
       "scripts/check-distribution.sh",
       "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
       "fixtures/minimal/.go/project.json",
       "tests/test_smoke.py"
     ]
@@ -50,13 +54,14 @@
     "R-1: Runtime, package, and repo-local project versions are consistently 0.3.8/v0.3.8.",
     "R-2: Changelog and operator docs describe capacity planning, review lifecycle, and attributed finish evidence without claiming subscription usage is invoice cost.",
     "R-3: Local release checks and the complete stack test gate pass at the final release commit.",
-    "R-4: Annotated v0.3.8 and the release commit are pushed and remotely verifiable."
+    "R-4: Annotated v0.3.8 and the release commit are pushed and remotely verifiable.",
+    "R-5: Existing-tag validation starts from a root-managed committed launcher, reconstructs the exact remote annotated-tag payload without mutating the caller checkout, and fails closed against environment, executable-path, Python user-site, Git-config, helper, hook, fsmonitor, uploadpack, index-flag, and alternate-worktree injection."
   ],
   "verification": [
     "python3 cli/go.py validate .",
     "uv run --no-project --with pytest pytest -q",
     "make check",
-    "bash scripts/release-check.sh 0.3.8"
+    "/usr/local/bin/go-workflow-release-check --repo . 0.3.8 --validate-existing"
   ],
   "claim": {
     "agent": "hermes",

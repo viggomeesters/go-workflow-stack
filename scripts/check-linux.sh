@@ -3,6 +3,14 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}"
+TEMPLATE_CHECK_OUTPUT=""
+
+cleanup() {
+  if [ -n "$TEMPLATE_CHECK_OUTPUT" ]; then
+    rm -f "$TEMPLATE_CHECK_OUTPUT"
+  fi
+}
+trap cleanup EXIT
 
 if command -v python3 >/dev/null 2>&1 && python3 -c 'import sys, pytest; raise SystemExit(sys.version_info < (3, 11))' 2>/dev/null; then
   PYTHON=(python3)
@@ -24,7 +32,8 @@ cd "$ROOT"
 "${PYTHON[@]}" cli/go.py validate .
 
 if [ -d "$TEMPLATE/.go" ]; then
-  "${PYTHON[@]}" cli/go.py template-check "$TEMPLATE" --json >/tmp/go-template-check-local.json
+  TEMPLATE_CHECK_OUTPUT="$(mktemp "${TMPDIR:-/tmp}/go-template-check.XXXXXX")"
+  "${PYTHON[@]}" cli/go.py template-check "$TEMPLATE" --json >"$TEMPLATE_CHECK_OUTPUT"
   echo "template pairing: ok"
 else
   echo "template pairing: skipped (set GO_PROJECT_TEMPLATE to its checkout)"

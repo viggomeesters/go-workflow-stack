@@ -1,0 +1,116 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "release-v038-agent-capacity",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release v0.3.8 with agent capacity, review lifecycle, and attributed finish evidence",
+  "description": "Publish the shipped agent-team-derived capacity policy, separate work/review lifecycle, and runtime/billing/usage finish attribution as an immutable stack release so go-project-template can adopt the behavior truthfully.",
+  "scope": {
+    "read": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "go_workflow/cli.py",
+      "go_workflow/task_state.py",
+      "go_workflow/state_io.py",
+      "go_workflow/capacity_policy.py",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/stack-updates.md",
+      "docs/agent-team-capacity-patterns.md",
+      "docs/go-autonomous-loop.md",
+      "scripts/check-linux.sh",
+      "scripts/check-distribution.sh",
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "go_workflow/cli.py",
+      "go_workflow/task_state.py",
+      "go_workflow/state_io.py",
+      "go_workflow/capacity_policy.py",
+      ".go/project.json",
+      ".go/hierarchy.json",
+      ".go/architecture-principles.json",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/stack-updates.md",
+      "docs/agent-team-capacity-patterns.md",
+      "docs/go-autonomous-loop.md",
+      "scripts/check-linux.sh",
+      "scripts/check-distribution.sh",
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "R-1: Runtime, package, and repo-local project versions are consistently 0.3.8/v0.3.8.",
+    "R-2: Changelog and operator docs describe capacity planning, review lifecycle, and attributed finish evidence without claiming subscription usage is invoice cost.",
+    "R-3: Local release checks and the complete stack test gate pass at the final release commit.",
+    "R-4: Annotated v0.3.8 and the release commit are pushed and remotely verifiable.",
+    "R-5: Existing-tag validation starts from a root-managed committed launcher, binds HEAD and the inner validator to the canonical origin before repository-code execution, reconstructs the exact remote annotated-tag payload plus its immutable canonical template pairing without mutating the caller checkout, and fails closed against environment, executable-path, Python user-site, Git-config, helper, hook, fsmonitor, uploadpack, replacement-ref, index-flag, and alternate-worktree injection."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "uv run --no-project --with pytest pytest -q",
+    "make check",
+    "/usr/local/bin/go-workflow-release-check --repo . 0.3.8 --validate-existing"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-07-27T19:36:52+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-07-28T19:54:30+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "A prior isolated Hermes safe-mode review of the final code diff returned VERDICT B with no ship blocker; its only nonblocking concern was direct integration depth, which the root-owned canonical validator subsequently closed against pushed code HEAD 1f6aeb87301f7437b279b0be84b4cedc3f2b97be."
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-07-28T19:54:30+02:00",
+      "task_id": "release-v038-agent-capacity",
+      "agent": "hermes",
+      "summary": "no_diff=true; pre_finish_state=git status --porcelain returned empty at pushed code HEAD 1f6aeb87301f7437b279b0be84b4cedc3f2b97be before lifecycle mutation; verification_command=/usr/local/bin/go-workflow-release-check --repo . 0.3.8 --validate-existing; verification_result=passed 106 historical tests plus standalone distribution after current 127-test gate and go validate; post_finish_lifecycle_status=0 open 0 active 0 blocked 81 done before closure commit; release_identity=annotated tag object 7c06a42a760630c532bce4d984468da8c7bb8091 resolves to commit c30e11d580167a1b088cd84a5487ae02cb904449; launcher=root:root mode 755 sha256 d041522c4e1a46c976bffffd64b102bd2c2eab5623a02d5fa566c83914d25cbe; template_pairing=immutable go-project-template commit 3956fc92f9e99520756d10f08373635182f22d67; critic=prior isolated Hermes safe-mode code review returned VERDICT B with no ship blocker and canonical integration closed its nonblocking test-depth concern; runtime=hermes; model=gpt-5.6-sol; billing_mode=subscription; owner=viggo",
+      "changed_files": [],
+      "no_diff": true,
+      "verification": {
+        "command": "/usr/local/bin/go-workflow-release-check --repo . 0.3.8 --validate-existing",
+        "result": "pushed code HEAD 1f6aeb87301f7437b279b0be84b4cedc3f2b97be passed 106 historical tests plus standalone distribution after current 127-test gate and go validate; immutable template commit 3956fc92f9e99520756d10f08373635182f22d67; root:root 755 launcher sha256 d041522c4e1a46c976bffffd64b102bd2c2eab5623a02d5fa566c83914d25cbe; annotated tag object 7c06a42a760630c532bce4d984468da8c7bb8091 resolves to c30e11d580167a1b088cd84a5487ae02cb904449; separate post-finish lifecycle state was 0 open 0 active 0 blocked 81 done before closure commit"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": "gpt-5.6-sol",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "subscription",
+        "owner": "viggo",
+        "model": "gpt-5.6-sol",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "prior isolated Hermes safe-mode code review returned VERDICT B with no ship blocker and canonical integration closed its nonblocking test-depth concern",
+        "skip_reason": null
+      }
+    }
+  ]
+}

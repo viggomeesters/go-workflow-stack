@@ -2999,7 +2999,59 @@ def test_existing_release_uses_immutable_canonical_template_pairing():
     assert "https://github.com/viggomeesters/go-project-template.git" in inner
     assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
-    assert inner.count('PYTHONPATH="$SOURCE_ROOT"') == 2
+    assert inner.count('PYTHONPATH="$PYTHON_BOOTSTRAP:$SOURCE_ROOT"') == 2
+    assert 'os.environ.pop("PYTHONPATH", None)' in inner
+
+
+def test_release_python_bootstrap_precedes_archive_and_scrubs_descendants(tmp_path: Path):
+    bootstrap = tmp_path / "bootstrap"
+    archive = tmp_path / "archive"
+    child_cwd = tmp_path / "child"
+    bootstrap.mkdir()
+    archive.mkdir()
+    child_cwd.mkdir()
+    (bootstrap / "sitecustomize.py").write_text(
+        'import os\nos.environ.pop("PYTHONPATH", None)\n',
+        encoding="utf-8",
+    )
+    (archive / "sitecustomize.py").write_text(
+        'import os\nos.environ["ARCHIVE_SITECUSTOMIZE_RAN"] = "1"\n',
+        encoding="utf-8",
+    )
+    (archive / "usercustomize.py").write_text(
+        'import os\nos.environ["ARCHIVE_USERCUSTOMIZE_RAN"] = "1"\n',
+        encoding="utf-8",
+    )
+    (archive / "release_probe.py").write_text("VALUE = 42\n", encoding="utf-8")
+    child_code = (
+        "import importlib.util, os; "
+        "assert 'PYTHONPATH' not in os.environ; "
+        "assert importlib.util.find_spec('release_probe') is None"
+    )
+    parent_code = (
+        "import os, release_probe, subprocess, sys; "
+        "assert release_probe.VALUE == 42; "
+        "assert 'PYTHONPATH' not in os.environ; "
+        "assert 'ARCHIVE_SITECUSTOMIZE_RAN' not in os.environ; "
+        "assert 'ARCHIVE_USERCUSTOMIZE_RAN' not in os.environ; "
+        f"child = subprocess.run([sys.executable, '-c', {child_code!r}], cwd={str(child_cwd)!r}); "
+        "assert child.returncode == 0"
+    )
+    env = os.environ.copy()
+    env.update({
+        "PYTHONNOUSERSITE": "1",
+        "PYTHONSAFEPATH": "1",
+        "PYTHONPATH": os.pathsep.join((str(bootstrap), str(archive))),
+    })
+
+    result = subprocess.run(
+        [sys.executable, "-c", parent_code],
+        text=True,
+        capture_output=True,
+        env=env,
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
 
 
 def test_external_release_launcher_rejects_unproven_head_before_inner_execution(tmp_path: Path):

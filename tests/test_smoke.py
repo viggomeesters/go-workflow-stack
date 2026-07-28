@@ -2999,6 +2999,7 @@ def test_existing_release_uses_immutable_canonical_template_pairing():
     assert "https://github.com/viggomeesters/go-project-template.git" in inner
     assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
+    assert inner.count('PYTHONPATH="$SOURCE_ROOT"') == 2
 
 
 def test_external_release_launcher_rejects_unproven_head_before_inner_execution(tmp_path: Path):

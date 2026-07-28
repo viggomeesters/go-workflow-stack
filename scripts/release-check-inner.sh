@@ -414,8 +414,12 @@ fi
 
 (
   cd "$SOURCE_ROOT"
-  sanitized_gate /usr/bin/env GO_PROJECT_TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}" "$BASH_BIN" "$SOURCE_ROOT/scripts/check-linux.sh"
-  sanitized_gate "$BASH_BIN" "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
+  sanitized_gate /usr/bin/env \
+    GO_PROJECT_TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}" \
+    PYTHONPATH="$SOURCE_ROOT" \
+    "$BASH_BIN" "$SOURCE_ROOT/scripts/check-linux.sh"
+  sanitized_gate /usr/bin/env PYTHONPATH="$SOURCE_ROOT" \
+    "$BASH_BIN" "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
 )
 
 if [ -n "${head_commit:-}" ]; then

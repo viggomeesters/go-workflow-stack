@@ -2994,6 +2994,13 @@ def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: P
     assert not inner_marker.exists()
 
 
+def test_existing_release_uses_immutable_canonical_template_pairing():
+    inner = (ROOT / "scripts" / "release-check-inner.sh").read_text(encoding="utf-8")
+    assert "https://github.com/viggomeesters/go-project-template.git" in inner
+    assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
+    assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
+
+
 def test_external_release_launcher_rejects_unproven_head_before_inner_execution(tmp_path: Path):
     repo = tmp_path / "attacker-repo"
     trusted_launcher = tmp_path / "go-workflow-release-check"

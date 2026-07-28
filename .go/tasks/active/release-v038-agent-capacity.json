@@ -55,7 +55,7 @@
     "R-2: Changelog and operator docs describe capacity planning, review lifecycle, and attributed finish evidence without claiming subscription usage is invoice cost.",
     "R-3: Local release checks and the complete stack test gate pass at the final release commit.",
     "R-4: Annotated v0.3.8 and the release commit are pushed and remotely verifiable.",
-    "R-5: Existing-tag validation starts from a root-managed committed launcher, reconstructs the exact remote annotated-tag payload without mutating the caller checkout, and fails closed against environment, executable-path, Python user-site, Git-config, helper, hook, fsmonitor, uploadpack, index-flag, and alternate-worktree injection."
+    "R-5: Existing-tag validation starts from a root-managed committed launcher, binds HEAD and the inner validator to the canonical origin before repository-code execution, reconstructs the exact remote annotated-tag payload plus its immutable canonical template pairing without mutating the caller checkout, and fails closed against environment, executable-path, Python user-site, Git-config, helper, hook, fsmonitor, uploadpack, replacement-ref, index-flag, and alternate-worktree injection."
   ],
   "verification": [
     "python3 cli/go.py validate .",

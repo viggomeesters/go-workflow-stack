@@ -2999,59 +2999,43 @@ def test_existing_release_uses_immutable_canonical_template_pairing():
     assert "https://github.com/viggomeesters/go-project-template.git" in inner
     assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
-    assert inner.count('PYTHONPATH="$PYTHON_BOOTSTRAP:$SOURCE_ROOT"') == 2
-    assert 'os.environ.pop("PYTHONPATH", None)' in inner
+    assert "PYTHONSAFEPATH=" not in inner
+    assert "PYTHONPATH=" not in inner
 
 
-def test_release_python_bootstrap_precedes_archive_and_scrubs_descendants(tmp_path: Path):
-    bootstrap = tmp_path / "bootstrap"
+def test_release_python_imports_use_archive_cwd_without_shadowing_script_entrypoints(tmp_path: Path):
     archive = tmp_path / "archive"
-    child_cwd = tmp_path / "child"
-    bootstrap.mkdir()
+    tool_bin = tmp_path / "tool-bin"
     archive.mkdir()
-    child_cwd.mkdir()
-    (bootstrap / "sitecustomize.py").write_text(
-        'import os\nos.environ.pop("PYTHONPATH", None)\n',
-        encoding="utf-8",
-    )
-    (archive / "sitecustomize.py").write_text(
-        'import os\nos.environ["ARCHIVE_SITECUSTOMIZE_RAN"] = "1"\n',
-        encoding="utf-8",
-    )
-    (archive / "usercustomize.py").write_text(
-        'import os\nos.environ["ARCHIVE_USERCUSTOMIZE_RAN"] = "1"\n',
-        encoding="utf-8",
-    )
+    tool_bin.mkdir()
     (archive / "release_probe.py").write_text("VALUE = 42\n", encoding="utf-8")
-    child_code = (
-        "import importlib.util, os; "
-        "assert 'PYTHONPATH' not in os.environ; "
-        "assert importlib.util.find_spec('release_probe') is None"
+    entrypoint = tool_bin / "installed-entrypoint.py"
+    entrypoint.write_text(
+        "import importlib.util\n"
+        "assert importlib.util.find_spec('release_probe') is None\n",
+        encoding="utf-8",
     )
-    parent_code = (
-        "import os, release_probe, subprocess, sys; "
-        "assert release_probe.VALUE == 42; "
-        "assert 'PYTHONPATH' not in os.environ; "
-        "assert 'ARCHIVE_SITECUSTOMIZE_RAN' not in os.environ; "
-        "assert 'ARCHIVE_USERCUSTOMIZE_RAN' not in os.environ; "
-        f"child = subprocess.run([sys.executable, '-c', {child_code!r}], cwd={str(child_cwd)!r}); "
-        "assert child.returncode == 0"
-    )
-    env = os.environ.copy()
-    env.update({
-        "PYTHONNOUSERSITE": "1",
-        "PYTHONSAFEPATH": "1",
-        "PYTHONPATH": os.pathsep.join((str(bootstrap), str(archive))),
-    })
+    env = {**os.environ, "PYTHONNOUSERSITE": "1"}
+    env.pop("PYTHONPATH", None)
+    env.pop("PYTHONSAFEPATH", None)
 
-    result = subprocess.run(
-        [sys.executable, "-c", parent_code],
+    source_process = subprocess.run(
+        [sys.executable, "-c", "import release_probe; assert release_probe.VALUE == 42"],
         text=True,
         capture_output=True,
+        cwd=archive,
+        env=env,
+    )
+    installed_process = subprocess.run(
+        [sys.executable, str(entrypoint)],
+        text=True,
+        capture_output=True,
+        cwd=archive,
         env=env,
     )
 
-    assert result.returncode == 0, result.stderr + result.stdout
+    assert source_process.returncode == 0, source_process.stderr + source_process.stdout
+    assert installed_process.returncode == 0, installed_process.stderr + installed_process.stdout
 
 
 def test_external_release_launcher_rejects_unproven_head_before_inner_execution(tmp_path: Path):

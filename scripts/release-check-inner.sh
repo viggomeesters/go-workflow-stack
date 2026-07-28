@@ -95,18 +95,10 @@ PY
 echo "release preflight: v$VERSION"
 SOURCE_ROOT="$ROOT"
 ARCHIVE_WORK=""
-PYTHON_BOOTSTRAP="$(mktemp -d /tmp/go-release-python.XXXXXX)"
 cleanup() {
-  rm -rf "${ARCHIVE_WORK:-}" "$PYTHON_BOOTSTRAP"
+  rm -rf "${ARCHIVE_WORK:-}"
 }
 trap cleanup EXIT
-cat >"$PYTHON_BOOTSTRAP/sitecustomize.py" <<'PY'
-import os
-
-# Keep the proven archive importable in this interpreter without leaking its
-# PYTHONPATH into subprocesses that must validate their installed package.
-os.environ.pop("PYTHONPATH", None)
-PY
 
 release_origin_url() {
   local raw_url
@@ -264,7 +256,6 @@ sanitized_gate() (
     LANG="${LANG:-C.UTF-8}" \
     TMPDIR="${TMPDIR:-/tmp}" \
     PYTHONNOUSERSITE=1 \
-    PYTHONSAFEPATH=1 \
     GIT_CONFIG_GLOBAL=/dev/null \
     GIT_CONFIG_SYSTEM=/dev/null \
     GIT_CONFIG_NOSYSTEM=1 \
@@ -427,10 +418,8 @@ fi
   cd "$SOURCE_ROOT"
   sanitized_gate /usr/bin/env \
     GO_PROJECT_TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}" \
-    PYTHONPATH="$PYTHON_BOOTSTRAP:$SOURCE_ROOT" \
     "$BASH_BIN" "$SOURCE_ROOT/scripts/check-linux.sh"
-  sanitized_gate /usr/bin/env PYTHONPATH="$PYTHON_BOOTSTRAP:$SOURCE_ROOT" \
-    "$BASH_BIN" "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
+  sanitized_gate "$BASH_BIN" "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
 )
 
 if [ -n "${head_commit:-}" ]; then

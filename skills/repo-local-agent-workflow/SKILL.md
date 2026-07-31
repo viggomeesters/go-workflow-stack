@@ -122,7 +122,7 @@ python3 ~/github/go-workflow-stack/cli/go.py loop <target-repo> --max-tasks 10 -
 python3 ~/github/go-workflow-stack/cli/go.py go-loop <target-repo> --max-tasks 10 --json  # explicit alias
 ```
 
-Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the repo-local go router. Normalize `loop`, `go-loop`, and `goloop` to the stronger `go-loop` route. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then recommends `spike`, `auto`, `go-loop`, or task creation. For `spike`, it distinguishes `mode=create_repo` from `mode=repair_existing_repo`; repair examples include `--skip-repo-complete` to avoid overwriting mature repos.
+Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gOo`, etc. all mean: invoke the single public repo-local Go router. Treat `Go plan`, `Go T123`, and `Go loop 2h` as modifiers, then report `selected_route` and continue through the internal primitive without another user command. The router inspects: repo exists, `.go/project.json`, vision, principles, hierarchy, open/active/blocked/done task counts, validity, and then selects discovery, planning, task intake, execution, or a bounded loop. For `spike`, it distinguishes `mode=create_repo` from `mode=repair_existing_repo`; repair examples include `--skip-repo-complete` to avoid overwriting mature repos.
 
 `go spike` is the bootstrap command Viggo can say when the project is still only an idea/design:
 
@@ -134,9 +134,9 @@ Normalize user-facing first tokens with `/^go+$/i`: `go`, `GO`, `Go`, `GOO`, `gO
 6. Append an ADR-lite decision event that this repo now uses the go spike/go auto contract.
 7. Validate and report the next open task.
 
-`go auto` is the autonomous continuation command. It means Viggo hands control to the agent inside repo-local safety rails; it is not just task-list printing and it is not a request for Viggo to keep typing the next phase. Bare `go` in a repo-local project should converge to this same command-train behavior after routing.
+`auto` is an internal autonomous continuation primitive. Viggo hands control to the agent with canonical `Go`; the router chooses `auto` or the stronger loop internally. It is not a request for Viggo to keep typing the next phase.
 
-**No-command-spam rule:** when Viggo says `go`, `go auto`, or `go-loop` in a repo-local context, the invoking coding agent must start the tool-call train immediately. Do not reply with a list of commands for Viggo to run. The default action is: inspect route/status, repair/confirm the `.go` contract, create or claim the next task, execute inside scope, verify, critic/recheck, repair, finish with evidence, and continue until done/repository-gate/budget.
+**No-command-spam rule:** when Viggo says `Go` or uses a modifier such as `Go plan`, `Go T123`, or `Go loop 2h`, the invoking coding agent must start the tool-call train immediately. Do not reply with a list of internal commands for Viggo to run. The default action is: inspect route/status, report one route line, repair/confirm the `.go` contract, create or claim the next task, execute inside scope when allowed, verify, critic/recheck, repair, finish with evidence, and continue until done/repository-gate/budget. `Go plan` stops before implementation.
 
 **Task-first invariant:** every non-empty new GO instruction becomes a new repo-local task before product execution, even when other open tasks already exist. Invoke `go <repo> --intent "<instruction>" --write [--loop] --execute`; this must append `task.created`, then claim the task before any build adapter or product diff. Use direct `go-loop` only to continue already-materialized open tasks. Direct loop execution with no open task fails closed.
 

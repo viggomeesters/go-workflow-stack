@@ -6,6 +6,10 @@ Reusable tooling for repo-local agentic engineering.
 
 The stack contains schemas, validators, fixtures, and a small CLI for projects that keep their own `.go/` JSON/JSONL state next to the code.
 
+For Viggo, `Go` is the single public repository-work command. `Go plan`,
+`Go T123`, and `Go loop 2h` are modifiers; the CLI commands documented below
+are internal primitives used by agents, scripts, and tests.
+
 Projects may combine `required_stack_version` with an immutable `stack_ref` (`vX.Y.Z` or a full commit SHA). The minimum version protects compatibility; the ref makes bootstrap and cross-machine continuation reproducible.
 
 ## Why this exists

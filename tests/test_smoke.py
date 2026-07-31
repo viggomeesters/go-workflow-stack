@@ -1487,10 +1487,16 @@ def test_native_codex_adapter_quotes_metacharacter_repository_path(tmp_path: Pat
 
 
 def test_routing_and_task_state_domains_are_importable(tmp_path: Path):
-    from go_workflow.routing import normalize_router_command, recommend_route
+    from go_workflow.routing import classify_public_go_intent, normalize_router_command, recommend_route
     from go_workflow.task_state import open_task_records, task_path, unfinished_task_ids
 
     assert normalize_router_command("GOO") == "go"
+    assert classify_public_go_intent("plan de onboarding", {})["route"] == "plan"
+    assert classify_public_go_intent("loop 2h tot groen", {})["route"] == "loop"
+    assert classify_public_go_intent("wayfinder voor deze greenfield", {})["route"] == "wayfinder"
+    assert classify_public_go_intent("T123", {})["route"] == "goal"
+    assert classify_public_go_intent("fix de login", {})["route"] == "now"
+    assert classify_public_go_intent("ga verder", {"open_task_count": 1})["route"] == "goal"
     recommendation = recommend_route("go-loop", "werk tot groen", {
         "repo_exists": True,
         "has_go": True,
@@ -1501,6 +1507,8 @@ def test_routing_and_task_state_domains_are_importable(tmp_path: Path):
         "open_task_count": 1,
     })
     assert recommendation["command"] == "go-loop"
+    assert recommendation["public_command"] == "go"
+    assert recommendation["selected_route"] == "loop"
 
     root = tmp_path / ".go"
     open_path = task_path(root, "open", "later")
@@ -3492,6 +3500,8 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     ready_route = run_go("router", str(repo), "--command", "GOO", "--intent", "ga verder", "--json")
     assert ready_route.returncode == 0, ready_route.stderr + ready_route.stdout
     ready_plan = json.loads(ready_route.stdout)
+    assert ready_plan["public_command"] == "go"
+    assert ready_plan["selected_route"] == "goal"
     assert ready_plan["state"]["has_vision"] is True
     assert ready_plan["state"]["has_principles"] is True
     assert ready_plan["state"]["open_task_count"] == 1
@@ -3511,6 +3521,13 @@ def test_go_router_normalizes_go_variants_and_detects_repo_state(tmp_path: Path)
     direct_loop_plan = json.loads(direct_loop_route.stdout)
     assert direct_loop_plan["normalized_command"] == "go-loop"
     assert direct_loop_plan["recommended"]["command"] == "go-loop"
+
+    plan_only_route = run_go("router", str(repo), "--command", "go", "--intent", "plan alleen; niet uitvoeren", "--json")
+    assert plan_only_route.returncode == 0, plan_only_route.stderr + plan_only_route.stdout
+    plan_only = json.loads(plan_only_route.stdout)
+    assert plan_only["public_command"] == "go"
+    assert plan_only["selected_route"] == "plan"
+    assert plan_only["stop_before_implementation"] is True
 
 
 def test_route_without_go_contract_fails_closed_without_vault_fallback(tmp_path: Path):

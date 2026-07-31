@@ -2,7 +2,7 @@
 
 This is the practical command layer for Viggo/Bertus/Hermes.
 
-The user-facing trigger is deliberately sloppy. These should all route to the same command router:
+`Go` is the single public repository-work command. These spellings route to the same command router:
 
 ```text
 go
@@ -15,11 +15,17 @@ gOo
 Router rule:
 
 ```text
-/^go+$/i                    -> repo-local go router
-loop | go-loop | goloop      -> go-loop control-handoff router
+/^go+$/i                    -> public repo-local Go router
+Go plan <work>              -> prepare durable state; stop before implementation
+Go <task-id>                -> resume/execute the named repo-local task
+Go loop <budget> <work>     -> bounded loop selected internally
+Go wayfinder <effort>       -> discovery before planning/execution
 ```
 
-The router then inspects the target repo and chooses what should happen next.
+The router reports `public_command`, `selected_route`, and
+`stop_before_implementation`, then chooses a compatible internal stack
+primitive. A coding agent continues with that primitive; Viggo should not have
+to type `go-plan`, `go-goal`, or `go-loop` as a second command.
 
 ## Quick use
 

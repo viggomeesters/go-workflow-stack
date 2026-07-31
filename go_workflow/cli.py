@@ -2617,13 +2617,16 @@ def cmd_router(args: argparse.Namespace) -> int:
         recommended["example"] = shell_join("python3", Path(__file__).resolve(), "task", "create", repo, "--summary", "<next task>")
     result = {
         "schema": "go-workflow.router.v1",
+        "public_command": recommended.get("public_command", "go"),
+        "selected_route": recommended.get("selected_route", ""),
+        "stop_before_implementation": bool(recommended.get("stop_before_implementation", False)),
         "normalized_command": normalized,
         "raw_command": raw_command,
         "intent": args.intent,
         "repo": str(repo),
         "state": state,
         "recommended": recommended,
-        "router_policy": "Normalize /^go+$/i tokens (go, GO, Go, GOO, gOo) to the repo-local go router; normalize loop/go-loop/goloop to go-loop; then choose spike/auto/go-loop/task-create from repo state.",
+        "router_policy": "Expose one public Go command; classify explicit plan/loop/task-id/Wayfinder intent, then choose internal repo-local primitives without requiring another user command.",
     }
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
@@ -3516,7 +3519,7 @@ def build_parser() -> argparse.ArgumentParser:
         loop.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
         loop.add_argument("--json", action="store_true")
         loop.set_defaults(func=cmd_loop)
-    router = sub.add_parser("router", help="Normalize go/GO/GOO commands and choose spike/auto/task route from repo state")
+    router = sub.add_parser("router", help="Route one public Go command to internal repo-local discovery/planning/execution primitives")
     router.add_argument("repo", nargs="?", default=".")
     router.add_argument("--command", default="go")
     router.add_argument("--intent", default="")

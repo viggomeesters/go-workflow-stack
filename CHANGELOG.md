@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Consolidate user-facing repository work behind one `Go` command with plan, task-id, loop-budget, and Wayfinder routing metadata while retaining existing CLI primitives internally.
+
 ## 0.3.8 - 2026-07-27
 
 - Persist exact GO intent text, SHA-256, and an optional durable source reference on intent-created tasks and creation events.

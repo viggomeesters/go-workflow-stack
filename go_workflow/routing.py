@@ -18,23 +18,73 @@ def normalize_router_command(raw_command: str) -> str:
     return token
 
 
-def recommend_route(normalized: str, intent: str, state: dict[str, Any]) -> dict[str, str]:
+def classify_public_go_intent(intent: str, state: dict[str, Any]) -> dict[str, Any]:
+    """Classify one public Go prompt without exposing CLI primitives."""
+    text = (intent or "").strip().lower()
+    stop_before_implementation = bool(
+        re.search(r"\b(alleen plan|plan only|niet uitvoeren|do not execute)\b", text)
+        or re.match(r"^(?:go\s+)?plan\b", text)
+    )
+    if "wayfinder" in text:
+        route = "wayfinder"
+    elif stop_before_implementation:
+        route = "plan"
+    elif any(word in text for word in ("loop", "ralph", "groen", "avondrun", "controle afgeven")):
+        route = "loop"
+    elif re.match(r"^(?:go\s+)?(?:task|backlog|leg vast)\b", text):
+        route = "task"
+    elif any(word in text for word in ("vision", "visie", "north star", "non-goal")):
+        route = "vision"
+    elif re.fullmatch(r"(?:go\s+)?[a-z]+\d+", text, flags=re.I):
+        route = "goal"
+    elif state.get("open_task_count", 0) > 0 or state.get("active_task_count", 0) > 0:
+        route = "goal"
+    elif text:
+        route = "now"
+    else:
+        route = "task"
+    return {
+        "public_command": "go",
+        "route": route,
+        "stop_before_implementation": stop_before_implementation,
+    }
+
+
+def recommend_route(normalized: str, intent: str, state: dict[str, Any]) -> dict[str, Any]:
     intent = (intent or "").strip().lower()
+    public = classify_public_go_intent(intent, state)
+    if normalized == "go-loop":
+        public.update({"route": "loop", "stop_before_implementation": False})
+
+    def recommendation(command: str, reason: str, **extra: Any) -> dict[str, Any]:
+        return {
+            "command": command,
+            "reason": reason,
+            "public_command": "go",
+            "selected_route": public["route"],
+            "stop_before_implementation": public["stop_before_implementation"],
+            **extra,
+        }
+
     if normalized not in {"go", "go-loop"}:
-        return {"command": "unknown", "reason": "command token is not a go/go-loop variant"}
+        return recommendation("unknown", "command token is not a go/go-loop variant")
     if not state.get("repo_exists"):
-        return {"command": "spike", "mode": "create_repo", "reason": "repo directory is missing"}
+        return recommendation("spike", "repo directory is missing", mode="create_repo", selected_route="spike")
     if not state.get("has_go"):
-        return {"command": "spike", "mode": "repair_existing_repo", "reason": "repo exists but .go contract is missing"}
+        return recommendation("spike", "repo exists but .go contract is missing", mode="repair_existing_repo", selected_route="spike")
     if not state.get("valid") or not all(state.get(key) for key in ("has_vision", "has_principles", "has_hierarchy")):
-        return {"command": "spike", "reason": "repo-local contract is incomplete or invalid"}
+        return recommendation("spike", "repo-local contract is incomplete or invalid", selected_route="spike")
+    if public["route"] in {"wayfinder", "vision", "plan"}:
+        return recommendation(public["route"], f"public Go selected the non-executing {public['route']} route")
+    if public["route"] == "task":
+        return recommendation("task create", "public Go requested durable intake without execution")
     if state.get("open_task_count", 0) > 0 and normalized == "go-loop":
-        return {"command": "go-loop", "reason": "explicit go-loop command and repo has open tasks"}
-    if state.get("open_task_count", 0) > 0 and any(word in intent for word in ("loop", "ralph", "groen", "avondrun", "controle afgeven")):
-        return {"command": "go-loop", "reason": "repo is valid, has open tasks, and intent asks for full control handoff/loop"}
+        return recommendation("go-loop", "explicit loop route and repo has open tasks")
+    if state.get("open_task_count", 0) > 0 and public["route"] == "loop":
+        return recommendation("go-loop", "repo is valid, has open tasks, and public Go selected a bounded loop")
     if state.get("open_task_count", 0) > 0:
-        return {"command": "auto", "reason": "repo is valid and has open tasks"}
-    return {"command": "task create", "reason": "repo is valid but has no open tasks; convert feedback into tasks"}
+        return recommendation("auto", "repo is valid and has open tasks")
+    return recommendation("task create", "repo is valid but has no open tasks; materialize the public Go intent first")
 
 
 def detected_platform(requested: str) -> dict[str, Any]:

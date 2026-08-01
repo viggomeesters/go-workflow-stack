@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "advice-model-01-authority",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Classify advice, read-only, imperative, Go, and Sent as goal authority",
+  "description": "Make the public router expose execution authority separately from route selection so questions stay advisory and explicit authorization is machine-readable.",
+  "scope": {
+    "read": [
+      "go_workflow/routing.py",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/routing.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Question forms classify as advice without implementation authority.",
+    "Imperatives, canonical Go, and Sent as goal classify as execution-authorized.",
+    "Explicit read-only or only-advice wording overrides execution authority.",
+    "Existing route selection remains backward compatible."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k authority"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-08-01T13:02:36+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-08-01T13:04:20+02:00",
+      "agent": "codex",
+      "summary": "RED: focused authority test failed because question prompts routed to now and exposed no authority fields. GREEN: classifier now returns advice/read_only/execute, authority source, implementation_authorized, and planning_state_authorized; focused routing+authority tests 2 passed. Public router readback confirmed question=no implementation, only-advice=no writes, Sent as goal=execute. Self-reflect: no additional durable agent/process improvement needed; the governing behavior is captured by this planned runtime task and tests."
+    }
+  ]
+}

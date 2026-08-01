@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 0.3.8 - 2026-08-01
+
+- Classify advice, explicit read-only requests, imperatives, bare Go, and Sent as goal with separate planning and implementation authority.
+- Persist compact schema-validated recommendations under repo-local `.go`, with exact SHA-256/source provenance and no copied exploration transcript.
+- Promote a pending recommendation into semantic tasks exactly once and continue execution in the same bare-Go invocation after chat context is gone.
+- Turn every execution-brief acceptance item into an evidence-backed R# outcome while preserving explicit closure for legacy free-intent outcomes.
+- Keep Wayfinder, canonical Go, Hermes links, and the public project template aligned with the durable advice-to-outcome contract.
+
 - Consolidate user-facing repository work behind one `Go` command with plan, task-id, loop-budget, and Wayfinder routing metadata while retaining existing CLI primitives internally.
 
 ## 0.3.8 - 2026-07-27

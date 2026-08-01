@@ -113,6 +113,21 @@
       "tasks": [
         "execution-brief-runtime"
       ]
+    },
+    {
+      "id": "complete-advice-to-outcome-model",
+      "title": "Complete advice-to-outcome model",
+      "description": "Make advice durable, authorization explicit, bare Go resumable, outcomes provable, and the contract portable across skills and template.",
+      "features": [],
+      "tasks": [
+        "advice-model-01-authority",
+        "advice-model-02-inbox",
+        "advice-model-03-promotion",
+        "advice-model-04-outcomes",
+        "advice-model-05-e2e-proof",
+        "advice-model-08-authority-handoff",
+        "advice-model-11-release-v038"
+      ]
     }
   ]
 }

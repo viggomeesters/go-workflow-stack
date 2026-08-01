@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "advice-model-02-inbox",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Persist and validate the latest recommendation in repo-local .go",
+  "description": "Add supported recommendation create/status state so a compact execution brief survives chat loss before it becomes tasks.",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "schemas/execution-brief.schema.json",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "schemas/recommendation.schema.json",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "A supported CLI command writes one validated pending recommendation under .go and validate inspects it.",
+    "The stored record contains compact brief, source hash/reference, authority state, and creation time without full chat prose.",
+    "Invalid or tampered recommendations fail before state mutation.",
+    "Explicit read-only advice can be represented without creating durable state."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k recommendation"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-08-01T13:04:20+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-08-01T13:06:20+02:00",
+      "agent": "codex",
+      "summary": "RED: recommendation tests failed because no supported recommendation command or state existed. GREEN: recommendation create/status now validates execution briefs, persists compact .go/recommendations/pending.json with authority/time/hash/source, validates it during repo validation, rejects tampered hashes before writes, and supports --read-only with zero .go mutation; focused 2 tests passed. Self-reflect: no additional durable agent/process improvement needed; the planned supported state boundary replaces the prior ad-hoc gap."
+    }
+  ]
+}

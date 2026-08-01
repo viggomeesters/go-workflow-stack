@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "advice-model-03-promotion",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Promote the pending recommendation with one bare Go and resume without chat",
+  "description": "Make bare Go discover the latest pending recommendation, materialize its work units exactly once, archive the recommendation, and enter execution in the same invocation.",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "go_workflow/state_io.py",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Bare Go with execution authority resumes from .go without conversation text or an execution-brief file.",
+    "Promotion is idempotent and never creates a task named Go.",
+    "The pending recommendation is archived only after all work-unit tasks are validly materialized.",
+    "Execute continues through the eligible tasks in the same invocation."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k recommendation_promotion"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-08-01T13:06:20+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-08-01T13:07:42+02:00",
+      "agent": "codex",
+      "summary": "RED: bare Go with only pending .go state returned task_required and created nothing. GREEN: cmd_go now discovers validated pending recommendation state, materializes its work units, archives it as applied only after valid task creation, records Go authority, and executes the task in the same invocation. Recovery/idempotency test passed: no chat/brief input, one applied record, no task named Go, second Go creates nothing. Focused recommendation/execution-brief suite passed. Self-reflect: no additional durable process change needed beyond the planned resume contract and regression."
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "advice-model-08-authority-handoff",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Close Sent-as-goal promotion provenance and non-executing route authority",
+  "description": "Record Go/imperative/Sent-as-goal promotion sources in the applied recommendation and ensure task/vision/plan routes never expose implementation authority.",
+  "scope": {
+    "read": [
+      "go_workflow/routing.py",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/routing.py",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Sent as goal can promote a pending recommendation and the applied record preserves sent_as_goal authority source.",
+    "Bare Go and explicit continuation imperatives promote rather than create relay tasks.",
+    "Task, vision, plan, advice, and Wayfinder routes never authorize implementation."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k authority_handoff"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-08-01T13:19:05+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-08-01T13:19:59+02:00",
+      "agent": "codex",
+      "summary": "RED: non-executing Go task/vision routes still exposed implementation_authorized=true and promotion had no authority-source flag. GREEN: task/vision/plan/advice/Wayfinder stop before implementation; continuation imperatives consume pending state rather than creating relay tasks; --authority-source preserves go/imperative/sent_as_goal in the applied record. Focused authority and promotion tests passed. Self-reflect: completion audit correctly created this provenance repair task instead of hiding the post-done gap."
+    }
+  ]
+}

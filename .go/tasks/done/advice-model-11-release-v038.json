@@ -1,0 +1,45 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "advice-model-11-release-v038",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prepare and locally tag go-workflow-stack v0.3.8",
+  "description": "Version the completed advice-to-outcome runtime so public templates can pin an immutable compatible release; do not push or publish without explicit authorization.",
+  "scope": {
+    "read": [
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Runtime and package metadata consistently report 0.3.8/v0.3.8.",
+    "Release notes describe authority, pending recommendation, bare-Go promotion, and outcome evidence behavior.",
+    "Full local Linux/WSL-compatible suite and template pairing pass before tag.",
+    "An annotated local v0.3.8 tag points at the verified release commit; no push or GitHub Actions occur."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-08-01T13:21:58+02:00"
+  },
+  "evidence": [
+    {
+      "created_at": "2026-08-01T13:26:13+02:00",
+      "agent": "codex",
+      "summary": "Versioned stack/package/project contract to 0.3.8/v0.3.8 and added release notes for authority, durable recommendation, bare-Go promotion, evidence closure, skills, and template. Release regression initially found two hermetic preflight fixtures still on 0.3.7; updated them and focused release tests passed. Final scripts/check-linux.sh: Python 3.12.13, 103 tests passed, .go valid, template pairing ok, no GitHub Actions. Local annotated tag will be created only after the release commit is clean. No push/publish. Self-reflect: version-synchronized release fixtures are now part of the verified gate."
+    }
+  ]
+}

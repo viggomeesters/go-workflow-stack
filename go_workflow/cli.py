@@ -60,6 +60,7 @@ TASK_SCHEMA = "go-workflow.repo-local.task.v1"
 EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 EXECUTION_BRIEF_SCHEMA = "go-workflow.execution-brief.v1"
+RECOMMENDATION_SCHEMA = "go-workflow.recommendation.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
 OUTCOME_TERMINAL_STATUSES = {"verified", "blocked", "rejected"}
@@ -226,6 +227,42 @@ def outcome_completion_findings(task: dict[str, Any]) -> list[str]:
     return findings
 
 
+def verify_pending_outcomes_from_checks(repo: Path, path: Path, task: dict[str, Any], agent: str, checks: list[dict[str, Any]]) -> dict[str, Any]:
+    """Close pending acceptance outcomes only after verification and critic have passed."""
+    if task.get("outcome_tracking_version") != 1:
+        return task
+    outcomes = task.get("requested_outcomes") or []
+    if not outcomes or any(
+        not isinstance(outcome, dict) or outcome.get("source") != "execution_brief_acceptance"
+        for outcome in outcomes
+    ):
+        return task
+    passed_commands = [str(check.get("command") or "verification") for check in checks if check.get("returncode") == 0]
+    evidence_summary = "verification and critic passed: " + "; ".join(passed_commands or ["no verification command"])
+    changed: list[str] = []
+    for outcome in outcomes:
+        if not isinstance(outcome, dict) or outcome.get("status") != "pending":
+            continue
+        outcome["status"] = "verified"
+        outcome.setdefault("evidence", []).append({
+            "created_at": now_iso(),
+            "agent": agent,
+            "summary": evidence_summary,
+        })
+        changed.append(str(outcome.get("id") or "unknown"))
+    if changed:
+        dump_json(path, task)
+        for outcome_id in changed:
+            append_jsonl(go_root(repo) / "evidence" / "events.jsonl", event(task["id"], "evidence.appended", agent, {
+                "action": "outcome.disposition_recorded",
+                "outcome_id": outcome_id,
+                "status": "verified",
+                "evidence": evidence_summary,
+                "source": "autonomous_verification_and_critic",
+            }))
+    return task
+
+
 def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = None) -> list[str]:
     errors: list[str] = []
     require(data.get("schema") == TASK_SCHEMA, errors, f"{rel}: schema mismatch")
@@ -269,6 +306,33 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
                     require(isinstance(outcome.get("evidence"), list), errors, f"{rel}: outcome {index} evidence must be a list")
         if expected_status == "done":
             errors.extend(f"{rel}: {finding}" for finding in outcome_completion_findings(data))
+    return errors
+
+
+def validate_recommendation(data: dict[str, Any], rel: str, project_id: str = "") -> list[str]:
+    errors: list[str] = []
+    require(data.get("schema") == RECOMMENDATION_SCHEMA, errors, f"{rel}: schema mismatch")
+    require(data.get("kind") == "recommendation", errors, f"{rel}: kind must be recommendation")
+    require(bool(TASK_ID_RE.fullmatch(str(data.get("id") or ""))), errors, f"{rel}: invalid id")
+    require(data.get("status") in {"pending", "applied", "superseded"}, errors, f"{rel}: invalid status")
+    require(bool(data.get("created_at")), errors, f"{rel}: created_at required")
+    require(bool(data.get("project")), errors, f"{rel}: project required")
+    if project_id:
+        require(data.get("project") == project_id, errors, f"{rel}: project does not match project.json id {project_id!r}")
+    authority = data.get("authority")
+    require(isinstance(authority, dict), errors, f"{rel}: authority must be an object")
+    if isinstance(authority, dict):
+        mode = authority.get("mode")
+        require(mode in {"advice", "execute"}, errors, f"{rel}: authority.mode must be advice or execute")
+        require(bool(str(authority.get("source") or "").strip()), errors, f"{rel}: authority.source required")
+        require(authority.get("implementation_authorized") is (mode == "execute"), errors, f"{rel}: implementation_authorized disagrees with mode")
+        require(authority.get("planning_state_authorized") is True, errors, f"{rel}: durable recommendation requires planning-state authority")
+    brief = data.get("brief")
+    require(isinstance(brief, dict), errors, f"{rel}: brief must be an object")
+    if isinstance(brief, dict):
+        errors.extend(f"{rel}: {item}" for item in validate_execution_brief(brief))
+        expected_id = f"recommendation-{str(brief.get('source', {}).get('sha256') or '')[:16]}"
+        require(data.get("id") == expected_id, errors, f"{rel}: id must derive from recommendation sha256")
     return errors
 
 
@@ -336,6 +400,14 @@ def validate_repo(repo: Path) -> list[str]:
                 errors.append(str(exc))
     for task_id in sorted(linked_task_ids - task_ids):
         errors.append(f".go/hierarchy.json: linked task {task_id!r} does not exist in any task state")
+    recommendation_paths = list((root / "recommendations").glob("*.json"))
+    recommendation_paths.extend((root / "recommendations" / "applied").glob("*.json"))
+    recommendation_paths.extend((root / "recommendations" / "superseded").glob("*.json"))
+    for path in sorted(recommendation_paths):
+        try:
+            errors.extend(validate_recommendation(load_json(path), relative(repo, path), project_id))
+        except RepoLocalError as exc:
+            errors.append(str(exc))
     for folder in ("runs", "evidence", "decisions"):
         for path in sorted((root / folder).glob("*.jsonl")):
             for index, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
@@ -2095,6 +2167,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
             result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Bounded executor attempts failed; critic/repair evidence recorded and task moved to blocked.", "next_action": "repair failing gate or configure build/critic/repair adapter, then rerun go-loop"})
             break
         task = load_json(active_path)
+        task = verify_pending_outcomes_from_checks(repo, active_path, task, args.agent, final_checks)
         outcome_findings = outcome_completion_findings(task)
         if outcome_findings:
             result.update({
@@ -2508,6 +2581,129 @@ def load_execution_brief(path: Path) -> dict[str, Any]:
     return brief
 
 
+def pending_recommendation_path(repo: Path) -> Path:
+    return go_root(repo) / "recommendations" / "pending.json"
+
+
+def cmd_recommendation_create(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot create recommendation in invalid .go state:\n- " + "\n- ".join(errors))
+    brief = load_execution_brief(Path(args.brief))
+    if args.read_only:
+        payload = {
+            "schema": "go-workflow.recommendation-create-result.v1",
+            "status": "read_only",
+            "repo": str(repo),
+            "path": None,
+            "planning_state_authorized": False,
+        }
+        print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else "recommendation: read_only (not written)")
+        return 0
+
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    target = pending_recommendation_path(repo)
+    if target.exists() and not args.replace:
+        raise RepoLocalError("pending recommendation already exists; consume it or pass --replace")
+    digest = brief["source"]["sha256"]
+    record = {
+        "schema": RECOMMENDATION_SCHEMA,
+        "kind": "recommendation",
+        "id": f"recommendation-{digest[:16]}",
+        "project": project["id"],
+        "status": "pending",
+        "created_at": now_iso(),
+        "authority": {
+            "mode": args.authority,
+            "source": args.authority_source,
+            "implementation_authorized": args.authority == "execute",
+            "planning_state_authorized": True,
+        },
+        "brief": brief,
+    }
+    record_errors = validate_recommendation(record, relative(repo, target), project["id"])
+    if record_errors:
+        raise RepoLocalError("invalid recommendation record:\n- " + "\n- ".join(record_errors))
+    target.parent.mkdir(parents=True, exist_ok=True)
+    dump_json(target, record)
+    append_jsonl(root / "runs" / "events.jsonl", event("recommendation", "run.checked", args.agent, {
+        "action": "recommendation.created",
+        "recommendation_id": record["id"],
+        "authority": record["authority"],
+        "recommendation_sha256": digest,
+        "source_ref": brief["source"].get("source_ref"),
+        "path": relative(repo, target),
+    }))
+    errors = validate_repo(repo)
+    if errors:
+        target.unlink(missing_ok=True)
+        raise RepoLocalError("recommendation invalidated .go state:\n- " + "\n- ".join(errors))
+    payload = {
+        "schema": "go-workflow.recommendation-create-result.v1",
+        "status": "pending",
+        "repo": str(repo),
+        "id": record["id"],
+        "path": relative(repo, target),
+        "authority": record["authority"],
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else f"recommendation: {payload['path']}")
+    return 0
+
+
+def cmd_recommendation_status(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot read recommendation status from invalid .go state:\n- " + "\n- ".join(errors))
+    target = pending_recommendation_path(repo)
+    record = load_json(target) if target.is_file() else None
+    payload = {
+        "schema": "go-workflow.recommendation-status.v1",
+        "repo": str(repo),
+        "status": "pending" if record else "empty",
+        "path": relative(repo, target) if record else None,
+        "recommendation": record,
+    }
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else f"recommendation: {payload['status']}")
+    return 0
+
+
+def archive_applied_recommendation(repo: Path, record: dict[str, Any], task_ids: list[str], authority_source: str) -> dict[str, Any]:
+    source = pending_recommendation_path(repo)
+    applied = dict(record)
+    applied["status"] = "applied"
+    applied["resolved_at"] = now_iso()
+    applied["applied_tasks"] = task_ids
+    applied["promotion"] = {
+        "authority": "execute",
+        "authority_source": authority_source,
+    }
+    target = go_root(repo) / "recommendations" / "applied" / f"{record['id']}.json"
+    record_errors = validate_recommendation(applied, relative(repo, target), str(record.get("project") or ""))
+    if record_errors:
+        raise RepoLocalError("cannot archive invalid applied recommendation:\n- " + "\n- ".join(record_errors))
+    atomic_move_json(source, target, applied)
+    append_jsonl(go_root(repo) / "runs" / "events.jsonl", event("recommendation", "run.checked", "go", {
+        "action": "recommendation.applied",
+        "recommendation_id": record["id"],
+        "task_ids": task_ids,
+        "authority_source": authority_source,
+        "path": relative(repo, target),
+    }))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("applied recommendation invalidated .go state:\n- " + "\n- ".join(errors))
+    return {
+        "id": record["id"],
+        "status": "applied",
+        "path": relative(repo, target),
+        "task_ids": task_ids,
+        "authority_source": authority_source,
+    }
+
+
 def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: str = "agent") -> list[dict[str, Any]]:
     """Compile explicit semantic work units to repo-local tasks without re-expanding chat prose."""
     root = go_root(repo)
@@ -2554,6 +2750,17 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
             "intent_source": intent_source,
             "execution_brief": compact_brief,
             "work_unit": {"id": unit["id"], "position": position, "total": total},
+            "outcome_tracking_version": 1,
+            "requested_outcomes": [
+                {
+                    "id": f"R{index}",
+                    "text": acceptance,
+                    "source": "execution_brief_acceptance",
+                    "status": "pending",
+                    "evidence": [],
+                }
+                for index, acceptance in enumerate(unit["acceptance"], start=1)
+            ],
             "acceptance": unit["acceptance"],
             "verification": unit["verification"],
             "claim": {"agent": None, "claimed_at": None},
@@ -2588,6 +2795,13 @@ def cmd_go(args: argparse.Namespace) -> int:
     """Bare go universal router: route loose vs repo-local work and optionally execute."""
     repo = Path(args.repo).resolve()
     intent = (args.intent or "").strip()
+    if re.fullmatch(r"go\s*:?\s*", intent, flags=re.I):
+        intent = ""
+    continuation_promotion = bool(re.fullmatch(
+        r"(?:aan de slag|doe het|voer (?:het )?uit|ga verder|werk verder|continue|finish|sent as goal)",
+        intent,
+        flags=re.I,
+    ))
     root = go_root(repo)
     state = {
         "repo_exists": repo.exists(),
@@ -2604,6 +2818,7 @@ def cmd_go(args: argparse.Namespace) -> int:
         "state": state,
         "created_task": None,
         "created_tasks": [],
+        "recommendation_promotion": None,
         "action": None,
         "plan": None,
     }
@@ -2616,7 +2831,15 @@ def cmd_go(args: argparse.Namespace) -> int:
         if errors:
             result.update({"action": "contract_repair_required", "reason": "repo-local .go contract is invalid", "errors": errors})
         else:
-            brief = load_execution_brief(Path(args.execution_brief)) if args.execution_brief else None
+            pending_record = None
+            if not args.execution_brief and (not intent or continuation_promotion) and pending_recommendation_path(repo).is_file():
+                pending_record = load_json(pending_recommendation_path(repo))
+                pending_errors = validate_recommendation(pending_record, relative(repo, pending_recommendation_path(repo)), str(load_json(root / "project.json").get("id") or ""))
+                if pending_errors:
+                    raise RepoLocalError("invalid pending recommendation:\n- " + "\n- ".join(pending_errors))
+            brief = load_execution_brief(Path(args.execution_brief)) if args.execution_brief else pending_record["brief"] if pending_record else None
+            if pending_record and continuation_promotion:
+                intent = ""
             if brief and intent:
                 raise RepoLocalError("use either --intent or --execution-brief, not both")
             routing_text = intent or (brief["problem"] if brief else "")
@@ -2625,6 +2848,13 @@ def cmd_go(args: argparse.Namespace) -> int:
             if brief and may_write_intent_task:
                 result["created_tasks"] = create_tasks_from_execution_brief(repo, brief, agent=args.agent)
                 result["created_task"] = result["created_tasks"][0]
+                if pending_record:
+                    result["recommendation_promotion"] = archive_applied_recommendation(
+                        repo,
+                        pending_record,
+                        [task["id"] for task in result["created_tasks"]],
+                        args.authority_source,
+                    )
             elif brief:
                 result["proposed_tasks"] = [
                     {"id": unit["id"], "summary": unit["summary"], "write_required": True}
@@ -3564,6 +3794,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--intent", default="")
     go.add_argument("--intent-source-ref", default="", help="optional durable source reference, for example telegram:<chat>:<message>")
     go.add_argument("--execution-brief", default="", help="schema-validated compact recommendation handoff to materialize as semantic work units")
+    go.add_argument("--authority-source", choices=["go", "imperative", "sent_as_goal"], default="go", help="execution authority that promoted a pending recommendation")
     go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
     go.add_argument("--write", action="store_true", help="materialize intent-created tasks; default --json/plan mode is non-mutating")
     go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")
@@ -3689,6 +3920,22 @@ def build_parser() -> argparse.ArgumentParser:
     template_check.add_argument("template_repo", nargs="?", default="../go-project-template")
     template_check.add_argument("--json", action="store_true")
     template_check.set_defaults(func=cmd_template_check)
+    recommendation = sub.add_parser("recommendation", help="Persist or inspect a compact repo-local recommendation handoff")
+    recommendation_sub = recommendation.add_subparsers(dest="recommendation_command", required=True)
+    recommendation_create = recommendation_sub.add_parser("create", help="Validate and persist the latest execution brief as a pending recommendation")
+    recommendation_create.add_argument("repo")
+    recommendation_create.add_argument("--brief", required=True)
+    recommendation_create.add_argument("--authority", choices=["advice", "execute"], default="advice")
+    recommendation_create.add_argument("--authority-source", default="question")
+    recommendation_create.add_argument("--read-only", action="store_true", help="validate the brief but do not mutate .go state")
+    recommendation_create.add_argument("--replace", action="store_true", help="replace an existing pending recommendation")
+    recommendation_create.add_argument("--agent", default="agent")
+    recommendation_create.add_argument("--json", action="store_true")
+    recommendation_create.set_defaults(func=cmd_recommendation_create)
+    recommendation_status = recommendation_sub.add_parser("status", help="Show the current pending recommendation")
+    recommendation_status.add_argument("repo", nargs="?", default=".")
+    recommendation_status.add_argument("--json", action="store_true")
+    recommendation_status.set_defaults(func=cmd_recommendation_status)
     task = sub.add_parser("task", help="Author repo-local tasks")
     task_sub = task.add_subparsers(dest="task_command", required=True)
     task_create = task_sub.add_parser("create", help="Create an open repo-local task")

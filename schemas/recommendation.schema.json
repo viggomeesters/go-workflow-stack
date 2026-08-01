@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.recommendation.v1",
+  "title": "Go Workflow Pending Recommendation",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "id", "project", "status", "created_at", "authority", "brief"],
+  "properties": {
+    "schema": {"const": "go-workflow.recommendation.v1"},
+    "kind": {"const": "recommendation"},
+    "id": {"type": "string", "pattern": "^recommendation-[0-9a-f]{16}$"},
+    "project": {"type": "string", "minLength": 1},
+    "status": {"enum": ["pending", "applied", "superseded"]},
+    "created_at": {"type": "string", "minLength": 1},
+    "resolved_at": {"type": "string", "minLength": 1},
+    "applied_tasks": {"type": "array", "items": {"type": "string", "minLength": 1}},
+    "promotion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["authority", "authority_source"],
+      "properties": {
+        "authority": {"const": "execute"},
+        "authority_source": {"type": "string", "minLength": 1}
+      }
+    },
+    "authority": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "source", "implementation_authorized", "planning_state_authorized"],
+      "properties": {
+        "mode": {"enum": ["advice", "execute"]},
+        "source": {"type": "string", "minLength": 1},
+        "implementation_authorized": {"type": "boolean"},
+        "planning_state_authorized": {"const": true}
+      }
+    },
+    "brief": {"$ref": "execution-brief.schema.json"}
+  }
+}

@@ -28,7 +28,7 @@ echo "local Linux/WSL verification with Python $VERSION"
 
 cd "$ROOT"
 "${PYTHON[@]}" -m py_compile cli/go.py go_workflow/cli.py
-"${PYTEST[@]}" tests/test_smoke.py -q
+env -u GO_PROJECT_TEMPLATE -u GO_PROJECT_TEMPLATE_SET "${PYTEST[@]}" tests/test_smoke.py -q
 "${PYTHON[@]}" cli/go.py validate .
 
 if [ -d "$TEMPLATE/.go" ]; then

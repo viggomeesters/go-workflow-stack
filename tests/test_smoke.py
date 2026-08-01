@@ -1633,7 +1633,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.8 v0.3.8 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == "0.3.9 v0.3.9 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -2235,8 +2235,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.8"
-    assert result["stack"]["ref"] == "v0.3.8"
+    assert result["stack"]["version"] == "0.3.9"
+    assert result["stack"]["ref"] == "v0.3.9"
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -2266,7 +2266,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.8"
+    assert project["stack_ref"] == "v0.3.9"
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -3387,8 +3387,8 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["required_stack_version"] == "0.3.8"
-    assert migrated["stack_ref"] == "v0.3.8"
+    assert migrated["required_stack_version"] == "0.3.9"
+    assert migrated["stack_ref"] == "v0.3.9"
     migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
     assert "epics" in migrated_hierarchy
     assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]

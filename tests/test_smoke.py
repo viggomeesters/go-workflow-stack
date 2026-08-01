@@ -1534,6 +1534,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         ROOT / "schemas" / "migration-plan.schema.json",
         ROOT / "schemas" / "stack-update-plan.schema.json",
         ROOT / "schemas" / "live-hermes-proof.schema.json",
+        ROOT / "schemas" / "execution-brief.schema.json",
         ROOT / "docs" / "agent-adapter-protocol.md",
         ROOT / "docs" / "contract-migrations.md",
         ROOT / "docs" / "stack-updates.md",
@@ -3683,6 +3684,112 @@ def test_go_intent_preserves_numbered_items_as_semantic_acceptance_without_blind
     assert "go_workflow/**" in task["scope"]["modify"]
     assert "CHANGELOG.md" in task["scope"]["modify"]
     assert len(list((repo / ".go" / "tasks" / "open").glob("*.json"))) == 1
+
+
+def test_go_execution_brief_materializes_semantic_work_units_with_compact_provenance(tmp_path: Path):
+    repo = tmp_path / "execution-brief-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "execution-brief", "--name", "Execution Brief")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    recommendation = "Move routine actions into Settings and leave only urgent status actions in the menu."
+    brief = {
+        "schema": "go-workflow.execution-brief.v1",
+        "destination": "A compact menu with complete functionality in discoverable settings.",
+        "problem": "The menu is bloated and the good recommendation must survive chat compaction.",
+        "chosen_approach": recommendation,
+        "non_goals": ["Remove existing functionality"],
+        "source": {
+            "recommendation": recommendation,
+            "sha256": hashlib.sha256(recommendation.encode("utf-8")).hexdigest(),
+            "source_ref": "codex:thread:menu-bloat",
+        },
+        "work_units": [
+            {
+                "id": "slim-menu",
+                "summary": "Keep only urgent status actions in the menu",
+                "scope": {"read": ["app/**"], "modify": ["app/menu.py"]},
+                "execution_mode": "agent",
+                "acceptance": ["Routine actions are absent from the menu and urgent actions remain."],
+                "verification": ["python3 -m unittest tests.test_menu"],
+            },
+            {
+                "id": "settings-home",
+                "summary": "Expose routine actions in Settings",
+                "scope": {"read": ["app/**"], "modify": ["app/settings.py"]},
+                "execution_mode": "agent",
+                "acceptance": ["Every moved routine action remains available in Settings."],
+                "verification": ["python3 -m unittest tests.test_settings"],
+            },
+        ],
+    }
+    brief_path = repo / "execution-brief.json"
+    brief_path.write_text(json.dumps(brief), encoding="utf-8")
+
+    created = run_go("go", str(repo), "--execution-brief", str(brief_path), "--write", "--json")
+
+    assert created.returncode == 0, created.stderr + created.stdout
+    payload = json.loads(created.stdout)
+    assert [task["id"] for task in payload["created_tasks"]] == ["slim-menu", "settings-home"]
+    assert payload["created_task"] == payload["created_tasks"][0]
+    first = json.loads((repo / payload["created_tasks"][0]["path"]).read_text(encoding="utf-8"))
+    second = json.loads((repo / payload["created_tasks"][1]["path"]).read_text(encoding="utf-8"))
+    assert first["execution_brief"]["chosen_approach"] == recommendation
+    assert first["execution_brief"]["source"] == brief["source"]
+    assert first["work_unit"] == {"id": "slim-menu", "position": 1, "total": 2}
+    assert first["scope"]["modify"] == ["app/menu.py"]
+    assert second["work_unit"] == {"id": "settings-home", "position": 2, "total": 2}
+    assert second["scope"]["modify"] == ["app/settings.py"]
+
+
+def test_go_execution_brief_fails_before_mutation_and_execute_does_not_stop_at_taskification(tmp_path: Path):
+    repo = tmp_path / "execution-brief-run-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "execution-run", "--name", "Execution Run")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    recommendation = "Materialize the approved bounded checks and run them immediately."
+    brief = {
+        "schema": "go-workflow.execution-brief.v1",
+        "destination": "Approved work proceeds without another user relay.",
+        "problem": "Task creation and execution currently feel like separate commands.",
+        "chosen_approach": recommendation,
+        "non_goals": [],
+        "source": {
+            "recommendation": recommendation,
+            "sha256": hashlib.sha256(recommendation.encode("utf-8")).hexdigest(),
+            "source_ref": None,
+        },
+        "work_units": [
+            {
+                "id": "run-approved-check",
+                "summary": "Run the approved bounded check",
+                "scope": {"read": ["README.md"], "modify": []},
+                "execution_mode": "mechanical",
+                "acceptance": ["The declared verification command succeeds in the same Go invocation."],
+                "verification": ["python3 -c 'assert 2 + 2 == 4'"],
+            }
+        ],
+    }
+    brief_path = repo / "execution-brief.json"
+    invalid_path = repo / "invalid-execution-brief.json"
+    brief_path.write_text(json.dumps(brief), encoding="utf-8")
+    invalid = dict(brief)
+    invalid["source"] = dict(brief["source"], sha256="0" * 64)
+    invalid_path.write_text(json.dumps(invalid), encoding="utf-8")
+
+    rejected = run_go("go", str(repo), "--execution-brief", str(invalid_path), "--write", "--json")
+    assert rejected.returncode == 1
+    assert "recommendation sha256 does not match" in rejected.stderr
+    assert not list((repo / ".go" / "tasks" / "open").glob("*.json"))
+
+    executed = run_go(
+        "go", str(repo), "--execution-brief", str(brief_path), "--execute", "--allow-dirty",
+        "--no-semantic-critic", "--agent", "pytest", "--json",
+    )
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    payload = json.loads(executed.stdout)
+    assert payload["created_tasks"][0]["id"] == "run-approved-check"
+    assert payload["execution"]["completed_tasks"] == ["run-approved-check"]
+    assert (repo / ".go" / "tasks" / "done" / "run-approved-check.json").is_file()
 
 
 def test_go_intent_recognizes_plain_numbered_lines_without_requiring_punctuation(tmp_path: Path):

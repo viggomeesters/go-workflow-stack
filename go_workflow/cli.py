@@ -59,6 +59,7 @@ HIERARCHY_SCHEMA = "go-workflow.repo-local.hierarchy.v1"
 TASK_SCHEMA = "go-workflow.repo-local.task.v1"
 EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
+EXECUTION_BRIEF_SCHEMA = "go-workflow.execution-brief.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
 OUTCOME_TERMINAL_STATUSES = {"verified", "blocked", "rejected"}
@@ -2445,6 +2446,144 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent", sourc
     }
 
 
+def validate_execution_brief(data: dict[str, Any]) -> list[str]:
+    """Validate the compact, durable handoff between recommendation and execution."""
+    errors: list[str] = []
+    require(data.get("schema") == EXECUTION_BRIEF_SCHEMA, errors, "execution brief: schema mismatch")
+    for field in ("destination", "problem", "chosen_approach"):
+        value = data.get(field)
+        require(isinstance(value, str) and bool(value.strip()), errors, f"execution brief: {field} must be a non-empty string")
+    chosen_approach = data.get("chosen_approach")
+    if isinstance(chosen_approach, str):
+        require(len(chosen_approach) <= 2000, errors, "execution brief: chosen_approach exceeds compact 2000 character boundary")
+    non_goals = data.get("non_goals")
+    require(isinstance(non_goals, list) and all(isinstance(item, str) and item.strip() for item in non_goals or []), errors, "execution brief: non_goals must be a list of non-empty strings")
+
+    source = data.get("source")
+    require(isinstance(source, dict), errors, "execution brief: source must be an object")
+    if isinstance(source, dict):
+        recommendation = source.get("recommendation")
+        digest = source.get("sha256")
+        require(isinstance(recommendation, str) and bool(recommendation.strip()), errors, "execution brief: source.recommendation must be a non-empty string")
+        require(recommendation == chosen_approach, errors, "execution brief: source.recommendation must equal chosen_approach")
+        if isinstance(recommendation, str):
+            expected = hashlib.sha256(recommendation.encode("utf-8")).hexdigest()
+            require(digest == expected, errors, "execution brief: recommendation sha256 does not match")
+        source_ref = source.get("source_ref")
+        require(source_ref is None or isinstance(source_ref, str), errors, "execution brief: source.source_ref must be a string or null")
+
+    work_units = data.get("work_units")
+    require(isinstance(work_units, list) and bool(work_units), errors, "execution brief: work_units must be a non-empty list")
+    seen_ids: set[str] = set()
+    if isinstance(work_units, list):
+        for position, unit in enumerate(work_units, start=1):
+            prefix = f"execution brief: work_units[{position}]"
+            require(isinstance(unit, dict), errors, f"{prefix} must be an object")
+            if not isinstance(unit, dict):
+                continue
+            unit_id = unit.get("id")
+            require(isinstance(unit_id, str) and bool(TASK_ID_RE.fullmatch(unit_id)), errors, f"{prefix}.id is invalid")
+            if isinstance(unit_id, str):
+                require(unit_id not in seen_ids, errors, f"{prefix}.id is duplicated: {unit_id}")
+                seen_ids.add(unit_id)
+            require(isinstance(unit.get("summary"), str) and bool(unit.get("summary", "").strip()), errors, f"{prefix}.summary must be a non-empty string")
+            require(unit.get("execution_mode", "agent") in {"mechanical", "agent"}, errors, f"{prefix}.execution_mode must be mechanical or agent")
+            scope = unit.get("scope")
+            require(isinstance(scope, dict), errors, f"{prefix}.scope must be an object")
+            if isinstance(scope, dict):
+                for field in ("read", "modify"):
+                    values = scope.get(field)
+                    require(isinstance(values, list) and all(isinstance(value, str) and value.strip() for value in values or []), errors, f"{prefix}.scope.{field} must be a list of non-empty strings")
+            for field in ("acceptance", "verification"):
+                values = unit.get(field)
+                require(isinstance(values, list) and bool(values) and all(isinstance(value, str) and value.strip() for value in values or []), errors, f"{prefix}.{field} must be a non-empty list of non-empty strings")
+    return errors
+
+
+def load_execution_brief(path: Path) -> dict[str, Any]:
+    brief = load_json(path.resolve())
+    errors = validate_execution_brief(brief)
+    if errors:
+        raise RepoLocalError("invalid execution brief:\n- " + "\n- ".join(errors))
+    return brief
+
+
+def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: str = "agent") -> list[dict[str, Any]]:
+    """Compile explicit semantic work units to repo-local tasks without re-expanding chat prose."""
+    root = go_root(repo)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot create execution brief tasks in invalid .go state:\n- " + "\n- ".join(errors))
+    brief_errors = validate_execution_brief(brief)
+    if brief_errors:
+        raise RepoLocalError("invalid execution brief:\n- " + "\n- ".join(brief_errors))
+    project = load_json(root / "project.json")
+    work_units = brief["work_units"]
+    for unit in work_units:
+        if any(task_path(root, state, unit["id"]).exists() for state in ("open", "active", "blocked", "done")):
+            raise RepoLocalError(f"execution brief task already exists: {unit['id']}")
+
+    compact_brief = {
+        "schema": brief["schema"],
+        "destination": brief["destination"],
+        "problem": brief["problem"],
+        "chosen_approach": brief["chosen_approach"],
+        "non_goals": brief["non_goals"],
+        "source": brief["source"],
+    }
+    intent_source = {
+        "text": brief["problem"],
+        "sha256": hashlib.sha256(brief["problem"].encode("utf-8")).hexdigest(),
+        "source_ref": brief["source"].get("source_ref"),
+    }
+    hierarchy = load_json(root / "hierarchy.json")
+    epics = hierarchy_epics(hierarchy)
+    created: list[dict[str, Any]] = []
+    total = len(work_units)
+    for position, unit in enumerate(work_units, start=1):
+        task = {
+            "schema": TASK_SCHEMA,
+            "kind": "task",
+            "execution_mode": unit.get("execution_mode", "agent"),
+            "id": unit["id"],
+            "project": project["id"],
+            "status": "open",
+            "summary": unit["summary"],
+            "description": f"Execution brief work unit {position}/{total}. Destination: {brief['destination']}",
+            "scope": unit["scope"],
+            "intent_source": intent_source,
+            "execution_brief": compact_brief,
+            "work_unit": {"id": unit["id"], "position": position, "total": total},
+            "acceptance": unit["acceptance"],
+            "verification": unit["verification"],
+            "claim": {"agent": None, "claimed_at": None},
+            "evidence": [],
+            "order": position,
+        }
+        target = task_path(root, "open", unit["id"])
+        dump_json(target, task)
+        if epics:
+            epics[0].setdefault("tasks", [])
+            if unit["id"] not in epics[0]["tasks"]:
+                epics[0]["tasks"].append(unit["id"])
+        append_jsonl(root / "runs" / "events.jsonl", event(unit["id"], "task.created", agent, {
+            "action": "task.created_from_execution_brief",
+            "path": relative(repo, target),
+            "work_unit_position": position,
+            "work_unit_total": total,
+            "recommendation_sha256": brief["source"]["sha256"],
+            "source_ref": brief["source"].get("source_ref"),
+        }))
+        created.append({"id": unit["id"], "summary": unit["summary"], "path": relative(repo, target)})
+    if epics:
+        set_hierarchy_epics(hierarchy, epics)
+        dump_json(root / "hierarchy.json", hierarchy)
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("execution brief tasks invalidated .go state:\n- " + "\n- ".join(errors))
+    return created
+
+
 def cmd_go(args: argparse.Namespace) -> int:
     """Bare go universal router: route loose vs repo-local work and optionally execute."""
     repo = Path(args.repo).resolve()
@@ -2464,6 +2603,7 @@ def cmd_go(args: argparse.Namespace) -> int:
         "intent": intent,
         "state": state,
         "created_task": None,
+        "created_tasks": [],
         "action": None,
         "plan": None,
     }
@@ -2476,10 +2616,24 @@ def cmd_go(args: argparse.Namespace) -> int:
         if errors:
             result.update({"action": "contract_repair_required", "reason": "repo-local .go contract is invalid", "errors": errors})
         else:
-            mode = "go-loop" if args.loop or any(word in intent.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
+            brief = load_execution_brief(Path(args.execution_brief)) if args.execution_brief else None
+            if brief and intent:
+                raise RepoLocalError("use either --intent or --execution-brief, not both")
+            routing_text = intent or (brief["problem"] if brief else "")
+            mode = "go-loop" if args.loop or any(word in routing_text.lower() for word in ["loop", "ralph", "groen", "controle afgeven", "tot bare go echt werkt"]) else "go-auto"
             may_write_intent_task = bool(args.write or args.execute)
-            if intent and may_write_intent_task:
+            if brief and may_write_intent_task:
+                result["created_tasks"] = create_tasks_from_execution_brief(repo, brief, agent=args.agent)
+                result["created_task"] = result["created_tasks"][0]
+            elif brief:
+                result["proposed_tasks"] = [
+                    {"id": unit["id"], "summary": unit["summary"], "write_required": True}
+                    for unit in brief["work_units"]
+                ]
+                result["write_boundary"] = "dry_run: no .go state was changed; rerun with --write or --execute to materialize the execution brief"
+            elif intent and may_write_intent_task:
                 result["created_task"] = create_task_from_intent(repo, intent, agent=args.agent, source_ref=args.intent_source_ref)
+                result["created_tasks"] = [result["created_task"]]
             elif intent:
                 contract = intent_task_contract(intent)
                 proposed_id = slugify(contract["summary"]).lower()[:48].strip("-") or "continue-project-goal"
@@ -3409,6 +3563,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("repo", nargs="?", default=".")
     go.add_argument("--intent", default="")
     go.add_argument("--intent-source-ref", default="", help="optional durable source reference, for example telegram:<chat>:<message>")
+    go.add_argument("--execution-brief", default="", help="schema-validated compact recommendation handoff to materialize as semantic work units")
     go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
     go.add_argument("--write", action="store_true", help="materialize intent-created tasks; default --json/plan mode is non-mutating")
     go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")

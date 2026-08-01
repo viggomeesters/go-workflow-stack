@@ -104,6 +104,15 @@
         "package-runtime-provenance-v034",
         "fix-v1-contract-migration"
       ]
+    },
+    {
+      "id": "advice-to-outcome-continuity",
+      "title": "Advice-to-outcome continuity",
+      "description": "Compile an approved compact recommendation into durable work units and continue execution in one Go run.",
+      "features": [],
+      "tasks": [
+        "execution-brief-runtime"
+      ]
     }
   ]
 }

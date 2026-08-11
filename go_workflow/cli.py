@@ -9,9 +9,11 @@ not the Life OS vault's Agent Workflow Lite task queue.
 from __future__ import annotations
 
 import argparse
+import contextlib
 import fnmatch
 import hashlib
 import html
+import io
 import json
 import os
 import re
@@ -188,6 +190,14 @@ def hierarchy_epics(data: dict[str, Any]) -> list[dict[str, Any]]:
     return []
 
 
+def epic_task_ids(epic: dict[str, Any]) -> list[str]:
+    task_ids = [str(task_id) for task_id in (epic.get("tasks") or [])]
+    for feature in epic.get("features") or []:
+        if isinstance(feature, dict):
+            task_ids.extend(str(task_id) for task_id in (feature.get("tasks") or []))
+    return list(dict.fromkeys(task_ids))
+
+
 def set_hierarchy_epics(data: dict[str, Any], epics: list[dict[str, Any]]) -> None:
     data["epics"] = epics
     data.pop("feature_groups", None)
@@ -291,6 +301,7 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
         require(isinstance(scope.get("modify"), list), errors, f"{rel}: scope.modify must be a list")
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
+    require(data.get("shareable_delivery", "auto") in {"auto", "required", "none"}, errors, f"{rel}: shareable_delivery must be auto, required, or none")
     if "work_status" in data:
         require(data.get("work_status") in {"pending", "in_progress", "completed"}, errors, f"{rel}: invalid work_status")
     if "review_status" in data:
@@ -441,9 +452,15 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     errors: list[str] = []
     require(data.get("schema") == EVENT_SCHEMA, errors, f"{prefix}: schema mismatch")
     require(data.get("kind") == "event", errors, f"{prefix}: kind must be event")
-    require(data.get("event") in {"task.created", "task.claimed", "task.finished", "task.blocked", "task.reviewed", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
+    require(data.get("event") in {"task.created", "task.claimed", "task.finished", "task.blocked", "task.reviewed", "delivery.built", "evidence.appended", "decision.recorded", "run.checked", "auto.safety_gate", "auto.reflected", "auto.attempt"}, errors, f"{prefix}: invalid event")
     require(bool(data.get("created_at")), errors, f"{prefix}: created_at required")
     require(bool(data.get("task_id")), errors, f"{prefix}: task_id required")
+    if data.get("event") == "delivery.built":
+        payload = data.get("data")
+        require(isinstance(payload, dict), errors, f"{prefix}: delivery.built data must be an object")
+        if isinstance(payload, dict):
+            for field in ("transaction_id", "delivery_id", "manifest", "html", "html_sha256"):
+                require(isinstance(payload.get(field), str) and bool(payload.get(field, "").strip()), errors, f"{prefix}: delivery.built data.{field} required")
     return errors
 
 
@@ -1018,6 +1035,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "schema": TASK_SCHEMA,
             "kind": "task",
             "execution_mode": args.execution_mode,
+            "shareable_delivery": "auto",
             "id": task_id,
             "project": project_id,
             "status": "open",
@@ -1310,19 +1328,164 @@ def finish_task_record(
     return target
 
 
+def task_requires_shareable_delivery(task: dict[str, Any]) -> bool:
+    policy = str(task.get("shareable_delivery") or "auto")
+    if policy == "required":
+        return True
+    if policy == "none":
+        return False
+    modify_paths = [str(path) for path in (task.get("scope") or {}).get("modify", [])]
+    substantive_paths = [path for path in modify_paths if path != ".go" and not path.startswith(".go/")]
+    return task.get("execution_mode") == "agent" and len(task.get("acceptance") or []) >= 2 and bool(substantive_paths)
+
+
+def automatic_delivery_plan(repo: Path, task: dict[str, Any]) -> dict[str, Any] | None:
+    if not task_requires_shareable_delivery(task):
+        return None
+    root = go_root(repo)
+    hierarchy = load_json(root / "hierarchy.json")
+    owning_epics = [epic for epic in hierarchy_epics(hierarchy) if task["id"] in epic_task_ids(epic)]
+    if len(owning_epics) != 1:
+        raise RepoLocalError(
+            f"shareable delivery requires exactly one owning epic for task {task['id']}; found {len(owning_epics)}"
+        )
+    epic = owning_epics[0]
+    releases: list[tuple[int, str]] = []
+    for manifest_path in sorted((root / "deliveries").glob("*/manifest.json")):
+        try:
+            manifest = load_json(manifest_path)
+            if manifest.get("assignment", {}).get("id") != epic.get("id"):
+                continue
+            releases.append((int(manifest.get("release", {}).get("version") or 0), str(manifest.get("delivery_id") or manifest_path.parent.name)))
+        except (OSError, TypeError, ValueError, json.JSONDecodeError):
+            continue
+    latest_version, latest_delivery = max(releases, default=(0, ""))
+    version = latest_version + 1
+    delivery_id = f"{slugify(str(epic['id']))}-v{version}"
+    return {
+        "epic": str(epic["id"]),
+        "version": version,
+        "delivery_id": delivery_id,
+        "supersedes": latest_delivery or "",
+        "target": root / "deliveries" / delivery_id,
+    }
+
+
+def build_automatic_delivery(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
+    args = argparse.Namespace(
+        repo=str(repo), epic=plan["epic"], version=plan["version"], delivery_id=plan["delivery_id"],
+        summary="", status="released", disclosure="restricted", supersedes=plan["supersedes"],
+        delivered=[], excluded=[], limitation=[], next_step=[], delivery_lock_held=True,
+    )
+    output = io.StringIO()
+    with contextlib.redirect_stdout(output):
+        result = cmd_delivery_build(args)
+    if result != 0:
+        raise RepoLocalError(f"automatic shareable delivery build failed with exit code {result}")
+    try:
+        return json.loads(output.getvalue())
+    except json.JSONDecodeError as exc:
+        raise RepoLocalError("automatic shareable delivery build returned invalid JSON") from exc
+
+
+def approve_completed_task(
+    repo: Path,
+    root: Path,
+    done_path: Path,
+    task: dict[str, Any],
+    record: dict[str, Any],
+    delivery_lock_held: bool = False,
+) -> dict[str, Any] | None:
+    if task.get("status") != "done" or task.get("work_status") != "completed":
+        raise RepoLocalError("approval requires completed work in done state")
+    if task.get("review_status") == "approved":
+        latest = (task.get("review_history") or [{}])[-1]
+        return latest.get("delivery") if isinstance(latest, dict) else None
+    plan = automatic_delivery_plan(repo, task)
+    if plan:
+        if delivery_lock_held:
+            return approve_completed_task_with_plan(repo, root, done_path, task, record, plan)
+        try:
+            with repository_lock(root, f"delivery-{plan['epic']}"):
+                return approve_completed_task_with_plan(repo, root, done_path, task, record, automatic_delivery_plan(repo, task))
+        except StateLockError as exc:
+            raise RepoLocalError(str(exc)) from exc
+    return approve_completed_task_with_plan(repo, root, done_path, task, record, None)
+
+
+def approve_completed_task_with_plan(
+    repo: Path,
+    root: Path,
+    done_path: Path,
+    task: dict[str, Any],
+    record: dict[str, Any],
+    plan: dict[str, Any] | None,
+) -> dict[str, Any] | None:
+    original = json.loads(json.dumps(task))
+    transaction_id = str(record.get("transaction_id") or uuid.uuid4().hex)
+    record["transaction_id"] = transaction_id
+    task["review_status"] = "approved"
+    task.setdefault("review_history", []).append(record)
+    dump_json(done_path, task)
+    delivery: dict[str, Any] | None = None
+    try:
+        if plan:
+            delivery = build_automatic_delivery(repo, plan)
+            record["delivery"] = delivery
+            dump_json(done_path, task)
+        append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.reviewed", record["agent"], record))
+        if delivery:
+            append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "delivery.built", record["agent"], {
+                "transaction_id": transaction_id,
+                **delivery,
+            }))
+    except Exception:
+        dump_json(done_path, original)
+        remove_jsonl_events_locked(
+            root / "evidence" / "events.jsonl",
+            lambda payload: (payload.get("data") or {}).get("transaction_id") == transaction_id,
+        )
+        remove_jsonl_events_locked(
+            root / "runs" / "events.jsonl",
+            lambda payload: (payload.get("data") or {}).get("transaction_id") == transaction_id,
+        )
+        if plan:
+            shutil.rmtree(plan["target"], ignore_errors=True)
+        raise
+    return delivery
+
+
 def approve_task_after_passed_critic(
     root: Path,
     done_path: Path,
     task_id: str,
     agent: str,
     transaction_id: str | None = None,
-) -> None:
+    delivery_lock_held: bool = False,
+) -> dict[str, Any] | None:
+    if not delivery_lock_held:
+        task_snapshot = load_json(done_path)
+        plan = automatic_delivery_plan(root.parent, task_snapshot)
+        if plan:
+            try:
+                with repository_lock(root, f"delivery-{plan['epic']}"):
+                    return approve_task_after_passed_critic(
+                        root,
+                        done_path,
+                        task_id,
+                        agent,
+                        transaction_id=transaction_id,
+                        delivery_lock_held=True,
+                    )
+            except StateLockError as exc:
+                raise RepoLocalError(str(exc)) from exc
     with repository_lock(root, f"task-{task_id}"):
         task = load_json(done_path)
         if task.get("status") != "done" or task.get("work_status") != "completed":
             raise RepoLocalError("critic approval requires completed work in done state")
         if task.get("review_status") != "review":
-            return
+            latest = (task.get("review_history") or [{}])[-1]
+            return latest.get("delivery") if isinstance(latest, dict) else None
         record = {
             "created_at": now_iso(),
             "agent": agent,
@@ -1331,13 +1494,14 @@ def approve_task_after_passed_critic(
         }
         if transaction_id:
             record["transaction_id"] = transaction_id
-        task["review_status"] = "approved"
-        task.setdefault("review_history", []).append(record)
-        dump_json(done_path, task)
-        event_data = dict(record)
-        if transaction_id:
-            event_data["transaction_id"] = transaction_id
-        append_jsonl(root / "evidence" / "events.jsonl", event(task_id, "task.reviewed", agent, event_data))
+        return approve_completed_task(
+            root.parent,
+            root,
+            done_path,
+            task,
+            record,
+            delivery_lock_held=delivery_lock_held,
+        )
 
 
 def restore_active_after_failed_ship(
@@ -1352,6 +1516,10 @@ def restore_active_after_failed_ship(
         if done_path.is_file():
             current = load_json(done_path)
             baseline_history = active_task.get("review_history", []) or []
+            transaction_deliveries = [
+                record.get("delivery") for record in (current.get("review_history", []) or [])[len(baseline_history):]
+                if record.get("transaction_id") == transaction_id and isinstance(record.get("delivery"), dict)
+            ]
             concurrent_history = [
                 record for record in (current.get("review_history", []) or [])[len(baseline_history):]
                 if record.get("transaction_id") != transaction_id
@@ -1361,6 +1529,10 @@ def restore_active_after_failed_ship(
                 restored.setdefault("review_history", []).extend(concurrent_history)
                 restored["review_status"] = current.get("review_status", restored.get("review_status", "none"))
             atomic_move_json(done_path, active_path, restored)
+            for delivery in transaction_deliveries:
+                delivery_id = str(delivery.get("delivery_id") or "")
+                if delivery_id:
+                    shutil.rmtree(root / "deliveries" / delivery_id, ignore_errors=True)
         elif active_path.is_file():
             current = load_json(active_path)
             if current.get("status") != "active" or current.get("work_status") != "in_progress":
@@ -1369,6 +1541,11 @@ def restore_active_after_failed_ship(
             atomic_json(active_path, active_task)
         remove_jsonl_events_locked(
             evidence_path,
+            lambda payload: payload.get("task_id") == active_task.get("id")
+            and (payload.get("data") or {}).get("transaction_id") == transaction_id,
+        )
+        remove_jsonl_events_locked(
+            root / "runs" / "events.jsonl",
             lambda payload: payload.get("task_id") == active_task.get("id")
             and (payload.get("data") or {}).get("transaction_id") == transaction_id,
         )
@@ -1669,6 +1846,7 @@ def create_followup_task(repo: Path, task: dict[str, Any], findings: list[str], 
         "schema": TASK_SCHEMA,
         "kind": "task",
         "execution_mode": task.get("execution_mode", "agent"),
+        "shareable_delivery": "none",
         "id": followup_id,
         "project": project["id"],
         "status": "open",
@@ -2299,36 +2477,68 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         finish_transaction_id = uuid.uuid4().hex
         done_path = task_path(root, "done", task["id"])
         try:
-            done_path = finish_task_record(
-                repo, root, active_path, task, args.agent, evidence_summary, transaction_id=finish_transaction_id,
-            )
-            if critic_status == "passed":
-                approve_task_after_passed_critic(
-                    root, done_path, task["id"], args.agent, transaction_id=finish_transaction_id,
-                )
+            delivery_plan = automatic_delivery_plan(repo, task)
         except Exception as exc:
-            restore_active_after_failed_ship(
-                root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
-            )
             result.update({
                 "status": "blocked",
                 "blocked_task": task["id"],
-                "summary": "Finish or review transition failed; task and evidence were restored to active.",
+                "summary": "Automatic delivery preflight failed; task remains active.",
                 "next_action": str(exc),
             })
             break
-        ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
-        result["ship"].append({"task_id": task["id"], **ship})
-        if ship.get("status") in {"blocked", "failed"}:
-            restore_active_after_failed_ship(
-                root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
-            )
-            result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship failed; verified task was restored to active.", "next_action": ship.get("reason") or ship.get("stderr")})
-            break
-        result["completed_tasks"].append(task["id"])
-        result["evidence"].append({"task_id": task["id"], "summary": evidence_summary})
-        if ship.get("status") == "push_failed":
-            result.update({"status": "ship_pending", "summary": "Task is complete in a local commit, but push failed.", "next_action": "repair the remote/push failure and run git push"})
+        delivery_context = (
+            repository_lock(root, f"delivery-{delivery_plan['epic']}")
+            if delivery_plan else contextlib.nullcontext()
+        )
+        try:
+            with delivery_context:
+                try:
+                    done_path = finish_task_record(
+                        repo, root, active_path, task, args.agent, evidence_summary, transaction_id=finish_transaction_id,
+                    )
+                    if critic_status == "passed":
+                        delivery = approve_task_after_passed_critic(
+                            root,
+                            done_path,
+                            task["id"],
+                            args.agent,
+                            transaction_id=finish_transaction_id,
+                            delivery_lock_held=bool(delivery_plan),
+                        )
+                        if delivery:
+                            result.setdefault("deliveries", []).append({"task_id": task["id"], **delivery})
+                except Exception as exc:
+                    restore_active_after_failed_ship(
+                        root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
+                    )
+                    result.update({
+                        "status": "blocked",
+                        "blocked_task": task["id"],
+                        "summary": "Finish or review transition failed; task and evidence were restored to active.",
+                        "next_action": str(exc),
+                    })
+                    break
+                ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
+                result["ship"].append({"task_id": task["id"], **ship})
+                if ship.get("status") in {"blocked", "failed"}:
+                    restore_active_after_failed_ship(
+                        root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
+                    )
+                    result["deliveries"] = [item for item in result.get("deliveries", []) if item.get("task_id") != task["id"]]
+                    result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship failed; verified task was restored to active.", "next_action": ship.get("reason") or ship.get("stderr")})
+                    break
+                result["completed_tasks"].append(task["id"])
+                result["evidence"].append({"task_id": task["id"], "summary": evidence_summary})
+                if ship.get("status") == "push_failed":
+                    result.update({"status": "ship_pending", "summary": "Task is complete in a local commit, but push failed.", "next_action": "repair the remote/push failure and run git push"})
+                    break
+        except StateLockError as exc:
+            result.update({
+                "status": "blocked",
+                "blocked_task": task["id"],
+                "summary": "Automatic delivery is busy for this epic; task remains active.",
+                "next_action": str(exc),
+            })
             break
         result["status"] = "done"
         result["summary"] = f"Completed {len(result['completed_tasks'])} task(s)."
@@ -2570,6 +2780,7 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent", sourc
         "schema": TASK_SCHEMA,
         "kind": "task",
         "execution_mode": "agent",
+        "shareable_delivery": "auto",
         "id": task_id,
         "project": project["id"],
         "status": "open",
@@ -2661,6 +2872,7 @@ def validate_execution_brief(data: dict[str, Any]) -> list[str]:
                 seen_ids.add(unit_id)
             require(isinstance(unit.get("summary"), str) and bool(unit.get("summary", "").strip()), errors, f"{prefix}.summary must be a non-empty string")
             require(unit.get("execution_mode", "agent") in {"mechanical", "agent"}, errors, f"{prefix}.execution_mode must be mechanical or agent")
+            require(unit.get("shareable_delivery", "auto") in {"auto", "required", "none"}, errors, f"{prefix}.shareable_delivery must be auto, required, or none")
             scope = unit.get("scope")
             require(isinstance(scope, dict), errors, f"{prefix}.scope must be an object")
             if isinstance(scope, dict):
@@ -2841,6 +3053,7 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
             "schema": TASK_SCHEMA,
             "kind": "task",
             "execution_mode": unit.get("execution_mode", "agent"),
+            "shareable_delivery": unit.get("shareable_delivery", "auto"),
             "id": unit["id"],
             "project": project["id"],
             "status": "open",
@@ -3280,6 +3493,7 @@ def cmd_task_create(args: argparse.Namespace) -> int:
         "schema": TASK_SCHEMA,
         "kind": "task",
         "execution_mode": args.execution_mode,
+        "shareable_delivery": args.shareable_delivery,
         "id": task_id,
         "project": project["id"],
         "status": "open",
@@ -3357,39 +3571,52 @@ def cmd_task_review(args: argparse.Namespace) -> int:
     root = go_root(repo)
     if not args.evidence.strip():
         raise RepoLocalError("review transition requires evidence")
+    delivery: dict[str, Any] | None = None
     try:
-        with repository_lock(root, f"task-{args.task_id}"):
-            path, task = find_task(root, args.task_id)
-            if args.status == "approved":
-                if task.get("status") != "done" or task.get("work_status") != "completed":
-                    raise RepoLocalError("approval requires completed work in done state")
-                task["review_status"] = "approved"
-                target_state = "done"
-            else:
-                task["review_status"] = "needs_fix"
-                task["work_status"] = "in_progress"
-                task["status"] = "active"
-                target_state = "active"
-                task.setdefault("claim", {})["agent"] = task.get("claim", {}).get("agent") or args.owner or args.agent
-                task.setdefault("claim", {})["claimed_at"] = task.get("claim", {}).get("claimed_at") or now_iso()
-            record = {
-                "created_at": now_iso(),
-                "agent": args.agent,
-                "status": args.status,
-                "evidence": args.evidence,
-            }
-            if args.owner:
-                record["owner"] = args.owner
-            task.setdefault("review_history", []).append(record)
-            target = task_path(root, target_state, task["id"])
-            if target != path:
-                atomic_move_json(path, target, task)
-            else:
-                dump_json(path, task)
-            append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.reviewed", args.agent, record))
+        path, task_snapshot = find_task(root, args.task_id)
+        delivery_plan = automatic_delivery_plan(repo, task_snapshot) if args.status == "approved" else None
+        delivery_context = (
+            repository_lock(root, f"delivery-{delivery_plan['epic']}")
+            if delivery_plan else contextlib.nullcontext()
+        )
+        with delivery_context:
+            with repository_lock(root, f"task-{args.task_id}"):
+                path, task = find_task(root, args.task_id)
+                record: dict[str, Any] = {
+                    "created_at": now_iso(),
+                    "agent": args.agent,
+                    "status": args.status,
+                    "evidence": args.evidence,
+                }
+                if args.owner:
+                    record["owner"] = args.owner
+                if args.status == "approved":
+                    delivery = approve_completed_task(
+                        repo,
+                        root,
+                        path,
+                        task,
+                        record,
+                        delivery_lock_held=bool(delivery_plan),
+                    )
+                    target = path
+                else:
+                    task["review_status"] = "needs_fix"
+                    task["work_status"] = "in_progress"
+                    task["status"] = "active"
+                    task.setdefault("claim", {})["agent"] = task.get("claim", {}).get("agent") or args.owner or args.agent
+                    task.setdefault("claim", {})["claimed_at"] = task.get("claim", {}).get("claimed_at") or now_iso()
+                    task.setdefault("review_history", []).append(record)
+                    target = task_path(root, "active", task["id"])
+                    if target != path:
+                        atomic_move_json(path, target, task)
+                    else:
+                        dump_json(path, task)
+                    append_jsonl(root / "evidence" / "events.jsonl", event(task["id"], "task.reviewed", args.agent, record))
     except StateLockError as exc:
         raise RepoLocalError(str(exc)) from exc
-    print(relative(repo, target))
+    suffix = f" delivery={delivery['html']}" if delivery else ""
+    print(f"{relative(repo, target)}{suffix}")
     return 0
 
 
@@ -3768,16 +3995,23 @@ def delivery_html(manifest: dict[str, Any]) -> str:
 
 def cmd_delivery_build(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    if not getattr(args, "delivery_lock_held", False):
+        try:
+            with repository_lock(root, f"delivery-{args.epic}"):
+                args.delivery_lock_held = True
+                return cmd_delivery_build(args)
+        except StateLockError as exc:
+            raise RepoLocalError(str(exc)) from exc
     errors = validate_repo(repo)
     if errors:
         raise RepoLocalError("invalid repo-local contract:\n- " + "\n- ".join(errors))
-    root = go_root(repo)
     project = load_json(root / "project.json")
     hierarchy = load_json(root / "hierarchy.json")
     epic = next((item for item in hierarchy_epics(hierarchy) if item.get("id") == args.epic), None)
     if not epic:
         raise RepoLocalError(f"unknown epic: {args.epic}")
-    tasks = delivery_task_records(root, [str(item) for item in epic.get("tasks", [])])
+    tasks = delivery_task_records(root, epic_task_ids(epic))
     done = [task for task in tasks if task.get("status") == "done"]
     delivered = args.delivered or [str(task.get("summary")) for task in done] or [f"Delivery voor {epic['title']}"]
     excluded = args.excluded or ["Geen aanvullende uitgesloten scope vastgelegd."]
@@ -4206,6 +4440,7 @@ def build_parser() -> argparse.ArgumentParser:
     task_create.add_argument("--read", action="append", default=[])
     task_create.add_argument("--modify", action="append", default=[])
     task_create.add_argument("--execution-mode", choices=["mechanical", "agent"], default="mechanical")
+    task_create.add_argument("--shareable-delivery", choices=["auto", "required", "none"], default="auto")
     task_create.add_argument("--acceptance", action="append", default=[])
     task_create.add_argument("--verification", action="append", default=[])
     task_create.set_defaults(func=cmd_task_create)

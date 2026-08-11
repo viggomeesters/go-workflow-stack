@@ -144,7 +144,8 @@
         "delivery-build-cli",
         "delivery-disclosure-lifecycle",
         "delivery-docs-packaging",
-        "delivery-runtime-browser-proof"
+        "delivery-runtime-browser-proof",
+        "automatic-shareable-delivery-policy"
       ]
     },
     {

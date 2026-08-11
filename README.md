@@ -66,6 +66,8 @@ python3 cli/go.py next ../go-project-template
 
 A substantial assignment can end in a standard HTML handoff that does not require GitHub access. The delivery is generated from one repo-local epic and contains a stakeholder summary, delivered and excluded scope, evidence, limitations, next steps, release identity, disclosure class, and SHA-256 provenance.
 
+New tasks default to `shareable_delivery: auto`. Approval automatically creates a restricted, released epic delivery when the task uses agent execution, has at least two acceptance criteria, and modifies at least one path outside `.go/`. Use `task create --shareable-delivery required` to force the gate or `--shareable-delivery none` for small/internal work. A required delivery must resolve to exactly one owning epic; generation failure rolls approval back instead of leaving falsely approved work. Autonomous `go` results expose generated artifacts in `deliveries` so the handoff can be sent directly. During autonomous shipping, the per-epic delivery lock remains held until ship succeeds or rollback completes, preventing concurrent work from superseding an artifact that recovery later removes.
+
 ```bash
 python3 cli/go.py delivery build ../my-project \
   --epic alteryx-flow-generator \
@@ -119,6 +121,7 @@ The apply command validates the paired template and then creates a project-speci
 - `recommendation create <repo> --brief <brief.json>`: persist the compact handoff at `.go/recommendations/pending.json`; use `--read-only` for a strictly non-mutating preview. A later bare `go <repo> --execute` promotes and archives it without needing chat context or another taskification prompt. See [advice-to-outcome continuity](docs/advice-to-outcome.md).
 - `delivery build <repo> --epic <id>`: generate `.go/deliveries/<epic>-vN/index.html` plus a validated `go-workflow.delivery.v1` manifest without requiring GitHub access.
 - `delivery publish <repo> --delivery-id <id>`: enter the explicit publisher-adapter boundary; it fails closed while no adapter is configured.
+- `task create <repo> ... --shareable-delivery auto|required|none`: control the approval-time shareable-delivery gate; `auto` is the default substantial-task policy.
 - `task outcome <repo> --task-id <id> --outcome R1 --status verified|blocked|rejected --evidence <proof>`: close one requested outcome. Tracked tasks cannot finish until every R# has a terminal disposition and non-empty evidence; autonomous execution returns `blocked` and leaves the task active when closure is incomplete.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.

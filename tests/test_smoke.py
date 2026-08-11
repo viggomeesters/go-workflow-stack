@@ -5,6 +5,9 @@ import shlex
 import shutil
 import subprocess
 import sys
+import threading
+import time
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import pytest
@@ -108,6 +111,15 @@ def test_delivery_manifest_contract_accepts_complete_stakeholder_release():
     Draft202012Validator.check_schema(schema)
     Draft202012Validator(schema).validate(manifest)
     assert validate_delivery_manifest(manifest) == []
+
+
+def test_delivery_built_event_requires_artifact_identity_and_provenance():
+    from go_workflow.cli import event, validate_event
+
+    errors = validate_event(event("task-1", "delivery.built", "agent", {}), ".go/runs/events.jsonl", 1)
+
+    assert any("delivery.built data.delivery_id required" in error for error in errors)
+    assert any("delivery.built data.html_sha256 required" in error for error in errors)
 
 
 def test_delivery_manifest_contract_rejects_missing_stakeholder_section():
@@ -338,6 +350,420 @@ def test_fresh_fixture_builds_shareable_delivery_with_packaged_schema(tmp_path: 
     assert (repo / payload["manifest"]).is_file()
     assert (ROOT / "schemas" / "delivery.schema.json").is_file()
     assert '"schemas" = ["schemas/*.json"]' in (ROOT / "pyproject.toml").read_text()
+
+
+def complete_reviewable_delivery_task(repo: Path, task_id: str) -> None:
+    claimed = run_go("claim", task_id, "--repo", str(repo), "--agent", "pytest", "--allow-dirty")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    (repo / f"{task_id}.txt").write_text("delivered\n", encoding="utf-8")
+    finished = run_go(
+        "finish", task_id, "--repo", str(repo), "--agent", "pytest",
+        "--evidence",
+        f"summary=completed; changed_files={task_id}.txt; verification_command=python3 -c pass; "
+        "verification_result=passed; critic=review required",
+    )
+    assert finished.returncode == 0, finished.stderr + finished.stdout
+
+
+def test_task_create_defaults_shareable_delivery_to_auto_and_accepts_override(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    automatic = run_go(
+        "task", "create", str(repo), "--id", "automatic", "--summary", "Automatic delivery",
+        "--epic", "client-work", "--execution-mode", "agent", "--modify", "automatic.txt",
+        "--acceptance", "Customer-visible behavior is complete", "--acceptance", "Evidence is reviewable",
+        "--verification", "python3 -c pass",
+    )
+    opted_out = run_go(
+        "task", "create", str(repo), "--id", "opted-out", "--summary", "No delivery",
+        "--epic", "client-work", "--execution-mode", "agent", "--shareable-delivery", "none",
+        "--modify", "opted-out.txt", "--acceptance", "Small fix is complete",
+        "--verification", "python3 -c pass",
+    )
+
+    assert automatic.returncode == 0, automatic.stderr + automatic.stdout
+    assert opted_out.returncode == 0, opted_out.stderr + opted_out.stdout
+    automatic_task = json.loads((repo / ".go" / "tasks" / "open" / "automatic.json").read_text())
+    opted_out_task = json.loads((repo / ".go" / "tasks" / "open" / "opted-out.json").read_text())
+    assert automatic_task["shareable_delivery"] == "auto"
+    assert opted_out_task["shareable_delivery"] == "none"
+
+
+def test_shareable_delivery_auto_classifies_only_substantial_agent_work():
+    from go_workflow.cli import task_requires_shareable_delivery
+
+    base = {"shareable_delivery": "auto", "execution_mode": "agent", "scope": {"modify": ["app.py"]}}
+    assert task_requires_shareable_delivery({**base, "acceptance": ["Outcome", "Proof"]}) is True
+    assert task_requires_shareable_delivery({**base, "acceptance": ["Tiny fix"]}) is False
+    assert task_requires_shareable_delivery({**base, "execution_mode": "mechanical", "acceptance": ["Outcome", "Proof"]}) is False
+    assert task_requires_shareable_delivery({**base, "shareable_delivery": "required", "acceptance": []}) is True
+    assert task_requires_shareable_delivery({**base, "shareable_delivery": "none", "acceptance": ["Outcome", "Proof"]}) is False
+
+
+def test_all_task_materializers_persist_shareable_delivery_policy(tmp_path: Path):
+    from go_workflow.cli import create_followup_task, create_tasks_from_execution_brief
+
+    spike_repo = tmp_path / "policy-spike"
+    spiked = run_go(
+        "spike", str(spike_repo), "--project-id", "policy-spike", "--name", "Policy Spike",
+        "--task", "spike-result|Build spike result", "--execution-mode", "agent",
+    )
+    assert spiked.returncode == 0, spiked.stderr + spiked.stdout
+    spike_task = json.loads((spike_repo / ".go" / "tasks" / "open" / "spike-result.json").read_text())
+    assert spike_task["shareable_delivery"] == "auto"
+
+    repo = tmp_path / "policy-materializers"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "policy", "--name", "Policy")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    intent = run_go("go", str(repo), "--intent", "Build a durable stakeholder result", "--write", "--json")
+    assert intent.returncode == 0, intent.stderr + intent.stdout
+    intent_payload = json.loads(intent.stdout)
+    intent_task = json.loads((repo / intent_payload["created_task"]["path"]).read_text())
+    assert intent_task["shareable_delivery"] == "auto"
+
+    recommendation = "Materialize one approved work unit."
+    brief = {
+        "schema": "go-workflow.execution-brief.v1",
+        "destination": "One durable task exists.",
+        "problem": "The work must survive chat compaction.",
+        "chosen_approach": recommendation,
+        "non_goals": [],
+        "source": {"recommendation": recommendation, "sha256": hashlib.sha256(recommendation.encode()).hexdigest(), "source_ref": None},
+        "work_units": [{
+            "id": "brief-result", "summary": "Build brief result", "execution_mode": "agent",
+            "scope": {"read": ["README.md"], "modify": ["brief-result.txt"]},
+            "acceptance": ["Result exists", "Proof is recorded"], "verification": ["python3 -c pass"],
+        }],
+    }
+    create_tasks_from_execution_brief(repo, brief, "planner")
+    brief_task = json.loads((repo / ".go" / "tasks" / "open" / "brief-result.json").read_text())
+    assert brief_task["shareable_delivery"] == "auto"
+
+    followup = create_followup_task(repo, intent_task, ["Resolve the critic finding"], "critic")
+    followup_task = json.loads((repo / ".go" / "tasks" / "open" / f"{followup['id']}.json").read_text())
+    assert followup_task["shareable_delivery"] == "none"
+
+
+def test_approving_substantial_task_automatically_builds_restricted_delivery(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    created = run_go(
+        "task", "create", str(repo), "--id", "major-result", "--summary", "Major result",
+        "--epic", "client-work", "--execution-mode", "agent", "--modify", "major-result.txt",
+        "--acceptance", "Stakeholder outcome is complete", "--acceptance", "Proof is recorded",
+        "--verification", "python3 -c pass",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    complete_reviewable_delivery_task(repo, "major-result")
+
+    reviewed = run_go(
+        "task", "review", str(repo), "--task-id", "major-result", "--status", "approved",
+        "--evidence", "VERDICT A", "--agent", "critic",
+    )
+
+    assert reviewed.returncode == 0, reviewed.stderr + reviewed.stdout
+    assert "delivery=.go/deliveries/client-work-v1/index.html" in reviewed.stdout
+    manifest = json.loads((repo / ".go" / "deliveries" / "client-work-v1" / "manifest.json").read_text())
+    task = json.loads((repo / ".go" / "tasks" / "done" / "major-result.json").read_text())
+    assert manifest["release"]["status"] == "released"
+    assert manifest["disclosure"]["class"] == "restricted"
+    assert manifest["assignment"]["id"] == "client-work"
+    assert task["review_status"] == "approved"
+    assert task["review_history"][-1]["delivery"]["delivery_id"] == "client-work-v1"
+
+    repeated = run_go(
+        "task", "review", str(repo), "--task-id", "major-result", "--status", "approved",
+        "--evidence", "VERDICT A repeated", "--agent", "critic",
+    )
+    assert repeated.returncode == 0, repeated.stderr + repeated.stdout
+    assert sorted(path.name for path in (repo / ".go" / "deliveries").iterdir()) == ["client-work-v1"]
+
+
+def test_next_substantial_task_creates_superseding_delivery_version(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    for task_id in ("first-result", "second-result"):
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", task_id.replace("-", " ").title(),
+            "--epic", "client-work", "--execution-mode", "agent", "--modify", f"{task_id}.txt",
+            "--acceptance", "Stakeholder outcome is complete", "--acceptance", "Proof is recorded",
+            "--verification", "python3 -c pass",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+        complete_reviewable_delivery_task(repo, task_id)
+        reviewed = run_go(
+            "task", "review", str(repo), "--task-id", task_id, "--status", "approved",
+            "--evidence", "VERDICT A", "--agent", "critic",
+        )
+        assert reviewed.returncode == 0, reviewed.stderr + reviewed.stdout
+
+    second = json.loads((repo / ".go" / "deliveries" / "client-work-v2" / "manifest.json").read_text())
+    assert second["release"]["version"] == 2
+    assert second["release"]["supersedes"] == "client-work-v1"
+    assert (repo / ".go" / "deliveries" / "client-work-v1" / "manifest.json").is_file()
+
+
+def test_concurrent_substantial_approvals_serialize_epic_delivery_builds(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
+    from go_workflow import cli as workflow_cli
+
+    repo = delivery_test_repo(tmp_path)
+    task_ids = ("parallel-result-a", "parallel-result-b")
+    for task_id in task_ids:
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", task_id,
+            "--epic", "client-work", "--execution-mode", "agent", "--modify", f"{task_id}.txt",
+            "--acceptance", "Stakeholder outcome is complete", "--acceptance", "Proof is recorded",
+            "--verification", "python3 -c pass",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+        complete_reviewable_delivery_task(repo, task_id)
+
+    original_build = workflow_cli.build_automatic_delivery
+    state = {"active": 0, "max_active": 0}
+    state_lock = threading.Lock()
+
+    def tracked_build(target_repo: Path, plan: dict):
+        with state_lock:
+            state["active"] += 1
+            state["max_active"] = max(state["max_active"], state["active"])
+        try:
+            time.sleep(0.08)
+            return original_build(target_repo, plan)
+        finally:
+            with state_lock:
+                state["active"] -= 1
+
+    monkeypatch.setattr(workflow_cli, "build_automatic_delivery", tracked_build)
+
+    def approve(task_id: str):
+        return workflow_cli.approve_task_after_passed_critic(
+            repo / ".go", repo / ".go" / "tasks" / "done" / f"{task_id}.json", task_id, "critic"
+        )
+
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        deliveries = list(executor.map(approve, task_ids))
+
+    assert state["max_active"] == 1
+    assert sorted(delivery["delivery_id"] for delivery in deliveries if delivery) == ["client-work-v1", "client-work-v2"]
+
+
+def test_failed_ship_holds_epic_delivery_lock_until_rollback_completes(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = delivery_test_repo(tmp_path)
+    root = repo / ".go"
+    for task_id in ("ship-a", "ship-b"):
+        created = run_go(
+            "task", "create", str(repo), "--id", task_id, "--summary", task_id,
+            "--epic", "client-work", "--execution-mode", "agent",
+            "--shareable-delivery", "required", "--modify", "result.txt",
+            "--acceptance", "Result exists", "--acceptance", "Result is reviewed",
+        )
+        assert created.returncode == 0, created.stderr + created.stdout
+        complete_reviewable_delivery_task(repo, task_id)
+
+    done_a = root / "tasks" / "done" / "ship-a.json"
+    done_b = root / "tasks" / "done" / "ship-b.json"
+    original_a = json.loads(done_a.read_text(encoding="utf-8"))
+    original_a.update({"status": "active", "work_status": "in_progress", "review_status": "none"})
+    original_a["review_history"] = []
+    original_a["evidence"] = []
+    active_a = root / "tasks" / "active" / "ship-a.json"
+    evidence_path = root / "evidence" / "events.jsonl"
+    transaction_id = "ship-a-transaction"
+    approved_a = threading.Event()
+    allow_rollback = threading.Event()
+
+    def approve_then_rollback_a():
+        with cli.repository_lock(root, "delivery-client-work"):
+            delivery = cli.approve_task_after_passed_critic(
+                root, done_a, "ship-a", "critic", transaction_id=transaction_id, delivery_lock_held=True,
+            )
+            assert delivery and delivery["delivery_id"] == "client-work-v1"
+            approved_a.set()
+            assert allow_rollback.wait(timeout=5)
+            cli.restore_active_after_failed_ship(
+                root, active_a, done_a, original_a, evidence_path, transaction_id,
+            )
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        rollback_future = pool.submit(approve_then_rollback_a)
+        assert approved_a.wait(timeout=5)
+        approval_b = pool.submit(cli.approve_task_after_passed_critic, root, done_b, "ship-b", "critic")
+        time.sleep(0.15)
+        assert not approval_b.done()
+        allow_rollback.set()
+        rollback_future.result(timeout=5)
+        delivery_b = approval_b.result(timeout=5)
+
+    assert delivery_b and delivery_b["delivery_id"] == "client-work-v1"
+    assert active_a.is_file()
+    assert not done_a.exists()
+    assert not (root / "deliveries" / "client-work-v2").exists()
+    manifest = json.loads((root / "deliveries" / "client-work-v1" / "manifest.json").read_text(encoding="utf-8"))
+    assert manifest["release"]["supersedes"] is None
+    assert [item["label"] for item in manifest["sections"]["evidence"]] == ["ship-b"]
+
+
+def test_manual_approval_waits_for_epic_lock_without_holding_task_lock(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = delivery_test_repo(tmp_path)
+    root = repo / ".go"
+    created = run_go(
+        "task", "create", str(repo), "--id", "lock-order", "--summary", "Lock order",
+        "--epic", "client-work", "--execution-mode", "agent", "--shareable-delivery", "required",
+        "--modify", "result.txt", "--acceptance", "Result exists", "--acceptance", "Result is reviewed",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    complete_reviewable_delivery_task(repo, "lock-order")
+    done_path = root / "tasks" / "done" / "lock-order.json"
+    lock_ready = threading.Event()
+    release_lock = threading.Event()
+
+    def hold_epic_lock():
+        with cli.repository_lock(root, "delivery-client-work"):
+            lock_ready.set()
+            assert release_lock.wait(timeout=5)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        holder = pool.submit(hold_epic_lock)
+        assert lock_ready.wait(timeout=5)
+        approval = pool.submit(cli.approve_task_after_passed_critic, root, done_path, "lock-order", "critic")
+        time.sleep(0.15)
+        assert not approval.done()
+        with cli.repository_lock(root, "task-lock-order", timeout_seconds=0.5):
+            pass
+        release_lock.set()
+        holder.result(timeout=5)
+        delivery = approval.result(timeout=5)
+
+    assert delivery and delivery["delivery_id"] == "client-work-v1"
+
+
+def test_explicit_delivery_build_waits_for_epic_delivery_lock(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = delivery_test_repo(tmp_path)
+    root = repo / ".go"
+    lock_ready = threading.Event()
+    release_lock = threading.Event()
+
+    def hold_epic_lock():
+        with cli.repository_lock(root, "delivery-client-work"):
+            lock_ready.set()
+            assert release_lock.wait(timeout=5)
+
+    with ThreadPoolExecutor(max_workers=2) as pool:
+        holder = pool.submit(hold_epic_lock)
+        assert lock_ready.wait(timeout=5)
+        build = pool.submit(
+            run_go,
+            "delivery", "build", str(repo), "--epic", "client-work", "--version", "1", "--status", "released",
+        )
+        time.sleep(0.15)
+        assert not build.done()
+        release_lock.set()
+        holder.result(timeout=5)
+        result = build.result(timeout=5)
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert (root / "deliveries" / "client-work-v1" / "manifest.json").is_file()
+
+
+def test_feature_nested_task_is_included_in_automatic_epic_delivery(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    created = run_go(
+        "task", "create", str(repo), "--id", "feature-result", "--summary", "Feature result",
+        "--epic", "client-work", "--execution-mode", "agent", "--modify", "feature-result.txt",
+        "--acceptance", "Stakeholder outcome is complete", "--acceptance", "Proof is recorded",
+        "--verification", "python3 -c pass",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    hierarchy_path = repo / ".go" / "hierarchy.json"
+    hierarchy = json.loads(hierarchy_path.read_text())
+    epic = hierarchy["epics"][1]
+    epic["tasks"].remove("feature-result")
+    epic["features"] = [{"id": "stakeholder-feature", "title": "Stakeholder feature", "tasks": ["feature-result"]}]
+    hierarchy_path.write_text(json.dumps(hierarchy, indent=2) + "\n")
+    complete_reviewable_delivery_task(repo, "feature-result")
+
+    reviewed = run_go(
+        "task", "review", str(repo), "--task-id", "feature-result", "--status", "approved",
+        "--evidence", "VERDICT A", "--agent", "critic",
+    )
+
+    assert reviewed.returncode == 0, reviewed.stderr + reviewed.stdout
+    manifest = json.loads((repo / ".go" / "deliveries" / "client-work-v1" / "manifest.json").read_text())
+    assert manifest["sections"]["delivered_scope"] == ["Feature result"]
+    assert [item["label"] for item in manifest["sections"]["evidence"]] == ["Feature result"]
+
+
+def test_autonomous_critic_approval_returns_automatic_delivery(tmp_path: Path):
+    from go_workflow.cli import approve_task_after_passed_critic
+
+    repo = delivery_test_repo(tmp_path)
+    created = run_go(
+        "task", "create", str(repo), "--id", "autonomous-result", "--summary", "Autonomous result",
+        "--epic", "client-work", "--execution-mode", "agent", "--modify", "autonomous-result.txt",
+        "--acceptance", "Stakeholder outcome is complete", "--acceptance", "Proof is recorded",
+        "--verification", "python3 -c pass",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    complete_reviewable_delivery_task(repo, "autonomous-result")
+    done_path = repo / ".go" / "tasks" / "done" / "autonomous-result.json"
+
+    delivery = approve_task_after_passed_critic(repo / ".go", done_path, "autonomous-result", "critic")
+
+    assert delivery is not None
+    assert delivery["delivery_id"] == "client-work-v1"
+    assert (repo / delivery["html"]).is_file()
+
+
+def test_required_delivery_failure_rolls_back_task_approval(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    created = run_go(
+        "task", "create", str(repo), "--id", "orphan-result", "--summary", "Orphan result",
+        "--epic", "client-work", "--execution-mode", "agent", "--shareable-delivery", "required",
+        "--modify", "orphan-result.txt", "--acceptance", "Result is complete",
+        "--verification", "python3 -c pass",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    complete_reviewable_delivery_task(repo, "orphan-result")
+    hierarchy_path = repo / ".go" / "hierarchy.json"
+    hierarchy = json.loads(hierarchy_path.read_text())
+    hierarchy["epics"][1]["tasks"].remove("orphan-result")
+    hierarchy_path.write_text(json.dumps(hierarchy, indent=2) + "\n", encoding="utf-8")
+
+    reviewed = run_go(
+        "task", "review", str(repo), "--task-id", "orphan-result", "--status", "approved",
+        "--evidence", "VERDICT A", "--agent", "critic",
+    )
+
+    assert reviewed.returncode == 1
+    assert "requires exactly one owning epic" in reviewed.stderr
+    task = json.loads((repo / ".go" / "tasks" / "done" / "orphan-result.json").read_text())
+    assert task["review_status"] == "review"
+    assert task["review_history"] == []
+    assert not (repo / ".go" / "deliveries").exists()
+
+
+def test_approving_opted_out_task_does_not_build_delivery(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    created = run_go(
+        "task", "create", str(repo), "--id", "small-fix", "--summary", "Small fix",
+        "--epic", "client-work", "--execution-mode", "agent", "--shareable-delivery", "none",
+        "--modify", "small-fix.txt", "--acceptance", "Fix is complete", "--verification", "python3 -c pass",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    complete_reviewable_delivery_task(repo, "small-fix")
+
+    reviewed = run_go(
+        "task", "review", str(repo), "--task-id", "small-fix", "--status", "approved",
+        "--evidence", "VERDICT A", "--agent", "critic",
+    )
+
+    assert reviewed.returncode == 0, reviewed.stderr + reviewed.stdout
+    assert "delivery=" not in reviewed.stdout
+    assert not (repo / ".go" / "deliveries").exists()
 
 
 def test_capacity_policy_defaults_to_solo_or_serial_review_lane():

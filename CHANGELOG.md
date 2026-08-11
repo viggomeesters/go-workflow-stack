@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Make restricted shareable delivery a standard approval-time gate for substantial agent tasks, with explicit `required`/`none` overrides, immutable epic versioning, per-epic serialization through autonomous ship/rollback, autonomous-run artifact readback, and fail-closed approval rollback.
+
 ## 0.3.10 - 2026-08-11
 
 - Add `go-workflow.delivery.v1` plus `delivery build` for deterministic standalone stakeholder HTML and adjacent SHA-256 provenance manifests.

@@ -65,6 +65,12 @@ RECOMMENDATION_SCHEMA = "go-workflow.recommendation.v1"
 DELIVERY_SCHEMA = "go-workflow.delivery.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
+DELIVERY_SENSITIVE_PATTERNS = (
+    ("local home path", re.compile(r"(?:/home/[^/\s]+|/Users/[^/\s]+|[A-Za-z]:\\\\Users\\\\[^\\\s]+)")),
+    ("credential assignment", re.compile(r"(?:token|password|secret|credential)\s*[:=]\s*\S+", re.I)),
+    ("credential file", re.compile(r"(?:^|[/\\])(?:\.env(?:\.[^/\\\s]+)?|id_rsa|private[-_]key)(?:$|[/\\\s])", re.I)),
+    ("private key material", re.compile(r"BEGIN [A-Z ]*PRIVATE KEY")),
+)
 OUTCOME_TERMINAL_STATUSES = {"verified", "blocked", "rejected"}
 
 
@@ -3665,6 +3671,11 @@ def delivery_task_records(root: Path, task_ids: list[str]) -> list[dict[str, Any
     return records
 
 
+def delivery_sensitive_findings(payload: dict[str, Any]) -> list[str]:
+    text = json.dumps(payload, ensure_ascii=False, sort_keys=True)
+    return [label for label, pattern in DELIVERY_SENSITIVE_PATTERNS if pattern.search(text)]
+
+
 def delivery_html(manifest: dict[str, Any]) -> str:
     esc = lambda value: html.escape(str(value), quote=True)
     sections = manifest["sections"]
@@ -3714,23 +3725,51 @@ def cmd_delivery_build(args: argparse.Namespace) -> int:
     delivery_id = args.delivery_id or f"{slugify(args.epic)}-v{args.version}"
     target = root / "deliveries" / delivery_id
     existing_manifest = target / "manifest.json"
+    existing: dict[str, Any] | None = None
     created_at = now_iso()
     if existing_manifest.is_file():
-        created_at = str(load_json(existing_manifest).get("release", {}).get("created_at") or created_at)
+        existing = load_json(existing_manifest)
+        created_at = str(existing.get("release", {}).get("created_at") or created_at)
+    if args.supersedes:
+        superseded_path = root / "deliveries" / args.supersedes / "manifest.json"
+        if not superseded_path.is_file():
+            raise RepoLocalError(f"superseded delivery does not exist: {args.supersedes}")
+        superseded = load_json(superseded_path)
+        if args.version <= int(superseded.get("release", {}).get("version") or 0):
+            raise RepoLocalError("replacement delivery version must be greater than the superseded version")
     source_payload = {"project": project, "epic": epic, "tasks": tasks, "summary": args.summary or epic.get("description") or f"Delivery voor {epic['title']}.", "delivered": delivered, "excluded": excluded, "limitations": limitations, "next_steps": next_steps, "version": args.version, "status": args.status, "disclosure": args.disclosure, "supersedes": args.supersedes or None}
     source_sha = hashlib.sha256(json.dumps(source_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
-    manifest = {"schema": DELIVERY_SCHEMA, "delivery_id": delivery_id, "project": {"id": project["id"], "name": project["name"]}, "assignment": {"kind": "epic", "id": epic["id"], "title": epic["title"]}, "release": {"version": args.version, "status": args.status, "created_at": created_at, "supersedes": args.supersedes or None}, "disclosure": {"class": args.disclosure, "scan_status": "passed"}, "sections": {"summary": source_payload["summary"], "delivered_scope": delivered, "excluded_scope": excluded, "evidence": evidence_items, "limitations": limitations, "next_steps": next_steps}, "provenance": {"source": ".go", "source_sha256": source_sha, "html_sha256": None}}
+    sensitive_findings = delivery_sensitive_findings(source_payload)
+    if sensitive_findings and args.disclosure != "restricted":
+        raise RepoLocalError("delivery is unsafe for public disclosure: " + ", ".join(sensitive_findings))
+    manifest = {"schema": DELIVERY_SCHEMA, "delivery_id": delivery_id, "project": {"id": project["id"], "name": project["name"]}, "assignment": {"kind": "epic", "id": epic["id"], "title": epic["title"]}, "release": {"version": args.version, "status": args.status, "created_at": created_at, "supersedes": args.supersedes or None}, "disclosure": {"class": args.disclosure, "scan_status": "blocked" if sensitive_findings else "passed"}, "sections": {"summary": source_payload["summary"], "delivered_scope": delivered, "excluded_scope": excluded, "evidence": evidence_items, "limitations": limitations, "next_steps": next_steps}, "provenance": {"source": ".go", "source_sha256": source_sha, "html_sha256": None}}
     findings = validate_delivery_manifest(manifest)
     if findings:
         raise RepoLocalError("invalid delivery manifest:\n- " + "\n- ".join(findings))
     html_text = delivery_html(manifest)
     html_sha = hashlib.sha256(html_text.encode("utf-8")).hexdigest()
     manifest["provenance"]["html_sha256"] = html_sha
+    if existing and existing.get("release", {}).get("status") in {"released", "superseded"}:
+        if existing.get("provenance", {}).get("source_sha256") == source_sha and existing.get("provenance", {}).get("html_sha256") == html_sha:
+            print(json.dumps({"delivery_id": delivery_id, "html": relative(repo, target / "index.html"), "manifest": relative(repo, existing_manifest), "source_sha256": source_sha, "html_sha256": html_sha}, indent=2, ensure_ascii=False))
+            return 0
+        raise RepoLocalError("released delivery is immutable; create a higher version and use --supersedes")
     target.mkdir(parents=True, exist_ok=True)
     atomic_write_text(target / "index.html", html_text)
     atomic_write_text(target / "manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
     print(json.dumps({"delivery_id": delivery_id, "html": relative(repo, target / "index.html"), "manifest": relative(repo, target / "manifest.json"), "source_sha256": source_sha, "html_sha256": html_sha}, indent=2, ensure_ascii=False))
     return 0
+
+
+def cmd_delivery_publish(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("invalid repo-local contract:\n- " + "\n- ".join(errors))
+    manifest = go_root(repo) / "deliveries" / args.delivery_id / "manifest.json"
+    if not manifest.is_file():
+        raise RepoLocalError(f"delivery manifest not found: {args.delivery_id}")
+    raise RepoLocalError("publisher adapter is not configured; delivery build is local-only and publication requires an explicit adapter")
 
 
 def cmd_decision_create(args: argparse.Namespace) -> int:
@@ -4083,6 +4122,10 @@ def build_parser() -> argparse.ArgumentParser:
     delivery_build.add_argument("--limitation", action="append", default=[])
     delivery_build.add_argument("--next-step", action="append", default=[])
     delivery_build.set_defaults(func=cmd_delivery_build)
+    delivery_publish = delivery_sub.add_parser("publish", help="Publish a built delivery through an explicit adapter")
+    delivery_publish.add_argument("repo", nargs="?", default=".")
+    delivery_publish.add_argument("--delivery-id", required=True)
+    delivery_publish.set_defaults(func=cmd_delivery_publish)
     task = sub.add_parser("task", help="Author repo-local tasks")
     task_sub = task.add_subparsers(dest="task_command", required=True)
     task_create = task_sub.add_parser("create", help="Create an open repo-local task")

@@ -154,6 +154,68 @@ def test_delivery_build_generates_deterministic_standalone_html_and_manifest(tmp
     assert second_result["html_sha256"] == first_result["html_sha256"]
 
 
+def delivery_test_repo(tmp_path: Path) -> Path:
+    repo = tmp_path / "delivery-policy-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    assert run_go("adopt", str(repo), "--project-id", "delivery-policy", "--name", "Delivery Policy").returncode == 0
+    assert run_go("epic", "create", str(repo), "--id", "client-work", "--title", "Client work").returncode == 0
+    return repo
+
+
+def test_delivery_public_disclosure_rejects_sensitive_content_before_write(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    result = run_go(
+        "delivery", "build", str(repo), "--epic", "client-work", "--disclosure", "public",
+        "--summary", "Internal proof at /home/viggo/customer/source.json",
+    )
+
+    assert result.returncode == 1
+    assert "unsafe for public disclosure" in result.stderr
+    assert not (repo / ".go" / "deliveries" / "client-work-v1").exists()
+
+
+def test_delivery_restricted_defaults_and_records_blocked_scan(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    result = run_go(
+        "delivery", "build", str(repo), "--epic", "client-work",
+        "--summary", "Internal proof at /home/viggo/customer/source.json",
+    )
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    manifest = json.loads((repo / ".go" / "deliveries" / "client-work-v1" / "manifest.json").read_text())
+    assert manifest["disclosure"] == {"class": "restricted", "scan_status": "blocked"}
+
+
+def test_delivery_released_version_is_immutable(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    first = run_go(
+        "delivery", "build", str(repo), "--epic", "client-work", "--status", "released",
+        "--summary", "Approved release summary",
+    )
+    assert first.returncode == 0, first.stderr + first.stdout
+    manifest_path = repo / ".go" / "deliveries" / "client-work-v1" / "manifest.json"
+    original = manifest_path.read_text()
+
+    changed = run_go(
+        "delivery", "build", str(repo), "--epic", "client-work", "--status", "released",
+        "--summary", "Silently changed release summary",
+    )
+
+    assert changed.returncode == 1
+    assert "released delivery is immutable" in changed.stderr
+    assert manifest_path.read_text() == original
+
+
+def test_delivery_publish_fails_closed_without_adapter(tmp_path: Path):
+    repo = delivery_test_repo(tmp_path)
+    built = run_go("delivery", "build", str(repo), "--epic", "client-work")
+    assert built.returncode == 0, built.stderr + built.stdout
+    result = run_go("delivery", "publish", str(repo), "--delivery-id", "client-work-v1")
+
+    assert result.returncode == 1
+    assert "publisher adapter" in result.stderr
+
+
 def test_capacity_policy_defaults_to_solo_or_serial_review_lane():
     from go_workflow.capacity_policy import plan_capacity
 

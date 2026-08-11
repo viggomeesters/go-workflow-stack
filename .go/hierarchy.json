@@ -128,6 +128,19 @@
         "advice-model-08-authority-handoff",
         "advice-model-11-release-v038"
       ]
+    },
+    {
+      "id": "shareable-output",
+      "title": "Shareable .go output",
+      "description": "Turn substantial .go work into a standard human-readable HTML delivery package that can be shared with stakeholders without GitHub access while preserving machine-verifiable provenance and privacy boundaries.",
+      "features": [],
+      "tasks": [
+        "shareable-output-contract",
+        "shareable-output-publication",
+        "shareable-output-privacy",
+        "shareable-output-lifecycle",
+        "shareable-output-prototype"
+      ]
     }
   ]
 }

@@ -1,0 +1,34 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "shareable-output-lifecycle",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Define generation and release lifecycle",
+  "description": "Decision ticket (Grilling/HITL): Decide when a large assignment earns a shareable artifact, how draft versus accepted versus released states work, how versions are named, and whether later updates replace or append releases.",
+  "scope": {
+    "read": [
+      ".go/hierarchy.json,.go/tasks,.go/evidence,README.md"
+    ],
+    "modify": [
+      ".go/decisions/events.jsonl,.go/tasks"
+    ]
+  },
+  "acceptance": [
+    "Lifecycle rules define qualifying work units plus draft and release transitions plus immutable version identity",
+    "The lifecycle explains how corrections and superseding releases remain auditable"
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "python3 cli/go.py readback ."
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

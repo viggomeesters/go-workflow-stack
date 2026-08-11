@@ -1,0 +1,78 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-build-cli",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Build deterministic standalone HTML and manifest output",
+  "description": "Build deterministic standalone HTML and manifest output",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "schemas/delivery.schema.json",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "The delivery build command generates a standalone readable HTML file and adjacent JSON manifest from one epic",
+    "Repeated builds from unchanged source produce stable stakeholder content and provenance hashes",
+    "Generated output contains summary plus delivered scope plus excluded scope plus evidence plus limitations plus next steps plus release identity"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "python3 cli/go.py delivery build --help",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:20:48+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:28:06+02:00",
+      "task_id": "delivery-build-cli",
+      "agent": "hermes",
+      "summary": "summary=Implemented deterministic delivery build CLI producing standalone HTML and adjacent manifest from one epic; changed_files=go_workflow/cli.py,tests/test_smoke.py,.go/tasks/active/delivery-build-cli.json; verification=python3 -m pytest tests/test_smoke.py -q rc=0 139 passed plus delivery build help validate and diff-check rc=0; critic=approved deterministic rebuild hashes HTML escaping standalone asset-free output and six stakeholder sections",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        ".go/tasks/active/delivery-build-cli.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 -m pytest tests/test_smoke.py -q rc=0 139 passed plus delivery build help validate and diff-check rc=0",
+        "result": "python3 -m pytest tests/test_smoke.py -q rc=0 139 passed plus delivery build help validate and diff-check rc=0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved deterministic rebuild hashes HTML escaping standalone asset-free output and six stakeholder sections",
+        "skip_reason": null
+      }
+    }
+  ]
+}

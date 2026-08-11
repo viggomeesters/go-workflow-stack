@@ -62,6 +62,32 @@ python3 cli/go.py readback ../go-project-template
 python3 cli/go.py next ../go-project-template
 ```
 
+## Shareable stakeholder deliveries
+
+A substantial assignment can end in a standard HTML handoff that does not require GitHub access. The delivery is generated from one repo-local epic and contains a stakeholder summary, delivered and excluded scope, evidence, limitations, next steps, release identity, disclosure class, and SHA-256 provenance.
+
+```bash
+python3 cli/go.py delivery build ../my-project \
+  --epic alteryx-flow-generator \
+  --version 1 \
+  --status released \
+  --disclosure restricted
+```
+
+The command writes a self-contained file and adjacent machine-readable manifest:
+
+```text
+.go/deliveries/alteryx-flow-generator-v1/
+  index.html
+  manifest.json
+```
+
+No repository browser or GitHub account is needed to open `index.html`. Build is local and side-effect free outside the repository. Publication is deliberately separate: `delivery publish` fails closed until an explicit publisher adapter is configured.
+
+Disclosure defaults to `restricted`. `public` and `link-private` builds reject local home paths, credential assignments, credential-file names, and private-key material before creating output. Restricted builds may retain internal detail but record `scan_status: blocked` so they cannot be mistaken for publication-ready output.
+
+Released and superseded delivery versions are immutable. Corrections use a higher version with `--supersedes <delivery-id>`; the previous artifact remains auditable.
+
 Check the public template/stack pairing explicitly:
 
 ```bash
@@ -91,6 +117,8 @@ The apply command validates the paired template and then creates a project-speci
 - `go <repo> --intent <text> --intent-source-ref <ref> --write`: materialize the exact instruction as `intent_source.text` plus SHA-256 and an optional durable origin reference. For a later standalone Telegram `GO`, pass the preceding message text unchanged and reference that message/session; do not reconstruct the intent from a summary.
 - `go <repo> --execution-brief <brief.json> --write|--execute`: validate a compact `go-workflow.execution-brief.v1`, materialize one task per semantic work unit, and preserve the selected approach plus SHA-256/source provenance on every task. `--execute` continues directly into the auto/loop lifecycle in the same invocation; it does not stop after taskification. Invalid briefs fail before creating tasks.
 - `recommendation create <repo> --brief <brief.json>`: persist the compact handoff at `.go/recommendations/pending.json`; use `--read-only` for a strictly non-mutating preview. A later bare `go <repo> --execute` promotes and archives it without needing chat context or another taskification prompt. See [advice-to-outcome continuity](docs/advice-to-outcome.md).
+- `delivery build <repo> --epic <id>`: generate `.go/deliveries/<epic>-vN/index.html` plus a validated `go-workflow.delivery.v1` manifest without requiring GitHub access.
+- `delivery publish <repo> --delivery-id <id>`: enter the explicit publisher-adapter boundary; it fails closed while no adapter is configured.
 - `task outcome <repo> --task-id <id> --outcome R1 --status verified|blocked|rejected --evidence <proof>`: close one requested outcome. Tracked tasks cannot finish until every R# has a terminal disposition and non-empty evidence; autonomous execution returns `blocked` and leaves the task active when closure is incomplete.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
@@ -128,10 +156,12 @@ The apply command validates the paired template and then creates a project-speci
   runs/*.jsonl
   evidence/*.jsonl
   decisions/*.jsonl
+  deliveries/<delivery-id>/index.html
+  deliveries/<delivery-id>/manifest.json
   imports/*.json
 ```
 
-JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Markdown is a human view only. Import bundles are review artifacts: they never overwrite existing project state unless a later explicit task chooses to reconcile them.
+JSON is canonical for current state. JSONL is canonical for lifecycle, evidence, and decision streams. Delivery HTML is a derived stakeholder view paired with a validated JSON manifest; it does not replace task or evidence state. Markdown is a human view only. Import bundles are review artifacts: they never overwrite existing project state unless a later explicit task chooses to reconcile them.
 
 Process locks live under `.git/go-workflow-locks` so they do not dirty Git state; non-Git fixtures use `.go/locks` as a fallback.
 

@@ -216,6 +216,20 @@ def test_delivery_publish_fails_closed_without_adapter(tmp_path: Path):
     assert "publisher adapter" in result.stderr
 
 
+def test_fresh_fixture_builds_shareable_delivery_with_packaged_schema(tmp_path: Path):
+    repo = tmp_path / "fresh-fixture"
+    shutil.copytree(ROOT / "fixtures" / "minimal", repo)
+
+    result = run_go("delivery", "build", str(repo), "--epic", "workflow-contract")
+
+    assert result.returncode == 0, result.stderr + result.stdout
+    payload = json.loads(result.stdout)
+    assert (repo / payload["html"]).is_file()
+    assert (repo / payload["manifest"]).is_file()
+    assert (ROOT / "schemas" / "delivery.schema.json").is_file()
+    assert '"schemas" = ["schemas/*.json"]' in (ROOT / "pyproject.toml").read_text()
+
+
 def test_capacity_policy_defaults_to_solo_or_serial_review_lane():
     from go_workflow.capacity_policy import plan_capacity
 

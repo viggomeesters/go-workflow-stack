@@ -2375,11 +2375,6 @@ def test_package_runtime_provenance_ignores_unrelated_parent_git_checkout(tmp_pa
 def test_package_runtime_provenance_real_vcs_tool_install_passes_doctor(tmp_path: Path):
     source = tmp_path / "release-source"
     subprocess.run(["git", "clone", "-q", "--no-hardlinks", str(ROOT), str(source)], check=True)
-    source_shallow = source / ".git" / "shallow"
-    if source_shallow.is_file():
-        shutil.copytree(ROOT / ".git" / "objects", source / ".git" / "objects", dirs_exist_ok=True)
-        source_shallow.unlink()
-        subprocess.run(["git", "fsck", "--full", "--no-progress"], cwd=source, check=True, capture_output=True)
     subprocess.run(["git", "checkout", "-q", "v0.3.5"], cwd=source, check=True)
     release_commit = subprocess.run(
         ["git", "rev-parse", "v0.3.5^{}"], cwd=source, text=True, capture_output=True, check=True,

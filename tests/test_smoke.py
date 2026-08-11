@@ -3800,6 +3800,8 @@ def test_existing_release_uses_immutable_canonical_template_pairing():
     assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
     assert "0.3.10:https://*)" in inner
     assert "d4a09d972451472180d45ef2a48c920ad91c496e" in inner
+    assert "0.3.11:https://*)" in inner
+    assert "6fb460a3ae15e6ed04f5abc0461c1bfade364522" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
     assert "PYTHONSAFEPATH=" not in inner
     assert "PYTHONPATH=" not in inner

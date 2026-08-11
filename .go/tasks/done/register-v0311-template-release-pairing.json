@@ -1,0 +1,90 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "register-v0311-template-release-pairing",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Register immutable v0.3.11 template pairing",
+  "description": "Add exact public go-project-template commit 6fb460a3ae15e6ed04f5abc0461c1bfade364522 to historical v0.3.11 release validation while preserving prior mappings.",
+  "scope": {
+    "read": [
+      "scripts/release-check-inner.sh",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "scripts/release-check-inner.sh",
+      "tests/test_smoke.py",
+      ".go/hierarchy.json",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      ".go/tasks/open/register-v0311-template-release-pairing.json",
+      ".go/tasks/active/register-v0311-template-release-pairing.json",
+      ".go/tasks/done/register-v0311-template-release-pairing.json"
+    ]
+  },
+  "acceptance": [
+    "R-1: Existing-release validation maps 0.3.11 only to exact template commit 6fb460a3ae15e6ed04f5abc0461c1bfade364522.",
+    "R-2: Historical v0.3.10 and v0.3.8 mappings plus fail-closed fallback remain intact.",
+    "R-3: After closeout/commit/push, remote --validate-existing 0.3.11 passes."
+  ],
+  "verification": [
+    "bash -n scripts/release-check-inner.sh",
+    "python3 -m pytest tests/test_smoke.py -q -k existing_release_uses_immutable_canonical_template_pairing"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T23:10:35+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-11T23:14:16+02:00",
+      "agent": "critic",
+      "status": "approved",
+      "evidence": "VERDICT A: exact 0.3.11 template commit 6fb460a3ae15e6ed04f5abc0461c1bfade364522, canonical remote, detached checkout, prior mappings/fallback preserved",
+      "transaction_id": "c371eca2dfca4d03a2ac834a7637537f"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T23:14:16+02:00",
+      "task_id": "register-v0311-template-release-pairing",
+      "agent": "hermes",
+      "summary": "summary=Registered immutable v0.3.11 template pairing to exact public commit 6fb460a3ae15e6ed04f5abc0461c1bfade364522 while preserving v0.3.8/v0.3.10 mappings and fail-closed fallback; changed_files=scripts/release-check-inner.sh,tests/test_smoke.py; verification_command=bash -n scripts/release-check-inner.sh && python3 -m pytest tests/test_smoke.py::test_existing_release_uses_immutable_canonical_template_pairing -q; verification_result=passed; critic=VERDICT A canonical remote, reachability, detached checkout, immutable commit and no mutable sibling fallback verified; post-push validate-existing required",
+      "changed_files": [
+        "scripts/release-check-inner.sh",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "bash -n scripts/release-check-inner.sh && python3 -m pytest tests/test_smoke.py::test_existing_release_uses_immutable_canonical_template_pairing -q",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "VERDICT A canonical remote, reachability, detached checkout, immutable commit and no mutable sibling fallback verified",
+        "skip_reason": null
+      }
+    }
+  ]
+}

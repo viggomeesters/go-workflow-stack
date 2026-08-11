@@ -146,7 +146,8 @@
         "delivery-docs-packaging",
         "delivery-runtime-browser-proof",
         "automatic-shareable-delivery-policy",
-        "release-v0311-automatic-delivery"
+        "release-v0311-automatic-delivery",
+        "register-v0311-template-release-pairing"
       ]
     },
     {

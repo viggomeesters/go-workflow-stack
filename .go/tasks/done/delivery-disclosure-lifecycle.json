@@ -1,0 +1,79 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-disclosure-lifecycle",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Enforce disclosure scans and immutable release versions",
+  "description": "Enforce disclosure scans and immutable release versions",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "schemas/delivery.schema.json",
+      "tests/test_smoke.py",
+      ".go/decisions/events.jsonl"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Missing disclosure defaults to restricted and public or link-private output fails closed on secret-like or local-path content",
+    "Released versions are immutable and corrections require a new version with optional supersedes provenance",
+    "Building remains local while publish is an explicit unsupported adapter boundary rather than an implicit side effect"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:28:07+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:32:32+02:00",
+      "task_id": "delivery-disclosure-lifecycle",
+      "agent": "hermes",
+      "summary": "summary=Enforced fail-closed disclosure scans immutable release versions supersedes validation and explicit publisher adapter boundary; changed_files=go_workflow/cli.py,tests/test_smoke.py,.go/tasks/active/delivery-disclosure-lifecycle.json; verification=python3 -m pytest tests/test_smoke.py -q rc=0 143 passed plus validate and diff-check rc=0; critic=approved sensitive findings do not echo matched content restricted remains usable and released output cannot be silently changed",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        ".go/tasks/active/delivery-disclosure-lifecycle.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 -m pytest tests/test_smoke.py -q rc=0 143 passed plus validate and diff-check rc=0",
+        "result": "python3 -m pytest tests/test_smoke.py -q rc=0 143 passed plus validate and diff-check rc=0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved sensitive findings do not echo matched content restricted remains usable and released output cannot be silently changed",
+        "skip_reason": null
+      }
+    }
+  ]
+}

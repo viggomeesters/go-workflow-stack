@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.delivery.v1",
+  "title": "Go Workflow Stakeholder Delivery",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "delivery_id", "project", "assignment", "release", "disclosure", "sections", "provenance"],
+  "properties": {
+    "schema": {"const": "go-workflow.delivery.v1"},
+    "delivery_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "project": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "name"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "name": {"type": "string", "minLength": 1}
+      }
+    },
+    "assignment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["kind", "id", "title"],
+      "properties": {
+        "kind": {"enum": ["epic", "task-set"]},
+        "id": {"type": "string", "minLength": 1},
+        "title": {"type": "string", "minLength": 1}
+      }
+    },
+    "release": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["version", "status", "created_at", "supersedes"],
+      "properties": {
+        "version": {"type": "integer", "minimum": 1},
+        "status": {"enum": ["draft", "released", "superseded"]},
+        "created_at": {"type": "string", "minLength": 1},
+        "supersedes": {"type": ["string", "null"]}
+      }
+    },
+    "disclosure": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["class", "scan_status"],
+      "properties": {
+        "class": {"enum": ["public", "link-private", "restricted"]},
+        "scan_status": {"enum": ["passed", "blocked"]}
+      }
+    },
+    "sections": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["summary", "delivered_scope", "excluded_scope", "evidence", "limitations", "next_steps"],
+      "properties": {
+        "summary": {"type": "string", "minLength": 1},
+        "delivered_scope": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "excluded_scope": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "evidence": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["label", "summary"],
+            "properties": {
+              "label": {"type": "string", "minLength": 1},
+              "summary": {"type": "string", "minLength": 1}
+            }
+          }
+        },
+        "limitations": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "next_steps": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}}
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["source", "source_sha256", "html_sha256"],
+      "properties": {
+        "source": {"const": ".go"},
+        "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "html_sha256": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"}
+      }
+    }
+  }
+}

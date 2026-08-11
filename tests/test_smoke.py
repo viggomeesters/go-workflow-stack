@@ -79,6 +79,81 @@ def run_go(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[s
     return subprocess.run([sys.executable, str(ROOT / "cli" / "go.py"), *args], cwd=cwd, text=True, capture_output=True)
 
 
+def valid_delivery_manifest() -> dict:
+    return {
+        "schema": "go-workflow.delivery.v1",
+        "delivery_id": "demo-output-v1",
+        "project": {"id": "demo", "name": "Demo"},
+        "assignment": {"kind": "epic", "id": "shareable-output", "title": "Shareable output"},
+        "release": {"version": 1, "status": "draft", "created_at": "2026-08-11T13:05:00+02:00", "supersedes": None},
+        "disclosure": {"class": "restricted", "scan_status": "passed"},
+        "sections": {
+            "summary": "A stakeholder-readable delivery.",
+            "delivered_scope": ["Standalone HTML"],
+            "excluded_scope": ["Public hosting"],
+            "evidence": [{"label": "Tests", "summary": "1 passed"}],
+            "limitations": ["Synthetic fixture only"],
+            "next_steps": ["Review with opdrachtgever"],
+        },
+        "provenance": {"source": ".go", "source_sha256": "a" * 64, "html_sha256": None},
+    }
+
+
+def test_delivery_manifest_contract_accepts_complete_stakeholder_release():
+    from go_workflow.cli import validate_delivery_manifest
+
+    assert validate_delivery_manifest(valid_delivery_manifest()) == []
+
+
+def test_delivery_manifest_contract_rejects_missing_stakeholder_section():
+    from go_workflow.cli import validate_delivery_manifest
+
+    manifest = valid_delivery_manifest()
+    del manifest["sections"]["limitations"]
+
+    assert validate_delivery_manifest(manifest) == ["delivery.sections.limitations must be a non-empty list"]
+
+
+def test_delivery_build_generates_deterministic_standalone_html_and_manifest(tmp_path: Path):
+    repo = tmp_path / "client-project"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "client-project", "--name", "Client Project")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    epic = run_go("epic", "create", str(repo), "--id", "customer-release", "--title", "Customer release")
+    assert epic.returncode == 0, epic.stderr + epic.stdout
+
+    command = (
+        "delivery", "build", str(repo), "--epic", "customer-release", "--version", "1",
+        "--summary", "A forwardable stakeholder delivery.",
+        "--delivered", "Standalone HTML report", "--excluded", "Public hosting",
+        "--limitation", "Synthetic evidence only", "--next-step", "Review with opdrachtgever",
+    )
+    first = run_go(*command)
+    assert first.returncode == 0, first.stderr + first.stdout
+    first_result = json.loads(first.stdout)
+    manifest_path = repo / first_result["manifest"]
+    html_path = repo / first_result["html"]
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    html_text = html_path.read_text(encoding="utf-8")
+
+    assert manifest["schema"] == "go-workflow.delivery.v1"
+    assert manifest["sections"]["delivered_scope"] == ["Standalone HTML report"]
+    assert manifest["provenance"]["html_sha256"] == hashlib.sha256(html_text.encode("utf-8")).hexdigest()
+    assert "Samenvatting" in html_text
+    assert "Opgeleverde scope" in html_text
+    assert "Bewijs" in html_text
+    assert "Beperkingen en open punten" in html_text
+    assert "Aanbevolen vervolg" in html_text
+    assert "<script" not in html_text.lower()
+    assert "http://" not in html_text and "https://" not in html_text
+
+    second = run_go(*command)
+    assert second.returncode == 0, second.stderr + second.stdout
+    second_result = json.loads(second.stdout)
+    assert second_result["source_sha256"] == first_result["source_sha256"]
+    assert second_result["html_sha256"] == first_result["html_sha256"]
+
+
 def test_capacity_policy_defaults_to_solo_or_serial_review_lane():
     from go_workflow.capacity_policy import plan_capacity
 

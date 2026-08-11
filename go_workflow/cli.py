@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import fnmatch
 import hashlib
+import html
 import json
 import os
 import re
@@ -61,6 +62,7 @@ EVENT_SCHEMA = "go-workflow.repo-local.event.v1"
 EXPORT_BUNDLE_SCHEMA = "go-workflow.repo-local.export-bundle.v1"
 EXECUTION_BRIEF_SCHEMA = "go-workflow.execution-brief.v1"
 RECOMMENDATION_SCHEMA = "go-workflow.recommendation.v1"
+DELIVERY_SCHEMA = "go-workflow.delivery.v1"
 TASK_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]*$")
 BLOCK_SECRET_RE = re.compile(r"(secret|token|credential|password|\.env|id_rsa|private[-_]key)", re.I)
 OUTCOME_TERMINAL_STATUSES = {"verified", "blocked", "rejected"}
@@ -306,6 +308,55 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
                     require(isinstance(outcome.get("evidence"), list), errors, f"{rel}: outcome {index} evidence must be a list")
         if expected_status == "done":
             errors.extend(f"{rel}: {finding}" for finding in outcome_completion_findings(data))
+    return errors
+
+
+def validate_delivery_manifest(data: dict[str, Any]) -> list[str]:
+    errors: list[str] = []
+    require(data.get("schema") == DELIVERY_SCHEMA, errors, "delivery.schema must be go-workflow.delivery.v1")
+    require(bool(TASK_ID_RE.fullmatch(str(data.get("delivery_id") or ""))), errors, "delivery.delivery_id must be a valid identifier")
+    for group, keys in {
+        "project": ("id", "name"),
+        "assignment": ("kind", "id", "title"),
+        "release": ("version", "status", "created_at", "supersedes"),
+        "disclosure": ("class", "scan_status"),
+        "sections": ("summary", "delivered_scope", "excluded_scope", "evidence", "limitations", "next_steps"),
+        "provenance": ("source", "source_sha256", "html_sha256"),
+    }.items():
+        value = data.get(group)
+        require(isinstance(value, dict), errors, f"delivery.{group} must be an object")
+        if isinstance(value, dict) and group != "sections":
+            for key in keys:
+                require(key in value, errors, f"delivery.{group}.{key} is required")
+    project = data.get("project") or {}
+    for key in ("id", "name"):
+        require(bool(str(project.get(key) or "").strip()), errors, f"delivery.project.{key} must be non-empty")
+    assignment = data.get("assignment") or {}
+    require(assignment.get("kind") in {"epic", "task-set"}, errors, "delivery.assignment.kind must be epic or task-set")
+    for key in ("id", "title"):
+        require(bool(str(assignment.get(key) or "").strip()), errors, f"delivery.assignment.{key} must be non-empty")
+    release = data.get("release") or {}
+    require(isinstance(release.get("version"), int) and release.get("version", 0) >= 1, errors, "delivery.release.version must be an integer >= 1")
+    require(release.get("status") in {"draft", "released", "superseded"}, errors, "delivery.release.status must be draft, released, or superseded")
+    require(bool(str(release.get("created_at") or "").strip()), errors, "delivery.release.created_at must be non-empty")
+    disclosure = data.get("disclosure") or {}
+    require(disclosure.get("class") in {"public", "link-private", "restricted"}, errors, "delivery.disclosure.class must be public, link-private, or restricted")
+    require(disclosure.get("scan_status") in {"passed", "blocked"}, errors, "delivery.disclosure.scan_status must be passed or blocked")
+    sections = data.get("sections") or {}
+    require(bool(str(sections.get("summary") or "").strip()), errors, "delivery.sections.summary must be non-empty")
+    for key in ("delivered_scope", "excluded_scope", "limitations", "next_steps"):
+        value = sections.get(key)
+        require(isinstance(value, list) and bool(value), errors, f"delivery.sections.{key} must be a non-empty list")
+    evidence = sections.get("evidence")
+    require(isinstance(evidence, list) and bool(evidence), errors, "delivery.sections.evidence must be a non-empty list")
+    if isinstance(evidence, list):
+        for index, item in enumerate(evidence, start=1):
+            require(isinstance(item, dict) and bool(str(item.get("label") or "").strip()) and bool(str(item.get("summary") or "").strip()), errors, f"delivery.sections.evidence item {index} needs label and summary")
+    provenance = data.get("provenance") or {}
+    require(provenance.get("source") == ".go", errors, "delivery.provenance.source must be .go")
+    require(bool(re.fullmatch(r"[0-9a-f]{64}", str(provenance.get("source_sha256") or ""))), errors, "delivery.provenance.source_sha256 must be sha256")
+    html_sha = provenance.get("html_sha256")
+    require(html_sha is None or bool(re.fullmatch(r"[0-9a-f]{64}", str(html_sha))), errors, "delivery.provenance.html_sha256 must be null or sha256")
     return errors
 
 
@@ -3602,6 +3653,86 @@ def cmd_bundle_import(args: argparse.Namespace) -> int:
     print(relative(repo, target))
     return 0
 
+
+def delivery_task_records(root: Path, task_ids: list[str]) -> list[dict[str, Any]]:
+    records: list[dict[str, Any]] = []
+    for task_id in task_ids:
+        for status in ("done", "active", "blocked", "open"):
+            path = task_path(root, status, task_id)
+            if path.is_file():
+                records.append(load_json(path))
+                break
+    return records
+
+
+def delivery_html(manifest: dict[str, Any]) -> str:
+    esc = lambda value: html.escape(str(value), quote=True)
+    sections = manifest["sections"]
+    release = manifest["release"]
+
+    def list_items(values: list[str]) -> str:
+        return "".join(f"<li>{esc(value)}</li>" for value in values)
+
+    evidence_rows = "".join(
+        f'<div class="proof-row"><strong>{esc(item["label"])}</strong><div>{esc(item["summary"])}</div></div>'
+        for item in sections["evidence"]
+    )
+    return f'''<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Delivery — {esc(manifest["assignment"]["title"])}</title><style>
+:root{{--paper:#f4f0e6;--ink:#202722;--muted:#5d675f;--line:#c9c7ba;--accent:#1f6b55;--soft:#dce9df;--white:#fffdf8}}*{{box-sizing:border-box}}html{{background:var(--paper);color:var(--ink);font-family:Atkinson Hyperlegible,"Segoe UI",Verdana,sans-serif;line-height:1.65;letter-spacing:.01em}}body{{margin:0}}.page{{width:min(1080px,calc(100% - 32px));margin:32px auto 72px}}header{{border-top:8px solid var(--accent);padding:28px 0 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}}.kicker{{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:800}}h1,h2{{font-family:Georgia,serif;font-weight:500}}h1{{font-size:clamp(2.2rem,7vw,5.4rem);line-height:.98;margin:.35rem 0 .8rem;max-width:760px}}h2{{font-size:2rem;line-height:1.15;margin:0 0 14px}}.lede{{max-width:720px;font-size:1.08rem;color:var(--muted)}}.release{{min-width:220px;border-left:1px solid var(--line);padding-left:24px;font-variant-numeric:tabular-nums}}.release span,.release strong{{display:block}}.status{{display:inline-block!important;margin-top:12px;background:var(--soft);color:var(--accent);padding:5px 10px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem}}main{{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:56px;margin-top:42px}}section{{padding:0 0 34px;margin-bottom:34px;border-bottom:1px solid var(--line)}}.scope{{display:grid;grid-template-columns:1fr 1fr;gap:28px}}li{{margin:.45rem 0}}.proof-row{{display:grid;grid-template-columns:140px 1fr;gap:18px;padding:13px 0;border-top:1px dotted var(--line)}}.proof-row strong{{color:var(--accent)}}aside{{align-self:start;position:sticky;top:24px;background:var(--white);border:1px solid var(--line);padding:22px}}.fact{{padding:10px 0;border-top:1px solid var(--line)}}.fact span{{display:block;color:var(--muted);font-size:.75rem;text-transform:uppercase;letter-spacing:.08em}}footer{{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;color:var(--muted);font-size:.82rem}}@media(max-width:760px){{.page{{width:min(100% - 24px,680px);margin-top:12px}}header,main,.scope{{grid-template-columns:1fr}}.release{{border-left:0;border-top:1px solid var(--line);padding:18px 0 0}}aside{{position:static;order:-1}}.proof-row{{grid-template-columns:1fr;gap:2px}}footer{{display:block}}}}@media print{{html{{background:#fff}}.page{{width:100%;margin:0}}aside{{position:static}}}}
+</style></head><body><div class="page"><header><div><div class="kicker">Opdrachtlevering</div><h1>{esc(manifest["assignment"]["title"])}</h1><p class="lede">{esc(sections["summary"])}</p></div><div class="release"><strong>{esc(manifest["delivery_id"])}</strong><span>{esc(release["created_at"])}</span><span class="status">{esc(release["status"])}</span></div></header><main><article>
+<section><h2>Samenvatting</h2><p>{esc(sections["summary"])}</p></section><section><h2>Opgeleverde scope</h2><div class="scope"><div><h3>Wel geleverd</h3><ul>{list_items(sections["delivered_scope"])}</ul></div><div><h3>Niet geleverd</h3><ul>{list_items(sections["excluded_scope"])}</ul></div></div></section><section><h2>Bewijs</h2>{evidence_rows}</section><section><h2>Beperkingen en open punten</h2><ul>{list_items(sections["limitations"])}</ul></section><section><h2>Aanbevolen vervolg</h2><ol>{list_items(sections["next_steps"])}</ol></section></article>
+<aside><h2>Releasegegevens</h2><div class="fact"><span>Project</span><strong>{esc(manifest["project"]["name"])}</strong></div><div class="fact"><span>Opdracht</span><strong>{esc(manifest["assignment"]["id"])}</strong></div><div class="fact"><span>Status</span><strong>{esc(release["status"])}</strong></div><div class="fact"><span>Disclosure</span><strong>{esc(manifest["disclosure"]["class"])}</strong></div><div class="fact"><span>Versie</span><strong>{release["version"]}</strong></div></aside></main><footer><span>Gegenereerd vanuit repo-lokale <strong>.go</strong>-evidence.</span><span>{esc(manifest["schema"])}</span></footer></div></body></html>
+'''
+
+
+def cmd_delivery_build(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("invalid repo-local contract:\n- " + "\n- ".join(errors))
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    hierarchy = load_json(root / "hierarchy.json")
+    epic = next((item for item in hierarchy_epics(hierarchy) if item.get("id") == args.epic), None)
+    if not epic:
+        raise RepoLocalError(f"unknown epic: {args.epic}")
+    tasks = delivery_task_records(root, [str(item) for item in epic.get("tasks", [])])
+    done = [task for task in tasks if task.get("status") == "done"]
+    delivered = args.delivered or [str(task.get("summary")) for task in done] or [f"Delivery voor {epic['title']}"]
+    excluded = args.excluded or ["Geen aanvullende uitgesloten scope vastgelegd."]
+    limitations = args.limitation or ["Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."]
+    next_steps = args.next_step or [str(task.get("summary")) for task in tasks if task.get("status") != "done"] or ["Review deze levering met de opdrachtgever."]
+    evidence_items: list[dict[str, str]] = []
+    for task in done:
+        latest = (task.get("evidence") or [{}])[-1]
+        summary = latest.get("summary") if isinstance(latest, dict) else str(latest)
+        evidence_items.append({"label": str(task.get("summary")), "summary": str(summary or "Task afgerond met repo-lokale evidence.")})
+    if not evidence_items:
+        evidence_items = [{"label": "Workflow", "summary": f"{len(done)}/{len(tasks)} gekoppelde tasks afgerond."}]
+    delivery_id = args.delivery_id or f"{slugify(args.epic)}-v{args.version}"
+    target = root / "deliveries" / delivery_id
+    existing_manifest = target / "manifest.json"
+    created_at = now_iso()
+    if existing_manifest.is_file():
+        created_at = str(load_json(existing_manifest).get("release", {}).get("created_at") or created_at)
+    source_payload = {"project": project, "epic": epic, "tasks": tasks, "summary": args.summary or epic.get("description") or f"Delivery voor {epic['title']}.", "delivered": delivered, "excluded": excluded, "limitations": limitations, "next_steps": next_steps, "version": args.version, "status": args.status, "disclosure": args.disclosure, "supersedes": args.supersedes or None}
+    source_sha = hashlib.sha256(json.dumps(source_payload, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
+    manifest = {"schema": DELIVERY_SCHEMA, "delivery_id": delivery_id, "project": {"id": project["id"], "name": project["name"]}, "assignment": {"kind": "epic", "id": epic["id"], "title": epic["title"]}, "release": {"version": args.version, "status": args.status, "created_at": created_at, "supersedes": args.supersedes or None}, "disclosure": {"class": args.disclosure, "scan_status": "passed"}, "sections": {"summary": source_payload["summary"], "delivered_scope": delivered, "excluded_scope": excluded, "evidence": evidence_items, "limitations": limitations, "next_steps": next_steps}, "provenance": {"source": ".go", "source_sha256": source_sha, "html_sha256": None}}
+    findings = validate_delivery_manifest(manifest)
+    if findings:
+        raise RepoLocalError("invalid delivery manifest:\n- " + "\n- ".join(findings))
+    html_text = delivery_html(manifest)
+    html_sha = hashlib.sha256(html_text.encode("utf-8")).hexdigest()
+    manifest["provenance"]["html_sha256"] = html_sha
+    target.mkdir(parents=True, exist_ok=True)
+    atomic_write_text(target / "index.html", html_text)
+    atomic_write_text(target / "manifest.json", json.dumps(manifest, indent=2, ensure_ascii=False) + "\n")
+    print(json.dumps({"delivery_id": delivery_id, "html": relative(repo, target / "index.html"), "manifest": relative(repo, target / "manifest.json"), "source_sha256": source_sha, "html_sha256": html_sha}, indent=2, ensure_ascii=False))
+    return 0
+
+
 def cmd_decision_create(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
@@ -3936,6 +4067,22 @@ def build_parser() -> argparse.ArgumentParser:
     recommendation_status.add_argument("repo", nargs="?", default=".")
     recommendation_status.add_argument("--json", action="store_true")
     recommendation_status.set_defaults(func=cmd_recommendation_status)
+    delivery = sub.add_parser("delivery", help="Build shareable stakeholder delivery artifacts from repo-local .go state")
+    delivery_sub = delivery.add_subparsers(dest="delivery_command", required=True)
+    delivery_build = delivery_sub.add_parser("build", help="Generate standalone HTML plus a delivery manifest for one epic")
+    delivery_build.add_argument("repo", nargs="?", default=".")
+    delivery_build.add_argument("--epic", required=True)
+    delivery_build.add_argument("--delivery-id", default="")
+    delivery_build.add_argument("--version", type=int, default=1)
+    delivery_build.add_argument("--status", choices=["draft", "released", "superseded"], default="draft")
+    delivery_build.add_argument("--disclosure", choices=["public", "link-private", "restricted"], default="restricted")
+    delivery_build.add_argument("--supersedes", default="")
+    delivery_build.add_argument("--summary", default="")
+    delivery_build.add_argument("--delivered", action="append", default=[])
+    delivery_build.add_argument("--excluded", action="append", default=[])
+    delivery_build.add_argument("--limitation", action="append", default=[])
+    delivery_build.add_argument("--next-step", action="append", default=[])
+    delivery_build.set_defaults(func=cmd_delivery_build)
     task = sub.add_parser("task", help="Author repo-local tasks")
     task_sub = task.add_subparsers(dest="task_command", required=True)
     task_create = task_sub.add_parser("create", help="Create an open repo-local task")

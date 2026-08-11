@@ -1,0 +1,104 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "id": "release-v0310-shareable-delivery",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release go-workflow-stack v0.3.10 with shareable delivery output",
+  "description": "Publish the delivery schema, strict validator, deterministic build/publish boundary, immutable lifecycle and compact executive one-pager as a new immutable stack release; preserve v0.3.9 unchanged so go-project-template can pin the real feature-bearing runtime.",
+  "scope": {
+    "read": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "go_workflow/cli.py",
+      "schemas/delivery.schema.json",
+      "CHANGELOG.md",
+      "README.md",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py",
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh"
+    ],
+    "modify": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      ".go/hierarchy.json",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      ".go/tasks/active/release-v0310-shareable-delivery.json",
+      ".go/tasks/done/release-v0310-shareable-delivery.json",
+      "CHANGELOG.md",
+      "README.md",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "R-1: Runtime, package, fixture, and repo-local project versions consistently report 0.3.10/v0.3.10; the real annotated v0.3.9 tag remains unchanged and backward compatibility with a 0.3.9 project requirement remains covered.",
+    "R-2: Changelog and README describe the delivery contract, standalone stakeholder output, disclosure defaults, immutability, and separate fail-closed publication boundary.",
+    "R-3: Full tests, Linux/distribution checks, .go validation, candidate release preflight, and current template compatibility all pass.",
+    "R-4: The task closeout is included in the v0.3.10 release commit; annotated-tag, hosted-release, installed-provenance, and remote readback gates must pass before the cross-repository Go outcome is claimed complete."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "bash scripts/check-linux.sh",
+    "/usr/local/bin/go-workflow-release-check --repo . 0.3.10 --allow-candidate",
+    "/usr/local/bin/go-workflow-release-check --repo . 0.3.10 --validate-existing"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T15:53:05+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T16:23:24+02:00",
+      "task_id": "release-v0310-shareable-delivery",
+      "agent": "hermes",
+      "summary": "summary=Prepared immutable go-workflow-stack v0.3.10 release containing delivery schema, deterministic standalone HTML build, strict schema-parity validation, restricted-by-default disclosure, immutable supersession and fail-closed publication boundary; changed_files=pyproject.toml,go_workflow/constants.py,.go/project.json,fixtures/minimal/.go/project.json,CHANGELOG.md,README.md,tests/test_smoke.py,.go/hierarchy.json,.go/runs/events.jsonl,.go/tasks/done/release-v0310-shareable-delivery.json; verification_command=GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template /usr/local/bin/go-workflow-release-check --repo . 0.3.10 --allow-candidate; verification_result=passed 173 tests, .go validation, current public template pairing and standalone uv-tool distribution; critic=VERDICT A no blockers, version surfaces consistent, current release fixtures correct, v0.3.9 annotated tag preserved; runtime=hermes; model=gpt-5.6-sol; billing_mode=subscription; owner=viggo",
+      "changed_files": [
+        "pyproject.toml",
+        "go_workflow/constants.py",
+        ".go/project.json",
+        "fixtures/minimal/.go/project.json",
+        "CHANGELOG.md",
+        "README.md",
+        "tests/test_smoke.py",
+        ".go/hierarchy.json",
+        ".go/runs/events.jsonl",
+        ".go/tasks/done/release-v0310-shareable-delivery.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template /usr/local/bin/go-workflow-release-check --repo . 0.3.10 --allow-candidate",
+        "result": "passed 173 tests, .go validation, current public template pairing and standalone uv-tool distribution"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": "gpt-5.6-sol",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "subscription",
+        "owner": "viggo",
+        "model": "gpt-5.6-sol",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "VERDICT A no blockers, version surfaces consistent, current release fixtures correct, v0.3.9 annotated tag preserved",
+        "skip_reason": null
+      }
+    }
+  ]
+}

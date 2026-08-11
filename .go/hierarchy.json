@@ -156,7 +156,8 @@
         "delivery-final-release",
         "delivery-schema-parity-repair",
         "delivery-v2-correction",
-        "delivery-executive-redesign"
+        "delivery-executive-redesign",
+        "release-v0310-shareable-delivery"
       ]
     }
   ]

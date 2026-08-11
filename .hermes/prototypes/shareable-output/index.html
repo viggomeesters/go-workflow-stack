@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Delivery — Alteryx Flow Generator</title>
+  <style>
+    :root{--paper:#f4f0e6;--ink:#202722;--muted:#5d675f;--line:#c9c7ba;--accent:#1f6b55;--accent-soft:#dce9df;--warn:#8a4d1f;--white:#fffdf8}
+    *{box-sizing:border-box} html{background:var(--paper);color:var(--ink);font-family:Atkinson Hyperlegible,"Segoe UI",Verdana,sans-serif;line-height:1.65;letter-spacing:.01em}
+    body{margin:0}.page{width:min(1080px,calc(100% - 32px));margin:32px auto 72px}.masthead{border-top:8px solid var(--accent);padding:28px 0 22px;border-bottom:1px solid var(--line);display:grid;grid-template-columns:minmax(0,1fr) auto;gap:24px;align-items:end}
+    .kicker{font-size:.78rem;text-transform:uppercase;letter-spacing:.14em;color:var(--accent);font-weight:800}.masthead h1{font-family:Georgia,serif;font-size:clamp(2.2rem,7vw,5.6rem);line-height:.95;margin:.35rem 0 .8rem;font-weight:500;max-width:760px}.lede{max-width:720px;font-size:1.08rem;color:var(--muted)}
+    .release{min-width:220px;border-left:1px solid var(--line);padding-left:24px;font-variant-numeric:tabular-nums}.release strong,.release span{display:block}.release strong{font-size:1.15rem}.release span{color:var(--muted);font-size:.9rem}.status{display:inline-block!important;margin-top:12px;background:var(--accent-soft);color:var(--accent);padding:5px 10px;border-radius:2px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;font-size:.72rem!important}
+    main{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:56px;margin-top:42px}.section{padding:0 0 34px;margin-bottom:34px;border-bottom:1px solid var(--line)}h2{font-family:Georgia,serif;font-size:2rem;line-height:1.15;margin:0 0 14px;font-weight:500}h3{font-size:1rem;margin:22px 0 8px}.intro{font-size:1.18rem}.scope{display:grid;grid-template-columns:1fr 1fr;gap:28px}.scope ul,.proof ul{padding-left:1.2rem}.scope li,.proof li{margin:.45rem 0}.excluded{color:var(--muted)}
+    .proof-row{display:grid;grid-template-columns:140px 1fr;gap:18px;padding:13px 0;border-top:1px dotted var(--line)}.proof-row strong{color:var(--accent)}code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.84em;background:#e8e4d9;padding:2px 5px;border-radius:3px;overflow-wrap:anywhere}
+    aside{align-self:start;position:sticky;top:24px}.facts{background:var(--white);border:1px solid var(--line);padding:22px}.facts h2{font-size:1.35rem}.fact{padding:11px 0;border-top:1px solid var(--line)}.fact span{display:block;color:var(--muted);font-size:.78rem;text-transform:uppercase;letter-spacing:.08em}.fact strong{display:block;margin-top:3px;overflow-wrap:anywhere}.notice{margin-top:18px;padding:16px;border-left:4px solid var(--warn);background:#f2e4d5;color:#5f391e;font-size:.9rem}
+    footer{margin-top:48px;padding-top:20px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:20px;color:var(--muted);font-size:.82rem}
+    @media(max-width:760px){.page{width:min(100% - 24px,680px);margin-top:12px}.masthead,main{grid-template-columns:1fr}.release{border-left:0;border-top:1px solid var(--line);padding:18px 0 0}.scope{grid-template-columns:1fr;gap:8px}aside{position:static;order:-1}.proof-row{grid-template-columns:1fr;gap:2px}.masthead h1{font-size:clamp(2.5rem,14vw,4.2rem)}footer{display:block}}
+    @media print{html{background:#fff}.page{width:100%;margin:0}.masthead{padding-top:12px}aside{position:static}.notice{break-inside:avoid}}
+  </style>
+</head>
+<body>
+<div class="page">
+  <header class="masthead">
+    <div>
+      <div class="kicker">Opdrachtlevering · synthetisch voorbeeld</div>
+      <h1>Alteryx Flow Generator</h1>
+      <p class="lede">Een deelbaar overzicht van wat is gebouwd, wat aantoonbaar werkt en waar nog grenzen liggen. Geen repository- of GitHub-toegang nodig.</p>
+    </div>
+    <div class="release">
+      <strong>delivery-2026.08.11-v1</strong>
+      <span>11 augustus 2026</span>
+      <span class="status">Released</span>
+    </div>
+  </header>
+
+  <main>
+    <article>
+      <section class="section">
+        <h2>Samenvatting</h2>
+        <p class="intro">De generator zet een gevalideerde veldmapping om naar een herhaalbare Alteryx-flow. Deze levering bewijst de generatieketen, structurele validatie en één synthetische runtime-route. Productiedata maakte geen deel uit van deze opdracht.</p>
+      </section>
+
+      <section class="section">
+        <h2>Opgeleverde scope</h2>
+        <div class="scope">
+          <div><h3>Wel geleverd</h3><ul><li>Mapping-invoer en validatie</li><li>Deterministische flowgeneratie</li><li>Versieerbaar outputmanifest</li><li>Synthetische runtime-proof</li></ul></div>
+          <div class="excluded"><h3>Niet geleverd</h3><ul><li>Uitrol in een klantomgeving</li><li>Validatie met klantdata</li><li>Beheer van Alteryx-licenties</li><li>Automatische productiepublicatie</li></ul></div>
+        </div>
+      </section>
+
+      <section class="section proof">
+        <h2>Bewijs</h2>
+        <div class="proof-row"><strong>Generator</strong><div>128 tests geslaagd; geen regressies in de bestaande contractsuite.</div></div>
+        <div class="proof-row"><strong>Structuur</strong><div>12/12 gegenereerde artifacts parseren en voldoen aan de verwachte schema-invarianten.</div></div>
+        <div class="proof-row"><strong>Runtime</strong><div>1/1 synthetische flow uitgevoerd met overeenkomende actual-versus-expected output.</div></div>
+        <div class="proof-row"><strong>Herkomst</strong><div>Manifest en HTML zijn gekoppeld via SHA-256; bronrelease <code>delivery-2026.08.11-v1</code>.</div></div>
+      </section>
+
+      <section class="section">
+        <h2>Beperkingen en open punten</h2>
+        <p>De technische keten is bewezen met synthetische invoer. Klantspecifieke semantiek en performance op productievolume zijn nog niet bewezen en worden daarom niet als afgerond gepresenteerd.</p>
+      </section>
+
+      <section class="section">
+        <h2>Aanbevolen vervolg</h2>
+        <ol><li>Selecteer één representatieve klantmapping zonder persoonsgegevens.</li><li>Voer een attended runtime-test uit in de doelomgeving.</li><li>Vergelijk output veld-voor-veld en publiceer bij groen een nieuwe delivery-versie.</li></ol>
+      </section>
+    </article>
+
+    <aside>
+      <div class="facts">
+        <h2>Releasegegevens</h2>
+        <div class="fact"><span>Project</span><strong>Alteryx Flow Generator</strong></div>
+        <div class="fact"><span>Opdracht</span><strong>Generator MVP</strong></div>
+        <div class="fact"><span>Status</span><strong>Released</strong></div>
+        <div class="fact"><span>Disclosure</span><strong>Restricted</strong></div>
+        <div class="fact"><span>Versie</span><strong>1</strong></div>
+        <div class="fact"><span>Artifact</span><strong>Standalone HTML</strong></div>
+      </div>
+      <div class="notice"><strong>Disclosure:</strong> dit prototype bevat uitsluitend synthetische gegevens en geen prompts, credentials, lokale paden of klantinformatie.</div>
+    </aside>
+  </main>
+
+  <footer><span>Gegenereerd vanuit repo-lokale <strong>.go</strong>-evidence.</span><span>Prototype voor go-workflow.delivery.v1</span></footer>
+</div>
+</body>
+</html>

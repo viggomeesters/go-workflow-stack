@@ -1,0 +1,76 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "shareable-output-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Decide the standard stakeholder output contract",
+  "description": "Decision ticket (Grilling/HITL): Which sections and status language must every shareable .go delivery contain so an opdrachtgever can understand outcome, scope, evidence, limitations, open points, and next steps without reading repository internals?",
+  "scope": {
+    "read": [
+      ".go/vision.json",
+      ".go/architecture-principles.json",
+      "schemas",
+      "README.md"
+    ],
+    "modify": [
+      ".go/decisions/events.jsonl",
+      ".go/tasks"
+    ]
+  },
+  "acceptance": [
+    "A versioned report contract names mandatory and optional sections plus status vocabulary and audience assumptions",
+    "The contract separates stakeholder narrative from machine-verifiable provenance"
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "python3 cli/go.py readback ."
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:10:46+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:11:29+02:00",
+      "task_id": "shareable-output-contract",
+      "agent": "hermes",
+      "summary": "summary=Accepted versioned stakeholder delivery contract; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-contract.json; verification=python3 cli/go.py validate . plus readback rc=0; critic=approved contract separates narrative from structured provenance and keeps HTML derived",
+      "changed_files": [
+        ".go/decisions/events.jsonl",
+        ".go/tasks/active/shareable-output-contract.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 cli/go.py validate . plus readback rc=0",
+        "result": "python3 cli/go.py validate . plus readback rc=0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved contract separates narrative from structured provenance and keeps HTML derived",
+        "skip_reason": null
+      }
+    }
+  ]
+}

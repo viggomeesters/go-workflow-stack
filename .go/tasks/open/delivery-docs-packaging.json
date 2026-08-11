@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-docs-packaging",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Document and package the shareable delivery workflow",
+  "description": "Document and package the shareable delivery workflow",
+  "scope": {
+    "read": [
+      "README.md",
+      "pyproject.toml",
+      "schemas/delivery.schema.json",
+      "go_workflow/cli.py"
+    ],
+    "modify": [
+      "README.md",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "fixtures/minimal/.go",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "README documents build inputs plus output paths plus disclosure classes plus the no-GitHub delivery route",
+    "Installed package data includes the delivery schema and a fresh clone can build a synthetic delivery"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "bash scripts/check-linux.sh",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

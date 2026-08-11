@@ -1,0 +1,78 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "shareable-output-prototype",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prototype one portable HTML delivery package",
+  "description": "Decision ticket (Prototype/HITL): Generate a disposable self-contained HTML example from synthetic .go state so Viggo can judge readability, density, evidence disclosure, printing, mobile behavior, and suitability for an opdrachtgever before the exporter architecture is fixed.",
+  "scope": {
+    "read": [
+      ".go",
+      "schemas",
+      "tests",
+      "README.md"
+    ],
+    "modify": [
+      ".go/decisions/events.jsonl",
+      ".go/tasks",
+      ".hermes/prototypes/shareable-output"
+    ]
+  },
+  "acceptance": [
+    "A synthetic standalone HTML prototype opens without a server and contains no repository or customer secrets",
+    "The prototype visibly demonstrates summary plus delivered scope plus proof plus limitations plus next steps plus provenance"
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "test -f .hermes/prototypes/shareable-output/index.html"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:12:09+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:13:33+02:00",
+      "task_id": "shareable-output-prototype",
+      "agent": "hermes",
+      "summary": "summary=Built and browser-reviewed standalone stakeholder delivery prototype; changed_files=.hermes/prototypes/shareable-output/index.html,.go/decisions/events.jsonl,.go/tasks/active/shareable-output-prototype.json; verification=prototype contract script plus browser DOM overflow probe rc=0; critic=approved visual hierarchy readable and directly forwardable with six mandatory sections and no internal scaffolding",
+      "changed_files": [
+        ".hermes/prototypes/shareable-output/index.html",
+        ".go/decisions/events.jsonl",
+        ".go/tasks/active/shareable-output-prototype.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "prototype contract script plus browser DOM overflow probe rc=0",
+        "result": "prototype contract script plus browser DOM overflow probe rc=0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved visual hierarchy readable and directly forwardable with six mandatory sections and no internal scaffolding",
+        "skip_reason": null
+      }
+    }
+  ]
+}

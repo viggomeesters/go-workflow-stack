@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-schema-contract",
+  "project": "go-workflow-stack",
+  "status": "active",
+  "summary": "Add the versioned delivery manifest contract",
+  "description": "Add the versioned delivery manifest contract",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "schemas/task.schema.json",
+      "tests/test_smoke.py",
+      "pyproject.toml"
+    ],
+    "modify": [
+      "schemas/delivery.schema.json",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "pyproject.toml"
+    ]
+  },
+  "acceptance": [
+    "A go-workflow.delivery.v1 manifest schema validates required stakeholder sections plus release identity plus disclosure plus provenance",
+    "Invalid or incomplete delivery manifests fail before artifacts are written"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:13:56+02:00"
+  },
+  "work_status": "in_progress",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

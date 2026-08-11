@@ -139,7 +139,12 @@
         "shareable-output-publication",
         "shareable-output-privacy",
         "shareable-output-lifecycle",
-        "shareable-output-prototype"
+        "shareable-output-prototype",
+        "delivery-schema-contract",
+        "delivery-build-cli",
+        "delivery-disclosure-lifecycle",
+        "delivery-docs-packaging",
+        "delivery-runtime-browser-proof"
       ]
     }
   ]

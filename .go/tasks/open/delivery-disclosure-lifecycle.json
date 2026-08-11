@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-disclosure-lifecycle",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Enforce disclosure scans and immutable release versions",
+  "description": "Enforce disclosure scans and immutable release versions",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "schemas/delivery.schema.json",
+      "tests/test_smoke.py",
+      ".go/decisions/events.jsonl"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "Missing disclosure defaults to restricted and public or link-private output fails closed on secret-like or local-path content",
+    "Released versions are immutable and corrections require a new version with optional supersedes provenance",
+    "Building remains local while publish is an explicit unsupported adapter boundary rather than an implicit side effect"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

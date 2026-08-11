@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-runtime-browser-proof",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Prove generated deliveries in a real browser and adversarial fixture",
+  "description": "Prove generated deliveries in a real browser and adversarial fixture",
+  "scope": {
+    "read": [
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "README.md",
+      "fixtures"
+    ],
+    "modify": [
+      "tests/test_smoke.py",
+      "docs/proof/shareable-output",
+      ".go/evidence/events.jsonl"
+    ]
+  },
+  "acceptance": [
+    "A generated synthetic delivery opens from disk with no console errors plus no horizontal overflow on mobile and desktop",
+    "Proof captures visible mandatory sections plus manifest hash agreement plus a rejected unsafe disclosure fixture",
+    "Repository gates pass and all shareable-output tasks have terminal evidence"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q",
+    "bash scripts/check-linux.sh",
+    "python3 cli/go.py template-check ../go-project-template --json",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

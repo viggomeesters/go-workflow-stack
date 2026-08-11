@@ -1,0 +1,75 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "shareable-output-publication",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Choose the publication and access model",
+  "description": "Decision ticket (Research/AFK): Compare self-contained HTML files, link-public static hosting, expiring or access-controlled hosting, and customer-owned delivery. Select defaults that do not depend on GitHub access.",
+  "scope": {
+    "read": [
+      "README.md",
+      "docs",
+      "go_workflow"
+    ],
+    "modify": [
+      ".go/decisions/events.jsonl",
+      ".go/tasks"
+    ]
+  },
+  "acceptance": [
+    "The decision compares file delivery and hosted URL delivery on friction plus privacy plus durability plus revocation",
+    "A default route and an escalation route are selected without requiring GitHub access"
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "python3 cli/go.py readback ."
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:11:29+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:11:29+02:00",
+      "task_id": "shareable-output-publication",
+      "agent": "hermes",
+      "summary": "summary=Accepted portable-first publication model; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-publication.json; verification=python3 cli/go.py validate . rc=0; critic=approved build and publish boundaries are separated and no GitHub access is required",
+      "changed_files": [
+        ".go/decisions/events.jsonl",
+        ".go/tasks/active/shareable-output-publication.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 cli/go.py validate . rc=0",
+        "result": "python3 cli/go.py validate . rc=0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved build and publish boundaries are separated and no GitHub access is required",
+        "skip_reason": null
+      }
+    }
+  ]
+}

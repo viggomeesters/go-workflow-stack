@@ -3370,7 +3370,10 @@ def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: P
 def test_existing_release_uses_immutable_canonical_template_pairing():
     inner = (ROOT / "scripts" / "release-check-inner.sh").read_text(encoding="utf-8")
     assert "https://github.com/viggomeesters/go-project-template.git" in inner
+    assert "0.3.8:https://*)" in inner
     assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
+    assert "0.3.10:https://*)" in inner
+    assert "d4a09d972451472180d45ef2a48c920ad91c496e" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
     assert "PYTHONSAFEPATH=" not in inner
     assert "PYTHONPATH=" not in inner

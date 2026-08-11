@@ -158,7 +158,8 @@
         "delivery-v2-correction",
         "delivery-executive-redesign",
         "release-v0310-shareable-delivery",
-        "release-v0310-shallow-provenance-test-repair"
+        "release-v0310-shallow-provenance-test-repair",
+        "register-v0310-template-release-pairing"
       ]
     }
   ]

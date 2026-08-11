@@ -393,6 +393,22 @@ if [ "$existing_mode" = "1" ] || [ "$local_tag_present" = "1" ]; then
         sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
         GO_PROJECT_TEMPLATE="$template_root"
         ;;
+      0.3.10:https://*)
+        template_commit="d4a09d972451472180d45ef2a48c920ad91c496e"
+        template_root="$ARCHIVE_WORK/go-project-template"
+        release_git clone -q --no-checkout --no-local \
+          https://github.com/viggomeesters/go-project-template.git "$template_root"
+        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
+          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
+          exit 1
+        fi
+        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
+          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
+          exit 1
+        fi
+        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
+        GO_PROJECT_TEMPLATE="$template_root"
+        ;;
       *)
         GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/no-project-template"
         ;;

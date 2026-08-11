@@ -146,6 +146,15 @@
         "delivery-docs-packaging",
         "delivery-runtime-browser-proof"
       ]
+    },
+    {
+      "id": "delivery-release-operations",
+      "title": "Delivery release operations",
+      "description": "Operational finalization tasks kept outside stakeholder delivery epics to avoid circular provenance.",
+      "features": [],
+      "tasks": [
+        "delivery-final-release"
+      ]
     }
   ]
 }

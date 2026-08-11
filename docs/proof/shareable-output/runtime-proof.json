@@ -3,7 +3,7 @@
   "delivery_id": "shareable-output-v1",
   "manifest": ".go/deliveries/shareable-output-v1/manifest.json",
   "html": ".go/deliveries/shareable-output-v1/index.html",
-  "html_sha256": "72ff33ba764e6767992b2547baac9c53044f0e3015cb42faeedb6867bdc5f970",
+  "html_sha256": "0a10e74ea34c5030e29a005aad94ef7027eb7ebb72614103a5fe6a0eb96d970d",
   "manifest_hash_matches": true,
   "mandatory_sections": {
     "passed": 6,
@@ -41,8 +41,11 @@
     "status": "passed"
   },
   "visual_critic": {
-    "desktop": "approved: clear hierarchy, readable two-column layout, no visible clipping, directly forwardable",
-    "mobile": "approved: responsive stacking, readable typography, identity and status visible, no clipped text",
+    "desktop": "approved final release: RELEASED visible, clear hierarchy, readable two-column layout, no visible clipping, directly forwardable",
+    "mobile": "approved final release: RELEASED visible, responsive stacking, readable typography, no clipped text",
     "blockers": []
-  }
+  },
+  "release_status": "released",
+  "source_sha256": "6a4692536ec9b660151e72b733e4347657e26ee238b209fbeb7b7f4b0e875f72",
+  "final_epic_tasks": "10/10 terminal before rebuild"
 }

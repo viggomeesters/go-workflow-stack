@@ -12,7 +12,7 @@
   },
   "release": {
     "version": 1,
-    "status": "draft",
+    "status": "released",
     "created_at": "2026-08-11T13:36:16+02:00",
     "supersedes": null
   },
@@ -31,7 +31,8 @@
       "Add the versioned delivery manifest contract",
       "Build deterministic standalone HTML and manifest output",
       "Enforce disclosure scans and immutable release versions",
-      "Document and package the shareable delivery workflow"
+      "Document and package the shareable delivery workflow",
+      "Prove generated deliveries in a real browser and adversarial fixture"
     ],
     "excluded_scope": [
       "Automatische publieke hosting zonder expliciete publisher-adapter"
@@ -72,6 +73,10 @@
       {
         "label": "Document and package the shareable delivery workflow",
         "summary": "summary=Documented no-GitHub delivery workflow disclosure lifecycle output contract and fresh-fixture packaging proof; changed_files=README.md,CHANGELOG.md,tests/test_smoke.py,.go/tasks/active/delivery-docs-packaging.json; verification=bash scripts/check-linux.sh rc=0 144 passed validate and template pairing ok plus diff-check rc=0; critic=approved docs match implemented defaults paths failure modes and immutable lifecycle"
+      },
+      {
+        "label": "Prove generated deliveries in a real browser and adversarial fixture",
+        "summary": "summary=Generated and browser-proved a real shareable-output delivery with adjacent manifest screenshots and adversarial disclosure proof; changed_files=.go/deliveries/shareable-output-v1/index.html,.go/deliveries/shareable-output-v1/manifest.json,docs/proof/shareable-output/runtime-proof.json,docs/proof/shareable-output/desktop.png,docs/proof/shareable-output/mobile.png,.go/tasks/active/delivery-runtime-browser-proof.json; verification=bash scripts/check-linux.sh rc=0 144 passed validate and template pairing ok plus manifest HTML sha256 agreement and browser DOM overflow=0 externalResources=0 scripts=0 consoleErrors=0; critic=approved desktop and mobile renders forwardable with no blockers"
       }
     ],
     "limitations": [
@@ -84,7 +89,7 @@
   },
   "provenance": {
     "source": ".go",
-    "source_sha256": "b5c31ddbb71d1c472bc15dc7fe339f0edf56e9dd82a9550beb16645f15f83d9c",
-    "html_sha256": "72ff33ba764e6767992b2547baac9c53044f0e3015cb42faeedb6867bdc5f970"
+    "source_sha256": "6a4692536ec9b660151e72b733e4347657e26ee238b209fbeb7b7f4b0e875f72",
+    "html_sha256": "0a10e74ea34c5030e29a005aad94ef7027eb7ebb72614103a5fe6a0eb96d970d"
   }
 }

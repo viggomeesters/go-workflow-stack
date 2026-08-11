@@ -6,6 +6,7 @@
 - Default disclosure to restricted and fail closed before writing public or link-private output containing local paths, credential material, or private-key markers.
 - Keep released deliveries immutable, require higher superseding versions for corrections, and expose publication as a separate adapter-gated command.
 - Keep runtime delivery validation in fail-closed parity with the published JSON Schema, including strict types, non-empty list items, nullable supersedes, and unknown-property rejection.
+- Redesign stakeholder HTML as a compact executive one-pager: one visible summary, three primary outcomes, collapsed proof/provenance, and no raw agent evidence or command output in the human layer.
 
 ## 0.3.9 - 2026-08-01
 

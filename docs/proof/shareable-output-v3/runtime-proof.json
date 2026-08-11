@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.delivery-runtime-proof.v1",
+  "delivery_id": "shareable-output-v3",
+  "release_status": "released",
+  "supersedes": "shareable-output-v2",
+  "html_sha256": "9c83914c500b80473cfb1d9048790d4b7e61f71fcc57427a7d0e3418b0407df0",
+  "manifest_hash_matches": true,
+  "information_design": {
+    "visible_summary_occurrences": 1,
+    "primary_outcomes_visible": 3,
+    "raw_changed_files_visible": false,
+    "raw_verification_commands_visible": false,
+    "evidence_collapsed_by_default": true,
+    "provenance_collapsed_by_default": true
+  },
+  "screenshots": {
+    "desktop": "docs/proof/shareable-output-v3/desktop.png",
+    "mobile": "docs/proof/shareable-output-v3/mobile.png"
+  },
+  "browser": {
+    "horizontal_overflow_px": 0,
+    "external_resources": 0,
+    "scripts": 0,
+    "console_messages": 0,
+    "javascript_errors": 0,
+    "visible_text_characters": 809,
+    "heading_count": 4,
+    "evidence_open_by_default": false,
+    "provenance_open_by_default": false
+  },
+  "visual_critic": {
+    "desktop": "approved; concise executive one-pager, modern sans hierarchy, evidence visually secondary, no blocker",
+    "mobile": "approved; natural title break, legible three-column signal strip, unclipped and appropriately concise"
+  }
+}

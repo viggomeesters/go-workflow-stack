@@ -224,11 +224,10 @@ def test_delivery_build_generates_deterministic_standalone_html_and_manifest(tmp
     assert manifest["schema"] == "go-workflow.delivery.v1"
     assert manifest["sections"]["delivered_scope"] == ["Standalone HTML report"]
     assert manifest["provenance"]["html_sha256"] == hashlib.sha256(html_text.encode("utf-8")).hexdigest()
-    assert "Samenvatting" in html_text
-    assert "Opgeleverde scope" in html_text
-    assert "Bewijs" in html_text
-    assert "Beperkingen en open punten" in html_text
-    assert "Aanbevolen vervolg" in html_text
+    assert "Opgeleverd" in html_text
+    assert "Technisch bewijs" in html_text
+    assert "Aandachtspunt" in html_text
+    assert "Volgende stap" in html_text
     assert "<script" not in html_text.lower()
     assert "http://" not in html_text and "https://" not in html_text
 
@@ -237,6 +236,32 @@ def test_delivery_build_generates_deterministic_standalone_html_and_manifest(tmp
     second_result = json.loads(second.stdout)
     assert second_result["source_sha256"] == first_result["source_sha256"]
     assert second_result["html_sha256"] == first_result["html_sha256"]
+
+
+def test_delivery_html_is_a_compact_stakeholder_view_with_internal_proof_collapsed():
+    from go_workflow.cli import delivery_html
+
+    manifest = valid_delivery_manifest()
+    manifest["sections"]["summary"] = "One clear stakeholder outcome."
+    manifest["sections"]["evidence"] = [
+        {
+            "label": "Validated delivery contract",
+            "summary": "summary=done; changed_files=go_workflow/cli.py; verification=pytest -q; critic=approved",
+        }
+    ]
+    html_text = delivery_html(manifest)
+
+    assert html_text.count("One clear stakeholder outcome.") == 1
+    assert 'class="outcome-grid"' in html_text
+    assert '<details class="evidence-details">' in html_text
+    assert '<details class="release-details">' in html_text
+    assert "Validated delivery contract" in html_text
+    assert "changed_files=" not in html_text
+    assert "verification=" not in html_text
+    assert "Georgia" not in html_text
+    assert "#f4f0e6" not in html_text
+    assert "<aside" not in html_text
+    assert "Releasegegevens" not in html_text
 
 
 def delivery_test_repo(tmp_path: Path) -> Path:

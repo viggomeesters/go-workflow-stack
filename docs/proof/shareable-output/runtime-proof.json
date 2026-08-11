@@ -1,0 +1,48 @@
+{
+  "schema": "go-workflow.delivery-runtime-proof.v1",
+  "delivery_id": "shareable-output-v1",
+  "manifest": ".go/deliveries/shareable-output-v1/manifest.json",
+  "html": ".go/deliveries/shareable-output-v1/index.html",
+  "html_sha256": "72ff33ba764e6767992b2547baac9c53044f0e3015cb42faeedb6867bdc5f970",
+  "manifest_hash_matches": true,
+  "mandatory_sections": {
+    "passed": 6,
+    "required": 6,
+    "names": [
+      "Samenvatting",
+      "Opgeleverde scope",
+      "Bewijs",
+      "Beperkingen en open punten",
+      "Aanbevolen vervolg",
+      "Releasegegevens"
+    ]
+  },
+  "screenshots": {
+    "desktop": "docs/proof/shareable-output/desktop.png",
+    "mobile": "docs/proof/shareable-output/mobile.png"
+  },
+  "browser": {
+    "engine": "Google Chrome headless",
+    "desktop_viewport": "1440x1200",
+    "mobile_viewport": "390x844"
+  },
+  "adversarial_public_disclosure_test": {
+    "command": "python3 -m pytest tests/test_smoke.py -q -k delivery_public_disclosure_rejects_sensitive_content_before_write",
+    "expected": "public output with a local home path fails before target creation",
+    "status": "passed"
+  },
+  "dom_console_probe": {
+    "viewport": "1280x577",
+    "horizontal_overflow_px": 0,
+    "external_resources": 0,
+    "scripts": 0,
+    "console_messages": 0,
+    "javascript_errors": 0,
+    "status": "passed"
+  },
+  "visual_critic": {
+    "desktop": "approved: clear hierarchy, readable two-column layout, no visible clipping, directly forwardable",
+    "mobile": "approved: responsive stacking, readable typography, identity and status visible, no clipped text",
+    "blockers": []
+  }
+}

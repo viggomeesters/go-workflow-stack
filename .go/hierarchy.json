@@ -145,7 +145,8 @@
         "delivery-disclosure-lifecycle",
         "delivery-docs-packaging",
         "delivery-runtime-browser-proof",
-        "automatic-shareable-delivery-policy"
+        "automatic-shareable-delivery-policy",
+        "release-v0311-automatic-delivery"
       ]
     },
     {

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.11 - 2026-08-11
+
 - Make restricted shareable delivery a standard approval-time gate for substantial agent tasks, with explicit `required`/`none` overrides, immutable epic versioning, per-epic serialization through autonomous ship/rollback, autonomous-run artifact readback, and fail-closed approval rollback.
 
 ## 0.3.10 - 2026-08-11

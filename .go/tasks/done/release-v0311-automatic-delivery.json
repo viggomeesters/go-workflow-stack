@@ -1,0 +1,104 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "release-v0311-automatic-delivery",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release automatic shareable deliveries as v0.3.11",
+  "description": "Bump, validate, tag, publish and independently install go-workflow-stack v0.3.11 without moving historical tags.",
+  "scope": {
+    "read": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "fixtures/minimal/.go/project.json",
+      "README.md",
+      "CHANGELOG.md",
+      "tests/test_smoke.py",
+      ".go/hierarchy.json",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      ".go/tasks/open/release-v0311-automatic-delivery.json",
+      ".go/tasks/active/release-v0311-automatic-delivery.json",
+      ".go/tasks/done/release-v0311-automatic-delivery.json"
+    ]
+  },
+  "acceptance": [
+    "R-1: All current version surfaces identify 0.3.11 and historical fixtures remain historical.",
+    "R-2: Candidate and archived-tag release checks pass without moving v0.3.10.",
+    "R-3: The release commit is ready for annotated v0.3.11 publication; tag, hosted-release and exact remote-install readback remain mandatory post-commit gates before final completion.",
+    "R-4: Release task is finished and approved in the release commit."
+  ],
+  "verification": [
+    "bash scripts/check-linux.sh",
+    "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template /usr/local/bin/go-workflow-release-check --repo . 0.3.11 --allow-candidate"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T22:49:18+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-11T22:59:10+02:00",
+      "agent": "critic",
+      "status": "approved",
+      "evidence": "VERDICT A: candidate preflight 187 passed, version surfaces consistent, historical v0.3.10 mapping/tag immutable, release diff clean",
+      "transaction_id": "073f73ec9eff4cbe8b2727366038da27"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T22:59:10+02:00",
+      "task_id": "release-v0311-automatic-delivery",
+      "agent": "hermes",
+      "summary": "summary=Prepared go-workflow-stack v0.3.11 release with aligned runtime/package/project/docs/tests while preserving v0.3.10 immutability; changed_files=pyproject.toml,go_workflow/constants.py,.go/project.json,fixtures/minimal/.go/project.json,README.md,CHANGELOG.md,tests/test_smoke.py; verification_command=GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template /usr/local/bin/go-workflow-release-check --repo . 0.3.11 --allow-candidate; verification_result=187 passed plus template pairing and standalone uv distribution; critic=VERDICT A version consistency and historical pairing preserved",
+      "changed_files": [
+        "pyproject.toml",
+        "go_workflow/constants.py",
+        ".go/project.json",
+        "fixtures/minimal/.go/project.json",
+        "README.md",
+        "CHANGELOG.md",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template /usr/local/bin/go-workflow-release-check --repo . 0.3.11 --allow-candidate",
+        "result": "187 passed plus template pairing and standalone uv distribution"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "VERDICT A version consistency and historical pairing preserved",
+        "skip_reason": null
+      }
+    }
+  ]
+}

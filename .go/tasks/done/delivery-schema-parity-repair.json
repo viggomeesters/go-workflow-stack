@@ -1,0 +1,87 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "id": "delivery-schema-parity-repair",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make delivery runtime validation fail closed with JSON Schema parity",
+  "description": "Make delivery runtime validation fail closed with JSON Schema parity",
+  "scope": {
+    "read": [
+      "schemas/delivery.schema.json",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "pyproject.toml"
+    ],
+    "modify": [
+      "schemas/delivery.schema.json",
+      "go_workflow/cli.py",
+      "tests/test_smoke.py",
+      "pyproject.toml",
+      "scripts/check-linux.sh",
+      "CHANGELOG.md",
+      ".go"
+    ]
+  },
+  "acceptance": [
+    "The runtime validator rejects every malformed case rejected by delivery.schema.json in the adversarial parity matrix",
+    "Unknown properties fail closed at root nested groups and evidence items",
+    "Non-string values empty list items boolean versions and invalid supersedes are rejected"
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q -k delivery_manifest",
+    "bash scripts/check-linux.sh",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-11T13:48:34+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-11T13:55:30+02:00",
+      "task_id": "delivery-schema-parity-repair",
+      "agent": "hermes",
+      "summary": "summary=Repaired delivery runtime validation to fail closed in JSON Schema parity after late independent critic found HIGH bypasses; changed_files=go_workflow/cli.py,tests/test_smoke.py,pyproject.toml,scripts/check-linux.sh,CHANGELOG.md,.go/tasks/active/delivery-schema-parity-repair.json; verification=bash scripts/check-linux.sh rc=0 172 passed validate and template pairing ok plus 30 focused parity tests and 20/20 extra adversarial mutations rejected; critic=approved blocker fixed strict types unknown properties non-empty items boolean integer exclusion nullable supersedes and schema-backed tests; self_reflect=process miss found async critic was left open before prior ship governing completion gate already exists selfimprove skill mutation not needed and go-now patch attempt safely refused because skill is not editable in active profile",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        "pyproject.toml",
+        "scripts/check-linux.sh",
+        "CHANGELOG.md",
+        ".go/tasks/active/delivery-schema-parity-repair.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "bash scripts/check-linux.sh rc=0 172 passed validate and template pairing ok plus 30 focused parity tests and 20/20 extra adversarial mutations rejected",
+        "result": "bash scripts/check-linux.sh rc=0 172 passed validate and template pairing ok plus 30 focused parity tests and 20/20 extra adversarial mutations rejected"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "approved blocker fixed strict types unknown properties non-empty items boolean integer exclusion nullable supersedes and schema-backed tests",
+        "skip_reason": null
+      }
+    }
+  ]
+}

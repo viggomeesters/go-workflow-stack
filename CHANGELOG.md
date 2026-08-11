@@ -5,6 +5,7 @@
 - Add `go-workflow.delivery.v1` plus `delivery build` for deterministic standalone stakeholder HTML and adjacent SHA-256 provenance manifests.
 - Default disclosure to restricted and fail closed before writing public or link-private output containing local paths, credential material, or private-key markers.
 - Keep released deliveries immutable, require higher superseding versions for corrections, and expose publication as a separate adapter-gated command.
+- Keep runtime delivery validation in fail-closed parity with the published JSON Schema, including strict types, non-empty list items, nullable supersedes, and unknown-property rejection.
 
 ## 0.3.9 - 2026-08-01
 

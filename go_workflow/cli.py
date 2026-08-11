@@ -318,51 +318,94 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
 
 
 def validate_delivery_manifest(data: dict[str, Any]) -> list[str]:
+    if not isinstance(data, dict):
+        return ["delivery must be an object"]
     errors: list[str] = []
+
+    def object_value(name: str, required_keys: set[str]) -> dict[str, Any] | None:
+        value = data.get(name)
+        if not isinstance(value, dict):
+            errors.append(f"delivery.{name} must be an object")
+            return None
+        unknown = sorted(set(value) - required_keys)
+        if unknown:
+            errors.append(f"delivery.{name} contains unknown properties: {', '.join(unknown)}")
+        for key in sorted(required_keys - set(value)):
+            errors.append(f"delivery.{name}.{key} is required")
+        return value
+
+    root_keys = {"schema", "delivery_id", "project", "assignment", "release", "disclosure", "sections", "provenance"}
+    unknown_root = sorted(set(data) - root_keys)
+    if unknown_root:
+        errors.append(f"delivery contains unknown properties: {', '.join(unknown_root)}")
+    for key in sorted(root_keys - set(data)):
+        errors.append(f"delivery.{key} is required")
+
     require(data.get("schema") == DELIVERY_SCHEMA, errors, "delivery.schema must be go-workflow.delivery.v1")
-    require(bool(TASK_ID_RE.fullmatch(str(data.get("delivery_id") or ""))), errors, "delivery.delivery_id must be a valid identifier")
-    for group, keys in {
-        "project": ("id", "name"),
-        "assignment": ("kind", "id", "title"),
-        "release": ("version", "status", "created_at", "supersedes"),
-        "disclosure": ("class", "scan_status"),
-        "sections": ("summary", "delivered_scope", "excluded_scope", "evidence", "limitations", "next_steps"),
-        "provenance": ("source", "source_sha256", "html_sha256"),
-    }.items():
-        value = data.get(group)
-        require(isinstance(value, dict), errors, f"delivery.{group} must be an object")
-        if isinstance(value, dict) and group != "sections":
-            for key in keys:
-                require(key in value, errors, f"delivery.{group}.{key} is required")
-    project = data.get("project") or {}
+    delivery_id = data.get("delivery_id")
+    require(isinstance(delivery_id, str) and bool(TASK_ID_RE.fullmatch(delivery_id)), errors, "delivery.delivery_id must be a valid identifier")
+
+    project = object_value("project", {"id", "name"}) or {}
     for key in ("id", "name"):
-        require(bool(str(project.get(key) or "").strip()), errors, f"delivery.project.{key} must be non-empty")
-    assignment = data.get("assignment") or {}
+        value = project.get(key)
+        require(isinstance(value, str) and len(value) >= 1, errors, f"delivery.project.{key} must be a non-empty string")
+
+    assignment = object_value("assignment", {"kind", "id", "title"}) or {}
     require(assignment.get("kind") in {"epic", "task-set"}, errors, "delivery.assignment.kind must be epic or task-set")
     for key in ("id", "title"):
-        require(bool(str(assignment.get(key) or "").strip()), errors, f"delivery.assignment.{key} must be non-empty")
-    release = data.get("release") or {}
-    require(isinstance(release.get("version"), int) and release.get("version", 0) >= 1, errors, "delivery.release.version must be an integer >= 1")
+        value = assignment.get(key)
+        require(isinstance(value, str) and len(value) >= 1, errors, f"delivery.assignment.{key} must be a non-empty string")
+
+    release = object_value("release", {"version", "status", "created_at", "supersedes"}) or {}
+    version = release.get("version")
+    require(type(version) is int and version >= 1, errors, "delivery.release.version must be an integer >= 1")
     require(release.get("status") in {"draft", "released", "superseded"}, errors, "delivery.release.status must be draft, released, or superseded")
-    require(bool(str(release.get("created_at") or "").strip()), errors, "delivery.release.created_at must be non-empty")
-    disclosure = data.get("disclosure") or {}
+    created_at = release.get("created_at")
+    require(isinstance(created_at, str) and len(created_at) >= 1, errors, "delivery.release.created_at must be a non-empty string")
+    supersedes = release.get("supersedes")
+    require(supersedes is None or isinstance(supersedes, str), errors, "delivery.release.supersedes must be a string or null")
+
+    disclosure = object_value("disclosure", {"class", "scan_status"}) or {}
     require(disclosure.get("class") in {"public", "link-private", "restricted"}, errors, "delivery.disclosure.class must be public, link-private, or restricted")
     require(disclosure.get("scan_status") in {"passed", "blocked"}, errors, "delivery.disclosure.scan_status must be passed or blocked")
-    sections = data.get("sections") or {}
-    require(bool(str(sections.get("summary") or "").strip()), errors, "delivery.sections.summary must be non-empty")
+
+    sections = object_value("sections", {"summary", "delivered_scope", "excluded_scope", "evidence", "limitations", "next_steps"}) or {}
+    summary = sections.get("summary")
+    if "summary" in sections:
+        require(isinstance(summary, str) and len(summary) >= 1, errors, "delivery.sections.summary must be a non-empty string")
     for key in ("delivered_scope", "excluded_scope", "limitations", "next_steps"):
+        if key not in sections:
+            continue
         value = sections.get(key)
-        require(isinstance(value, list) and bool(value), errors, f"delivery.sections.{key} must be a non-empty list")
+        if not isinstance(value, list) or not value:
+            errors.append(f"delivery.sections.{key} must be a non-empty list")
+        else:
+            for index, item in enumerate(value, start=1):
+                require(isinstance(item, str) and len(item) >= 1, errors, f"delivery.sections.{key} item {index} must be a non-empty string")
+
     evidence = sections.get("evidence")
-    require(isinstance(evidence, list) and bool(evidence), errors, "delivery.sections.evidence must be a non-empty list")
-    if isinstance(evidence, list):
+    if "evidence" not in sections:
+        pass
+    elif not isinstance(evidence, list) or not evidence:
+        errors.append("delivery.sections.evidence must be a non-empty list")
+    else:
         for index, item in enumerate(evidence, start=1):
-            require(isinstance(item, dict) and bool(str(item.get("label") or "").strip()) and bool(str(item.get("summary") or "").strip()), errors, f"delivery.sections.evidence item {index} needs label and summary")
-    provenance = data.get("provenance") or {}
+            if not isinstance(item, dict):
+                errors.append(f"delivery.sections.evidence item {index} must be an object")
+                continue
+            unknown = sorted(set(item) - {"label", "summary"})
+            if unknown:
+                errors.append(f"delivery.sections.evidence item {index} contains unknown properties: {', '.join(unknown)}")
+            for key in ("label", "summary"):
+                value = item.get(key)
+                require(isinstance(value, str) and len(value) >= 1, errors, f"delivery.sections.evidence item {index}.{key} must be a non-empty string")
+
+    provenance = object_value("provenance", {"source", "source_sha256", "html_sha256"}) or {}
     require(provenance.get("source") == ".go", errors, "delivery.provenance.source must be .go")
-    require(bool(re.fullmatch(r"[0-9a-f]{64}", str(provenance.get("source_sha256") or ""))), errors, "delivery.provenance.source_sha256 must be sha256")
+    source_sha = provenance.get("source_sha256")
+    require(isinstance(source_sha, str) and bool(re.fullmatch(r"[0-9a-f]{64}", source_sha)), errors, "delivery.provenance.source_sha256 must be sha256")
     html_sha = provenance.get("html_sha256")
-    require(html_sha is None or bool(re.fullmatch(r"[0-9a-f]{64}", str(html_sha))), errors, "delivery.provenance.html_sha256 must be null or sha256")
+    require(html_sha is None or (isinstance(html_sha, str) and bool(re.fullmatch(r"[0-9a-f]{64}", html_sha))), errors, "delivery.provenance.html_sha256 must be null or sha256")
     return errors
 
 

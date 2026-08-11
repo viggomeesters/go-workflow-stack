@@ -12,12 +12,12 @@ cleanup() {
 }
 trap cleanup EXIT
 
-if command -v python3 >/dev/null 2>&1 && python3 -c 'import sys, pytest; raise SystemExit(sys.version_info < (3, 11))' 2>/dev/null; then
+if command -v python3 >/dev/null 2>&1 && python3 -c 'import sys, pytest, jsonschema; raise SystemExit(sys.version_info < (3, 11))' 2>/dev/null; then
   PYTHON=(python3)
   PYTEST=(python3 -m pytest)
 elif command -v uv >/dev/null 2>&1; then
   PYTHON=(uv run --python '>=3.11' --no-project python)
-  PYTEST=(uv run --python '>=3.11' --no-project --with pytest pytest)
+  PYTEST=(uv run --python '>=3.11' --no-project --with pytest --with jsonschema pytest)
 else
   echo "Python 3.11+ required; install Python 3.11+ or uv." >&2
   exit 2

@@ -8,6 +8,7 @@ import sys
 from pathlib import Path
 
 import pytest
+from jsonschema import Draft202012Validator, ValidationError
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -102,7 +103,11 @@ def valid_delivery_manifest() -> dict:
 def test_delivery_manifest_contract_accepts_complete_stakeholder_release():
     from go_workflow.cli import validate_delivery_manifest
 
-    assert validate_delivery_manifest(valid_delivery_manifest()) == []
+    manifest = valid_delivery_manifest()
+    schema = json.loads((ROOT / "schemas" / "delivery.schema.json").read_text())
+    Draft202012Validator.check_schema(schema)
+    Draft202012Validator(schema).validate(manifest)
+    assert validate_delivery_manifest(manifest) == []
 
 
 def test_delivery_manifest_contract_rejects_missing_stakeholder_section():
@@ -111,7 +116,87 @@ def test_delivery_manifest_contract_rejects_missing_stakeholder_section():
     manifest = valid_delivery_manifest()
     del manifest["sections"]["limitations"]
 
-    assert validate_delivery_manifest(manifest) == ["delivery.sections.limitations must be a non-empty list"]
+    assert validate_delivery_manifest(manifest) == ["delivery.sections.limitations is required"]
+
+
+def test_delivery_manifest_runtime_validator_rejects_non_object_root():
+    from go_workflow.cli import validate_delivery_manifest
+
+    schema = json.loads((ROOT / "schemas" / "delivery.schema.json").read_text())
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate([])
+    assert validate_delivery_manifest([]) == ["delivery must be an object"]
+
+
+@pytest.mark.parametrize("missing", ["schema", "delivery_id", "project", "assignment", "release", "disclosure", "sections", "provenance"])
+def test_delivery_manifest_runtime_validator_rejects_schema_required_root_fields(missing: str):
+    from go_workflow.cli import validate_delivery_manifest
+
+    manifest = valid_delivery_manifest()
+    del manifest[missing]
+    schema = json.loads((ROOT / "schemas" / "delivery.schema.json").read_text())
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(manifest)
+    assert validate_delivery_manifest(manifest)
+
+
+@pytest.mark.parametrize(
+    ("path", "value"),
+    [
+        (("delivery_id",), 123),
+        (("project", "id"), 123),
+        (("assignment", "title"), 123),
+        (("release", "version"), True),
+        (("release", "supersedes"), {"delivery": "old-v1"}),
+        (("sections", "summary"), 123),
+        (("sections", "delivered_scope"), [None]),
+        (("sections", "excluded_scope"), [""]),
+        (("sections", "evidence"), [{"label": 123, "summary": "proof"}]),
+        (("sections", "limitations"), [False]),
+        (("provenance", "html_sha256"), 123),
+    ],
+)
+def test_delivery_manifest_runtime_validator_rejects_schema_invalid_types(path: tuple[str, ...], value):
+    from go_workflow.cli import validate_delivery_manifest
+
+    manifest = valid_delivery_manifest()
+    target = manifest
+    for key in path[:-1]:
+        target = target[key]
+    target[path[-1]] = value
+    schema = json.loads((ROOT / "schemas" / "delivery.schema.json").read_text())
+
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(manifest)
+    assert validate_delivery_manifest(manifest), f"runtime validator accepted schema-invalid mutation at {'.'.join(path)}"
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        (),
+        ("project",),
+        ("assignment",),
+        ("release",),
+        ("disclosure",),
+        ("sections",),
+        ("sections", "evidence", "0"),
+        ("provenance",),
+    ],
+)
+def test_delivery_manifest_runtime_validator_rejects_schema_unknown_properties(path: tuple[str, ...]):
+    from go_workflow.cli import validate_delivery_manifest
+
+    manifest = valid_delivery_manifest()
+    target = manifest
+    for key in path:
+        target = target[int(key)] if isinstance(target, list) else target[key]
+    target["unexpected"] = "must fail closed"
+    schema = json.loads((ROOT / "schemas" / "delivery.schema.json").read_text())
+
+    with pytest.raises(ValidationError):
+        Draft202012Validator(schema).validate(manifest)
+    assert validate_delivery_manifest(manifest), f"runtime validator accepted unknown property at {path or ('root',)}"
 
 
 def test_delivery_build_generates_deterministic_standalone_html_and_manifest(tmp_path: Path):

@@ -1,0 +1,87 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "shareable-output-v2",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "shareable-output",
+    "title": "Shareable .go output"
+  },
+  "release": {
+    "version": 2,
+    "status": "released",
+    "created_at": "2026-08-11T13:56:44+02:00",
+    "supersedes": "shareable-output-v1"
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "passed"
+  },
+  "sections": {
+    "summary": "Go Workflow Stack levert zelfstandige stakeholder-HTML zonder GitHub-toegang, met fail-closed privacychecks, immutable releases en runtime-validatie die aantoonbaar in parity staat met het gepubliceerde JSON Schema.",
+    "delivered_scope": [
+      "Standalone HTML plus machineleesbaar delivery manifest",
+      "Fail-closed disclosure scanning en immutable release lifecycle",
+      "Strikte JSON Schema/runtime-validator parity met adversarial regressietests"
+    ],
+    "excluded_scope": [
+      "Automatische publieke hosting zonder expliciete publisher-adapter"
+    ],
+    "evidence": [
+      {
+        "label": "Decide the standard stakeholder output contract",
+        "summary": "summary=Accepted versioned stakeholder delivery contract; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-contract.json; verification=python3 cli/go.py validate . plus readback rc=0; critic=approved contract separates narrative from structured provenance and keeps HTML derived"
+      },
+      {
+        "label": "Choose the publication and access model",
+        "summary": "summary=Accepted portable-first publication model; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-publication.json; verification=python3 cli/go.py validate . rc=0; critic=approved build and publish boundaries are separated and no GitHub access is required"
+      },
+      {
+        "label": "Define redaction and disclosure boundaries",
+        "summary": "summary=Accepted fail-closed disclosure model; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-privacy.json; verification=python3 cli/go.py validate . rc=0; critic=approved unknown disclosure defaults to restricted and publication remains gated"
+      },
+      {
+        "label": "Define generation and release lifecycle",
+        "summary": "summary=Accepted immutable delivery lifecycle; changed_files=.go/decisions/events.jsonl,.go/tasks/active/shareable-output-lifecycle.json; verification=python3 cli/go.py validate . rc=0; critic=approved explicit releases avoid accidental publication and preserve superseded history"
+      },
+      {
+        "label": "Prototype one portable HTML delivery package",
+        "summary": "summary=Built and browser-reviewed standalone stakeholder delivery prototype; changed_files=.hermes/prototypes/shareable-output/index.html,.go/decisions/events.jsonl,.go/tasks/active/shareable-output-prototype.json; verification=prototype contract script plus browser DOM overflow probe rc=0; critic=approved visual hierarchy readable and directly forwardable with six mandatory sections and no internal scaffolding"
+      },
+      {
+        "label": "Add the versioned delivery manifest contract",
+        "summary": "summary=Added go-workflow.delivery.v1 JSON schema and fail-closed manual validator with RED-GREEN tests; changed_files=schemas/delivery.schema.json,go_workflow/cli.py,tests/test_smoke.py,.go/tasks/active/delivery-schema-contract.json; verification=python3 -m pytest tests/test_smoke.py -q rc=0 138 passed plus validate and diff-check rc=0; critic=approved schema and validator cover mandatory stakeholder sections release disclosure and provenance with precise missing-section error"
+      },
+      {
+        "label": "Build deterministic standalone HTML and manifest output",
+        "summary": "summary=Implemented deterministic delivery build CLI producing standalone HTML and adjacent manifest from one epic; changed_files=go_workflow/cli.py,tests/test_smoke.py,.go/tasks/active/delivery-build-cli.json; verification=python3 -m pytest tests/test_smoke.py -q rc=0 139 passed plus delivery build help validate and diff-check rc=0; critic=approved deterministic rebuild hashes HTML escaping standalone asset-free output and six stakeholder sections"
+      },
+      {
+        "label": "Enforce disclosure scans and immutable release versions",
+        "summary": "summary=Enforced fail-closed disclosure scans immutable release versions supersedes validation and explicit publisher adapter boundary; changed_files=go_workflow/cli.py,tests/test_smoke.py,.go/tasks/active/delivery-disclosure-lifecycle.json; verification=python3 -m pytest tests/test_smoke.py -q rc=0 143 passed plus validate and diff-check rc=0; critic=approved sensitive findings do not echo matched content restricted remains usable and released output cannot be silently changed"
+      },
+      {
+        "label": "Document and package the shareable delivery workflow",
+        "summary": "summary=Documented no-GitHub delivery workflow disclosure lifecycle output contract and fresh-fixture packaging proof; changed_files=README.md,CHANGELOG.md,tests/test_smoke.py,.go/tasks/active/delivery-docs-packaging.json; verification=bash scripts/check-linux.sh rc=0 144 passed validate and template pairing ok plus diff-check rc=0; critic=approved docs match implemented defaults paths failure modes and immutable lifecycle"
+      },
+      {
+        "label": "Prove generated deliveries in a real browser and adversarial fixture",
+        "summary": "summary=Generated and browser-proved a real shareable-output delivery with adjacent manifest screenshots and adversarial disclosure proof; changed_files=.go/deliveries/shareable-output-v1/index.html,.go/deliveries/shareable-output-v1/manifest.json,docs/proof/shareable-output/runtime-proof.json,docs/proof/shareable-output/desktop.png,docs/proof/shareable-output/mobile.png,.go/tasks/active/delivery-runtime-browser-proof.json; verification=bash scripts/check-linux.sh rc=0 144 passed validate and template pairing ok plus manifest HTML sha256 agreement and browser DOM overflow=0 externalResources=0 scripts=0 consoleErrors=0; critic=approved desktop and mobile renders forwardable with no blockers"
+      }
+    ],
+    "limitations": [
+      "De huidige generator ondersteunt één epic per delivery"
+    ],
+    "next_steps": [
+      "Voeg alleen indien nodig een expliciete hostingadapter toe met toegang en revocation"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "dd246dfffe7f5d76357712bc1a05ff2fbd0c29e508dde87ca5afd5d3b2c92cbd",
+    "html_sha256": "345f0af23f57ae7c633ad8474ff7c05866e25c8a97993299f00adfb5ff9c5ef5"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.delivery-runtime-proof.v1",
+  "delivery_id": "shareable-output-v2",
+  "release_status": "released",
+  "supersedes": "shareable-output-v1",
+  "source_sha256": "dd246dfffe7f5d76357712bc1a05ff2fbd0c29e508dde87ca5afd5d3b2c92cbd",
+  "html_sha256": "345f0af23f57ae7c633ad8474ff7c05866e25c8a97993299f00adfb5ff9c5ef5",
+  "manifest_hash_matches": true,
+  "validator_parity": {
+    "focused_tests": "30 passed",
+    "extra_mutations": "20/20 rejected",
+    "repo_suite": "172 passed"
+  },
+  "screenshot": "docs/proof/shareable-output-v2/desktop.png",
+  "browser": {
+    "version_and_released_visible": true,
+    "sections": 6,
+    "horizontal_overflow_px": 0,
+    "external_resources": 0,
+    "scripts": 0,
+    "console_messages": 0,
+    "javascript_errors": 0,
+    "visual_critic": "approved; validator parity visible, layout readable and unclipped, no blockers"
+  },
+  "version_1_immutability": "index.html and manifest.json hashes unchanged during v2 generation"
+}

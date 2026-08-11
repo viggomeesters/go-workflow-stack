@@ -154,7 +154,8 @@
       "features": [],
       "tasks": [
         "delivery-final-release",
-        "delivery-schema-parity-repair"
+        "delivery-schema-parity-repair",
+        "delivery-v2-correction"
       ]
     }
   ]

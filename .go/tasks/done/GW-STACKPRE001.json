@@ -27,8 +27,16 @@
     "claimed_at": "2026-08-17T06:31:57+02:00"
   },
   "work_status": "completed",
-  "review_status": "review",
-  "review_history": [],
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-17T07:17:35+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Approved after current archived-tag v0.3.12 validation: 190 tests passed, template pairing passed, Linux/WSL verification passed, standalone uv-tool distribution passed.",
+      "transaction_id": "23b877fe0d0e4c91bb998ee1a31c8c86"
+    }
+  ],
   "evidence": [
     {
       "schema": "go-workflow.finish-evidence.v1",

@@ -104,7 +104,8 @@
         "package-runtime-provenance-v034",
         "fix-v1-contract-migration",
         "GW-STACKPRE001",
-        "release-v0312-stack-freshness"
+        "release-v0312-stack-freshness",
+        "register-v0312-template-pairing"
       ]
     },
     {

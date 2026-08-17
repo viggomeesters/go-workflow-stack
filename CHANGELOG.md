@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.3.12 - 2026-08-17
+
+- Require a stack-freshness preflight before route, task creation, claim, or product edits in repo-local Go projects.
+- Add `stack update --latest` to resolve the highest annotated immutable release and preserve dry-run-first, atomic rollback behavior.
+- Make already-current updates true no-ops without project writes, rollback files, or synthetic lifecycle events.
+
 ## 0.3.11 - 2026-08-11
 
 - Make restricted shareable delivery a standard approval-time gate for substantial agent tasks, with explicit `required`/`none` overrides, immutable epic versioning, per-epic serialization through autonomous ship/rollback, autonomous-run artifact readback, and fail-closed approval rollback.

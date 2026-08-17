@@ -103,7 +103,8 @@
         "publish-github-release-v033",
         "package-runtime-provenance-v034",
         "fix-v1-contract-migration",
-        "GW-STACKPRE001"
+        "GW-STACKPRE001",
+        "release-v0312-stack-freshness"
       ]
     },
     {

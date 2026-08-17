@@ -24,6 +24,24 @@ def _git(stack_repo: Path, *args: str) -> subprocess.CompletedProcess[str]:
     return subprocess.run(["git", "-C", str(stack_repo), *args], text=True, capture_output=True)
 
 
+def latest_stack_ref(stack_repo: Path) -> str:
+    listed = _git(stack_repo, "tag", "--list", "v[0-9]*")
+    if listed.returncode != 0:
+        raise StackUpdateError(f"cannot list immutable stack tags in {stack_repo}: {listed.stderr.strip()}")
+    releases: list[tuple[tuple[int, int, int], str]] = []
+    for tag in listed.stdout.splitlines():
+        match = VERSION_REF_RE.fullmatch(tag.strip())
+        if not match:
+            continue
+        kind = _git(stack_repo, "cat-file", "-t", f"refs/tags/{tag}")
+        if kind.returncode != 0 or kind.stdout.strip() != "tag":
+            continue
+        releases.append((tuple(int(part) for part in match.group(1).split(".")), tag))
+    if not releases:
+        raise StackUpdateError(f"no annotated immutable vX.Y.Z stack tags found in {stack_repo}")
+    return max(releases)[1]
+
+
 def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, Any]:
     match = VERSION_REF_RE.fullmatch(to_ref)
     if not match:
@@ -51,6 +69,7 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         raise StackUpdateError(
             f"stack ref {to_ref} supports contract {runtime_contract}, project requires {project_contract}"
         )
+    up_to_date = project.get("required_stack_version") == version and project.get("stack_ref") == to_ref
     after = dict(project)
     after.update({"required_stack_version": version, "stack_ref": to_ref})
     return {
@@ -65,13 +84,18 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         "resolved_commit": resolved.stdout.strip(),
         "runtime_contract_version": runtime_contract,
         "project_contract_version": project_contract,
-        "changes": [".go/project.json:required_stack_version", ".go/project.json:stack_ref"],
+        "up_to_date": up_to_date,
+        "changes": [] if up_to_date else [".go/project.json:required_stack_version", ".go/project.json:stack_ref"],
         "before_project": project,
         "after_project": after,
     }
 
 
 def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
+    if plan.get("up_to_date"):
+        result = {key: value for key, value in plan.items() if key not in {"before_project", "after_project"}}
+        result.update({"mode": "noop", "rollback_record": None})
+        return result
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
     slug = f"{stamp}-{plan['to_ref']}-{plan['resolved_commit'][:12]}"
     rollback_path = repo / ".go" / "updates" / f"{slug}.json"

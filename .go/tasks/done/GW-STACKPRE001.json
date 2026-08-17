@@ -1,0 +1,76 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "GW-STACKPRE001",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Enforce latest immutable stack preflight",
+  "description": "Add a dry-run-first latest stable tag resolver and no-op-safe apply path so repository work can update an old .go stack pin before routing or claiming.",
+  "scope": {
+    "read": [
+      "go_workflow/stack_update.py,go_workflow/cli.py,tests/test_smoke.py,AGENTS.md,README.md,docs/go-command-router.md,skills/repo-local-agent-workflow/SKILL.md,.go/**"
+    ],
+    "modify": [
+      "go_workflow/stack_update.py,go_workflow/cli.py,tests/test_smoke.py,AGENTS.md,README.md,docs/go-command-router.md,skills/repo-local-agent-workflow/SKILL.md,.go/**"
+    ]
+  },
+  "acceptance": [
+    "stack update accepts --latest as an alternative to --to; resolves highest stable immutable vX.Y.Z tag; same-pin apply is a true no-op; older pin updates atomically with rollback; docs require this preflight before route/claim/edit."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_smoke.py -q; make check; python3 cli/go.py validate .; git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-17T06:31:57+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-17T06:40:46+02:00",
+      "task_id": "GW-STACKPRE001",
+      "agent": "hermes",
+      "summary": "changed_files=AGENTS.md,README.md,docs/go-command-router.md,go_workflow/cli.py,go_workflow/stack_update.py,skills/repo-local-agent-workflow/SKILL.md,tests/test_smoke.py; verification_command=python3 -m pytest tests/test_smoke.py -q && make check && python3 cli/go.py validate . && git diff --check; verification_result=passed: 190 smoke tests and make check; critic_outcome=passed: fail-closed latest-tag, no-op and rollback behavior reviewed; runtime=hermes; billing_mode=subscription",
+      "changed_files": [
+        "AGENTS.md",
+        "README.md",
+        "docs/go-command-router.md",
+        "go_workflow/cli.py",
+        "go_workflow/stack_update.py",
+        "skills/repo-local-agent-workflow/SKILL.md",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 -m pytest tests/test_smoke.py -q && make check && python3 cli/go.py validate . && git diff --check",
+        "result": "passed: 190 smoke tests and make check"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "subscription",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed: fail-closed latest-tag, no-op and rollback behavior reviewed",
+        "skip_reason": null
+      }
+    }
+  ]
+}

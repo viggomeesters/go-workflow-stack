@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from go_workflow.constants import STACK_REF, STACK_VERSION
 from go_workflow.task_state import pending_review_task_ids
 
 
@@ -2997,6 +2998,68 @@ def test_stack_update_is_dry_run_first_and_apply_records_rollback(tmp_path: Path
     rollback_data = json.loads(rollback.read_text(encoding="utf-8"))
     assert rollback_data["before_project"]["stack_ref"] == "v0.2.0"
     assert rollback_data["after_project"]["stack_ref"] == "v0.3.0"
+
+
+def test_stack_update_latest_resolves_highest_release_and_current_pin_is_noop(tmp_path: Path):
+    repo = tmp_path / "latest-current"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "latest-current", "--name", "Latest Current")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    before = project_path.read_text(encoding="utf-8")
+
+    planned = run_go("stack", "update", str(repo), "--latest", "--json")
+    assert planned.returncode == 0, planned.stderr + planned.stdout
+    plan = json.loads(planned.stdout)
+    assert plan["to_ref"] == STACK_REF
+    assert plan["to_version"] == STACK_VERSION
+    assert plan["up_to_date"] is True
+    assert plan["changes"] == []
+
+    applied = run_go("stack", "update", str(repo), "--latest", "--apply", "--json")
+    assert applied.returncode == 0, applied.stderr + applied.stdout
+    result = json.loads(applied.stdout)
+    assert result["mode"] == "noop"
+    assert result["rollback_record"] is None
+    assert project_path.read_text(encoding="utf-8") == before
+    assert not (repo / ".go" / "updates").exists()
+
+
+def test_stack_update_latest_upgrades_an_old_pin_before_repo_work(tmp_path: Path):
+    repo = tmp_path / "latest-old"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "latest-old", "--name", "Latest Old")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    project_path = repo / ".go" / "project.json"
+    project = json.loads(project_path.read_text(encoding="utf-8"))
+    project.update({"required_stack_version": "0.2.0", "stack_ref": "v0.2.0"})
+    project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
+
+    applied = run_go("stack", "update", str(repo), "--latest", "--apply", "--json")
+    assert applied.returncode == 0, applied.stderr + applied.stdout
+    result = json.loads(applied.stdout)
+    assert result["mode"] == "applied"
+    assert result["to_ref"] == STACK_REF
+    assert result["to_version"] == STACK_VERSION
+    updated = json.loads(project_path.read_text(encoding="utf-8"))
+    assert updated["required_stack_version"] == STACK_VERSION
+    assert updated["stack_ref"] == STACK_REF
+    assert (repo / result["rollback_record"]).is_file()
+
+
+def test_go_entrypoints_require_latest_immutable_stack_preflight():
+    surfaces = [
+        ROOT / "AGENTS.md",
+        ROOT / "README.md",
+        ROOT / "docs" / "go-command-router.md",
+        ROOT / "skills" / "repo-local-agent-workflow" / "SKILL.md",
+    ]
+    combined = "\n".join(path.read_text(encoding="utf-8") for path in surfaces)
+    assert "--latest" in combined
+    assert "before route" in combined
+    assert "highest annotated immutable" in combined
+    assert "GO_STACK_ALLOW_DEV=1" in combined
+    assert "no-op" in combined
 
 
 def test_stack_update_rejects_missing_and_incompatible_refs_before_writing(tmp_path: Path):

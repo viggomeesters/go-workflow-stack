@@ -129,7 +129,7 @@ The apply command validates the paired template and then creates a project-speci
 - `migrate <repo> [--apply]`: plan a versioned `.go` migration without writes, or explicitly apply and validate it.
 - `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.
 - `proof validate <proof.json> [--evidence-root dir] [--copy-to path]`: validate live Hermes evidence, optionally recompute raw-result hashes, and copy only after all proof gates pass.
-- `stack update <repo> --to vX.Y.Z [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply atomically with rollback data only when explicitly requested.
+- `stack update <repo> (--to vX.Y.Z | --latest) [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply atomically with rollback data only when explicitly requested. `--latest` selects the highest annotated stable tag; applying an already-current pin is a no-op.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
 - `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
@@ -254,6 +254,16 @@ Review and explicitly apply an immutable project stack update:
 go-workflow stack update . --to v0.3.11 --json
 go-workflow stack update . --to v0.3.11 --apply --json
 ```
+
+Before normal work in any repo-local `.go` project, fetch the canonical stack tags and run the freshness preflight **before** route, task creation, claim, or product edits:
+
+```bash
+git -C ~/github/go-workflow-stack fetch origin --tags
+GO_STACK=~/github/go-workflow-stack go-workflow stack update . --latest --json
+GO_STACK=~/github/go-workflow-stack go-workflow stack update . --latest --apply --agent hermes --json
+```
+
+The first command is the reviewable dry run. The second is a no-op when the repo already pins the newest annotated immutable release; otherwise it writes an atomic rollback record and validates the resulting contract. Failure blocks repository work. Never “update” by pointing a project at mutable `main` or by enabling `GO_STACK_ALLOW_DEV=1`.
 
 ## Privacy and security
 

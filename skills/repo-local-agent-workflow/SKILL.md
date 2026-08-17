@@ -148,11 +148,12 @@ Ask only when the emitted preflight reports an active repository gate, external 
 
 Before implementation, the agent must ensure the repo-local contract is good enough to execute:
 
-1. Vision/end goal exists in `.go/vision.json`.
-2. Design principles exist in `.go/architecture-principles.json`.
-3. Hierarchy exists in `.go/hierarchy.json`.
-4. A concrete task exists for the current slice.
-5. Acceptance and verification evidence are explicit.
+1. Fetch tags in the canonical `go-workflow-stack` checkout and run `stack update <repo> --latest --apply` before route, task creation, claim, or product edits. The highest annotated immutable release wins; current pins no-op. Failure or overlapping dirty `.go` migration state blocks product work. Never use mutable `main` or `GO_STACK_ALLOW_DEV=1` as an update shortcut.
+2. Vision/end goal exists in `.go/vision.json`.
+3. Design principles exist in `.go/architecture-principles.json`.
+4. Hierarchy exists in `.go/hierarchy.json`.
+5. A concrete task exists for the current slice.
+6. Acceptance and verification evidence are explicit.
 
 When an agent receives this contract, it must immediately continue with tool calls in the same run unless a stop condition is already present. Its `execution_policy` is deliberately high-autonomy: do not ask when a safe default exists; create same-scope follow-up tasks when verification/self-reflect proves they are needed; continue after self-reflect or escalate to `go-loop` when the work is still not genuinely done. Its `run_envelope` adds machine-readable preflight, budget, per-command timeout, run-until condition, checkpoint triggers, quiet output policy, and expected result schema. Every adapter receives `GO_CONTEXT_JSON` with vision, principles, hierarchy, task, evidence, and decisions. The semantic critic is enabled by default; `--no-semantic-critic` is the explicit escape hatch. Adapter hooks remain available through `--build-command`, `--critic-command`, `--repair-command`, and `--repair-agent codex|hermes`. Each attempt writes `.go/runs/<task-id>/attempt-XX/` artifacts and `.go/runs/latest.json` resume state.
 

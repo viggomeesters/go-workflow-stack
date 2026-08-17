@@ -102,7 +102,8 @@
         "release-v033-native-hermes",
         "publish-github-release-v033",
         "package-runtime-provenance-v034",
-        "fix-v1-contract-migration"
+        "fix-v1-contract-migration",
+        "GW-STACKPRE001"
       ]
     },
     {

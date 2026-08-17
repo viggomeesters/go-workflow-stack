@@ -42,7 +42,7 @@ from go_workflow.capacity_policy import plan_capacity
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, pending_review_task_ids as task_state_pending_review_task_ids, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
-from go_workflow.stack_update import StackUpdateError, apply_stack_update, plan_stack_update, rollback_stack_update
+from go_workflow.stack_update import StackUpdateError, apply_stack_update, latest_stack_ref, plan_stack_update, rollback_stack_update
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, remove_jsonl_events_locked, repository_lock
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
@@ -4333,7 +4333,9 @@ def build_parser() -> argparse.ArgumentParser:
     stack_sub = stack.add_subparsers(dest="stack_command", required=True)
     stack_update = stack_sub.add_parser("update", help="Validate and update required_stack_version and stack_ref")
     stack_update.add_argument("repo", nargs="?", default=".")
-    stack_update.add_argument("--to", required=True, help="immutable target tag vX.Y.Z")
+    stack_update_target = stack_update.add_mutually_exclusive_group(required=True)
+    stack_update_target.add_argument("--to", help="immutable target tag vX.Y.Z")
+    stack_update_target.add_argument("--latest", action="store_true", help="use the highest annotated immutable vX.Y.Z tag in the stack checkout")
     stack_update.add_argument("--stack-repo", help="stack git checkout used to resolve and inspect the tag; defaults to GO_STACK or the source checkout")
     stack_update.add_argument("--apply", action="store_true", help="apply transaction; default is dry-run")
     stack_update.add_argument("--agent", default="agent")
@@ -4588,7 +4590,8 @@ def cmd_stack_update(args: argparse.Namespace) -> int:
             "set GO_STACK or pass --stack-repo"
         )
     try:
-        plan = plan_stack_update(repo, stack_repo, args.to)
+        target_ref = latest_stack_ref(stack_repo) if args.latest else args.to
+        plan = plan_stack_update(repo, stack_repo, target_ref)
     except StackUpdateError as exc:
         raise RepoLocalError(str(exc)) from exc
     result = plan
@@ -4596,18 +4599,20 @@ def cmd_stack_update(args: argparse.Namespace) -> int:
         result = apply_stack_update(repo, plan)
         errors = validate_repo(repo)
         if errors:
-            rollback_stack_update(repo, result["rollback_record"])
+            if result.get("rollback_record"):
+                rollback_stack_update(repo, result["rollback_record"])
             raise RepoLocalError("stack update rolled back because the resulting contract is invalid:\n- " + "\n- ".join(errors))
-        append_jsonl(
-            go_root(repo) / "runs" / "events.jsonl",
-            event("stack-update", "run.checked", args.agent, {
-                "action": "stack.updated",
-                "from_ref": result.get("from_ref"),
-                "to_ref": result["to_ref"],
-                "resolved_commit": result["resolved_commit"],
-                "rollback_record": result["rollback_record"],
-            }),
-        )
+        if result["mode"] != "noop":
+            append_jsonl(
+                go_root(repo) / "runs" / "events.jsonl",
+                event("stack-update", "run.checked", args.agent, {
+                    "action": "stack.updated",
+                    "from_ref": result.get("from_ref"),
+                    "to_ref": result["to_ref"],
+                    "resolved_commit": result["resolved_commit"],
+                    "rollback_record": result["rollback_record"],
+                }),
+            )
     if args.json:
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:

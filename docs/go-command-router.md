@@ -135,15 +135,20 @@ route -> status -> contract-repair-if-needed -> next-or-create-task -> claim -> 
 
 Operationally:
 
-1. Read repo state via `.go`, not vault task state.
-2. Claim one task.
-3. Edit only inside task scope.
-4. Run the task verification commands.
-5. Recheck/devil/harden when code, docs, contracts, UI, automation, or public behavior changed.
-6. Finish only with evidence.
-7. Self-reflect: should vision, principles, hierarchy, or tasks be improved?
-8. Summarize compactly for Viggo.
-9. Convert every new Viggo instruction into a task before product edits, then execute it through `go auto` or `go loop`.
+1. Fetch canonical stack tags and run `stack update <repo> --latest --apply` before route, task creation, claim, or product edits. Current pins no-op; old pins update transactionally; failure blocks work.
+2. Read repo state via `.go`, not vault task state.
+3. Claim one task.
+4. Edit only inside task scope.
+5. Run the task verification commands.
+6. Recheck/devil/harden when code, docs, contracts, UI, automation, or public behavior changed.
+7. Finish only with evidence.
+8. Self-reflect: should vision, principles, hierarchy, or tasks be improved?
+9. Summarize compactly for Viggo.
+10. Convert every new Viggo instruction into a task before product edits, then execute it through `go auto` or `go loop`.
+
+## Stack freshness invariant
+
+An existing `.go/project.json` pin is a minimum reproducibility contract, not permission to stay indefinitely on an older release. Before ordinary repository work, compare it against the highest annotated immutable `vX.Y.Z` tag in the canonical stack checkout. Apply the update first when it is older. Keep the migration as a separate, reviewable workflow diff and rollback record; do not mix it into the requested product change. If tags cannot be refreshed, the migration overlaps unknown dirty `.go` state, or the updated contract fails validation, stop before product work.
 
 `go auto` may invoke `go loop` when:
 

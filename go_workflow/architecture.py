@@ -192,3 +192,125 @@ def validate_architecture_state(root: Path, project_id: str) -> list[str]:
         if expires_at is not None and expires_at <= current:
             errors.append(f"{events_path.relative_to(root.parent)}:{line_number}: waiver has expired: {waiver_id}")
     return errors
+
+
+def _jsonl(path: Path) -> list[dict[str, Any]]:
+    if not path.is_file():
+        return []
+    records: list[dict[str, Any]] = []
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError:
+            continue
+        if isinstance(item, dict):
+            records.append(item)
+    return records
+
+
+def architecture_briefs(root: Path) -> dict[str, dict[str, Any]]:
+    briefs: dict[str, dict[str, Any]] = {}
+    for path in sorted((root / "architecture" / "briefs").glob("*.json")):
+        try:
+            item = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError):
+            continue
+        if isinstance(item, dict) and item.get("id"):
+            briefs[str(item["id"])] = item
+    return briefs
+
+
+def latest_decisions(root: Path) -> dict[str, dict[str, Any]]:
+    decisions: dict[str, dict[str, Any]] = {}
+    for decision_event in _jsonl(root / "decisions" / "events.jsonl"):
+        if decision_event.get("event") != "decision.recorded":
+            continue
+        payload = decision_event.get("data")
+        decision_id = str(payload.get("decision_id") or "") if isinstance(payload, dict) else ""
+        if decision_id:
+            decisions[decision_id] = decision_event
+    return decisions
+
+
+def architecture_status(root: Path) -> dict[str, Any]:
+    briefs = architecture_briefs(root)
+    events = _jsonl(root / "architecture" / "events.jsonl")
+    deviations: dict[str, dict[str, Any]] = {}
+    waivers: dict[str, dict[str, Any]] = {}
+    for architecture_event in events:
+        payload = architecture_event.get("data") if isinstance(architecture_event.get("data"), dict) else {}
+        if architecture_event.get("event") == "architecture.deviation.recorded":
+            deviations[str(payload.get("deviation_id") or f"{architecture_event.get('task_id')}:{architecture_event.get('scope_id')}")] = architecture_event
+        if str(architecture_event.get("event") or "").startswith("architecture.waiver."):
+            waiver_id = str(payload.get("waiver_id") or "")
+            if waiver_id:
+                waivers[waiver_id] = architecture_event
+    return {
+        "briefs": {
+            "total": len(briefs),
+            "accepted": sum(1 for brief in briefs.values() if brief.get("status") == "accepted"),
+            "draft": sum(1 for brief in briefs.values() if brief.get("status") == "draft"),
+        },
+        "open_deviations": sum(1 for event in deviations.values() if (event.get("data") or {}).get("status", "open") == "open"),
+        "active_waivers": sum(1 for event in waivers.values() if event.get("event") == "architecture.waiver.granted"),
+        "scope_ids": sorted(briefs),
+    }
+
+
+def resolve_applicable_architecture(root: Path, task: dict[str, Any] | None = None) -> dict[str, Any]:
+    metadata = task.get("architecture") if isinstance(task, dict) else None
+    briefs_by_id = architecture_briefs(root)
+    decisions_by_id = latest_decisions(root)
+    if not isinstance(metadata, dict):
+        return {
+            "enabled": False,
+            "classification": {"impact": "none"},
+            "briefs": [],
+            "principles": [],
+            "decisions": [],
+            "quality_attributes": [],
+            "open_deviations": [],
+            "active_waivers": [],
+            "missing_scope_refs": [],
+            "missing_decision_ids": [],
+        }
+    scope_refs = [str(item) for item in metadata.get("scope_refs", [])]
+    briefs = [briefs_by_id[item] for item in scope_refs if item in briefs_by_id]
+    decision_ids = list(dict.fromkeys(
+        [str(item) for item in metadata.get("decision_ids", [])]
+        + [str(item) for brief in briefs for item in brief.get("decision_ids", [])]
+    ))
+    architecture_events = _jsonl(root / "architecture" / "events.jsonl")
+    latest_deviations: dict[str, dict[str, Any]] = {}
+    latest_waivers: dict[str, dict[str, Any]] = {}
+    for architecture_event in architecture_events:
+        if architecture_event.get("scope_id") not in scope_refs:
+            continue
+        payload = architecture_event.get("data") if isinstance(architecture_event.get("data"), dict) else {}
+        if architecture_event.get("event") == "architecture.deviation.recorded":
+            latest_deviations[str(payload.get("deviation_id") or architecture_event.get("task_id"))] = architecture_event
+        if str(architecture_event.get("event") or "").startswith("architecture.waiver."):
+            waiver_id = str(payload.get("waiver_id") or "")
+            if waiver_id:
+                latest_waivers[waiver_id] = architecture_event
+    principles_path = root / "architecture-principles.json"
+    principle_doc = json.loads(principles_path.read_text(encoding="utf-8")) if principles_path.is_file() else {}
+    return {
+        "enabled": True,
+        "classification": {
+            "impact": metadata.get("impact", "none"),
+            "concerns": metadata.get("concerns", []),
+            "conformance_required": metadata.get("conformance_required", False),
+            "human_gate": metadata.get("human_gate", "none"),
+        },
+        "briefs": briefs,
+        "principles": principle_doc.get("principles", []),
+        "decisions": [decisions_by_id[item] for item in decision_ids if item in decisions_by_id],
+        "quality_attributes": [attribute for brief in briefs for attribute in brief.get("quality_attributes", [])],
+        "open_deviations": [event for event in latest_deviations.values() if (event.get("data") or {}).get("status", "open") == "open"],
+        "active_waivers": [event for event in latest_waivers.values() if event.get("event") == "architecture.waiver.granted"],
+        "missing_scope_refs": [item for item in scope_refs if item not in briefs_by_id],
+        "missing_decision_ids": [item for item in decision_ids if item not in decisions_by_id],
+    }

@@ -46,7 +46,13 @@ from go_workflow.stack_update import StackUpdateError, apply_stack_update, lates
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, remove_jsonl_events_locked, repository_lock
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
-from go_workflow.architecture import validate_architecture_state, validate_task_architecture
+from go_workflow.architecture import (
+    architecture_briefs,
+    architecture_status as summarize_architecture,
+    resolve_applicable_architecture,
+    validate_architecture_state,
+    validate_task_architecture,
+)
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -1592,6 +1598,7 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
         "task": task,
         "recent_evidence": load_jsonl_events(root / "evidence" / "events.jsonl", limit=10),
         "recent_decisions": load_jsonl_events(root / "decisions" / "events.jsonl", limit=10),
+        "applicable_architecture": resolve_applicable_architecture(root, task),
     }
 
 
@@ -3355,6 +3362,7 @@ def cmd_status(args: argparse.Namespace) -> int:
         for state in ("open", "active", "blocked", "done"):
             counts[state] = len(list((root / "tasks" / state).glob("*.json")))
         status["tasks"] = counts
+        status["architecture"] = summarize_architecture(root)
         tasks = open_tasks(repo)
         status["setup_required"] = project_mode == "template"
         if status["setup_required"]:
@@ -4153,10 +4161,90 @@ def cmd_readback(args: argparse.Namespace) -> int:
     print(f"Wedge: {vision['wedge']}")
     print("Principles: " + "; ".join(p["id"] for p in principles.get("principles", [])))
     print("Epics: " + "; ".join(g["id"] for g in hierarchy_epics(hierarchy)))
+    architecture = summarize_architecture(root)
+    print(
+        "Architecture: "
+        f"briefs={architecture['briefs']['total']}; "
+        f"open_deviations={architecture['open_deviations']}; "
+        f"active_waivers={architecture['active_waivers']}"
+    )
     if tasks:
         print(f"Next task: {tasks[0][1]['id']} — {tasks[0][1]['summary']}")
     else:
         print("Next task: none")
+    return 0
+
+
+def architecture_task(root: Path, task_id: str) -> dict[str, Any] | None:
+    if not task_id:
+        return None
+    _path, task = find_task(root, task_id)
+    return task
+
+
+def cmd_architecture_validate(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    errors = validate_architecture_state(root, str(project.get("id") or ""))
+    payload = {"schema": "go-workflow.architecture-validation.v1", "valid": not errors, "errors": errors}
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    elif errors:
+        for error in errors:
+            print(f"error: {error}", file=sys.stderr)
+    else:
+        print(f"ok: {root / 'architecture'}")
+    return 0 if not errors else 1
+
+
+def architecture_readback_payload(repo: Path, task_id: str = "") -> dict[str, Any]:
+    root = go_root(repo)
+    task = architecture_task(root, task_id)
+    briefs = architecture_briefs(root)
+    return {
+        "schema": "go-workflow.architecture-readback.v1",
+        "project": load_json(root / "project.json").get("id"),
+        "task_id": task_id or None,
+        "status": summarize_architecture(root),
+        "briefs": [briefs[brief_id] for brief_id in sorted(briefs)],
+        "applicable_architecture": resolve_applicable_architecture(root, task),
+    }
+
+
+def cmd_architecture_readback(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot read back invalid .go state:\n- " + "\n- ".join(errors))
+    payload = architecture_readback_payload(repo, args.task_id)
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print(f"project: {payload['project']}")
+        print(f"briefs: {payload['status']['briefs']['total']}")
+        print(f"open_deviations: {payload['status']['open_deviations']}")
+        print(f"active_waivers: {payload['status']['active_waivers']}")
+        if args.task_id:
+            applicable = payload["applicable_architecture"]
+            print(f"task: {args.task_id}")
+            print(f"impact: {applicable['classification']['impact']}")
+            print(f"decisions: {len(applicable['decisions'])}")
+    return 0
+
+
+def cmd_architecture_status(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot summarize invalid .go state:\n- " + "\n- ".join(errors))
+    payload = {"schema": "go-workflow.architecture-status.v1", **summarize_architecture(go_root(repo))}
+    if args.json:
+        print(json.dumps(payload, indent=2, ensure_ascii=False))
+    else:
+        print("briefs: " + str(payload["briefs"]["total"]))
+        print("open_deviations: " + str(payload["open_deviations"]))
+        print("active_waivers: " + str(payload["active_waivers"]))
     return 0
 
 
@@ -4487,6 +4575,21 @@ def build_parser() -> argparse.ArgumentParser:
     decision_create.add_argument("--agent", default="agent")
     decision_create.add_argument("--task-id", default="project-decision")
     decision_create.set_defaults(func=cmd_decision_create)
+    architecture = sub.add_parser("architecture", help="Inspect and operate the optional conditional architecture lane")
+    architecture_sub = architecture.add_subparsers(dest="architecture_command", required=True)
+    architecture_validate = architecture_sub.add_parser("validate", help="Validate architecture briefs and append-only events")
+    architecture_validate.add_argument("repo", nargs="?", default=".")
+    architecture_validate.add_argument("--json", action="store_true")
+    architecture_validate.set_defaults(func=cmd_architecture_validate)
+    architecture_readback = architecture_sub.add_parser("readback", help="Resolve applicable architecture for a project or task")
+    architecture_readback.add_argument("repo", nargs="?", default=".")
+    architecture_readback.add_argument("--task-id", default="")
+    architecture_readback.add_argument("--json", action="store_true")
+    architecture_readback.set_defaults(func=cmd_architecture_readback)
+    architecture_status = architecture_sub.add_parser("status", help="Summarize briefs, deviations, waivers, and scopes")
+    architecture_status.add_argument("repo", nargs="?", default=".")
+    architecture_status.add_argument("--json", action="store_true")
+    architecture_status.set_defaults(func=cmd_architecture_status)
     migrate = sub.add_parser("migrate", help="Plan or explicitly apply versioned .go contract migrations")
     migrate.add_argument("repo", nargs="?", default=".")
     migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")

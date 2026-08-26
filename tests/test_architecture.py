@@ -14,7 +14,7 @@ from go_workflow.architecture import (
     validate_architecture_event,
     validate_task_architecture,
 )
-from go_workflow.cli import validate_repo, validate_task
+from go_workflow.cli import architecture_readback_payload, build_execution_context, validate_repo, validate_task
 
 
 def valid_task() -> dict:
@@ -155,3 +155,73 @@ def test_validate_repo_accepts_optional_architecture_state_and_rejects_expired_w
     closed["data"] = {"waiver_id": "legacy-adapter-waiver", "status": "expired"}
     event_path.write_text(json.dumps(waiver) + "\n" + json.dumps(closed) + "\n", encoding="utf-8")
     assert validate_repo(repo) == []
+
+
+def test_execution_context_resolves_exact_old_decision_and_architecture_status(tmp_path: Path):
+    repo = tmp_path / "demo"
+    shutil.copytree(ROOT / "fixtures" / "minimal", repo)
+    root = repo / ".go"
+    project_id = json.loads((root / "project.json").read_text(encoding="utf-8"))["id"]
+    architecture = root / "architecture"
+    (architecture / "briefs").mkdir(parents=True)
+    brief = valid_brief()
+    brief["project"] = project_id
+    (architecture / "briefs" / "project-memory.json").write_text(json.dumps(brief) + "\n", encoding="utf-8")
+
+    decision_events = []
+    for index in range(12):
+        decision_id = "canonical-project-state-v1" if index == 0 else f"noise-{index}"
+        decision_events.append({
+            "schema": "go-workflow.repo-local.event.v1",
+            "kind": "event",
+            "event": "decision.recorded",
+            "created_at": f"2026-08-26T12:{index:02d}:00+02:00",
+            "task_id": "architecture-test",
+            "agent": "hermes",
+            "data": {
+                "decision_id": decision_id,
+                "title": decision_id,
+                "status": "accepted",
+                "context": "test",
+                "decision": "test",
+                "consequences": [],
+            },
+        })
+    (root / "decisions").mkdir(parents=True, exist_ok=True)
+    (root / "decisions" / "events.jsonl").write_text(
+        "".join(json.dumps(event) + "\n" for event in decision_events), encoding="utf-8"
+    )
+
+    deviation = valid_event("architecture.deviation.recorded")
+    deviation["data"] = {"deviation_id": "dev-1", "status": "open", "reason": "Pending adapter isolation"}
+    waiver = valid_event("architecture.waiver.granted")
+    waiver["data"] = {
+        "waiver_id": "waiver-1",
+        "status": "active",
+        "reason": "Temporary adapter",
+        "accepted_risk": "One adapter remains coupled",
+        "expires_at": "2026-12-31T23:59:59+00:00",
+    }
+    (architecture / "events.jsonl").write_text(json.dumps(deviation) + "\n" + json.dumps(waiver) + "\n", encoding="utf-8")
+
+    task = valid_task()
+    task["project"] = project_id
+    task["architecture"] = {
+        "impact": "material",
+        "scope_refs": ["project-memory"],
+        "concerns": ["data"],
+        "decision_ids": ["canonical-project-state-v1"],
+        "conformance_required": True,
+        "human_gate": "decision",
+    }
+    context = build_execution_context(repo, task)
+    recent_ids = [(event.get("data") or {}).get("decision_id") for event in context["recent_decisions"]]
+    applicable_ids = [(event.get("data") or {}).get("decision_id") for event in context["applicable_architecture"]["decisions"]]
+    assert "canonical-project-state-v1" not in recent_ids
+    assert applicable_ids == ["canonical-project-state-v1"]
+    assert context["applicable_architecture"]["quality_attributes"][0]["id"] == "project-isolation"
+
+    readback = architecture_readback_payload(repo, "")
+    assert readback["status"]["briefs"] == {"total": 1, "accepted": 1, "draft": 0}
+    assert readback["status"]["open_deviations"] == 1
+    assert readback["status"]["active_waivers"] == 1

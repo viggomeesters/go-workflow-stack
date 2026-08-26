@@ -1,0 +1,80 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "plan-architecture-lane",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Materialize the cross-repo architecture lane implementation plan",
+  "description": "Translate Viggo's requested architecture-lane outcome into bounded stack and template tasks with explicit sequencing, acceptance, verification, release, pairing, and push boundaries.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "/home/viggo/github/go-project-template/.go/**"
+    ],
+    "modify": [
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Stack work is split into contract, context/CLI, gates/critic, release, and pairing tasks.",
+    "Template work is represented by its own repo-local task and depends on the released stack.",
+    "No product implementation begins before the applicable task is claimed."
+  ],
+  "verification": [
+    "python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py validate .",
+    "python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py status . --json"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-26T15:53:22+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-26T15:54:23+02:00",
+      "task_id": "plan-architecture-lane",
+      "agent": "hermes",
+      "summary": "changed_files=.go/hierarchy.json,.go/tasks/open/architecture-contracts.json,.go/tasks/open/architecture-context-cli.json,.go/tasks/open/architecture-conformance-gates.json,.go/tasks/open/release-v0313-architecture-lane.json,.go/tasks/open/register-v0313-template-pairing.json,/home/viggo/github/go-project-template/.go/tasks/open/adopt-v0313-architecture-lane.json; verification_command=python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py validate . && python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py status . --json && /home/viggo/github/go-project-template/go validate /home/viggo/github/go-project-template; verification_result=PASS: both repo-local contracts validate and six implementation tasks are materialized in their owning repositories; reviewer/critic outcome=PASS: tasks are bounded by contracts, context/CLI, conformance gates, release, template adoption, and exact pairing; release precedes template pin and pairing follows template push.",
+      "changed_files": [
+        ".go/hierarchy.json",
+        ".go/tasks/open/architecture-contracts.json",
+        ".go/tasks/open/architecture-context-cli.json",
+        ".go/tasks/open/architecture-conformance-gates.json",
+        ".go/tasks/open/release-v0313-architecture-lane.json",
+        ".go/tasks/open/register-v0313-template-pairing.json",
+        "/home/viggo/github/go-project-template/.go/tasks/open/adopt-v0313-architecture-lane.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py validate . && python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py status . --json && /home/viggo/github/go-project-template/go validate /home/viggo/github/go-project-template",
+        "result": "PASS: both repo-local contracts validate and six implementation tasks are materialized in their owning repositories"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": null,
+        "skip_reason": null
+      }
+    }
+  ]
+}

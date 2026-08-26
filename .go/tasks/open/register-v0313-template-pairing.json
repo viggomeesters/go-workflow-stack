@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "register-v0313-template-pairing",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Register and prove the v0.3.13 stack/template pairing",
+  "description": "After go-project-template is pinned and populated with the architecture starter contract, register the exact release/template pairing, run fresh-clone-style cross-repo proof, and push the scoped stack follow-up.",
+  "scope": {
+    "read": [
+      "**",
+      "/home/viggo/github/go-project-template/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "tests/**",
+      "docs/**",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "The stack recognizes the exact v0.3.13 template pairing rather than mutable main.",
+    "Template-check and a fresh copied-template validation exercise architecture readback and legacy compatibility.",
+    "All cross-repo checks pass and the pairing commit is pushed."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest -q",
+    "make check",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

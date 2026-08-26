@@ -167,6 +167,20 @@
         "release-v0310-shallow-provenance-test-repair",
         "register-v0310-template-release-pairing"
       ]
+    },
+    {
+      "id": "architecture-lane",
+      "title": "Conditional Architecture Lane",
+      "description": "Task-local architecture impact, exact context, conformance, human gates, and portable template defaults without creating a parallel source of truth.",
+      "features": [],
+      "tasks": [
+        "plan-architecture-lane",
+        "architecture-contracts",
+        "architecture-context-cli",
+        "architecture-conformance-gates",
+        "release-v0313-architecture-lane",
+        "register-v0313-template-pairing"
+      ]
     }
   ]
 }

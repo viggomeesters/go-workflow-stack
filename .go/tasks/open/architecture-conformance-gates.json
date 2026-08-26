@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "architecture-conformance-gates",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Enforce conditional architecture classification and conformance gates",
+  "description": "Add deterministic minimum-impact classification, claim preflight, architecture critic findings, conformance recording, waiver lifecycle, and finish gates. Material changes require applicable context/evidence; foundational or explicit irreversible/security/data-boundary decisions require human approval evidence.",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**"
+    ],
+    "modify": [
+      "go_workflow/architecture.py",
+      "go_workflow/cli.py",
+      "tests/test_architecture.py",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "Hard triggers can raise architecture impact but automated classification cannot lower an explicit or deterministic minimum.",
+    "Claim fails closed for material/foundational tasks with missing briefs or decisions while none/local tasks retain the normal workflow.",
+    "Finish requires conformance evidence and any declared human gate; waivers require actor, reason, accepted risk, and future expiry.",
+    "Semantic critic reports unresolved decisions, stale waivers, missing quality-attribute evidence, and implicit boundary changes."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest tests/test_architecture.py -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

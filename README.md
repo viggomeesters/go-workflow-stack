@@ -22,7 +22,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 - **Template repo ([`go-project-template`](https://github.com/viggomeesters/go-project-template))**: starter `.go/` project-state structure.
 - **Project repos**: own their `.go/` state and evidence.
 
-For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
+For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the conditional task-local architecture lane, see [`docs/architecture-lane.md`](docs/architecture-lane.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
 
 Routing rule: a target repo must own a valid `.go/project.json` before workflow execution starts. Repositories without that contract fail closed and must use `adopt` or `spike`; a vault is never an execution fallback.
 
@@ -231,19 +231,19 @@ sudo /usr/bin/install -o root -g root -m 0755 \
 Run the pre-tag candidate gate locally without publishing or invoking hosted automation:
 
 ```bash
-/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.12 --allow-candidate
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.13 --allow-candidate
 ```
 
 After committing and creating the annotated tag, run the mandatory final gate. It is intentionally local, can run before the release commit or tag is pushed, requires a clean tree, and tests the archived tag payload rather than the mutable checkout:
 
 ```bash
-/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.12
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.13
 ```
 
 If a later repair commit must revalidate an existing immutable tag, opt in explicitly:
 
 ```bash
-/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.12 --validate-existing
+/usr/local/bin/go-workflow-release-check --repo "$PWD" 0.3.13 --validate-existing
 ```
 
 Existing-tag validation proves that the tag is an ancestor of `HEAD`. A shallow checkout is hydrated in an isolated temporary clone from the canonical HTTPS `viggomeesters/go-workflow-stack` origin so the working checkout remains untouched and historical tag regressions remain available. The historical stack payload never pairs with an adjacent or explicitly supplied project template: `--validate-existing` refuses `GO_PROJECT_TEMPLATE`, because executing a historical gate against external mutable state would violate checkout isolation. When a historical release requires the public template suite, the validator uses an explicit release-to-template commit mapping fetched from the canonical HTTPS template origin; v0.3.8 is paired with `go-project-template` commit `3956fc92f9e99520756d10f08373635182f22d67`. Validate current template compatibility separately against the current stack. An isolated `/usr/bin/python3 -I` launcher builds a minimal environment before Bash starts, so inherited shell functions and startup files cannot affect path resolution. When installed outside the repository, the launcher rejects untrusted origins before executing repository code; existing-tag mode also proves the selected `HEAD` is reachable from an origin branch and loads the inner validator from that isolated remote clone. Release tools must resolve from the root-managed system path `/usr/local/bin:/usr/bin:/bin`; install `uv` there for historical distribution checks instead of relying on a user-writable `~/.local/bin`. Release modes are selected only through explicit command-line flags, not inherited shell variables. SSH origins, arbitrary forks, remote helpers, Git replacement refs, Git config injection, Git hooks inherited through environment config, and transport proxy/SSL overrides are rejected or ignored. Local filesystem remotes are accepted only for fixtures with `--allow-local-origin`.
@@ -251,8 +251,8 @@ Existing-tag validation proves that the tag is an ancestor of `HEAD`. A shallow 
 Review and explicitly apply an immutable project stack update:
 
 ```bash
-go-workflow stack update . --to v0.3.12 --json
-go-workflow stack update . --to v0.3.12 --apply --json
+go-workflow stack update . --to v0.3.13 --json
+go-workflow stack update . --to v0.3.13 --apply --json
 ```
 
 Before normal work in any repo-local `.go` project, fetch the canonical stack tags and run the freshness preflight **before** route, task creation, claim, or product edits:
@@ -271,7 +271,7 @@ The repository should contain only synthetic public fixtures. Do not commit priv
 
 ## Status
 
-Public v0.3.12 release. Repo work now starts with a fail-closed freshness preflight that updates old project pins to the latest annotated immutable stack release before routing or product edits. `stack update --latest` remains dry-run-first, transactional and no-op-safe for current pins. It retains v0.3.11's restricted immutable stakeholder-delivery contract.
+Public v0.3.13 release. Go now has an opt-in task-local architecture lane: consequential changes resolve exact briefs and decisions, fail closed on missing per-scope conformance, and require named-human approval where decision authority or risk acceptance demands it. Legacy repositories remain valid until the lane is explicitly activated. The v0.3.12 fail-closed stack-freshness preflight remains mandatory and no-op-safe for current pins.
 
 ## License
 

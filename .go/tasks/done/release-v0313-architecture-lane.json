@@ -1,0 +1,97 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "release-v0313-architecture-lane",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Document and release go-workflow-stack v0.3.13 architecture lane",
+  "description": "Harden the architecture lane, document migration and operator behavior, update the canonical skill, run full local gates, bump version, create an annotated immutable release, and push main/tag without GitHub Actions.",
+  "scope": {
+    "read": [
+      "**",
+      "/home/viggo/github/go-project-template/**"
+    ],
+    "modify": [
+      "README.md",
+      "CHANGELOG.md",
+      "docs/**",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "go_workflow/cli.py",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py",
+      "tests/test_architecture.py",
+      "scripts/release-check-inner.sh",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Architecture lane usage, activation, human gates, waivers, and migration are documented without requiring architecture theater.",
+    "Full test suite, make check, and stack/template compatibility gates pass locally.",
+    "An annotated immutable v0.3.13 release is committed, tagged, and pushed after verification."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest -q",
+    "make check",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-26T16:23:20+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-26T16:39:34+02:00",
+      "task_id": "release-v0313-architecture-lane",
+      "agent": "hermes",
+      "summary": "changed_files=README.md,CHANGELOG.md,docs/architecture-lane.md,docs/practical-architecture.md,skills/repo-local-agent-workflow/SKILL.md,pyproject.toml,go_workflow/constants.py,go_workflow/cli.py,fixtures/minimal/.go/project.json,tests/test_smoke.py,tests/test_architecture.py,.go/project.json; verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check && python3 cli/go.py template-check ../go-project-template --json && /usr/local/bin/go-workflow-release-check --repo \"/home/viggo/github/go-workflow-stack\" 0.3.13 --allow-candidate && git diff --check; verification_result=PASS: 195 full tests, canonical make check, template-check, 190-test isolated Linux/distribution candidate gate and runtime architecture lifecycle smoke all passed; critic_outcome=PASS: architecture lane stays opt-in for legacy repos, exact decision context is deterministic, each scope requires conformance, named-human gates reject automation identities, deviations remain visible, and waivers are grantable plus append-only closable.",
+      "changed_files": [
+        "README.md",
+        "CHANGELOG.md",
+        "docs/architecture-lane.md",
+        "docs/practical-architecture.md",
+        "skills/repo-local-agent-workflow/SKILL.md",
+        "pyproject.toml",
+        "go_workflow/constants.py",
+        "go_workflow/cli.py",
+        "fixtures/minimal/.go/project.json",
+        "tests/test_smoke.py",
+        "tests/test_architecture.py",
+        ".go/project.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "uv run --no-project --with pytest --with jsonschema pytest -q && make check && python3 cli/go.py template-check ../go-project-template --json && /usr/local/bin/go-workflow-release-check --repo \"/home/viggo/github/go-workflow-stack\" 0.3.13 --allow-candidate && git diff --check",
+        "result": "PASS: 195 full tests, canonical make check, template-check, 190-test isolated Linux/distribution candidate gate and runtime architecture lifecycle smoke all passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS: architecture lane stays opt-in for legacy repos, exact decision context is deterministic, each scope requires conformance, named-human gates reject automation identities, deviations remain visible, and waivers are grantable plus append-only closable.",
+        "skip_reason": null
+      }
+    }
+  ]
+}

@@ -53,7 +53,10 @@ In `my-project` edit:
 - `.go/architecture-principles.json` — hard project rules such as native JavaScript, size limits, visual constraints, privacy boundaries;
 - `.go/vision.json` — what the project should become;
 - `.go/hierarchy.json` — epic-lite work packages, features, and task links;
-- `.go/tasks/open/*.json` — claimable work.
+- `.go/tasks/open/*.json` — claimable work;
+- `.go/architecture/briefs/*.json` and `.go/architecture/events.jsonl` — optional, scoped architecture control for consequential changes.
+
+The architecture lane is deliberately conditional. Existing projects without `.go/architecture/` keep the normal workflow. For activation, impact levels, human approval, conformance, waivers, and incremental migration, see [`architecture-lane.md`](architecture-lane.md).
 
 ### 4. Validate from the stack
 

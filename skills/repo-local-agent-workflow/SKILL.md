@@ -63,6 +63,9 @@ Prefer small canonical files over one mega-state file:
   runs/*.jsonl
   evidence/*.jsonl
   decisions/*.jsonl       # ADR-lite decision events
+  architecture/           # optional conditional architecture lane
+    briefs/*.json          # scoped context and measurable quality attributes
+    events.jsonl           # classification/review/conformance/deviation/waiver events
   reflections/*.jsonl     # auto/loop batch self-reflection events
   imports/*.json
   locks/
@@ -85,6 +88,19 @@ Use these names consistently, but keep them lightweight:
 | Reflection | `.go/reflections/events.jsonl` | append-only auto/loop batch self-review and next-action trail |
 
 ADR and Epic are standard contract concepts; do not introduce them ad hoc outside these files/events.
+
+## Conditional architecture lane
+
+Use the architecture lane only when a task changes boundaries, contracts, data ownership, integrations, security/privacy, migrations, difficult-to-reverse platform direction, or measurable system qualities. Repositories without `.go/architecture/` remain backward-compatible; tasks with explicit `architecture` metadata activate the lane immediately.
+
+Canonical split:
+
+- `.go/architecture/briefs/<scope-id>.json` owns scoped context, stakeholders, constraints, risks, and measurable quality attributes;
+- `.go/decisions/events.jsonl` remains the only decision ledger;
+- `.go/architecture/events.jsonl` records classification, review, conformance, deviations, and time-bounded waivers;
+- `.go/evidence/events.jsonl` remains the verification proof stream.
+
+Run `architecture classify` before claim for consequential tasks. A deterministic minimum may raise impact but never lower a hard signal. Material tasks require accepted briefs/decisions and passing conformance for every scope; foundational tasks additionally require named human approval with evidence. Automation identities cannot claim human authority. Waivers require an actor, reason, accepted risk, and future timezone-aware expiry. Do not backfill historical architecture ceremony: activate incrementally at the next consequential change. Full operator commands and migration rules live in `docs/architecture-lane.md`.
 
 ## Starting or retrofitting a project
 

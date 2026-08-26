@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+## 0.3.13 - 2026-08-26
+
+- Add an opt-in, task-local architecture lane with strict brief and event contracts while keeping legacy repositories valid.
+- Resolve exact applicable briefs, decisions, quality attributes, deviations, and waivers into execution context and architecture readback/status commands.
+- Fail closed on material architecture claims and finishes until decisions, per-scope conformance, evidence, and required named-human approvals are present.
+- Add deterministic impact floors plus explicit classification, review, conformance, and time-bounded waiver commands without creating a second decision or evidence source of truth.
+
 ## 0.3.12 - 2026-08-17
 
 - Require a stack-freshness preflight before route, task creation, claim, or product edits in repo-local Go projects.

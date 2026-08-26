@@ -4341,8 +4341,13 @@ def cmd_architecture_conformance(args: argparse.Namespace) -> int:
         "evidence_refs": args.evidence_ref,
         "waiver_ids": args.waiver_id,
     }
+    event_name = "architecture.deviation.recorded" if args.status == "deviation" else "architecture.conformance.recorded"
+    if args.status == "deviation":
+        data["status"] = "open"
+        data["conformance_status"] = "deviation"
+        data["deviation_id"] = f"{task.get('id')}:{args.scope_id}"
     append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
-        "architecture.conformance.recorded", str(task.get("id")), args.scope_id, args.actor, data,
+        event_name, str(task.get("id")), args.scope_id, args.actor, data,
     ))
     errors = validate_repo(repo)
     if errors:
@@ -4393,6 +4398,22 @@ def cmd_architecture_waiver(args: argparse.Namespace) -> int:
     if errors:
         raise RepoLocalError("waiver event produced invalid state:\n- " + "\n- ".join(errors))
     print(f"{args.id}: active until {args.expires_at}")
+    return 0
+
+
+def cmd_architecture_waiver_close(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    _path, task = find_task(root, args.task_id)
+    event_name = f"architecture.waiver.{args.status}"
+    data = {"waiver_id": args.id, "status": args.status, "reason": args.reason}
+    append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
+        event_name, str(task.get("id")), args.scope_id, args.actor, data,
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("waiver closure produced invalid state:\n- " + "\n- ".join(errors))
+    print(f"{args.id}: {args.status}")
     return 0
 
 
@@ -4783,6 +4804,15 @@ def build_parser() -> argparse.ArgumentParser:
     architecture_waiver.add_argument("--deviation-id", action="append", default=[])
     architecture_waiver.add_argument("--actor", required=True)
     architecture_waiver.set_defaults(func=cmd_architecture_waiver)
+    architecture_waiver_close = architecture_sub.add_parser("waiver-close", help="Expire or revoke an architecture waiver without rewriting its grant")
+    architecture_waiver_close.add_argument("repo", nargs="?", default=".")
+    architecture_waiver_close.add_argument("--id", required=True)
+    architecture_waiver_close.add_argument("--task-id", required=True)
+    architecture_waiver_close.add_argument("--scope-id", required=True)
+    architecture_waiver_close.add_argument("--status", choices=["expired", "revoked"], required=True)
+    architecture_waiver_close.add_argument("--reason", required=True)
+    architecture_waiver_close.add_argument("--actor", required=True)
+    architecture_waiver_close.set_defaults(func=cmd_architecture_waiver_close)
     migrate = sub.add_parser("migrate", help="Plan or explicitly apply versioned .go contract migrations")
     migrate.add_argument("repo", nargs="?", default=".")
     migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")

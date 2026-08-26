@@ -46,6 +46,7 @@ from go_workflow.stack_update import StackUpdateError, apply_stack_update, lates
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, remove_jsonl_events_locked, repository_lock
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
+from go_workflow.architecture import validate_architecture_state, validate_task_architecture
 
 CONTRACT_ROOT = STACK_ROOT
 SCHEMA_ROOT = CONTRACT_ROOT / "schemas"
@@ -302,6 +303,8 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
     require(data.get("shareable_delivery", "auto") in {"auto", "required", "none"}, errors, f"{rel}: shareable_delivery must be auto, required, or none")
+    if "architecture" in data:
+        errors.extend(validate_task_architecture(data.get("architecture"), rel))
     if "work_status" in data:
         require(data.get("work_status") in {"pending", "in_progress", "completed"}, errors, f"{rel}: invalid work_status")
     if "review_status" in data:
@@ -517,6 +520,7 @@ def validate_repo(repo: Path) -> list[str]:
                 errors.append(str(exc))
     for task_id in sorted(linked_task_ids - task_ids):
         errors.append(f".go/hierarchy.json: linked task {task_id!r} does not exist in any task state")
+    errors.extend(validate_architecture_state(root, project_id))
     recommendation_paths = list((root / "recommendations").glob("*.json"))
     recommendation_paths.extend((root / "recommendations" / "applied").glob("*.json"))
     recommendation_paths.extend((root / "recommendations" / "superseded").glob("*.json"))

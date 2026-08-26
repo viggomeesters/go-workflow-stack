@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.architecture-brief.v1",
+  "title": "Go Workflow Architecture Brief",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "id", "project", "title", "status", "owner", "outcomes", "scope", "stakeholders", "constraints", "quality_attributes", "risks", "open_questions", "decision_ids"],
+  "properties": {
+    "schema": {"const": "go-workflow.architecture-brief.v1"},
+    "kind": {"const": "architecture_brief"},
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "project": {"type": "string", "minLength": 1},
+    "title": {"type": "string", "minLength": 1},
+    "status": {"enum": ["draft", "accepted", "superseded", "archived"]},
+    "owner": {"type": "string", "minLength": 1},
+    "outcomes": {"$ref": "#/$defs/stringList"},
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["in", "out", "systems", "boundaries"],
+      "properties": {
+        "in": {"$ref": "#/$defs/stringList"},
+        "out": {"$ref": "#/$defs/stringList"},
+        "systems": {"$ref": "#/$defs/stringList"},
+        "boundaries": {"$ref": "#/$defs/stringList"}
+      }
+    },
+    "stakeholders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["role", "concerns", "decision_rights"],
+        "properties": {
+          "role": {"type": "string", "minLength": 1},
+          "concerns": {"$ref": "#/$defs/stringList"},
+          "decision_rights": {"$ref": "#/$defs/stringList"}
+        }
+      }
+    },
+    "constraints": {"$ref": "#/$defs/stringList"},
+    "quality_attributes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "scenario", "measure", "threshold"],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "scenario": {"type": "string", "minLength": 1},
+          "measure": {"type": "string", "minLength": 1},
+          "threshold": {}
+        }
+      }
+    },
+    "risks": {"$ref": "#/$defs/stringList"},
+    "open_questions": {"$ref": "#/$defs/stringList"},
+    "decision_ids": {"$ref": "#/$defs/stringList"}
+  },
+  "$defs": {
+    "stringList": {
+      "type": "array",
+      "items": {"type": "string", "minLength": 1}
+    }
+  }
+}

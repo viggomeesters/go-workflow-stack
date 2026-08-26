@@ -1,0 +1,66 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.architecture-event.v1",
+  "title": "Go Workflow Architecture Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "kind", "event", "created_at", "task_id", "scope_id", "actor", "data"],
+  "properties": {
+    "schema": {"const": "go-workflow.architecture-event.v1"},
+    "kind": {"const": "architecture_event"},
+    "event": {
+      "enum": [
+        "architecture.classified",
+        "architecture.reviewed",
+        "architecture.conformance.recorded",
+        "architecture.deviation.recorded",
+        "architecture.waiver.granted",
+        "architecture.waiver.expired",
+        "architecture.waiver.revoked"
+      ]
+    },
+    "created_at": {"type": "string", "format": "date-time"},
+    "task_id": {"type": "string", "minLength": 1},
+    "scope_id": {"type": "string", "minLength": 1},
+    "actor": {"type": "string", "minLength": 1},
+    "data": {"type": "object"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"event": {"const": "architecture.conformance.recorded"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["status", "principle_checks", "decision_checks", "quality_attribute_checks", "evidence_refs"],
+            "properties": {
+              "status": {"enum": ["passed", "passed_with_waiver", "deviation", "blocked"]},
+              "principle_checks": {"type": "array"},
+              "decision_checks": {"type": "array"},
+              "quality_attribute_checks": {"type": "array"},
+              "evidence_refs": {"type": "array", "items": {"type": "string", "minLength": 1}}
+            }
+          }
+        }
+      }
+    },
+    {
+      "if": {"properties": {"event": {"const": "architecture.waiver.granted"}}},
+      "then": {
+        "properties": {
+          "data": {
+            "type": "object",
+            "required": ["waiver_id", "status", "reason", "accepted_risk", "expires_at"],
+            "properties": {
+              "waiver_id": {"type": "string", "minLength": 1},
+              "status": {"const": "active"},
+              "reason": {"type": "string", "minLength": 1},
+              "accepted_risk": {"type": "string", "minLength": 1},
+              "expires_at": {"type": "string", "format": "date-time"}
+            }
+          }
+        }
+      }
+    }
+  ]
+}

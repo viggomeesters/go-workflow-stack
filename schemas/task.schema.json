@@ -29,6 +29,28 @@
         "agent"
       ]
     },
+    "architecture": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["impact"],
+      "properties": {
+        "impact": {"enum": ["none", "local", "material", "foundational"]},
+        "scope_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "concerns": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "decision_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+        "conformance_required": {"type": "boolean"},
+        "human_gate": {"enum": ["none", "decision", "risk_acceptance"]},
+        "classification": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["reason", "actor"],
+          "properties": {
+            "reason": {"type": "string", "minLength": 1},
+            "actor": {"type": "string", "minLength": 1}
+          }
+        }
+      }
+    },
     "id": {
       "type": "string",
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"

@@ -10,6 +10,9 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from go_workflow.architecture import (
+    architecture_claim_findings,
+    architecture_finish_findings,
+    effective_architecture_impact,
     validate_architecture_brief,
     validate_architecture_event,
     validate_task_architecture,
@@ -225,3 +228,82 @@ def test_execution_context_resolves_exact_old_decision_and_architecture_status(t
     assert readback["status"]["briefs"] == {"total": 1, "accepted": 1, "draft": 0}
     assert readback["status"]["open_deviations"] == 1
     assert readback["status"]["active_waivers"] == 1
+
+
+def test_architecture_gates_raise_hard_minimum_and_require_conformance_and_human_review(tmp_path: Path):
+    repo = tmp_path / "demo"
+    shutil.copytree(ROOT / "fixtures" / "minimal", repo)
+    root = repo / ".go"
+    project_id = json.loads((root / "project.json").read_text(encoding="utf-8"))["id"]
+
+    legacy_task = valid_task()
+    legacy_task["project"] = project_id
+    legacy_task["summary"] = "Legacy API migration task"
+    assert architecture_claim_findings(root, legacy_task) == []
+    assert architecture_finish_findings(root, legacy_task) == []
+
+    task = valid_task()
+    task["project"] = project_id
+    task["summary"] = "Add external integration and API contract"
+    task["architecture"] = {
+        "impact": "local",
+        "scope_refs": [],
+        "concerns": [],
+        "decision_ids": [],
+        "conformance_required": False,
+        "human_gate": "none",
+    }
+    effective, minimum, signals = effective_architecture_impact(task)
+    assert (effective, minimum) == ("material", "material")
+    assert "integration" in signals
+    assert any("must be raised" in finding for finding in architecture_claim_findings(root, task))
+
+    architecture = root / "architecture"
+    (architecture / "briefs").mkdir(parents=True)
+    brief = valid_brief()
+    brief["project"] = project_id
+    (architecture / "briefs" / "project-memory.json").write_text(json.dumps(brief) + "\n", encoding="utf-8")
+    (root / "decisions").mkdir(parents=True, exist_ok=True)
+    decision = {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-08-26T12:00:00+02:00",
+        "task_id": "architecture-test",
+        "agent": "human-architect",
+        "data": {
+            "decision_id": "canonical-project-state-v1",
+            "title": "Canonical state",
+            "status": "accepted",
+            "context": "test",
+            "decision": "Use canonical project state",
+            "consequences": [],
+        },
+    }
+    (root / "decisions" / "events.jsonl").write_text(json.dumps(decision) + "\n", encoding="utf-8")
+    task["architecture"] = {
+        "impact": "material",
+        "scope_refs": ["project-memory"],
+        "concerns": ["integration", "data"],
+        "decision_ids": ["canonical-project-state-v1"],
+        "conformance_required": True,
+        "human_gate": "decision",
+    }
+    assert architecture_claim_findings(root, task) == []
+    initial_finish = architecture_finish_findings(root, task)
+    assert any("conformance event required" in finding for finding in initial_finish)
+    assert any("human architecture approval" in finding for finding in initial_finish)
+
+    conformance = valid_event("architecture.conformance.recorded")
+    conformance["data"] = {
+        "status": "passed",
+        "principle_checks": [{"id": "json-first", "status": "passed"}],
+        "decision_checks": [{"id": "canonical-project-state-v1", "status": "passed"}],
+        "quality_attribute_checks": [{"id": "project-isolation", "status": "passed", "evidence": "pytest"}],
+        "evidence_refs": [".go/evidence/events.jsonl#proof"],
+    }
+    review = valid_event("architecture.reviewed")
+    review["actor"] = "viggo"
+    review["data"] = {"status": "approved", "human": True, "evidence_ref": "review:architecture-test"}
+    (architecture / "events.jsonl").write_text(json.dumps(conformance) + "\n" + json.dumps(review) + "\n", encoding="utf-8")
+    assert architecture_finish_findings(root, task) == []

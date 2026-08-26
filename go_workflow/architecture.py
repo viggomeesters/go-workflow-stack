@@ -314,3 +314,147 @@ def resolve_applicable_architecture(root: Path, task: dict[str, Any] | None = No
         "missing_scope_refs": [item for item in scope_refs if item not in briefs_by_id],
         "missing_decision_ids": [item for item in decision_ids if item not in decisions_by_id],
     }
+
+
+IMPACT_ORDER = {"none": 0, "local": 1, "material": 2, "foundational": 3}
+FOUNDATIONAL_SIGNALS = (
+    "source of truth", "trust boundary", "authentication", "authorization", "identity",
+    "data ownership", "public contract", "irreversible", "platform choice", "vendor lock-in",
+)
+MATERIAL_SIGNALS = (
+    "schema", "migration", "database", "api", "event contract", "integration", "security",
+    "privacy", "infrastructure", "deployment", "network", "retention",
+)
+MATERIAL_PATH_SIGNALS = ("migration", "schema", "infra", "auth", "api", "deploy", "terraform", "network")
+
+
+def deterministic_minimum_impact(task: dict[str, Any]) -> tuple[str, list[str]]:
+    text = " ".join([
+        str(task.get("summary") or ""),
+        str(task.get("description") or ""),
+        " ".join(str(item) for item in (task.get("acceptance") or [])),
+    ]).lower()
+    paths = " ".join(str(item) for item in ((task.get("scope") or {}).get("modify") or [])).lower()
+    foundational = sorted({signal for signal in FOUNDATIONAL_SIGNALS if signal in text})
+    if foundational:
+        return "foundational", foundational
+    material = sorted({signal for signal in MATERIAL_SIGNALS if signal in text})
+    material.extend(sorted({f"path:{signal}" for signal in MATERIAL_PATH_SIGNALS if signal in paths}))
+    if material:
+        return "material", list(dict.fromkeys(material))
+    return "none", []
+
+
+def effective_architecture_impact(task: dict[str, Any]) -> tuple[str, str, list[str]]:
+    metadata = task.get("architecture") if isinstance(task.get("architecture"), dict) else {}
+    explicit = str(metadata.get("impact") or "none")
+    minimum, signals = deterministic_minimum_impact(task)
+    effective = max((explicit, minimum), key=lambda item: IMPACT_ORDER.get(item, -1))
+    return effective, minimum, signals
+
+
+def _latest_architecture_events(root: Path, task_id: str) -> dict[str, dict[str, Any]]:
+    latest: dict[str, dict[str, Any]] = {}
+    for architecture_event in _jsonl(root / "architecture" / "events.jsonl"):
+        if architecture_event.get("task_id") != task_id:
+            continue
+        event_name = str(architecture_event.get("event") or "")
+        payload = architecture_event.get("data") if isinstance(architecture_event.get("data"), dict) else {}
+        scope_id = str(architecture_event.get("scope_id") or "project")
+        key = f"{event_name}:{scope_id}"
+        if event_name.startswith("architecture.waiver."):
+            key = f"waiver:{payload.get('waiver_id')}"
+        latest[key] = architecture_event
+    return latest
+
+
+def architecture_claim_findings(root: Path, task: dict[str, Any]) -> list[str]:
+    has_metadata = isinstance(task.get("architecture"), dict)
+    if not has_metadata and not (root / "architecture").exists():
+        return []
+    effective, minimum, signals = effective_architecture_impact(task)
+    if effective in {"none", "local"}:
+        return []
+    metadata = task.get("architecture") if isinstance(task.get("architecture"), dict) else {}
+    findings: list[str] = []
+    if IMPACT_ORDER.get(str(metadata.get("impact") or "none"), 0) < IMPACT_ORDER[minimum]:
+        findings.append(f"architecture impact must be raised to deterministic minimum {minimum}: {', '.join(signals)}")
+    applicable = resolve_applicable_architecture(root, task)
+    if not metadata.get("scope_refs"):
+        findings.append("material/foundational task requires architecture.scope_refs")
+    if applicable["missing_scope_refs"]:
+        findings.append("missing architecture briefs: " + ", ".join(applicable["missing_scope_refs"]))
+    draft_briefs = [str(brief.get("id")) for brief in applicable["briefs"] if brief.get("status") != "accepted"]
+    if draft_briefs:
+        findings.append("architecture briefs must be accepted before claim: " + ", ".join(draft_briefs))
+    if applicable["missing_decision_ids"]:
+        findings.append("missing architecture decisions: " + ", ".join(applicable["missing_decision_ids"]))
+    unresolved = [
+        str((event.get("data") or {}).get("decision_id"))
+        for event in applicable["decisions"]
+        if (event.get("data") or {}).get("status") != "accepted"
+    ]
+    if unresolved:
+        findings.append("architecture decisions must be accepted: " + ", ".join(unresolved))
+    if effective in {"material", "foundational"} and not applicable["quality_attributes"]:
+        findings.append("material/foundational task requires measurable quality attributes in an applicable brief")
+    return findings
+
+
+def architecture_finish_findings(root: Path, task: dict[str, Any]) -> list[str]:
+    has_metadata = isinstance(task.get("architecture"), dict)
+    if not has_metadata and not (root / "architecture").exists():
+        return []
+    findings = architecture_claim_findings(root, task)
+    metadata = task.get("architecture") if isinstance(task.get("architecture"), dict) else {}
+    effective, _minimum, _signals = effective_architecture_impact(task)
+    if effective in {"none", "local"}:
+        return findings
+    applicable = resolve_applicable_architecture(root, task)
+    latest = _latest_architecture_events(root, str(task.get("id") or ""))
+    scope_refs = [str(item) for item in metadata.get("scope_refs", [])]
+    expected_decisions = {str(item) for item in metadata.get("decision_ids", [])}
+    expected_quality_attributes = {str(item.get("id")) for item in applicable["quality_attributes"] if isinstance(item, dict)}
+    if metadata.get("conformance_required", True):
+        for scope_id in scope_refs:
+            conformance = latest.get(f"architecture.conformance.recorded:{scope_id}")
+            if not conformance:
+                findings.append(f"architecture conformance event required before finish for scope {scope_id}")
+                continue
+            payload = conformance.get("data") or {}
+            status = payload.get("status")
+            if status not in {"passed", "passed_with_waiver"}:
+                findings.append(f"architecture conformance is not passing for scope {scope_id}: {status}")
+            if not payload.get("evidence_refs"):
+                findings.append(f"architecture conformance requires evidence_refs for scope {scope_id}")
+            decision_checks = payload.get("decision_checks") or []
+            checked_decisions = {str(item.get("id")) for item in decision_checks if isinstance(item, dict) and item.get("status") in {"passed", "waived"}}
+            missing_decisions = sorted(expected_decisions - checked_decisions)
+            if missing_decisions:
+                findings.append(f"conformance missing passing decision checks for scope {scope_id}: " + ", ".join(missing_decisions))
+            quality_checks = payload.get("quality_attribute_checks") or []
+            checked_quality = {str(item.get("id")) for item in quality_checks if isinstance(item, dict) and item.get("status") in {"passed", "waived"}}
+            missing_quality = sorted(expected_quality_attributes - checked_quality)
+            if missing_quality:
+                findings.append(f"conformance missing passing quality-attribute checks for scope {scope_id}: " + ", ".join(missing_quality))
+            if status == "passed_with_waiver":
+                waiver_ids = payload.get("waiver_ids") or []
+                active_ids = {
+                    str((event.get("data") or {}).get("waiver_id"))
+                    for event in applicable["active_waivers"]
+                }
+                missing = [str(item) for item in waiver_ids if str(item) not in active_ids]
+                if not waiver_ids:
+                    findings.append(f"passed_with_waiver requires waiver_ids for scope {scope_id}")
+                elif missing:
+                    findings.append("conformance references inactive waivers: " + ", ".join(missing))
+    human_gate = str(metadata.get("human_gate") or "none")
+    if human_gate != "none" or effective == "foundational":
+        for scope_id in scope_refs:
+            review = latest.get(f"architecture.reviewed:{scope_id}")
+            payload = review.get("data") if review else {}
+            if not review or payload.get("status") != "approved" or payload.get("human") is not True:
+                findings.append(f"explicit human architecture approval required for scope {scope_id} and gate {human_gate if human_gate != 'none' else 'foundational'}")
+    if applicable["open_deviations"] and not applicable["active_waivers"]:
+        findings.append("open architecture deviations require repair or an active time-bounded waiver")
+    return findings

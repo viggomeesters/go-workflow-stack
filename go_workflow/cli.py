@@ -48,7 +48,11 @@ from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_her
 from go_workflow.runtime_identity import resolve_runtime_identity
 from go_workflow.architecture import (
     architecture_briefs,
+    architecture_claim_findings,
+    architecture_finish_findings,
     architecture_status as summarize_architecture,
+    deterministic_minimum_impact,
+    effective_architecture_impact,
     resolve_applicable_architecture,
     validate_architecture_state,
     validate_task_architecture,
@@ -1886,7 +1890,8 @@ def builtin_semantic_findings(repo: Path, task: dict[str, Any], checks: list[dic
     failed = [check for check in checks if check.get("returncode") != 0]
     if failed:
         findings.append(f"verification still failing: {failed[0].get('command')}")
-    return findings
+    findings.extend(architecture_finish_findings(go_root(repo), task))
+    return list(dict.fromkeys(findings))
 
 
 def repair_agent_available(agent: str) -> dict[str, Any]:
@@ -3727,6 +3732,9 @@ def cmd_claim(args: argparse.Namespace) -> int:
                 raise RepoLocalError(f"task is not open: {data.get('status')}")
             if data.get("claim", {}).get("agent"):
                 raise RepoLocalError(f"task already claimed by {data['claim']['agent']}")
+            architecture_findings = architecture_claim_findings(root, data)
+            if architecture_findings:
+                raise RepoLocalError("architecture preflight blocked claim:\n- " + "\n- ".join(architecture_findings))
             dirty = classify_dirty(repo, data.get("scope", {}).get("modify", []))
             if dirty["blocking"] and not args.allow_dirty:
                 raise RepoLocalError("blocking dirty state before claim:\n- " + "\n- ".join(dirty["blocking"]))
@@ -3759,6 +3767,9 @@ def cmd_finish(args: argparse.Namespace) -> int:
             outcome_findings = outcome_completion_findings(data)
             if outcome_findings:
                 raise RepoLocalError("finish blocked by incomplete requested outcomes:\n- " + "\n- ".join(outcome_findings))
+            architecture_findings = architecture_finish_findings(root, data)
+            if architecture_findings:
+                raise RepoLocalError("architecture conformance blocked finish:\n- " + "\n- ".join(architecture_findings))
             finish_evidence = build_finish_evidence(repo, data, args.agent, args.evidence)
             evidence_findings = finish_evidence_findings(data, finish_evidence)
             if evidence_findings:
@@ -4248,6 +4259,143 @@ def cmd_architecture_status(args: argparse.Namespace) -> int:
     return 0
 
 
+def architecture_lane_event(event_name: str, task_id: str, scope_id: str, actor: str, data: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "schema": "go-workflow.architecture-event.v1",
+        "kind": "architecture_event",
+        "event": event_name,
+        "created_at": now_iso(),
+        "task_id": task_id,
+        "scope_id": scope_id or "project",
+        "actor": actor,
+        "data": data,
+    }
+
+
+def cmd_architecture_classify(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    path, task = find_task(root, args.task_id)
+    if task.get("status") == "done" and args.write:
+        raise RepoLocalError("cannot reclassify a done task")
+    existing = task.get("architecture") if isinstance(task.get("architecture"), dict) else {}
+    requested = args.impact or str(existing.get("impact") or "none")
+    minimum, signals = deterministic_minimum_impact(task)
+    candidate = dict(existing)
+    candidate.update({
+        "impact": max((requested, minimum), key=lambda item: {"none": 0, "local": 1, "material": 2, "foundational": 3}[item]),
+        "scope_refs": args.scope_ref or existing.get("scope_refs", []),
+        "concerns": args.concern or existing.get("concerns", []),
+        "decision_ids": args.decision_id or existing.get("decision_ids", []),
+        "conformance_required": args.conformance_required or bool(existing.get("conformance_required", False)),
+        "human_gate": args.human_gate or str(existing.get("human_gate") or "none"),
+    })
+    if candidate["impact"] in {"material", "foundational"}:
+        candidate["conformance_required"] = True
+    if candidate["impact"] == "foundational" and candidate["human_gate"] == "none":
+        candidate["human_gate"] = "risk_acceptance"
+    payload = {
+        "schema": "go-workflow.architecture-classification.v1",
+        "task_id": task.get("id"),
+        "requested_impact": requested,
+        "deterministic_minimum": minimum,
+        "signals": signals,
+        "classification": candidate,
+        "written": bool(args.write),
+    }
+    if args.write:
+        task["architecture"] = candidate
+        errors = validate_task(task, relative(repo, path))
+        if errors:
+            raise RepoLocalError("classification produced an invalid task:\n- " + "\n- ".join(errors))
+        dump_json(path, task)
+        append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
+            "architecture.classified", str(task.get("id")), candidate["scope_refs"][0] if candidate["scope_refs"] else "project", args.actor,
+            {"status": "recorded", "requested_impact": requested, "minimum_impact": minimum, "effective_impact": candidate["impact"], "signals": signals},
+        ))
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else f"{task.get('id')}: {candidate['impact']} (minimum={minimum})")
+    return 0
+
+
+def parse_architecture_checks(values: list[str]) -> list[dict[str, str]]:
+    checks: list[dict[str, str]] = []
+    for value in values:
+        parts = value.split("=", 2)
+        checks.append({"id": parts[0], "status": parts[1] if len(parts) > 1 else "passed", "evidence": parts[2] if len(parts) > 2 else ""})
+    return checks
+
+
+def cmd_architecture_conformance(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    _path, task = find_task(root, args.task_id)
+    if args.status in {"passed", "passed_with_waiver"} and not args.evidence_ref:
+        raise RepoLocalError("passing conformance requires at least one --evidence-ref")
+    if args.status == "passed_with_waiver" and not args.waiver_id:
+        raise RepoLocalError("passed_with_waiver requires --waiver-id")
+    data = {
+        "status": args.status,
+        "principle_checks": parse_architecture_checks(args.principle_check),
+        "decision_checks": parse_architecture_checks(args.decision_check),
+        "quality_attribute_checks": parse_architecture_checks(args.quality_attribute_check),
+        "evidence_refs": args.evidence_ref,
+        "waiver_ids": args.waiver_id,
+    }
+    append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
+        "architecture.conformance.recorded", str(task.get("id")), args.scope_id, args.actor, data,
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("conformance event produced invalid state:\n- " + "\n- ".join(errors))
+    print(f"{task.get('id')}: conformance={args.status}")
+    return 0
+
+
+def cmd_architecture_review(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    _path, task = find_task(root, args.task_id)
+    if args.human and args.actor.strip().lower() in {"agent", "hermes", "codex", "architecture-critic", "template-check", "make-check"}:
+        raise RepoLocalError("--human approval requires a named human actor, not an automation identity")
+    data = {"status": args.status, "human": bool(args.human), "evidence_ref": args.evidence_ref}
+    append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
+        "architecture.reviewed", str(task.get("id")), args.scope_id, args.actor, data,
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("review event produced invalid state:\n- " + "\n- ".join(errors))
+    print(f"{task.get('id')}: review={args.status} human={bool(args.human)}")
+    return 0
+
+
+def cmd_architecture_waiver(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    root = go_root(repo)
+    _path, task = find_task(root, args.task_id)
+    try:
+        expiry = datetime.fromisoformat(args.expires_at.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise RepoLocalError("--expires-at must be an ISO datetime") from exc
+    if expiry.tzinfo is None or expiry <= datetime.now(timezone.utc):
+        raise RepoLocalError("--expires-at must be a future timezone-aware datetime")
+    data = {
+        "waiver_id": args.id,
+        "status": "active",
+        "reason": args.reason,
+        "accepted_risk": args.accepted_risk,
+        "expires_at": args.expires_at,
+        "deviation_ids": args.deviation_id,
+    }
+    append_jsonl(root / "architecture" / "events.jsonl", architecture_lane_event(
+        "architecture.waiver.granted", str(task.get("id")), args.scope_id, args.actor, data,
+    ))
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("waiver event produced invalid state:\n- " + "\n- ".join(errors))
+    print(f"{args.id}: active until {args.expires_at}")
+    return 0
+
+
 def route_repo(repo: Path) -> dict[str, Any]:
     repo = repo.resolve()
     root = go_root(repo)
@@ -4590,6 +4738,51 @@ def build_parser() -> argparse.ArgumentParser:
     architecture_status.add_argument("repo", nargs="?", default=".")
     architecture_status.add_argument("--json", action="store_true")
     architecture_status.set_defaults(func=cmd_architecture_status)
+    architecture_classify = architecture_sub.add_parser("classify", help="Calculate deterministic minimum impact and optionally write task metadata")
+    architecture_classify.add_argument("repo", nargs="?", default=".")
+    architecture_classify.add_argument("--task-id", required=True)
+    architecture_classify.add_argument("--impact", choices=["none", "local", "material", "foundational"])
+    architecture_classify.add_argument("--scope-ref", action="append", default=[])
+    architecture_classify.add_argument("--concern", action="append", default=[])
+    architecture_classify.add_argument("--decision-id", action="append", default=[])
+    architecture_classify.add_argument("--conformance-required", action="store_true")
+    architecture_classify.add_argument("--human-gate", choices=["none", "decision", "risk_acceptance"])
+    architecture_classify.add_argument("--actor", default="agent")
+    architecture_classify.add_argument("--write", action="store_true")
+    architecture_classify.add_argument("--json", action="store_true")
+    architecture_classify.set_defaults(func=cmd_architecture_classify)
+    architecture_conformance = architecture_sub.add_parser("conformance", help="Record task architecture conformance evidence")
+    architecture_conformance.add_argument("repo", nargs="?", default=".")
+    architecture_conformance.add_argument("--task-id", required=True)
+    architecture_conformance.add_argument("--scope-id", required=True)
+    architecture_conformance.add_argument("--status", choices=["passed", "passed_with_waiver", "deviation", "blocked"], required=True)
+    architecture_conformance.add_argument("--principle-check", action="append", default=[])
+    architecture_conformance.add_argument("--decision-check", action="append", default=[])
+    architecture_conformance.add_argument("--quality-attribute-check", action="append", default=[])
+    architecture_conformance.add_argument("--evidence-ref", action="append", default=[])
+    architecture_conformance.add_argument("--waiver-id", action="append", default=[])
+    architecture_conformance.add_argument("--actor", default="architecture-critic")
+    architecture_conformance.set_defaults(func=cmd_architecture_conformance)
+    architecture_review = architecture_sub.add_parser("review", help="Record an architecture review or explicit human approval")
+    architecture_review.add_argument("repo", nargs="?", default=".")
+    architecture_review.add_argument("--task-id", required=True)
+    architecture_review.add_argument("--scope-id", required=True)
+    architecture_review.add_argument("--status", choices=["approved", "rejected"], required=True)
+    architecture_review.add_argument("--human", action="store_true")
+    architecture_review.add_argument("--evidence-ref", required=True)
+    architecture_review.add_argument("--actor", required=True)
+    architecture_review.set_defaults(func=cmd_architecture_review)
+    architecture_waiver = architecture_sub.add_parser("waiver", help="Grant a reasoned, time-bounded architecture waiver")
+    architecture_waiver.add_argument("repo", nargs="?", default=".")
+    architecture_waiver.add_argument("--id", required=True)
+    architecture_waiver.add_argument("--task-id", required=True)
+    architecture_waiver.add_argument("--scope-id", required=True)
+    architecture_waiver.add_argument("--reason", required=True)
+    architecture_waiver.add_argument("--accepted-risk", required=True)
+    architecture_waiver.add_argument("--expires-at", required=True)
+    architecture_waiver.add_argument("--deviation-id", action="append", default=[])
+    architecture_waiver.add_argument("--actor", required=True)
+    architecture_waiver.set_defaults(func=cmd_architecture_waiver)
     migrate = sub.add_parser("migrate", help="Plan or explicitly apply versioned .go contract migrations")
     migrate.add_argument("repo", nargs="?", default=".")
     migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")

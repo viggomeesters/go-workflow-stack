@@ -1,0 +1,80 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "register-v0313-template-pairing",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Register and prove the v0.3.13 stack/template pairing",
+  "description": "After go-project-template is pinned and populated with the architecture starter contract, register the exact release/template pairing, run fresh-clone-style cross-repo proof, and push the scoped stack follow-up.",
+  "scope": {
+    "read": [
+      "**",
+      "/home/viggo/github/go-project-template/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "scripts/release-check-inner.sh",
+      "tests/**",
+      "docs/**",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "The stack recognizes the exact v0.3.13 template pairing rather than mutable main.",
+    "Template-check and a fresh copied-template validation exercise architecture readback and legacy compatibility.",
+    "All cross-repo checks pass and the pairing commit is pushed."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest -q",
+    "make check",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-26T16:50:24+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-26T16:55:50+02:00",
+      "task_id": "register-v0313-template-pairing",
+      "agent": "hermes",
+      "summary": "changed_files=scripts/release-check-inner.sh,tests/test_smoke.py; verification_command=targeted immutable pairing test && uv full 195 tests && make check && template-check ../go-project-template && git diff --check; verification_result=PASS: exact v0.3.13 mapping points to origin-reachable template commit ab89ae489fd88e464c052c076e4c6f48a06d5b2b, 195 tests and cross-repo first-auto gate passed; critic_outcome=PASS: prior immutable mappings remain unchanged, pairing uses full commit not mutable main, and template contract visibly exercises accepted architecture scope plus no-impact sample task.",
+      "changed_files": [
+        "scripts/release-check-inner.sh",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "targeted immutable pairing test && uv full 195 tests && make check && template-check ../go-project-template && git diff --check",
+        "result": "PASS: exact v0.3.13 mapping points to origin-reachable template commit ab89ae489fd88e464c052c076e4c6f48a06d5b2b, 195 tests and cross-repo first-auto gate passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS: prior immutable mappings remain unchanged, pairing uses full commit not mutable main, and template contract visibly exercises accepted architecture scope plus no-impact sample task.",
+        "skip_reason": null
+      }
+    }
+  ]
+}

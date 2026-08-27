@@ -1,0 +1,119 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "require-material-architecture-decisions",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Require governing decisions for material architecture work",
+  "description": "Close the gap where material or foundational tasks can pass claim and finish with accepted briefs and conformance but no governing accepted decision. Require at least one exact accepted decision reference while preserving none/local and legacy compatibility.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/architecture.py",
+      "tests/test_architecture.py",
+      "docs/architecture-lane.md",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      ".go/architecture/**",
+      ".go/decisions/events.jsonl",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Material and foundational tasks fail claim when their task plus applicable accepted briefs reference zero decisions.",
+    "A referenced missing, proposed, rejected or superseded decision continues to fail closed.",
+    "None/local tasks and legacy repositories without architecture metadata remain compatible.",
+    "Documentation explains that implementation may reuse an existing accepted governing decision; forced per-task ADR creation is not required."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest tests/test_architecture.py -q",
+    "uv run --no-project --with pytest --with jsonschema pytest -q",
+    "make check",
+    "python3 cli/go.py template-check ../go-project-template --json"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-27T08:47:55+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-27T08:56:58+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Approved after two observed RED failures, focused GREEN, 197-test regression, make/template gates, exact scoped conformance, and adversarial multi-scope repair.",
+      "transaction_id": "a2d931aaff2d4d43a32f731391643d03",
+      "delivery": {
+        "delivery_id": "architecture-lane-v1",
+        "html": ".go/deliveries/architecture-lane-v1/index.html",
+        "manifest": ".go/deliveries/architecture-lane-v1/manifest.json",
+        "source_sha256": "a6eff731238e36e952336fa00280465f1953811f1e5b1bd808e05a2ecf40bd71",
+        "html_sha256": "f7bb93bf67405917ae3d9461d9ff30dca945021516d72f94e87b79469b699457"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-27T08:56:58+02:00",
+      "task_id": "require-material-architecture-decisions",
+      "agent": "hermes",
+      "summary": "changed_files=.go/architecture/briefs/architecture-lane-governance.json,.go/architecture/events.jsonl,.go/decisions/events.jsonl,.go/hierarchy.json,.go/runs/events.jsonl,go_workflow/architecture.py,tests/test_architecture.py,docs/architecture-lane.md,skills/repo-local-agent-workflow/SKILL.md; verification_command=focused RED/GREEN architecture tests then uv pytest -q && make check && template-check ../go-project-template && git diff --check; verification_result=PASS: 7 architecture tests, 197 full tests, make check and template first_auto_execute all green; critic_outcome=PASS after adversarial repair: material work now requires an accepted governing decision and brief-owned decisions/quality attributes are checked only in their own scope.",
+      "changed_files": [
+        ".go/architecture/briefs/architecture-lane-governance.json",
+        ".go/architecture/events.jsonl",
+        ".go/decisions/events.jsonl",
+        ".go/hierarchy.json",
+        ".go/runs/events.jsonl",
+        "go_workflow/architecture.py",
+        "tests/test_architecture.py",
+        "docs/architecture-lane.md",
+        "skills/repo-local-agent-workflow/SKILL.md"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "focused RED/GREEN architecture tests then uv pytest -q && make check && template-check ../go-project-template && git diff --check",
+        "result": "PASS: 7 architecture tests, 197 full tests, make check and template first_auto_execute all green"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS after adversarial repair: material work now requires an accepted governing decision and brief-owned decisions/quality attributes are checked only in their own scope.",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "decision-traceability"
+    ],
+    "decision_ids": [
+      "material-work-requires-governing-decision-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

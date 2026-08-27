@@ -100,7 +100,7 @@ Canonical split:
 - `.go/architecture/events.jsonl` records classification, review, conformance, deviations, and time-bounded waivers;
 - `.go/evidence/events.jsonl` remains the verification proof stream.
 
-Run `architecture classify` before claim for consequential tasks. A deterministic minimum may raise impact but never lower a hard signal. Material tasks require accepted briefs/decisions and passing conformance for every scope; foundational tasks additionally require named human approval with evidence. Automation identities cannot claim human authority. Waivers require an actor, reason, accepted risk, and future timezone-aware expiry. Do not backfill historical architecture ceremony: activate incrementally at the next consequential change. Full operator commands and migration rules live in `docs/architecture-lane.md`.
+Run `architecture classify` before claim for consequential tasks. A deterministic minimum may raise impact but never lower a hard signal. Material and foundational tasks require at least one exact accepted governing decision resolved from the task or an applicable brief, plus passing conformance for every scope; reuse an existing accepted decision when it already governs the change instead of manufacturing a duplicate ADR. Foundational tasks additionally require named human approval with evidence. Automation identities cannot claim human authority. Waivers require an actor, reason, accepted risk, and future timezone-aware expiry. Do not backfill historical architecture ceremony: activate incrementally at the next consequential change. Full operator commands and migration rules live in `docs/architecture-lane.md`.
 
 ## Starting or retrofitting a project
 

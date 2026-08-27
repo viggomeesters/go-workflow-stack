@@ -78,7 +78,9 @@ Inspect the applicable contract:
 ./go architecture status . --json
 ```
 
-A material or foundational claim fails closed when an applicable brief is missing or unaccepted, referenced decisions are missing or unaccepted, or no measurable quality attribute exists.
+A material or foundational claim fails closed when an applicable brief is missing or unaccepted, when the combined task and applicable-brief references contain no governing decision, when a referenced decision is missing or unaccepted, or when no measurable quality attribute exists.
+
+The decision requirement is about traceability, not ADR volume. Reuse an existing accepted decision when it already governs the change. Create a new decision only when the task introduces or revises a real trade-off; do not manufacture duplicate decisions merely to satisfy the gate.
 
 Record conformance after implementation and verification:
 
@@ -92,7 +94,7 @@ Record conformance after implementation and verification:
   --evidence-ref '.go/evidence/events.jsonl#<proof>'
 ```
 
-Every referenced scope needs its own passing conformance event. Every referenced decision and quality attribute needs a passing or explicitly waived check.
+Every referenced scope needs its own passing conformance event. Task-level decision references apply across the task; decision IDs and quality attributes owned by a brief are checked only in that brief's scope. Each applicable item needs a passing or explicitly waived check, without cross-contaminating unrelated scopes.
 
 ## Human approval
 

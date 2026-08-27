@@ -307,3 +307,170 @@ def test_architecture_gates_raise_hard_minimum_and_require_conformance_and_human
     review["data"] = {"status": "approved", "human": True, "evidence_ref": "review:architecture-test"}
     (architecture / "events.jsonl").write_text(json.dumps(conformance) + "\n" + json.dumps(review) + "\n", encoding="utf-8")
     assert architecture_finish_findings(root, task) == []
+
+
+def test_material_tasks_require_an_accepted_governing_decision_but_may_reuse_one_from_a_brief(tmp_path: Path):
+    repo = tmp_path / "demo"
+    shutil.copytree(ROOT / "fixtures" / "minimal", repo)
+    root = repo / ".go"
+    project_id = json.loads((root / "project.json").read_text(encoding="utf-8"))["id"]
+    architecture = root / "architecture"
+    (architecture / "briefs").mkdir(parents=True)
+
+    brief = valid_brief()
+    brief["project"] = project_id
+    brief["decision_ids"] = []
+    brief_path = architecture / "briefs" / "project-memory.json"
+    brief_path.write_text(json.dumps(brief) + "\n", encoding="utf-8")
+
+    task = valid_task()
+    task["project"] = project_id
+    task["architecture"] = {
+        "impact": "material",
+        "scope_refs": ["project-memory"],
+        "concerns": ["data"],
+        "decision_ids": [],
+        "conformance_required": True,
+        "human_gate": "none",
+    }
+
+    findings = architecture_claim_findings(root, task)
+    assert any("requires at least one accepted governing architecture decision" in finding for finding in findings)
+
+    brief["decision_ids"] = ["canonical-project-state-v1"]
+    brief_path.write_text(json.dumps(brief) + "\n", encoding="utf-8")
+    findings = architecture_claim_findings(root, task)
+    assert any("missing architecture decisions: canonical-project-state-v1" in finding for finding in findings)
+
+    decision = {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-08-27T09:00:00+02:00",
+        "task_id": "architecture-test",
+        "agent": "human-architect",
+        "data": {
+            "decision_id": "canonical-project-state-v1",
+            "title": "Canonical project state",
+            "status": "proposed",
+            "context": "test",
+            "decision": "Use canonical project state",
+            "consequences": [],
+        },
+    }
+    (root / "decisions").mkdir(parents=True, exist_ok=True)
+    decision_path = root / "decisions" / "events.jsonl"
+    decision_path.write_text(json.dumps(decision) + "\n", encoding="utf-8")
+    findings = architecture_claim_findings(root, task)
+    assert any("architecture decisions must be accepted: canonical-project-state-v1" in finding for finding in findings)
+
+    decision["data"]["status"] = "accepted"
+    decision_path.write_text(json.dumps(decision) + "\n", encoding="utf-8")
+    assert architecture_claim_findings(root, task) == []
+
+    conformance = valid_event("architecture.conformance.recorded")
+    conformance["data"] = {
+        "status": "passed",
+        "principle_checks": [],
+        "decision_checks": [],
+        "quality_attribute_checks": [{"id": "project-isolation", "status": "passed", "evidence": "pytest"}],
+        "evidence_refs": [".go/evidence/events.jsonl#proof"],
+    }
+    (architecture / "events.jsonl").write_text(json.dumps(conformance) + "\n", encoding="utf-8")
+    findings = architecture_finish_findings(root, task)
+    assert any("conformance missing passing decision checks for scope project-memory: canonical-project-state-v1" in finding for finding in findings)
+
+    conformance["data"]["decision_checks"] = [{"id": "canonical-project-state-v1", "status": "passed"}]
+    (architecture / "events.jsonl").write_text(json.dumps(conformance) + "\n", encoding="utf-8")
+    assert architecture_finish_findings(root, task) == []
+
+    task["architecture"]["impact"] = "local"
+    task["architecture"]["scope_refs"] = []
+    task["architecture"]["decision_ids"] = []
+    assert architecture_claim_findings(root, task) == []
+
+
+def test_finish_conformance_checks_each_briefs_decisions_and_quality_attributes_in_its_own_scope(tmp_path: Path):
+    repo = tmp_path / "demo"
+    shutil.copytree(ROOT / "fixtures" / "minimal", repo)
+    root = repo / ".go"
+    project_id = json.loads((root / "project.json").read_text(encoding="utf-8"))["id"]
+    architecture = root / "architecture"
+    (architecture / "briefs").mkdir(parents=True)
+
+    memory_brief = valid_brief()
+    memory_brief["project"] = project_id
+    integration_brief = valid_brief()
+    integration_brief["project"] = project_id
+    integration_brief["id"] = "integration-boundary"
+    integration_brief["title"] = "Integration boundary"
+    integration_brief["decision_ids"] = ["integration-contract-v1"]
+    integration_brief["quality_attributes"] = [
+        {
+            "id": "integration-latency",
+            "scenario": "A dependency responds normally",
+            "measure": "p95 milliseconds",
+            "threshold": 500,
+        }
+    ]
+    (architecture / "briefs" / "project-memory.json").write_text(json.dumps(memory_brief) + "\n", encoding="utf-8")
+    (architecture / "briefs" / "integration-boundary.json").write_text(json.dumps(integration_brief) + "\n", encoding="utf-8")
+
+    decisions = []
+    for decision_id in ("canonical-project-state-v1", "integration-contract-v1"):
+        decisions.append({
+            "schema": "go-workflow.repo-local.event.v1",
+            "kind": "event",
+            "event": "decision.recorded",
+            "created_at": "2026-08-27T09:00:00+02:00",
+            "task_id": "architecture-test",
+            "agent": "human-architect",
+            "data": {
+                "decision_id": decision_id,
+                "title": decision_id,
+                "status": "accepted",
+                "context": "test",
+                "decision": "test",
+                "consequences": [],
+            },
+        })
+    (root / "decisions").mkdir(parents=True, exist_ok=True)
+    (root / "decisions" / "events.jsonl").write_text(
+        "".join(json.dumps(decision) + "\n" for decision in decisions), encoding="utf-8"
+    )
+
+    task = valid_task()
+    task["project"] = project_id
+    task["architecture"] = {
+        "impact": "material",
+        "scope_refs": ["project-memory", "integration-boundary"],
+        "concerns": ["data", "integration"],
+        "decision_ids": [],
+        "conformance_required": True,
+        "human_gate": "none",
+    }
+
+    memory_conformance = valid_event("architecture.conformance.recorded")
+    memory_conformance["data"] = {
+        "status": "passed",
+        "principle_checks": [],
+        "decision_checks": [{"id": "canonical-project-state-v1", "status": "passed"}],
+        "quality_attribute_checks": [{"id": "project-isolation", "status": "passed", "evidence": "pytest"}],
+        "evidence_refs": ["evidence:memory"],
+    }
+    integration_conformance = valid_event("architecture.conformance.recorded")
+    integration_conformance["scope_id"] = "integration-boundary"
+    integration_conformance["data"] = {
+        "status": "passed",
+        "principle_checks": [],
+        "decision_checks": [{"id": "integration-contract-v1", "status": "passed"}],
+        "quality_attribute_checks": [{"id": "integration-latency", "status": "passed", "evidence": "pytest"}],
+        "evidence_refs": ["evidence:integration"],
+    }
+    (architecture / "events.jsonl").write_text(
+        json.dumps(memory_conformance) + "\n" + json.dumps(integration_conformance) + "\n",
+        encoding="utf-8",
+    )
+
+    assert architecture_claim_findings(root, task) == []
+    assert architecture_finish_findings(root, task) == []

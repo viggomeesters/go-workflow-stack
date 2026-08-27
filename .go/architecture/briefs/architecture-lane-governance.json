@@ -1,0 +1,70 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "architecture-lane-governance",
+  "project": "go-workflow-stack",
+  "title": "Architecture lane governance contract",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Consequential work cannot complete without traceability to an accepted governing architecture decision."
+  ],
+  "scope": {
+    "in": [
+      "Architecture classification, claim preflight and finish conformance behavior"
+    ],
+    "out": [
+      "Mandating a newly authored ADR for every implementation task"
+    ],
+    "systems": [
+      "go-workflow architecture lane"
+    ],
+    "boundaries": [
+      "Task metadata, scoped briefs, decision ledger and architecture event stream"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "low ceremony",
+        "decision traceability",
+        "clear human authority"
+      ],
+      "decision_rights": [
+        "accept or revise governing architecture decisions and risks"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "deterministic preflight",
+        "exact relevant context",
+        "actionable failure messages"
+      ],
+      "decision_rights": [
+        "propose options and verify conformance without claiming human authority"
+      ]
+    }
+  ],
+  "constraints": [
+    "The existing .go/decisions/events.jsonl ledger remains the only decision source of truth.",
+    "Legacy repositories and none/local tasks remain backward compatible.",
+    "A task may reuse an existing accepted governing decision; the gate must not force duplicate ADRs."
+  ],
+  "quality_attributes": [
+    {
+      "id": "governing-decision-traceability",
+      "scenario": "A task is effectively classified as material or foundational and reaches claim or finish preflight.",
+      "measure": "Material or foundational tasks with zero exact accepted governing decision references",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "An overly literal gate could incentivize meaningless ADR creation instead of reuse of a real governing decision."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "material-work-requires-governing-decision-v1"
+  ]
+}

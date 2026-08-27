@@ -387,6 +387,17 @@ def architecture_claim_findings(root: Path, task: dict[str, Any]) -> list[str]:
     draft_briefs = [str(brief.get("id")) for brief in applicable["briefs"] if brief.get("status") != "accepted"]
     if draft_briefs:
         findings.append("architecture briefs must be accepted before claim: " + ", ".join(draft_briefs))
+    governing_decision_ids = {
+        str(item)
+        for item in metadata.get("decision_ids", [])
+    }
+    governing_decision_ids.update(
+        str(item)
+        for brief in applicable["briefs"]
+        for item in brief.get("decision_ids", [])
+    )
+    if not governing_decision_ids:
+        findings.append("material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief")
     if applicable["missing_decision_ids"]:
         findings.append("missing architecture decisions: " + ", ".join(applicable["missing_decision_ids"]))
     unresolved = [
@@ -413,10 +424,23 @@ def architecture_finish_findings(root: Path, task: dict[str, Any]) -> list[str]:
     applicable = resolve_applicable_architecture(root, task)
     latest = _latest_architecture_events(root, str(task.get("id") or ""))
     scope_refs = [str(item) for item in metadata.get("scope_refs", [])]
-    expected_decisions = {str(item) for item in metadata.get("decision_ids", [])}
-    expected_quality_attributes = {str(item.get("id")) for item in applicable["quality_attributes"] if isinstance(item, dict)}
+    task_decision_ids = {str(item) for item in metadata.get("decision_ids", [])}
+    briefs_by_scope = {
+        str(brief.get("id")): brief
+        for brief in applicable["briefs"]
+        if isinstance(brief, dict) and brief.get("id")
+    }
     if metadata.get("conformance_required", True):
         for scope_id in scope_refs:
+            scope_brief = briefs_by_scope.get(scope_id, {})
+            expected_decisions = task_decision_ids | {
+                str(item) for item in scope_brief.get("decision_ids", [])
+            }
+            expected_quality_attributes = {
+                str(item.get("id"))
+                for item in scope_brief.get("quality_attributes", [])
+                if isinstance(item, dict) and item.get("id")
+            }
             conformance = latest.get(f"architecture.conformance.recorded:{scope_id}")
             if not conformance:
                 findings.append(f"architecture conformance event required before finish for scope {scope_id}")

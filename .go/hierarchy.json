@@ -179,7 +179,8 @@
         "architecture-context-cli",
         "architecture-conformance-gates",
         "release-v0313-architecture-lane",
-        "register-v0313-template-pairing"
+        "register-v0313-template-pairing",
+        "require-material-architecture-decisions"
       ]
     }
   ]

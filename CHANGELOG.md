@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## 0.3.14 - 2026-08-27
+
+- Require every effectively material or foundational task to resolve at least one exact accepted governing decision from task metadata or an applicable brief.
+- Apply brief-owned decision and quality-attribute conformance checks only within the owning scope, preventing unrelated multi-scope cross-failures.
+- Keep legacy and none/local work compatible while documenting reuse of existing accepted decisions instead of manufacturing per-task ADRs.
+
 ## 0.3.13 - 2026-08-26
 
 - Add an opt-in, task-local architecture lane with strict brief and event contracts while keeping legacy repositories valid.

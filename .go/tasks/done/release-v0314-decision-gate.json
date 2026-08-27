@@ -1,0 +1,114 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "release-v0314-decision-gate",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Release v0.3.14 governing decision gate",
+  "description": "Package the already-shipped governing-decision and scoped-conformance hardening as the next immutable patch release, without adding new framework behavior.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "CHANGELOG.md",
+      "README.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "fixtures/minimal/.go/project.json",
+      "tests/test_smoke.py",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Release metadata and documentation identify version 0.3.14 as the immutable patch containing the accepted governing-decision gate.",
+    "No product behavior beyond commit f58182c is added in the release task.",
+    "Candidate and tagged release gates reconstruct the archive, package and template contract successfully."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest --with jsonschema pytest -q",
+    "make check",
+    "/usr/local/bin/go-workflow-release-check --repo \"/home/viggo/github/go-workflow-stack\" 0.3.14 --allow-candidate",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-27T13:30:38+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-27T14:01:13+02:00",
+      "agent": "architecture-critic",
+      "status": "approved",
+      "evidence": "Devil review verdict A on staged diff d22b438b4d6f6d2c36ef1c513fe2e6dd72e33f0797a38f1a57a9311194231b3b: version metadata consistent, lifecycle and conformance present, all changed paths in scope, and no runtime behavior beyond STACK_VERSION.",
+      "transaction_id": "f7a11a4ad7a34fe4b06ae0778daf1144"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-27T13:53:38+02:00",
+      "task_id": "release-v0314-decision-gate",
+      "agent": "hermes",
+      "summary": "changed_files=.go/project.json,.go/tasks,.go/architecture/events.jsonl,.go/runs/events.jsonl,.go/hierarchy.json,CHANGELOG.md,README.md,fixtures/minimal/.go/project.json,go_workflow/constants.py,pyproject.toml,tests/test_smoke.py; verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check && go-workflow-release-check --repo . 0.3.14 --allow-candidate && git diff --check; verification_result=PASS: 197 repo tests and 190 immutable candidate archive tests passed, make check and standalone uv tool distribution passed; critic_outcome=preliminary adversarial index review found claim clean and only the expected pre-finish conformance requirement, now recorded; no runtime behavior beyond the already-shipped governing-decision hardening",
+      "changed_files": [
+        ".go/project.json",
+        ".go/tasks",
+        ".go/architecture/events.jsonl",
+        ".go/runs/events.jsonl",
+        ".go/hierarchy.json",
+        "CHANGELOG.md",
+        "README.md",
+        "fixtures/minimal/.go/project.json",
+        "go_workflow/constants.py",
+        "pyproject.toml",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "uv run --no-project --with pytest --with jsonschema pytest -q && make check && go-workflow-release-check --repo . 0.3.14 --allow-candidate && git diff --check",
+        "result": "PASS: 197 repo tests and 190 immutable candidate archive tests passed, make check and standalone uv tool distribution passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "preliminary adversarial index review found claim clean and only the expected pre-finish conformance requirement, now recorded",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "release-contract"
+    ],
+    "decision_ids": [
+      "material-work-requires-governing-decision-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

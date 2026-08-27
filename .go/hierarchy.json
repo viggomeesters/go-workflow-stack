@@ -181,7 +181,8 @@
         "release-v0313-architecture-lane",
         "register-v0313-template-pairing",
         "require-material-architecture-decisions",
-        "release-v0314-decision-gate"
+        "release-v0314-decision-gate",
+        "pair-v0314-template-commit"
       ]
     }
   ]

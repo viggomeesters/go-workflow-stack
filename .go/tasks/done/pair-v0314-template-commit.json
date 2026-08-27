@@ -1,0 +1,113 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "pair-v0314-template-commit",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Pair v0.3.14 with immutable template commit",
+  "description": "Bind tagged go-workflow-stack v0.3.14 to the exact canonical go-project-template commit that adopts the governing-decision gate, while preserving historical pairings.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "scripts/release-check-inner.sh",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      ".go/**",
+      "scripts/release-check-inner.sh",
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "R-1: release-check-inner maps 0.3.14 canonical HTTPS validation to template commit 490dd50671dd740e5902ad17ed475258bb7c939b.",
+    "R-2: historical v0.3.13 pairing ab89ae489fd88e464c052c076e4c6f48a06d5b2b remains unchanged.",
+    "R-3: canonical origin validation for annotated v0.3.14 passes the immutable release, distribution and template checks.",
+    "R-4: release tag v0.3.14 remains anchored to release commit 2fb25c5b447e5c0622dca2d24f4f731adeb9f097."
+  ],
+  "verification": [
+    "/usr/local/bin/go-workflow-release-check --repo . 0.3.14 --validate-existing",
+    "uv run --no-project --with pytest --with jsonschema pytest -q tests/test_smoke.py -k immutable_canonical_template_pairing"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-08-27T14:17:41+02:00"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-08-27T14:22:02+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Approved after focused pairing regression, full pytest, make check, preserved historical mapping and candidate release gate reached only the expected not-yet-on-origin boundary.",
+      "transaction_id": "7170e00e55c84b3799e74fd3f875fd4c",
+      "delivery": {
+        "delivery_id": "architecture-lane-v2",
+        "html": ".go/deliveries/architecture-lane-v2/index.html",
+        "manifest": ".go/deliveries/architecture-lane-v2/manifest.json",
+        "source_sha256": "467008c53dfa605c8adb3130717d47d80d81805bf67abb37acd5f1fb09bc3e0c",
+        "html_sha256": "e72983c06094d49d50d8bbc886a13d433d204d746cf8852bb63dabba0cc68a81"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-08-27T14:22:02+02:00",
+      "task_id": "pair-v0314-template-commit",
+      "agent": "hermes",
+      "summary": "changed_files=scripts/release-check-inner.sh,tests/test_smoke.py,.go/decisions/events.jsonl,.go/architecture/events.jsonl,.go/hierarchy.json,.go/runs/events.jsonl,.go/tasks/done/pair-v0314-template-commit.json; verification_command=focused pairing test && full pytest && make check && post-push root validator canonical origin gate; verification_result=PASS focused pairing, full pytest and make check; candidate committed gate reached only expected HEAD-not-on-origin boundary; critic_outcome=PASS exact v0.3.14 pairing preserves v0.3.13 history and tag target.",
+      "changed_files": [
+        "scripts/release-check-inner.sh",
+        "tests/test_smoke.py",
+        ".go/decisions/events.jsonl",
+        ".go/architecture/events.jsonl",
+        ".go/hierarchy.json",
+        ".go/runs/events.jsonl",
+        ".go/tasks/done/pair-v0314-template-commit.json"
+      ],
+      "no_diff": false,
+      "verification": {
+        "command": "focused pairing test && full pytest && make check && post-push root validator canonical origin gate",
+        "result": "PASS focused pairing, full pytest and make check"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS exact v0.3.14 pairing preserves v0.3.13 history and tag target.",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "Immutable release-to-template provenance"
+    ],
+    "decision_ids": [
+      "pair-v0314-template-commit-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

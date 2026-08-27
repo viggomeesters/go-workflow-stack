@@ -1,0 +1,89 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "architecture-lane-v2",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "architecture-lane",
+    "title": "Conditional Architecture Lane"
+  },
+  "release": {
+    "version": 2,
+    "status": "released",
+    "created_at": "2026-08-27T14:22:02+02:00",
+    "supersedes": "architecture-lane-v1"
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "blocked"
+  },
+  "sections": {
+    "summary": "Task-local architecture impact, exact context, conformance, human gates, and portable template defaults without creating a parallel source of truth.",
+    "delivered_scope": [
+      "Materialize the cross-repo architecture lane implementation plan",
+      "Add backward-compatible architecture contract schemas and validation",
+      "Resolve applicable architecture and expose CLI/readback/status",
+      "Enforce conditional architecture classification and conformance gates",
+      "Document and release go-workflow-stack v0.3.13 architecture lane",
+      "Register and prove the v0.3.13 stack/template pairing",
+      "Require governing decisions for material architecture work",
+      "Release v0.3.14 governing decision gate",
+      "Pair v0.3.14 with immutable template commit"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Materialize the cross-repo architecture lane implementation plan",
+        "summary": "changed_files=.go/hierarchy.json,.go/tasks/open/architecture-contracts.json,.go/tasks/open/architecture-context-cli.json,.go/tasks/open/architecture-conformance-gates.json,.go/tasks/open/release-v0313-architecture-lane.json,.go/tasks/open/register-v0313-template-pairing.json,/home/viggo/github/go-project-template/.go/tasks/open/adopt-v0313-architecture-lane.json; verification_command=python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py validate . && python3 /home/viggo/.cache/go-workflow-stack/v0.3.12/cli/go.py status . --json && /home/viggo/github/go-project-template/go validate /home/viggo/github/go-project-template; verification_result=PASS: both repo-local contracts validate and six implementation tasks are materialized in their owning repositories; reviewer/critic outcome=PASS: tasks are bounded by contracts, context/CLI, conformance gates, release, template adoption, and exact pairing; release precedes template pin and pairing follows template push."
+      },
+      {
+        "label": "Add backward-compatible architecture contract schemas and validation",
+        "summary": "changed_files=go_workflow/architecture.py,go_workflow/cli.py,schemas/task.schema.json,schemas/architecture-brief.schema.json,schemas/architecture-event.schema.json,tests/test_architecture.py; verification_command=uv run --no-project --with pytest --with jsonschema pytest tests/test_architecture.py -q && make check; verification_result=PASS: 3 architecture contract tests and canonical make check passed; critic_outcome=PASS after correcting waiver lifecycle so historical grants remain valid when an explicit expired/revoked event closes the waiver; legacy repositories without .go/architecture remain valid; ownership ledger records Codex unavailable and Hermes takeover."
+      },
+      {
+        "label": "Resolve applicable architecture and expose CLI/readback/status",
+        "summary": "changed_files=go_workflow/architecture.py,go_workflow/cli.py,tests/test_architecture.py; verification_command=uv run --no-project --with pytest --with jsonschema pytest tests/test_architecture.py -q && python3 cli/go.py architecture validate fixtures/minimal --json && python3 cli/go.py architecture status fixtures/minimal --json && python3 cli/go.py architecture readback fixtures/minimal --json && make check; verification_result=PASS: 4 focused tests, all three CLI commands, exact old-decision resolution, and canonical make check passed; critic_outcome=PASS: exact decision references are resolved independently of the last-10 window, missing references remain visible, legacy repositories report an empty disabled lane, and no duplicate decision source was introduced."
+      },
+      {
+        "label": "Enforce conditional architecture classification and conformance gates",
+        "summary": "changed_files=go_workflow/architecture.py,go_workflow/cli.py,tests/test_architecture.py; verification_command=uv run --no-project --with pytest --with jsonschema pytest tests/test_architecture.py -q && python3 /tmp/architecture_gate_smoke.py && make check; verification_result=PASS: 5 focused tests, full runtime smoke and canonical make check passed; critic_outcome=PASS after adversarial repairs: legacy repos stay opt-in, deterministic triggers cannot be lowered, each architecture scope requires its own conformance and human review, decision and quality checks must pass, and automation identities cannot self-declare human approval."
+      },
+      {
+        "label": "Document and release go-workflow-stack v0.3.13 architecture lane",
+        "summary": "changed_files=README.md,CHANGELOG.md,docs/architecture-lane.md,docs/practical-architecture.md,skills/repo-local-agent-workflow/SKILL.md,pyproject.toml,go_workflow/constants.py,go_workflow/cli.py,fixtures/minimal/.go/project.json,tests/test_smoke.py,tests/test_architecture.py,.go/project.json; verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check && python3 cli/go.py template-check ../go-project-template --json && /usr/local/bin/go-workflow-release-check --repo \"/home/viggo/github/go-workflow-stack\" 0.3.13 --allow-candidate && git diff --check; verification_result=PASS: 195 full tests, canonical make check, template-check, 190-test isolated Linux/distribution candidate gate and runtime architecture lifecycle smoke all passed; critic_outcome=PASS: architecture lane stays opt-in for legacy repos, exact decision context is deterministic, each scope requires conformance, named-human gates reject automation identities, deviations remain visible, and waivers are grantable plus append-only closable."
+      },
+      {
+        "label": "Register and prove the v0.3.13 stack/template pairing",
+        "summary": "changed_files=scripts/release-check-inner.sh,tests/test_smoke.py; verification_command=targeted immutable pairing test && uv full 195 tests && make check && template-check ../go-project-template && git diff --check; verification_result=PASS: exact v0.3.13 mapping points to origin-reachable template commit ab89ae489fd88e464c052c076e4c6f48a06d5b2b, 195 tests and cross-repo first-auto gate passed; critic_outcome=PASS: prior immutable mappings remain unchanged, pairing uses full commit not mutable main, and template contract visibly exercises accepted architecture scope plus no-impact sample task."
+      },
+      {
+        "label": "Require governing decisions for material architecture work",
+        "summary": "changed_files=.go/architecture/briefs/architecture-lane-governance.json,.go/architecture/events.jsonl,.go/decisions/events.jsonl,.go/hierarchy.json,.go/runs/events.jsonl,go_workflow/architecture.py,tests/test_architecture.py,docs/architecture-lane.md,skills/repo-local-agent-workflow/SKILL.md; verification_command=focused RED/GREEN architecture tests then uv pytest -q && make check && template-check ../go-project-template && git diff --check; verification_result=PASS: 7 architecture tests, 197 full tests, make check and template first_auto_execute all green; critic_outcome=PASS after adversarial repair: material work now requires an accepted governing decision and brief-owned decisions/quality attributes are checked only in their own scope."
+      },
+      {
+        "label": "Release v0.3.14 governing decision gate",
+        "summary": "changed_files=.go/project.json,.go/tasks,.go/architecture/events.jsonl,.go/runs/events.jsonl,.go/hierarchy.json,CHANGELOG.md,README.md,fixtures/minimal/.go/project.json,go_workflow/constants.py,pyproject.toml,tests/test_smoke.py; verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check && go-workflow-release-check --repo . 0.3.14 --allow-candidate && git diff --check; verification_result=PASS: 197 repo tests and 190 immutable candidate archive tests passed, make check and standalone uv tool distribution passed; critic_outcome=preliminary adversarial index review found claim clean and only the expected pre-finish conformance requirement, now recorded; no runtime behavior beyond the already-shipped governing-decision hardening"
+      },
+      {
+        "label": "Pair v0.3.14 with immutable template commit",
+        "summary": "changed_files=scripts/release-check-inner.sh,tests/test_smoke.py,.go/decisions/events.jsonl,.go/architecture/events.jsonl,.go/hierarchy.json,.go/runs/events.jsonl,.go/tasks/done/pair-v0314-template-commit.json; verification_command=focused pairing test && full pytest && make check && post-push root validator canonical origin gate; verification_result=PASS focused pairing, full pytest and make check; candidate committed gate reached only expected HEAD-not-on-origin boundary; critic_outcome=PASS exact v0.3.14 pairing preserves v0.3.13 history and tag target."
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Review deze levering met de opdrachtgever."
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "467008c53dfa605c8adb3130717d47d80d81805bf67abb37acd5f1fb09bc3e0c",
+    "html_sha256": "e72983c06094d49d50d8bbc886a13d433d204d746cf8852bb63dabba0cc68a81"
+  }
+}

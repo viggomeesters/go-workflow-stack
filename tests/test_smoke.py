@@ -1559,6 +1559,141 @@ def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
     assert status.stdout.strip() == ""
 
 
+def test_go_loop_push_records_commit_target_and_remote_readback_in_done_evidence(tmp_path: Path):
+    repo = tmp_path / "push-provenance-project"
+    remote = tmp_path / "origin.git"
+    subprocess.run(["git", "init", "--bare", "-q", str(remote)], check=True)
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    adopt = run_go("adopt", str(repo), "--project-id", "push-provenance", "--name", "Push Provenance")
+    assert adopt.returncode == 0, adopt.stderr + adopt.stdout
+    task = run_go(
+        "task", "create", str(repo), "--id", "ship-with-proof", "--summary", "Ship with proof",
+        "--epic", "workflow", "--modify", "shipped.txt", "--acceptance", "Push is read back from origin",
+        "--verification", "test -f shipped.txt",
+    )
+    assert task.returncode == 0, task.stderr + task.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed push provenance", "-q",
+    ], cwd=repo, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(remote)], cwd=repo, check=True)
+    subprocess.run(["git", "push", "-q", "-u", "origin", "main"], cwd=repo, check=True)
+
+    executed = run_go(
+        "go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest",
+        "--build-command", "printf delivered > shipped.txt", "--ship-policy", "push", "--allow-push", "--json",
+    )
+
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    result = json.loads(executed.stdout)
+    task_ship = next(item for item in result["ship"] if item["task_id"] == "ship-with-proof")
+    assert task_ship["status"] == "pushed"
+    assert task_ship["commit_sha"]
+    assert task_ship["push_target"] == "origin/main"
+    assert task_ship["remote_sha"] == task_ship["commit_sha"]
+    assert task_ship["readback_verified"] is True
+    done = json.loads((repo / ".go" / "tasks" / "done" / "ship-with-proof.json").read_text(encoding="utf-8"))
+    recorded_ship = done["evidence"][-1]["ship"]
+    assert recorded_ship["commit_sha"] == task_ship["commit_sha"]
+    assert recorded_ship["push_target"] == "origin/main"
+    assert recorded_ship["remote_sha"] == task_ship["commit_sha"]
+    assert recorded_ship["readback_verified"] is True
+    local_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, text=True, capture_output=True, check=True).stdout.strip()
+    remote_head = subprocess.run(
+        ["git", "--git-dir", str(remote), "rev-parse", "refs/heads/main"],
+        text=True, capture_output=True, check=True,
+    ).stdout.strip()
+    assert remote_head == local_head
+
+
+def test_push_readback_fails_closed_when_remote_ref_does_not_match_commit(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "push-readback-mismatch-project"
+    remote = tmp_path / "origin.git"
+    subprocess.run(["git", "init", "--bare", "-q", str(remote)], check=True)
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    (repo / "proof.txt").write_text("baseline\n", encoding="utf-8")
+    subprocess.run(["git", "add", "proof.txt"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "baseline", "-q",
+    ], cwd=repo, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(remote)], cwd=repo, check=True)
+    subprocess.run(["git", "push", "-q", "-u", "origin", "main"], cwd=repo, check=True)
+    old_remote_sha = subprocess.run(
+        ["git", "--git-dir", str(remote), "rev-parse", "refs/heads/main"],
+        text=True, capture_output=True, check=True,
+    ).stdout.strip()
+    hook = remote / "hooks" / "post-receive"
+    hook.write_text(
+        "#!/bin/sh\n"
+        "while read old new ref; do\n"
+        "  git update-ref \"$ref\" \"$old\" \"$new\"\n"
+        "done\n",
+        encoding="utf-8",
+    )
+    hook.chmod(0o755)
+    (repo / "proof.txt").write_text("changed\n", encoding="utf-8")
+
+    result = cli.ship_changes(
+        repo,
+        "push",
+        True,
+        "ship mismatch",
+        {"scope": {"modify": ["proof.txt"]}},
+    )
+
+    assert result["status"] == "readback_failed"
+    assert result["commit_sha"] != old_remote_sha
+    assert result["push_target"] == "origin/main"
+    assert result["remote_sha"] == old_remote_sha
+    assert result["readback_verified"] is False
+
+
+def test_push_readback_uses_configured_push_remote_not_upstream(tmp_path: Path):
+    import go_workflow.cli as cli
+
+    repo = tmp_path / "push-remote-project"
+    upstream = tmp_path / "upstream.git"
+    delivery = tmp_path / "delivery.git"
+    subprocess.run(["git", "init", "--bare", "-q", str(upstream)], check=True)
+    subprocess.run(["git", "init", "--bare", "-q", str(delivery)], check=True)
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    (repo / "proof.txt").write_text("baseline\n", encoding="utf-8")
+    subprocess.run(["git", "add", "proof.txt"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "baseline", "-q",
+    ], cwd=repo, check=True)
+    subprocess.run(["git", "remote", "add", "origin", str(upstream)], cwd=repo, check=True)
+    subprocess.run(["git", "remote", "add", "delivery", str(delivery)], cwd=repo, check=True)
+    subprocess.run(["git", "push", "-q", "-u", "origin", "main"], cwd=repo, check=True)
+    subprocess.run(["git", "config", "remote.pushDefault", "delivery"], cwd=repo, check=True)
+    (repo / "proof.txt").write_text("delivered\n", encoding="utf-8")
+
+    result = cli.ship_changes(
+        repo,
+        "push",
+        True,
+        "ship to push remote",
+        {"scope": {"modify": ["proof.txt"]}},
+    )
+
+    assert result["status"] == "pushed"
+    assert result["push_target"] == "delivery/main"
+    assert result["remote_sha"] == result["commit_sha"]
+    assert result["readback_verified"] is True
+    upstream_head = subprocess.run(
+        ["git", "--git-dir", str(upstream), "rev-parse", "refs/heads/main"],
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    assert upstream_head != result["commit_sha"]
+
+
 def test_blocked_ship_keeps_verified_task_active(tmp_path: Path):
     repo = tmp_path / "blocked-ship-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -1775,7 +1910,170 @@ def test_no_diff_rejects_substantive_go_contract_changes(tmp_path: Path):
     project_path.write_text('{"required_stack_version":"9.9.9"}\n', encoding="utf-8")
 
     with pytest.raises(cli.RepoLocalError, match=".go/project.json"):
-        cli.finish_changed_files(repo, {"no_diff": "true"})
+        cli.finish_changed_files(repo, {"claim": {"base_commit": cli.claim_base_commit(repo)}}, {"no_diff": "true"})
+
+
+def test_no_diff_rejects_clean_committed_product_changes_since_claim(tmp_path: Path):
+    repo = tmp_path / "committed-since-claim-project"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "claim-base", "--name", "Claim Base")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "claim-base-proof", "--summary", "Claim base proof",
+        "--epic", "workflow", "--modify", "proof.txt", "--acceptance", "no_diff sees committed work",
+        "--verification", "test -f proof.txt",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed claim base", "-q",
+    ], cwd=repo, check=True)
+    claim_base = subprocess.run(["git", "rev-parse", "HEAD"], cwd=repo, text=True, capture_output=True, check=True).stdout.strip()
+    claimed = run_go("claim", "claim-base-proof", "--repo", str(repo), "--agent", "pytest")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    active = json.loads((repo / ".go" / "tasks" / "active" / "claim-base-proof.json").read_text(encoding="utf-8"))
+    assert active["claim"]["base_commit"] == claim_base
+    claimed_event = json.loads((repo / ".go" / "runs" / "events.jsonl").read_text(encoding="utf-8").splitlines()[-1])
+    assert claimed_event["event"] == "task.claimed"
+    assert claimed_event["data"]["base_commit"] == claim_base
+    (repo / "proof.txt").write_text("committed after claim\n", encoding="utf-8")
+    subprocess.run(["git", "add", "proof.txt"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "product change after claim", "-q",
+    ], cwd=repo, check=True)
+
+    finished = run_go(
+        "finish", "claim-base-proof", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=test -f proof.txt rc=0; critic=passed",
+    )
+
+    assert finished.returncode == 1
+    assert "no_diff=true contradicts committed changes since claim: proof.txt" in finished.stderr
+    assert (repo / ".go" / "tasks" / "active" / "claim-base-proof.json").is_file()
+
+
+def test_no_diff_fails_closed_when_claim_base_provenance_is_missing(tmp_path: Path):
+    repo = tmp_path / "missing-claim-base-project"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "missing-base", "--name", "Missing Base")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "missing-base-proof", "--summary", "Missing base proof",
+        "--epic", "workflow", "--acceptance", "no_diff requires provenance", "--verification", "true",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed missing base", "-q",
+    ], cwd=repo, check=True)
+    claimed = run_go("claim", "missing-base-proof", "--repo", str(repo), "--agent", "pytest")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+    active_path = repo / ".go" / "tasks" / "active" / "missing-base-proof.json"
+    active = json.loads(active_path.read_text(encoding="utf-8"))
+    del active["claim"]["base_commit"]
+    active_path.write_text(json.dumps(active, indent=2) + "\n", encoding="utf-8")
+
+    finished = run_go(
+        "finish", "missing-base-proof", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=true rc=0; critic=passed",
+    )
+
+    assert finished.returncode == 1
+    assert "no_diff=true requires claim.base_commit provenance" in finished.stderr
+
+
+def test_no_diff_fails_closed_when_task_claim_base_disagrees_with_claim_event(tmp_path: Path):
+    repo = tmp_path / "claim-event-mismatch-project"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "claim-mismatch", "--name", "Claim Mismatch")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "claim-event-mismatch", "--summary", "Claim event mismatch",
+        "--epic", "workflow", "--acceptance", "claim provenance must agree", "--verification", "true",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed claim mismatch", "-q",
+    ], cwd=repo, check=True)
+    claimed = run_go("claim", "claim-event-mismatch", "--repo", str(repo), "--agent", "pytest")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+
+    active_path = repo / ".go" / "tasks" / "active" / "claim-event-mismatch.json"
+    active = json.loads(active_path.read_text(encoding="utf-8"))
+    forged = subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit-tree", "HEAD^{tree}"],
+        cwd=repo,
+        text=True,
+        input="forged claim\n",
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    active["claim"]["base_commit"] = forged
+    active_path.write_text(json.dumps(active, indent=2) + "\n", encoding="utf-8")
+
+    finished = run_go(
+        "finish", "claim-event-mismatch", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=true rc=0; critic=passed",
+    )
+
+    assert finished.returncode == 1
+    assert "does not match task.claimed event" in finished.stderr
+
+
+def test_no_diff_fails_closed_when_claim_base_is_not_an_ancestor(tmp_path: Path):
+    repo = tmp_path / "nonancestor-base-project"
+    subprocess.run(["git", "init", "-q", "-b", "main", str(repo)], check=True)
+    adopted = run_go("adopt", str(repo), "--project-id", "nonancestor", "--name", "Nonancestor")
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "nonancestor-base", "--summary", "Nonancestor base",
+        "--epic", "workflow", "--acceptance", "claim base must precede HEAD", "--verification", "true",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run([
+        "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
+        "commit", "-m", "seed nonancestor", "-q",
+    ], cwd=repo, check=True)
+    claimed = run_go("claim", "nonancestor-base", "--repo", str(repo), "--agent", "pytest")
+    assert claimed.returncode == 0, claimed.stderr + claimed.stdout
+
+    unrelated = subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit-tree", "HEAD^{tree}"],
+        cwd=repo,
+        text=True,
+        input="unrelated root\n",
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    active_path = repo / ".go" / "tasks" / "active" / "nonancestor-base.json"
+    active = json.loads(active_path.read_text(encoding="utf-8"))
+    active["claim"]["base_commit"] = unrelated
+    active_path.write_text(json.dumps(active, indent=2) + "\n", encoding="utf-8")
+
+    events_path = repo / ".go" / "runs" / "events.jsonl"
+    events = [json.loads(line) for line in events_path.read_text(encoding="utf-8").splitlines() if line]
+    for event in reversed(events):
+        if event.get("event") == "task.claimed" and event.get("task_id") == "nonancestor-base":
+            event.setdefault("data", {})["base_commit"] = unrelated
+            break
+    events_path.write_text(
+        "".join(json.dumps(event, separators=(",", ":")) + "\n" for event in events),
+        encoding="utf-8",
+    )
+
+    finished = run_go(
+        "finish", "nonancestor-base", "--repo", str(repo), "--agent", "pytest",
+        "--evidence", "no_diff=true; verification=true rc=0; critic=passed",
+    )
+
+    assert finished.returncode == 1
+    assert "ancestor of HEAD" in finished.stderr
 
 
 def test_agent_check_reports_real_adapter_availability():

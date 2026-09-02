@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- Record the exact Git claim base and identity in task state plus its matching
+  claim event; `no_diff=true` compares dirty and committed claim-to-HEAD changes,
+  requires task/event agreement, and rejects unavailable or non-ancestor bases.
+- Bind autonomous ship evidence to the task-delivery commit and an explicit
+  same-name branch target resolved from Git's push-remote precedence,
+  independent `git ls-remote` readback, and exact remote SHA; mismatches fail
+  closed instead of reporting a successful push.
+
 ## 0.3.14 - 2026-08-27
 
 - Require every effectively material or foundational task to resolve at least one exact accepted governing decision from task metadata or an applicable brief.

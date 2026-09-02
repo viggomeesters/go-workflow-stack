@@ -1,0 +1,161 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "make-completed-task-evidence-audit-tight-bind-a",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+  "description": "Created from bare go intent:\n\nMake completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+  "scope": {
+    "read": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "Makefile"
+    ],
+    "modify": [
+      ".go/**",
+      "README.md",
+      "docs/**",
+      "tests/**",
+      "go_workflow/**",
+      "scripts/**",
+      "cli/**",
+      "schemas/**",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "Makefile"
+    ]
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+    "sha256": "0bf497553029d9d79f5cfa8ae23e5fd82d14be880da4df4c644732b9e076514f",
+    "source_ref": "telegram:8340627826:73555"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+      "source": "intent",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-02T22:58:11+02:00",
+          "agent": "hermes",
+          "summary": "Claim base is event-bound and ancestor-checked; no_diff covers committed claim-to-HEAD paths; ship records exact commit, explicit remote/ref, ls-remote SHA, and readback_verified; 204 tests and make check pass; independent exact-index critic A."
+        }
+      ]
+    }
+  ],
+  "decomposition_policy": {
+    "mode": "semantic",
+    "default": "bundle_when_coherent",
+    "split_when": [
+      "outcomes_can_ship_independently",
+      "outcomes_require_different_verification",
+      "outcomes_touch_distinct_components_or_repositories",
+      "combined_scope_is_too_large_for_one_safe_claim"
+    ],
+    "rule": "List numbering is acceptance coverage, not an automatic task boundary."
+  },
+  "acceptance": [
+    "R1: Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+    "All requested outcomes are verified or explicitly blocked with evidence."
+  ],
+  "verification": [
+    "uv run --no-project --with pytest pytest -q",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-02T22:22:22+02:00",
+    "base_commit": "cbc0a328516ff31d4b3010de9900b8feb7f5e4eb"
+  },
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-02T22:58:32+02:00",
+      "task_id": "make-completed-task-evidence-audit-tight-bind-a",
+      "agent": "hermes",
+      "summary": "verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check; verification_result=204 passed and make check passed; changed_files=go_workflow/cli.py, tests/test_smoke.py, docs/architecture.md, CHANGELOG.md; test_coverage=missing base, forged task/event base, nonancestor equal-tree base, committed post-claim diff, remote mismatch, pushRemote precedence, exact push/readback provenance; reviewer=independent exact-index staged critic; critic=passed verdict A on 7e7e1bca70a65230720281e49a2dd02cf6cfa41de83401e288b9549d7b2adab2; architecture_conformance=passed architecture-lane-governance; requested_outcomes=R1 verified; no_diff=false",
+      "changed_files": [
+        "go_workflow/cli.py",
+        "tests/test_smoke.py",
+        "docs/architecture.md",
+        "CHANGELOG.md"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "cbc0a328516ff31d4b3010de9900b8feb7f5e4eb",
+        "observed_head_commit": "cbc0a328516ff31d4b3010de9900b8feb7f5e4eb"
+      },
+      "verification": {
+        "command": "uv run --no-project --with pytest --with jsonschema pytest -q && make check",
+        "result": "204 passed and make check passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed verdict A on 7e7e1bca70a65230720281e49a2dd02cf6cfa41de83401e288b9549d7b2adab2",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "Finish and ship provenance contract"
+    ],
+    "decision_ids": [
+      "material-work-requires-governing-decision-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-02T22:58:33+02:00",
+      "agent": "independent-critic",
+      "status": "approved",
+      "evidence": "Verdict A on exact staged hash 7e7e1bca70a65230720281e49a2dd02cf6cfa41de83401e288b9549d7b2adab2; nonancestor equal-tree, forged task/event base, duplicate claim identity, and pushRemote precedence probes passed; hash re-pinned unchanged.",
+      "transaction_id": "95c4639080104f02a85f809b841f312c",
+      "delivery": {
+        "delivery_id": "autonomous-go-runtime-v1",
+        "html": ".go/deliveries/autonomous-go-runtime-v1/index.html",
+        "manifest": ".go/deliveries/autonomous-go-runtime-v1/manifest.json",
+        "source_sha256": "ab658627456b9a9b668fad89bb77fa792ee5304527cc60982f6ff9b7c0cd44de",
+        "html_sha256": "c43017bce69ee1dec6f668f748dc66d1a47d42b3c8ff54e183236c3e3655e44d"
+      }
+    }
+  ]
+}

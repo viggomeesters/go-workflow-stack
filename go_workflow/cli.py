@@ -714,26 +714,132 @@ def split_evidence_list(value: str) -> list[str]:
     return [item.strip() for item in re.split(r"[,|]", value) if item.strip()]
 
 
-def finish_changed_files(repo: Path, fields: dict[str, str]) -> tuple[list[str], bool]:
+EMPTY_GIT_TREE_SHA = "4b825dc642cb6eb9a060e54bf8d69288fbee4904"
+
+
+def git_head_commit(repo: Path) -> str | None:
+    result = subprocess.run(["git", "rev-parse", "--verify", "HEAD"], cwd=repo, text=True, capture_output=True, check=False)
+    value = result.stdout.strip()
+    return value if result.returncode == 0 and re.fullmatch(r"[0-9a-f]{40}", value) else None
+
+
+def claim_base_commit(repo: Path) -> str:
+    return git_head_commit(repo) or EMPTY_GIT_TREE_SHA
+
+
+def lifecycle_only_path(path: str) -> bool:
+    lifecycle_prefixes = (
+        ".go/tasks/",
+        ".go/runs/",
+        ".go/evidence/",
+        ".go/reflections/",
+    )
+    return path == ".go/hierarchy.json" or path.startswith(lifecycle_prefixes)
+
+
+def claim_event_base_commit(repo: Path, task: dict[str, Any]) -> str:
+    task_id = str(task.get("id", "")).strip()
+    claim = task.get("claim") or {}
+    claimed_at = str(claim.get("claimed_at", "")).strip()
+    events_path = repo / ".go" / "runs" / "events.jsonl"
+    if not events_path.exists():
+        raise RepoLocalError("no_diff=true requires task.claimed event provenance")
+
+    candidates: list[dict[str, Any]] = []
+    for line_number, line in enumerate(events_path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            event = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise RepoLocalError(
+                f"no_diff=true cannot trust malformed task.claimed ledger at line {line_number}: {exc.msg}"
+            ) from exc
+        if not isinstance(event, dict):
+            raise RepoLocalError(
+                f"no_diff=true cannot trust non-object task.claimed ledger entry at line {line_number}"
+            )
+        if event.get("event") == "task.claimed" and event.get("task_id") == task_id:
+            candidates.append(event)
+
+    identified = [
+        event
+        for event in candidates
+        if str((event.get("data") or {}).get("claimed_at", "")).strip()
+    ]
+    if identified:
+        exact = [
+            event
+            for event in identified
+            if str((event.get("data") or {}).get("claimed_at", "")).strip() == claimed_at
+        ]
+        if len(exact) != 1:
+            raise RepoLocalError("no_diff=true claim identity does not match exactly one task.claimed event")
+        event = exact[0]
+    else:
+        event = candidates[-1] if candidates else None
+    event_base = str(((event or {}).get("data") or {}).get("base_commit", "")).strip()
+    if not event_base:
+        raise RepoLocalError("no_diff=true requires task.claimed event base_commit provenance")
+    return event_base
+
+
+def committed_paths_since_claim(repo: Path, task: dict[str, Any]) -> list[str]:
+    base = str((task.get("claim") or {}).get("base_commit") or "").strip()
+    if not base:
+        raise RepoLocalError("no_diff=true requires claim.base_commit provenance")
+    event_base = claim_event_base_commit(repo, task)
+    if event_base != base:
+        raise RepoLocalError("no_diff=true claim.base_commit does not match task.claimed event")
+    head = git_head_commit(repo)
+    if head is None:
+        if base == EMPTY_GIT_TREE_SHA:
+            return []
+        raise RepoLocalError("no_diff=true cannot compare a claim base without a current HEAD")
+    if head == base:
+        return []
+    if base != EMPTY_GIT_TREE_SHA:
+        exists = subprocess.run(
+            ["git", "cat-file", "-e", f"{base}^{{commit}}"], cwd=repo, text=True, capture_output=True, check=False,
+        )
+        if exists.returncode != 0:
+            raise RepoLocalError(f"claim.base_commit is not available: {base}")
+        ancestor = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", base, head],
+            cwd=repo,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        if ancestor.returncode == 1:
+            raise RepoLocalError(f"no_diff=true claim base commit is not an ancestor of HEAD: {base}")
+        if ancestor.returncode != 0:
+            raise RepoLocalError(
+                "no_diff=true could not verify claim base ancestry: " + (ancestor.stderr.strip() or base)
+            )
+    result = subprocess.run(
+        ["git", "diff", "--name-only", base, head, "--"], cwd=repo, text=True, capture_output=True, check=False,
+    )
+    if result.returncode != 0:
+        raise RepoLocalError(result.stderr.strip() or "cannot compare claim base with current HEAD")
+    return [line.strip() for line in result.stdout.splitlines() if line.strip()]
+
+
+def finish_changed_files(repo: Path, task: dict[str, Any], fields: dict[str, str]) -> tuple[list[str], bool]:
     explicit = fields.get("changed_files") or fields.get("changed") or fields.get("files")
     if explicit:
         return split_evidence_list(explicit), False
     no_diff_value = (fields.get("no_diff") or fields.get("no_changes") or "").lower()
     status_paths = [path for _code, path in git_status(repo)]
     if no_diff_value in {"1", "true", "yes", "ok"}:
-        lifecycle_prefixes = (
-            ".go/tasks/",
-            ".go/runs/",
-            ".go/evidence/",
-            ".go/reflections/",
-        )
-        lifecycle_files = {".go/hierarchy.json"}
-        product_paths = [
-            path for path in status_paths
-            if path not in lifecycle_files and not path.startswith(lifecycle_prefixes)
-        ]
+        product_paths = [path for path in status_paths if not lifecycle_only_path(path)]
         if product_paths:
             raise RepoLocalError("no_diff=true contradicts dirty worktree paths: " + ", ".join(product_paths))
+        committed_product_paths = [path for path in committed_paths_since_claim(repo, task) if not lifecycle_only_path(path)]
+        if committed_product_paths:
+            raise RepoLocalError(
+                "no_diff=true contradicts committed changes since claim: " + ", ".join(committed_product_paths)
+            )
         return [], True
     return status_paths, not status_paths
 
@@ -747,7 +853,7 @@ def task_requires_review_evidence(task: dict[str, Any]) -> bool:
 
 def build_finish_evidence(repo: Path, task: dict[str, Any], agent: str, summary: str) -> dict[str, Any]:
     fields = parse_finish_evidence_fields(summary)
-    changed_files, no_diff = finish_changed_files(repo, fields)
+    changed_files, no_diff = finish_changed_files(repo, task, fields)
     verification_text = fields.get("verification") or fields.get("validation") or fields.get("verify") or fields.get("check")
     result_text = fields.get("verification_result") or fields.get("result") or fields.get("status")
     critic_text = fields.get("critic") or fields.get("critic_outcome") or fields.get("review") or fields.get("reviewer") or fields.get("reviewer_outcome")
@@ -776,6 +882,10 @@ def build_finish_evidence(repo: Path, task: dict[str, Any], agent: str, summary:
         "summary": summary,
         "changed_files": changed_files,
         "no_diff": no_diff,
+        "git": {
+            "claim_base_commit": (task.get("claim") or {}).get("base_commit"),
+            "observed_head_commit": git_head_commit(repo),
+        },
         "verification": {
             "command": fields.get("verification_command") or fields.get("command") or verification_text,
             "result": result_text or verification_text,
@@ -2007,6 +2117,93 @@ def run_default_critic_agent(
     return result
 
 
+def git_push_target(repo: Path) -> tuple[str, str, str] | None:
+    branch_result = subprocess.run(
+        ["git", "symbolic-ref", "--quiet", "--short", "HEAD"],
+        cwd=repo, text=True, capture_output=True, check=False,
+    )
+    branch = branch_result.stdout.strip()
+    if branch_result.returncode != 0 or not branch:
+        return None
+    remote = ""
+    for key in (f"branch.{branch}.pushRemote", "remote.pushDefault", f"branch.{branch}.remote"):
+        configured = subprocess.run(
+            ["git", "config", "--get", key],
+            cwd=repo, text=True, capture_output=True, check=False,
+        )
+        if configured.returncode == 0 and configured.stdout.strip():
+            remote = configured.stdout.strip()
+            break
+    if not remote or remote == ".":
+        return None
+    return remote, branch, f"{remote}/{branch}"
+
+
+def verify_remote_commit(
+    repo: Path,
+    commit_sha: str,
+    target: tuple[str, str, str] | None = None,
+) -> dict[str, Any]:
+    target = target or git_push_target(repo)
+    if target is None:
+        return {
+            "push_target": None,
+            "remote_sha": None,
+            "readback_verified": False,
+            "readback_error": "cannot resolve configured push target",
+        }
+    remote, branch, label = target
+    readback = subprocess.run(
+        ["git", "ls-remote", "--heads", remote, f"refs/heads/{branch}"],
+        cwd=repo, text=True, capture_output=True, check=False,
+    )
+    remote_sha = None
+    if readback.returncode == 0 and readback.stdout.strip():
+        candidate = readback.stdout.split()[0]
+        if re.fullmatch(r"[0-9a-f]{40}", candidate):
+            remote_sha = candidate
+    verified = readback.returncode == 0 and remote_sha == commit_sha
+    return {
+        "push_target": label,
+        "remote_sha": remote_sha,
+        "readback_verified": verified,
+        "readback_error": None if verified else (readback.stderr.strip() or "remote readback does not match committed SHA"),
+    }
+
+
+def push_exact_commit(repo: Path, commit_sha: str, target: tuple[str, str, str]) -> subprocess.CompletedProcess[str]:
+    remote, branch, _label = target
+    return subprocess.run(
+        ["git", "push", remote, f"{commit_sha}:refs/heads/{branch}"],
+        cwd=repo,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+
+
+def attach_ship_provenance(root: Path, done_path: Path, task_id: str, agent: str, ship: dict[str, Any]) -> None:
+    task = load_json(done_path)
+    evidence = task.get("evidence") or []
+    if not evidence:
+        raise RepoLocalError("cannot attach ship provenance without finish evidence")
+    provenance = {
+        "policy": ship.get("policy"),
+        "commit_sha": ship.get("commit_sha"),
+        "push_target": ship.get("push_target"),
+        "remote_sha": ship.get("remote_sha"),
+        "readback_verified": bool(ship.get("readback_verified")),
+    }
+    evidence[-1]["ship"] = provenance
+    dump_json(done_path, task)
+    append_jsonl(root / "evidence" / "events.jsonl", event(
+        task_id,
+        "evidence.appended",
+        agent,
+        {"kind": "ship_provenance", "ship": provenance},
+    ))
+
+
 def ship_changes(repo: Path, policy: str, allow_push: bool, message: str, task: dict[str, Any] | None = None) -> dict[str, Any]:
     if policy == "none":
         return {"policy": policy, "status": "skipped"}
@@ -2017,7 +2214,21 @@ def ship_changes(repo: Path, policy: str, allow_push: bool, message: str, task: 
         return {"policy": policy, "status": "failed", "stderr": status.stderr}
     changed = git_status_paths(repo)
     if not changed:
-        return {"policy": policy, "status": "clean"}
+        result: dict[str, Any] = {"policy": policy, "status": "clean", "commit_sha": git_head_commit(repo)}
+        if policy == "push" and result["commit_sha"]:
+            target = git_push_target(repo)
+            if target is None:
+                result.update({"status": "push_failed", "push_target": None, "reason": "cannot resolve configured push target"})
+                return result
+            result["push_target"] = target[2]
+            push = push_exact_commit(repo, result["commit_sha"], target)
+            result["push"] = {"returncode": push.returncode, "stdout": push.stdout[-2000:], "stderr": push.stderr[-2000:]}
+            if push.returncode != 0:
+                result["status"] = "push_failed"
+                return result
+            result.update(verify_remote_commit(repo, result["commit_sha"], target))
+            result["status"] = "pushed" if result["readback_verified"] else "readback_failed"
+        return result
     allowed_paths = [path for path in changed if allowed_runtime_path(path) or (task is not None and path_allowed_by_task(path, task, allow_runtime=False))]
     unrelated = [path for path in changed if path not in allowed_paths]
     if not allowed_paths:
@@ -2029,10 +2240,25 @@ def ship_changes(repo: Path, policy: str, allow_push: bool, message: str, task: 
     result = {"policy": policy, "status": "committed" if commit.returncode == 0 else "failed", "stdout": commit.stdout[-2000:], "stderr": commit.stderr[-2000:], "scoped_paths": allowed_paths, "unrelated_dirty": unrelated}
     if commit.returncode != 0:
         return result
+    result["commit_sha"] = git_head_commit(repo)
     if policy == "push":
-        push = subprocess.run(["git", "push"], cwd=repo, text=True, capture_output=True)
+        target = git_push_target(repo)
+        if target is None:
+            result.update({"status": "push_failed", "push_target": None, "reason": "cannot resolve configured push target"})
+            return result
+        result["push_target"] = target[2]
+        push = push_exact_commit(repo, result["commit_sha"], target)
         result["push"] = {"returncode": push.returncode, "stdout": push.stdout[-2000:], "stderr": push.stderr[-2000:]}
-        result["status"] = "pushed" if push.returncode == 0 else "push_failed"
+        if push.returncode != 0:
+            result["status"] = "push_failed"
+            return result
+        if not result["commit_sha"]:
+            result["status"] = "readback_failed"
+            result["readback_verified"] = False
+            result["readback_error"] = "cannot resolve committed SHA after push"
+            return result
+        result.update(verify_remote_commit(repo, result["commit_sha"], target))
+        result["status"] = "pushed" if result["readback_verified"] else "readback_failed"
     return result
 
 
@@ -2284,10 +2510,26 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 task["work_status"] = "in_progress"
                 task.setdefault("review_status", "none")
                 task.setdefault("review_history", [])
-                task["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
+                base_commit = claim_base_commit(repo)
+                claimed_at = now_iso()
+                task["claim"] = {
+                    "agent": args.agent,
+                    "claimed_at": claimed_at,
+                    "base_commit": base_commit,
+                }
                 active_path = task_path(root, "active", task["id"])
                 atomic_move_json(open_path, active_path, task)
-                append_jsonl(root / "runs" / "events.jsonl", event(task["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"], "executor": mode}))
+                append_jsonl(root / "runs" / "events.jsonl", event(
+                    task["id"],
+                    "task.claimed",
+                    args.agent,
+                    {
+                        "report_only_dirty": dirty["report_only"],
+                        "executor": mode,
+                        "base_commit": base_commit,
+                        "claimed_at": claimed_at,
+                    },
+                ))
         except StateLockError as exc:
             result.update({"status": "safety_gate", "blocked_task": task.get("id"), "summary": str(exc), "next_action": "wait for the live task owner or recover the stale lock"})
             break
@@ -2543,10 +2785,13 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     result["deliveries"] = [item for item in result.get("deliveries", []) if item.get("task_id") != task["id"]]
                     result.update({"status": "blocked", "blocked_task": task["id"], "summary": "Ship failed; verified task was restored to active.", "next_action": ship.get("reason") or ship.get("stderr")})
                     break
+                if ship.get("status") in {"committed", "pushed"}:
+                    attach_ship_provenance(root, done_path, task["id"], args.agent, ship)
                 result["completed_tasks"].append(task["id"])
                 result["evidence"].append({"task_id": task["id"], "summary": evidence_summary})
-                if ship.get("status") == "push_failed":
-                    result.update({"status": "ship_pending", "summary": "Task is complete in a local commit, but push failed.", "next_action": "repair the remote/push failure and run git push"})
+                if ship.get("status") in {"push_failed", "readback_failed"}:
+                    reason = ship.get("readback_error") or (ship.get("push") or {}).get("stderr") or "push/readback failed"
+                    result.update({"status": "ship_pending", "summary": "Task is complete in a local commit, but push/readback proof failed.", "next_action": reason})
                     break
         except StateLockError as exc:
             result.update({
@@ -3742,10 +3987,21 @@ def cmd_claim(args: argparse.Namespace) -> int:
             data["work_status"] = "in_progress"
             data.setdefault("review_status", "none")
             data.setdefault("review_history", [])
-            data["claim"] = {"agent": args.agent, "claimed_at": now_iso()}
+            base_commit = claim_base_commit(repo)
+            claimed_at = now_iso()
+            data["claim"] = {
+                "agent": args.agent,
+                "claimed_at": claimed_at,
+                "base_commit": base_commit,
+            }
             target = task_path(root, "active", data["id"])
             atomic_move_json(path, target, data)
-            append_jsonl(root / "runs" / "events.jsonl", event(data["id"], "task.claimed", args.agent, {"report_only_dirty": dirty["report_only"]}))
+            append_jsonl(root / "runs" / "events.jsonl", event(
+                data["id"],
+                "task.claimed",
+                args.agent,
+                {"report_only_dirty": dirty["report_only"], "base_commit": base_commit, "claimed_at": claimed_at},
+            ))
     except StateLockError as exc:
         raise RepoLocalError(str(exc)) from exc
     print(relative(repo, target))

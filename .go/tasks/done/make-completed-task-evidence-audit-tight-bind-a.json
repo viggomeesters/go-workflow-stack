@@ -123,6 +123,13 @@
       "review": {
         "outcome": "passed verdict A on 7e7e1bca70a65230720281e49a2dd02cf6cfa41de83401e288b9549d7b2adab2",
         "skip_reason": null
+      },
+      "ship": {
+        "policy": "push",
+        "commit_sha": "a4f342849b29b5e729a9c541325eb58496544067",
+        "push_target": "origin/main",
+        "remote_sha": "a4f342849b29b5e729a9c541325eb58496544067",
+        "readback_verified": true
       }
     }
   ],

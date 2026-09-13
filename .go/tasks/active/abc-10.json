@@ -30,7 +30,9 @@
       "CHANGELOG.md",
       ".go/project.json",
       "docs/releases/**",
-      "scripts/release-check-inner.sh"
+      "scripts/release-check-inner.sh",
+      "go_workflow/cli.py",
+      "go_workflow/run_state.py"
     ]
   },
   "acceptance": [
@@ -87,7 +89,7 @@
       "allow_push": true,
       "production_deployment": "not authorized; fixtures only"
     },
-    "scope_note": "Two-task local-remote campaign, deterministic failure/property matrix and separately recorded live native worker proof. Live task profiles Terra High and Astra Medium are explicitly in acceptance; no external production deployment. Existing regressions are reused through the campaign check script."
+    "scope_note": "Two-task local-remote campaign, deterministic failure/property matrix and separately recorded live native worker proof. Live task profiles Terra High and Astra Medium are explicitly in acceptance; no external production deployment. Existing regressions are reused through the campaign check script. Live v0.3.25 proof exposed a pre-publication critic demanding downstream release receipt. Bounded in-scope repair adds explicit managed pre-publication critic instructions without weakening completion or publication gates; preserve failed live evidence and retest. Second live trial exposed native worker instructions requiring canonical outcome writes outside its sandbox; keep canonical single-writer ownership and have managed workers report evidence for the controller."
   },
   "builds_on": [
     {

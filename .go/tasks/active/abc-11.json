@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-11",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Taakbranches en worktrees veilig beheren",
   "description": "Lever opt-in branch- en worktreebeheer voor zelfstandige Go-taken: één werkplek per taak, strikt eigenaarschap, scopecontrole, herstelbare integratiegrens en veilige cleanup. Hergebruik bestaande state/scopeprimitieven en vertaal geselecteerde legacylessen; geen volledige legacyruntime importeren.\nAfhankelijk van: go-workflow-stack:abc-01. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -53,16 +53,17 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T13:58:28+02:00",
+    "base_commit": "318f7f02378253fdd9f2647338b0ac2d330bc5ff"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
   "planning": {
     "status": "prepared",
-    "implementation_status": "not_started",
+    "implementation_status": "in_progress",
     "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -192,5 +193,11 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "execution_workspace": {
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-11",
+    "branch": "codex/abc-11",
+    "coordinator_checkout": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "mode": "manual serialized development of workspace manager"
   }
 }

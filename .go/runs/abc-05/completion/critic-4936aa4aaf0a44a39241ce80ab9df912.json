@@ -1,0 +1,31 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "abc-05",
+  "project": "go-workflow-stack",
+  "contract_digest": "3c71c85a4ce46ffd4fe0f3476b51ea29fcb70a4464b7fdeeb45b07f73e010250",
+  "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
+  "content_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed all changed source, schemas, version and controller contract paths. Real Git/process fixtures cover manual/automatic/approval bypasses, failed push/readback, stale content/raw proof, requirement binding and orphan collectors. Fixed orphan visibility and unvalidated optional evidence reference defects; 104 focused and 301 Linux tests plus candidate distribution/template gate passed.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/go-autonomous-loop.md",
+    "docs/releases/v0.3.20.md",
+    "go_workflow/cli.py",
+    "go_workflow/completion.py",
+    "go_workflow/constants.py",
+    "go_workflow/run_state.py",
+    "go_workflow/shipping.py",
+    "go_workflow/worktrees.py",
+    "pyproject.toml",
+    "schemas/project.schema.json",
+    "schemas/release-evidence.schema.json",
+    "schemas/run-state.schema.json",
+    "scripts/release-check-inner.sh",
+    "tests/test_abc_completion.py"
+  ]
+}

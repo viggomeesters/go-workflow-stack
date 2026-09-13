@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-05",
+  "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
+  "status": "candidate_passed_final_tag_pending",
+  "checks": [
+    "301 Linux tests passed (197 smoke and 104 focused)",
+    "104 focused tests passed on macOS",
+    "make check passed in Linux and ordinary macOS clone",
+    "candidate release gate passed with immutable template/distribution pairing",
+    "actual canonical completion collector executed every declared check after integration and version synchronization",
+    "owned workspace staging/integration succeeded; user uv.lock preserved"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json",
+    "sha256": "2d43f500a91c20fc2787c65c1cf0d65d22713eeaedb0066ddfcaed444f96bdec"
+  },
+  "critic": {
+    "path": ".go/runs/abc-05/completion/critic-4936aa4aaf0a44a39241ce80ab9df912.json",
+    "sha256": "49f53a0a035521ccd4440c580b09410ee62a20342ca5def50ed59a3d7cfa1fa7"
+  },
+  "critic_method": "same-agent review; not independent attestation",
+  "repairs": [
+    "All opted-in finish and approval paths share one lifecycle gate",
+    "Failed opted-in push/readback restores active and clears completed_tasks",
+    "Check results bind exact command, requirements, cwd, revision, content and raw output",
+    "Release readback binds annotated tag object, released content and explicit remote branch/profile",
+    "Verification child registers before payload; orphan remains a visible gate after controller death",
+    "Requirements cannot cite an unvalidated optional release reference"
+  ],
+  "limitations": [
+    "Automatic publication remains abc-06, deployment abc-07",
+    "Unconfigured legacy behavior and historical_unmigrated records are not silently converted",
+    "Hashes ensure consistency within a trusted controller, not independent model or reviewer identity",
+    "Only Git-tag and GitHub release readback are supported; absent profile blocks required completion"
+  ],
+  "self_reflect": "Reused the existing process-boundary guard instead of creating a second orphan mechanism; synchronized canonical version before candidate checks. No global skill or memory changes."
+}

@@ -1,0 +1,179 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "abc-05",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-0fc43b6cb5bb4c31bae378ae802a3d0b",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-05",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_completion.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
+        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json",
+        "sha256": "f827f73a736c799dab07e2bd88c1f620e7bf12afc3ac4d4b16ef468fcf181fbc"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-05",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
+        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json",
+        "sha256": "57d34709c3118b891475820cd3ab04bedd0af15ee9be01c12ed3f480c05a962f"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-05",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
+        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json",
+        "sha256": "6a85c70d6d818be508992ea33769ddf51bfd2e6699903e040e7f162bfec8011f"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Een mislukte of niet-bevestigde push laat releaseplichtig werk pending/active/blocked en nooit done of completed_tasks; taakstatus en runstatus blijven consistent.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Handmatige finish, automatische finish, approval en taak-/goalrapportage gebruiken dezelfde gate; alleen proza of een model-success kan bewijs niet vervangen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Work, review en releasevoortgang zijn onderscheiden. Eén afgeronde taak vereist niet dat de hele backlog leeg is; een campagne claimt geen volledige goal-completion zolang werk resteert.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Commit, gecontroleerde inhoud en geverifieerde remote branch/SHA zijn gekoppeld; latere integratie of releasevoorbereiding invalideert verouderde relevante checks.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Een releaseprofiel waarvoor nog geen publisher bestaat wordt eerlijk geblokkeerd; legacy gedrag verandert uitsluitend volgens de gekozen migratiepolicy.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Verificatie voert de afgesproken lokale commando’s uit en registreert cwd, argv/commando, exitcode, geteste revisie/werkdiff en bewijsreferentie. Alleen een gevuld veld, test_evidence:none of een oud geslaagd resultaat kan verplichte checks niet vervangen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Alle verplichte requirements en fasebewijzen zijn inhoudelijk geldig vóór finish; ontbrekende/failed checks, mislukte push en onbevestigde remote readback blokkeren done. Regressies dekken de agent-brain push-fail/done-route en legacy finish-before-ship, ook via handmatige bypassroutes.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "3c71c85a4ce46ffd4fe0f3476b51ea29fcb70a4464b7fdeeb45b07f73e010250",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 92967
+  },
+  "worker_group": null,
+  "inflight": null
+}

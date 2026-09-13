@@ -489,8 +489,8 @@
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "0.3.20",
-    "verification_ref": ".go/evidence/abc-05-verification.json",
+    "candidate_version": "0.3.21",
+    "verification_ref": ".go/evidence/abc-05-v021-verification.json",
     "next_ready": [
       "abc-05",
       "abc-09"

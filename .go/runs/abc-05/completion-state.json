@@ -4,7 +4,7 @@
   "project": "go-workflow-stack",
   "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
   "owner": "codex-astra-high",
-  "run_id": "verify-519e3ce141bc4eb59f24669a71223f1b",
+  "run_id": "verify-4f415d886e5643e6907964829311ffb9",
   "workspace": {
     "path": "/Users/viggomeesters/Dev/go-workflow-stack",
     "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
@@ -31,16 +31,16 @@
         "status": "passed",
         "command": "python3 -m pytest tests/test_abc_completion.py -q",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
-        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
+        "revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
+        "worktree_digest": "d0ad3b57d2179407ffbac5c828faee571ef8c6c3f05a1cc837765a86fb2e5985",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json"
+          ".go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json",
-        "sha256": "3a400c1218beae320815e24440b80f6491816da2cb6cb32e2a931c320c38cab8"
+        "path": ".go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json",
+        "sha256": "54285c92d05153ca94bf42965704348849c67eb22bb88f170b4b71da03664f7a"
       }
     },
     {
@@ -61,16 +61,16 @@
         "status": "passed",
         "command": "python3 cli/go.py validate .",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
-        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
+        "revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
+        "worktree_digest": "d0ad3b57d2179407ffbac5c828faee571ef8c6c3f05a1cc837765a86fb2e5985",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json"
+          ".go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json",
-        "sha256": "40c3a29f382fffc54f45386e895b1eaebf05d398f3ad434f018a219bd3137002"
+        "path": ".go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json",
+        "sha256": "9e6f0ddf3904ce3ea3d5692ef3d47c4c458742d95184458491548d70ad4aa208"
       }
     },
     {
@@ -91,16 +91,16 @@
         "status": "passed",
         "command": "git diff --check",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
-        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
+        "revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
+        "worktree_digest": "d0ad3b57d2179407ffbac5c828faee571ef8c6c3f05a1cc837765a86fb2e5985",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json"
+          ".go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json",
-        "sha256": "10f06aa646eece59fc9c1341d1938fd0a37627e0b6376eaf330213ef4c7ad3f0"
+        "path": ".go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json",
+        "sha256": "7180c00363050c6443c19e603fba677b86f08bda7b9c8af617f40fee0d136f0a"
       }
     }
   ],
@@ -108,6 +108,10 @@
   "effects": {},
   "budgets": [],
   "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
     {
       "event": "new_verification_capture",
       "previous_inflight": null
@@ -124,6 +128,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -137,6 +146,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -150,6 +164,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -163,6 +182,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -176,6 +200,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -183,8 +212,14 @@
       "id": "R6",
       "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T17:00:18+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json"
+        }
+      ]
     },
     {
       "id": "R7",
@@ -196,6 +231,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -209,6 +249,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     }
@@ -219,7 +264,7 @@
   "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
   "controller": {
     "host": "macbook-pro-van-viggo-1.home",
-    "pid": 21077
+    "pid": 46311
   },
   "worker_group": null,
   "inflight": null

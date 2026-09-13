@@ -1,0 +1,34 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_standard_outcome_cli_proof_allows_tracked_task_finish_and_approval ____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-187/test_standard_outcome_cli_proo0')
+
+    def test_standard_outcome_cli_proof_allows_tracked_task_finish_and_approval(tmp_path):
+        repo,source,task=fixture(tmp_path)
+        task.update(outcome_tracking_version=1,requested_outcomes=[
+            {'id':'R1','text':'Delivered app','source':'fixture','status':'pending','evidence':[]}])
+        source.write_text(json.dumps(task))
+        _,verification,_,_,_=prepare_proofs(repo,task)
+        result=call(repo,'task','outcome',repo,'--task-id',task['id'],'--outcome','R1',
+                    '--status','verified','--evidence',verification['path'],'--agent','owner')
+        assert result.returncode==0,result.stderr
+        task=json.loads(source.read_text())
+        assert task['requested_outcomes'][0]['evidence'][0]['summary']==verification['path']
+        result=call(repo,'finish',task['id'],'--repo',repo,'--agent','owner','--evidence',SUMMARY)
+>       assert result.returncode==0,result.stderr
+E       AssertionError: error: lifecycle completion blocked:
+E         - lifecycle: unhashable type: 'dict'
+E         
+E       assert 1 == 0
+E        +  where 1 = CompletedProcess(args=['/Users/viggomeesters/.cache/uv/builds-v0/.tmphyn6Q6/bin/python', '/Users/viggomeesters/Documen...nown'], returncode=1, stdout='', stderr="error: lifecycle completion blocked:\n- lifecycle: unhashable type: 'dict'\n").returncode
+
+work/abc-05/tests/test_abc_completion.py:270: AssertionError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-187/test_standard_outcome_cli_proo0/origin.git
+ * [new branch]      main -> main
+ * [new tag]         v1.2 -> v1.2
+=========================== short test summary info ============================
+FAILED work/abc-05/tests/test_abc_completion.py::test_standard_outcome_cli_proof_allows_tracked_task_finish_and_approval
+1 failed, 21 deselected in 1.64s

@@ -1,0 +1,41 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-05",
+  "revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
+  "status": "candidate_passed_final_tag_pending",
+  "candidate_revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
+  "checks": [
+    "303 Linux tests passed (197 smoke and 106 focused)",
+    "22 completion regressions passed on macOS",
+    "make check passed in Linux and ordinary macOS clone",
+    "candidate release gate passed with immutable template/distribution pairing",
+    "actual canonical completion collector executed every declared check after integration and version synchronization",
+    "owned workspace staging/integration succeeded; user uv.lock preserved"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json",
+    "sha256": "45714a7364bc0e66f209aed99fd7d78d777fa86aeb69841ec92521949b04a4db"
+  },
+  "critic": {
+    "path": ".go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json",
+    "sha256": "ef8d85730ef66063eb78f07b7c5f53609a7f8e34a42eaefb2efd2fa46f005377"
+  },
+  "critic_method": "same-agent review; not independent attestation",
+  "repairs": [
+    "Standard CLI attributed outcome evidence accepted only for exact validated proof references; full outcome/finish/approval regression reproduces and repairs v0.3.20 failure",
+    "Historical reporting reads portable Git/proof without old controller liveness; reproduced ordinary-clone regression repaired",
+    "All opted-in finish and approval paths share one lifecycle gate",
+    "Failed opted-in push/readback restores active and clears completed_tasks",
+    "Check results bind exact command, requirements, cwd, revision, content and raw output",
+    "Release readback binds annotated tag object, released content and explicit remote branch/profile",
+    "Verification child registers before payload; orphan remains a visible gate after controller death",
+    "Requirements cannot cite an unvalidated optional release reference"
+  ],
+  "limitations": [
+    "Automatic publication remains abc-06, deployment abc-07",
+    "Unconfigured legacy behavior and historical_unmigrated records are not silently converted",
+    "Hashes ensure consistency within a trusted controller, not independent model or reviewer identity",
+    "Only Git-tag and GitHub release readback are supported; absent profile blocks required completion"
+  ],
+  "self_reflect": "Reused the existing process-boundary guard instead of creating a second orphan mechanism; synchronized canonical version before candidate checks. No global skill or memory changes. Late ordinary-clone regression repaired before publication; superseded tag/check evidence preserved. v0.3.20 exposed a producer/consumer evidence-shape gap; preserve the failed gate and add actual CLI flow coverage in v0.3.21."
+}

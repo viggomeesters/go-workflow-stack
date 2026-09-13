@@ -144,6 +144,11 @@
           "created_at": "2026-09-13T16:57:03+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:30+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -162,6 +167,11 @@
           "created_at": "2026-09-13T16:57:03+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:30+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -180,6 +190,11 @@
           "created_at": "2026-09-13T16:57:03+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -198,6 +213,11 @@
           "created_at": "2026-09-13T16:57:03+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -216,6 +236,11 @@
           "created_at": "2026-09-13T16:57:04+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -247,6 +272,11 @@
           "created_at": "2026-09-13T16:57:04+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     },
@@ -265,6 +295,11 @@
           "created_at": "2026-09-13T16:57:04+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
+        },
+        {
+          "created_at": "2026-09-13T17:11:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json"
         }
       ]
     }
@@ -307,12 +342,12 @@
   "completion_evidence": {
     "schema": "go-workflow.completion-evidence.v1",
     "verification": {
-      "path": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json",
-      "sha256": "f3fc5ae954aa5b73e64a6dd6786b96713e4e66e838df472a1afb5f8c3d4e581e"
+      "path": ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json",
+      "sha256": "45714a7364bc0e66f209aed99fd7d78d777fa86aeb69841ec92521949b04a4db"
     },
     "critic": {
-      "path": ".go/runs/abc-05/completion/critic-16b75e5486a94a568b7417e947cf96cb.json",
-      "sha256": "675c5e606632f8167981aea089436051794c28207f265d0566323ca713cc9c3f"
+      "path": ".go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json",
+      "sha256": "ef8d85730ef66063eb78f07b7c5f53609a7f8e34a42eaefb2efd2fa46f005377"
     },
     "release": {
       "path": ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json",

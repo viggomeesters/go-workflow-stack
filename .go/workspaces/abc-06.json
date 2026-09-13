@@ -1,0 +1,19 @@
+{
+  "task_id": "abc-06",
+  "owner": "codex-astra-high",
+  "run_id": "abc-06-development",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-06",
+  "branch": "codex/abc-06",
+  "base_branch": "main",
+  "base_commit": "8b6499049cccfd932cbbf8632a6c81f8a4eec7a2",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+  "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+  "generation": "a495ea2a61814b8cb54665e29412a22f",
+  "state": "integrated",
+  "integration": {
+    "workspace_head": "90d9d7a316c5b8894b65c1ea72a036260f276608",
+    "integrated_commit": "90d9d7a316c5b8894b65c1ea72a036260f276608"
+  }
+}

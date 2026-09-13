@@ -38,7 +38,8 @@
       "schemas/project.schema.json",
       "schemas/run-state.schema.json",
       "scripts/release-check-inner.sh",
-      "docs/go-autonomous-loop.md"
+      "docs/go-autonomous-loop.md",
+      "schemas/publication-state.schema.json"
     ]
   },
   "acceptance": [
@@ -88,7 +89,8 @@
       "source": "User GO and continuation",
       "ship_policy": "push",
       "allow_push": true
-    }
+    },
+    "scope_note": "Publisher needs a typed durable publication checkpoint and reuses the native process guard plus the shared completion producers; no deployment adapter is included."
   },
   "builds_on": [
     {

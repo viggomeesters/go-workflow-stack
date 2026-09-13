@@ -41,6 +41,7 @@ from go_workflow.adapter_protocol import build_adapter_request, normalize_adapte
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.execution_context import ContextError, create_snapshot, verify_snapshot
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
+from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
     validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
     WorkspaceError, create_workspace, workflow_root, is_git_checkout)
@@ -567,6 +568,15 @@ def validate_repo(repo: Path) -> list[str]:
             if record['task_id'] != path.stem or record['task_id'] not in task_ids:
                 errors.append(f'{path}: workspace task identity missing/mismatched')
         except (WorkspaceError, RepoLocalError) as exc:
+            errors.append(f'{path}: {exc}')
+    from go_workflow.run_state import validate_state
+    for path in sorted((root / 'runs').glob('*/run-state.json')):
+        try:
+            run = load_json(path)
+            validate_state(run)
+            if run['task_id'] != path.parent.name or run['task_id'] not in task_ids or run['project'] != project_id:
+                errors.append(f'{path}: managed run task/project identity mismatch')
+        except (RunStateError, RepoLocalError) as exc:
             errors.append(f'{path}: {exc}')
     errors.extend(validate_architecture_state(root, project_id))
     recommendation_paths = list((root / "recommendations").glob("*.json"))
@@ -1402,6 +1412,7 @@ def build_auto_preflight(repo: Path, selected_tasks: list[dict[str, Any]], max_t
 
 
 def run_shell_with_timeout(repo: Path, command: str, env: dict[str, str], timeout_seconds: int) -> dict[str, Any]:
+    command = process_command(command, Path(__file__))
     process = subprocess.Popen(
         command,
         cwd=repo,
@@ -2507,6 +2518,9 @@ def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args:
 
 
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
+    managed = select_managed_task(repo, args, sys.modules[__name__])
+    if managed is not None:
+        return execute_managed(repo, args, mode, managed, sys.modules[__name__])
     plan = build_loop_plan(repo, args, mode=mode)
     root = go_root(repo)
     preflight = plan["run_envelope"]["preflight"]
@@ -5376,6 +5390,20 @@ def build_parser() -> argparse.ArgumentParser:
     context_verify.add_argument('repo')
     for field in ('task-id', 'snapshot', 'sha256'): context_verify.add_argument('--' + field, required=True)
     context_verify.set_defaults(func=cmd_context_verify)
+    for command_parser in (go, auto, *[sub.choices[name] for name in ('loop', 'go-loop')]):
+        for field in ('task-id', 'workspace-path', 'workspace-branch', 'base-branch', 'base-commit', 'run-id'):
+            command_parser.add_argument('--' + field, default='')
+    managed_parser = sub.add_parser('managed', help='Internal managed-run process boundary')
+    managed_sub = managed_parser.add_subparsers(dest='managed_operation', required=True)
+    enter = managed_sub.add_parser('worker-enter')
+    enter.add_argument('repo')
+    for field in ('task-id', 'run-id', 'nonce', 'owner'): enter.add_argument('--' + field, required=True)
+    enter.set_defaults(func=cmd_managed_worker_enter)
+    relocate = managed_sub.add_parser('relocate')
+    relocate.add_argument('repo')
+    for field in ('task-id', 'run-id', 'owner', 'old-control', 'old-workspace', 'workspace'):
+        relocate.add_argument('--' + field, required=True)
+    relocate.set_defaults(func=cmd_managed_relocate)
     return parser
 
 
@@ -5624,12 +5652,24 @@ def cmd_context_verify(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_managed_worker_enter(args: argparse.Namespace) -> int:
+    worker_enter(Path(args.repo).resolve(), args.task_id, args.run_id, args.nonce, args.owner)
+    return 0
+
+
+def cmd_managed_relocate(args: argparse.Namespace) -> int:
+    state = relocate_run(Path(args.repo), args.task_id, args.owner, args.run_id,
+                         Path(args.old_control), Path(args.old_workspace), Path(args.workspace))
+    print(json.dumps(state, indent=2))
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError, ContextError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

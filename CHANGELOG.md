@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.19 — managed phase resume
+
+- Resume the same managed task from confirmed build/verification/critic checkpoints with renewed budgets.
+- Register worker process groups before dispatch and reject live-owner/orphan takeover, including standalone workspace operations.
+- Preserve interrupted setup, requirements, phase evidence and explicit side-effect intent/readback records.
+- Repair explicitly moved local checkout pairs, retaining historical proof and invalidating affected checks.
+- Leave controlled tasks active at release_pending until the lifecycle publisher supplies verified release evidence.
+
 ## 0.3.18 — durable worker context
 
 - Capture immutable managed-native phase context and full raw process evidence.

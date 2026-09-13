@@ -149,3 +149,43 @@ The stack needs three layers:
 ## Benchmark status
 
 See [`autonomy-benchmark.md`](autonomy-benchmark.md) for the current Ralph / Oh-My-Codex comparison. The stack now proves a hardened conductor, default agent/critic boundary, restartable multi-task campaign, transactional commits, and a vision-level completion audit. Integrated Ralph/OMC equivalence remains `PARTIAL` because deterministic adapter fixtures do not prove the quality of every live model-driven campaign.
+
+## Managed task phase resume (v0.3.19)
+
+Tasks opting into `execution_contract.workspace.mode=task_worktree` use the
+native Codex phase runner. Initial dispatch requires the explicit task, separate
+workspace path/branch, exact base branch/commit and run identity:
+
+```bash
+./go auto . --execute --task-id T038 --agent owner --executor-agent codex \
+  --workspace-path /explicit/task-workspace --workspace-branch task/T038 \
+  --base-branch main --base-commit <exact-40-character-commit> --run-id T038-run \
+  --max-commands 1 --max-minutes 5 --json
+```
+
+Resolve and preflight the project's immutable runtime first. The source stack
+uses its documented `python3 cli/go.py` development entrypoint after preflight.
+The next invocation keeps `--task-id`, `--agent` and the desired budget; omit the
+initial workspace flags to reuse the stored binding. An active managed run is
+selected before new open work. Ambiguous active runs require explicit selection.
+An older active task without a checkpoint is never assigned a guessed phase.
+
+The flow is setup → build → verify → critic, with bounded repair → verify loops.
+Budget exhaustion after a confirmed build resumes verification, not another
+builder. Native phases retain frozen model/effort profiles and durable context
+references; effective model identity remains independently unconfirmed.
+`resume.json` records exact task/owner arguments and the required immutable
+runtime ref without mutable checkout fallbacks. The renewed budget is appended
+to the run history; old usage and phase evidence remain available.
+
+Successful build/check/critic execution currently returns `release_pending` and
+keeps the task active. Verified finish and the idempotent publisher are subsequent
+lifecycle work. No release, deployment or task completion is inferred from green
+worker prose. Cleanup recovery only runs after verified integration, release and
+approved completion; it never starts a new builder or publisher.
+
+For an explicitly moved, stopped local pair, invoke the verified runtime with
+`managed relocate <new-control> --task-id T038 --owner owner --run-id T038-run
+--old-control <old-control> --old-workspace <old-worker> --workspace <new-worker>`.
+The operation retains all code and historical context, repairs Git metadata,
+and invalidates location-dependent checks. See `state-safety.md` for boundaries.

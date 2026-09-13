@@ -228,6 +228,8 @@ def guard_workspace_command(args):
                  'cmd_recommendation_status', 'cmd_context_verify'}
     name = args.func.__name__
     if name in read_only or (name == 'cmd_workspace_operation' and args.workspace_operation == 'status'): return
+    if name == 'cmd_managed_worker_enter' and getattr(args, 'task_id', None) == record['task_id']:
+        if args.owner == record['owner'] and args.run_id == record['run_id']: return
     if name == 'cmd_task_outcome' and getattr(args, 'task_id', None) == record['task_id']:
         if getattr(args, 'agent', None) == record['owner'] and workflow_root(repo) == Path(record['control_repo']) / '.go':
             active_task(Path(record['control_repo']), record['task_id'], record['owner'])
@@ -278,9 +280,18 @@ def checked_scope(record):
     return paths
 
 
+def require_run_idle(record):
+    from .run_state import state_path, read_state, require_stopped, RunStateError
+    control = Path(record['control_repo'])
+    if state_path(control, record['task_id']).exists():
+        try: require_stopped(read_state(control, record['task_id']))
+        except RunStateError as exc: raise WorkspaceError(str(exc)) from exc
+
+
 def stage_workspace(control, task_id, owner, run_id):
     with repository_lock(Path(control) / '.go', 'workspace-execution-' + task_id):
         record = verify_workspace(owned_record(control, task_id, owner, run_id))
+        require_run_idle(record)
         if record['state'] != 'ready': raise WorkspaceError('Workspace must be ready for staging')
         paths = checked_scope(record)
         if paths: git(Path(record['path']), '--literal-pathspecs', 'add', '--all', '--', *paths)
@@ -294,6 +305,7 @@ def execution_lease(workspace, task_id, owner, run_id, *, timeout_seconds=10.0):
     control = Path(record['control_repo'])
     with repository_lock(control / '.go', 'workspace-execution-' + task_id, timeout_seconds):
         current = verify_workspace(owned_record(control, task_id, owner, run_id))
+        require_run_idle(current)
         if current['state'] != 'ready': raise WorkspaceError('Workspace must be ready for execution')
         yield current
         # An owner/branch change while the worker was running is never accepted.
@@ -315,6 +327,7 @@ def integration_slot(control, task_id, owner, run_id, *, timeout_seconds=10.0):
     with repository_lock(control / '.go', 'workspace-integration', timeout_seconds):
         with repository_lock(control / '.go', 'workspace-execution-' + task_id, timeout_seconds):
             record = verify_workspace(owned_record(control, task_id, owner, run_id))
+            require_run_idle(record)
             if record['state'] != 'ready': raise WorkspaceError('Workspace is not ready for integration')
             require_clean(record)
             checked_scope(record)
@@ -330,6 +343,7 @@ def record_integration(control, task_id, owner, run_id, integrated_commit):
     with repository_lock(control / '.go', 'workspace-integration'):
         with repository_lock(control / '.go', 'workspace-execution-' + task_id):
             record = verify_workspace(owned_record(control, task_id, owner, run_id))
+            require_run_idle(record)
             require_clean(record)
             checked_scope(record)
             head = git_text(Path(record['path']), 'rev-parse', 'HEAD')
@@ -372,6 +386,7 @@ def cleanup_workspace(control, task_id, owner, run_id):
     with repository_lock(control / '.go', 'workspace-integration'):
         with repository_lock(control / '.go', 'workspace-execution-' + task_id):
             record = owned_record(control, task_id, owner, run_id, active=False)
+            require_run_idle(record)
             if record['state'] == 'cleaned': return record
             proof = cleanup_proof(control, record)
             workspace = Path(record['path'])
@@ -405,6 +420,7 @@ def rebind_workspace(control, task_id, owner, run_id, new_owner, new_run_id):
     with repository_lock(control / '.go', 'workspace-execution-' + task_id):
         with repository_lock(control / '.go', 'task-' + task_id):
             record = verify_workspace(owned_record(control, task_id, owner, run_id, active=False))
+            require_run_idle(record)
             if record['state'] != 'ready': raise WorkspaceError('Only a ready workspace can follow a claim transfer')
             active_task(control, task_id, new_owner)
             record.setdefault('ownership_history', []).append({'owner': owner, 'run_id': run_id})

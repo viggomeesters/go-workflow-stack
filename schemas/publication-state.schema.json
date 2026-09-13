@@ -118,6 +118,23 @@
         "actor": {
           "type": "string",
           "minLength": 1
+        },
+        "deployment": {
+          "type": "object",
+          "required": [
+            "allowed",
+            "target"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "allowed": {
+              "const": true
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       }
     },
@@ -126,6 +143,7 @@
         "preparing",
         "prepared",
         "publishing",
+        "deploying",
         "finishing",
         "published"
       ]
@@ -211,6 +229,382 @@
         "sha256": {
           "type": "string",
           "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "deployment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "profile",
+        "key",
+        "phase",
+        "commands",
+        "observations",
+        "artifact",
+        "package_attempts"
+      ],
+      "properties": {
+        "schema": {
+          "const": "go-workflow.deployment-state.v1"
+        },
+        "profile": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "target",
+            "recovery_policy",
+            "required_env",
+            "deploy",
+            "observe"
+          ],
+          "properties": {
+            "mode": {
+              "const": "required"
+            },
+            "target": {
+              "type": "string",
+              "minLength": 1
+            },
+            "recovery_policy": {
+              "const": "resume_only"
+            },
+            "required_env": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+              }
+            },
+            "deploy": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "argv",
+                "idempotency"
+              ],
+              "properties": {
+                "argv": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contains": {
+                    "type": "string",
+                    "pattern": "\\{idempotency_key\\}"
+                  }
+                },
+                "idempotency": {
+                  "const": "required"
+                }
+              }
+            },
+            "observe": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "argv",
+                "read_only"
+              ],
+              "properties": {
+                "argv": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contains": {
+                    "type": "string",
+                    "pattern": "\\{idempotency_key\\}"
+                  }
+                },
+                "read_only": {
+                  "const": true
+                }
+              }
+            },
+            "package": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "argv",
+                "filename"
+              ],
+              "properties": {
+                "argv": {
+                  "type": "array",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "contains": {
+                    "type": "string",
+                    "pattern": "\\{output\\}"
+                  }
+                },
+                "filename": {
+                  "type": "string",
+                  "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+                }
+              }
+            }
+          }
+        },
+        "key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "phase": {
+          "enum": [
+            "pending",
+            "accepted",
+            "verified"
+          ]
+        },
+        "commands": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        },
+        "observations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "observation",
+              "raw"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "observation": {
+                "type": "object",
+                "required": [
+                  "schema",
+                  "status",
+                  "authorized",
+                  "available",
+                  "target",
+                  "commit",
+                  "version",
+                  "artifact_sha256",
+                  "idempotency_key"
+                ],
+                "properties": {
+                  "target": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "commit": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{40}$"
+                  },
+                  "version": {
+                    "type": "string",
+                    "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+                  },
+                  "artifact_sha256": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "pattern": "^[0-9a-f]{64}$"
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "idempotency_key": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  },
+                  "schema": {
+                    "const": "go-workflow.deployment-observation.v1"
+                  },
+                  "status": {
+                    "enum": [
+                      "absent",
+                      "accepted",
+                      "live",
+                      "unknown"
+                    ]
+                  },
+                  "authorized": {
+                    "type": "boolean"
+                  },
+                  "available": {
+                    "type": "boolean"
+                  }
+                }
+              },
+              "raw": {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "path",
+                  "sha256"
+                ],
+                "properties": {
+                  "path": {
+                    "type": "string",
+                    "minLength": 1
+                  },
+                  "sha256": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{64}$"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "artifact": {
+          "anyOf": [
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "path",
+                "sha256",
+                "size"
+              ],
+              "properties": {
+                "path": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "sha256": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                },
+                "size": {
+                  "type": "integer",
+                  "minimum": 0
+                }
+              }
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "package_attempts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "output",
+              "status"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "output": {
+                "type": "string",
+                "minLength": 1
+              },
+              "status": {
+                "enum": [
+                  "pending",
+                  "confirmed"
+                ]
+              }
+            }
+          }
+        },
+        "effect": {
+          "type": "object",
+          "required": [
+            "status",
+            "expected"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "status": {
+              "enum": [
+                "pending",
+                "confirmed"
+              ]
+            },
+            "expected": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "target",
+                "commit",
+                "version",
+                "artifact_sha256",
+                "idempotency_key"
+              ],
+              "properties": {
+                "target": {
+                  "type": "string",
+                  "minLength": 1
+                },
+                "commit": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{40}$"
+                },
+                "version": {
+                  "type": "string",
+                  "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+                },
+                "artifact_sha256": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "pattern": "^[0-9a-f]{64}$"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "idempotency_key": {
+                  "type": "string",
+                  "pattern": "^[0-9a-f]{64}$"
+                }
+              }
+            }
+          }
+        },
+        "evidence": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
         }
       }
     }

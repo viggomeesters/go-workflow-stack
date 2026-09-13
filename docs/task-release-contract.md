@@ -206,3 +206,76 @@ User files and other generated output are preserved and can block cleanup.
 GitHub Actions are never consulted. Local bare-Git fixtures exercise the complete
 managed lifecycle, while process fixtures cover orphan protection and lost GitHub
 responses without contacting an external publisher.
+
+
+## Deployment and live proof (v0.3.23)
+
+A release profile can explicitly declare no deployment with
+`"deployment": {"mode":"none","reason":"Source/library release only"}`.
+Omitting this field retains legacy release-only behavior. Neither case claims
+that a running service was verified. A required deployment profile must also
+configure publication and uses this structure (replace the example target and
+adapters during onboarding):
+
+```json
+{
+  "mode": "required",
+  "target": "app-staging",
+  "recovery_policy": "resume_only",
+  "required_env": ["DEPLOY_TOKEN"],
+  "package": {
+    "argv": ["python3", "scripts/package.py", "{output}", "{commit}", "{version}"],
+    "filename": "app.pkg"
+  },
+  "deploy": {
+    "argv": ["python3", "scripts/deploy.py", "{target}", "{idempotency_key}", "{commit}", "{version}", "{artifact}", "{artifact_sha256}"],
+    "idempotency": "required"
+  },
+  "observe": {
+    "argv": ["python3", "scripts/observe.py", "{target}", "{idempotency_key}"],
+    "read_only": true
+  }
+}
+```
+
+Add `--allow-deploy` to initial managed execution or `release prepare`, alongside
+`--ship-policy push --allow-push`. The controller freezes both authorizations and
+the profile; resume retains them. Missing authorization, target, credentials or
+recovery policy blocks deployment. Credentials are environment variable names,
+not values stored in the profile. There is no inferred rollback or production
+migration permission.
+
+Adapters receive structured argv in the canonical checkout under the registered
+publication process guard, command/time budget and single publication reservation.
+They must leave verified product content unchanged. Supported placeholders are
+`{target}`, `{idempotency_key}`, `{commit}`, `{version}`, `{artifact_sha256}`,
+`{artifact}` and `{output}`. Package is optional; without it artifact values are
+empty argv substitutions and null in observations. Packaging runs after Git release
+readback, with the released identity. Output goes into the Git common directory's
+`go-workflow-artifacts/<task>/` storage. The controller records its SHA-256 and size;
+partial unacknowledged files remain preserved, while a retry uses a fresh path.
+
+The observer must query the target, not echo the requested values. It exits zero
+and prints one JSON object using `go-workflow.deployment-observation.v1`, containing
+`status` (`absent`, `accepted`, `live` or `unknown`), `authorized`, `available`,
+`target`, full `commit`, semantic `version`, `artifact_sha256` (or null), and
+`idempotency_key`. Every identity field must match. `live` requires authorized and
+available true; absent/accepted require available false. Unauthorized, unknown,
+malformed or failed observations are never interpreted as absence or success.
+An adapter must authoritatively answer for the queried operation even when it is
+absent, and must enforce idempotency for a repeated key. These are trusted adapter
+contracts, not provider-independent guarantees made by an exit code.
+
+The durable release state gains a `deploying` phase. It records the same stable
+operation key before an external write, observes before each attempt, and leaves
+accepted-but-not-live pending without redeploying. A lost response is reconciled
+against that operation. Remote release identity is checked again on resume; a
+compatible descendant metadata commit is allowed, a conflicting tag is not.
+
+`go-workflow.deployment-evidence.v1` retains executed command references, raw live
+observation and package identity. Release evidence links that proof. Completion
+validates the profile/version stored in the released Git commit and executes fresh
+read-only observation before finish and approval. Historical reporting checks saved
+proof without contacting an old target or requiring its old local artifact cache.
+The adapters themselves remain trusted infrastructure; no real target is configured
+by the stack. Cross-host recovery and adopted project defaults are separate work.

@@ -1,0 +1,316 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Verified released artifact and live target evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "target",
+    "commit",
+    "version",
+    "artifact_sha256",
+    "idempotency_key",
+    "schema",
+    "status",
+    "task_id",
+    "project",
+    "contract_digest",
+    "content_digest",
+    "run_id",
+    "profile",
+    "observation",
+    "raw",
+    "artifact",
+    "commands"
+  ],
+  "properties": {
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "artifact_sha256": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "idempotency_key": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "schema": {
+      "const": "go-workflow.deployment-evidence.v1"
+    },
+    "status": {
+      "const": "verified"
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "contract_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "mode",
+        "target",
+        "recovery_policy",
+        "required_env",
+        "deploy",
+        "observe"
+      ],
+      "properties": {
+        "mode": {
+          "const": "required"
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "recovery_policy": {
+          "const": "resume_only"
+        },
+        "required_env": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
+          }
+        },
+        "deploy": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "argv",
+            "idempotency"
+          ],
+          "properties": {
+            "argv": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contains": {
+                "type": "string",
+                "pattern": "\\{idempotency_key\\}"
+              }
+            },
+            "idempotency": {
+              "const": "required"
+            }
+          }
+        },
+        "observe": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "argv",
+            "read_only"
+          ],
+          "properties": {
+            "argv": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contains": {
+                "type": "string",
+                "pattern": "\\{idempotency_key\\}"
+              }
+            },
+            "read_only": {
+              "const": true
+            }
+          }
+        },
+        "package": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "argv",
+            "filename"
+          ],
+          "properties": {
+            "argv": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1
+              },
+              "contains": {
+                "type": "string",
+                "pattern": "\\{output\\}"
+              }
+            },
+            "filename": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+            }
+          }
+        }
+      }
+    },
+    "observation": {
+      "type": "object",
+      "required": [
+        "schema",
+        "status",
+        "authorized",
+        "available",
+        "target",
+        "commit",
+        "version",
+        "artifact_sha256",
+        "idempotency_key"
+      ],
+      "properties": {
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "version": {
+          "type": "string",
+          "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+        },
+        "artifact_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "idempotency_key": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "schema": {
+          "const": "go-workflow.deployment-observation.v1"
+        },
+        "status": {
+          "enum": [
+            "absent",
+            "accepted",
+            "live",
+            "unknown"
+          ]
+        },
+        "authorized": {
+          "type": "boolean"
+        },
+        "available": {
+          "type": "boolean"
+        }
+      }
+    },
+    "raw": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "artifact": {
+      "anyOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "sha256",
+            "size"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            "size": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "commands": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

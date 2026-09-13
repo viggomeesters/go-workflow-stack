@@ -2459,6 +2459,7 @@ def build_resume_args(mode: str, args: argparse.Namespace) -> list[str]:
         ("--followup-on-block", "followup_on_block"),
         ("--allow-dirty", "allow_dirty"),
         ("--allow-push", "allow_push"),
+        ("--allow-deploy", "allow_deploy"),
         ("--json", "json"),
     ]:
         if bool(getattr(args, name, False)):
@@ -2528,6 +2529,7 @@ def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args:
             "ship_policy": arg_str(args, "ship_policy", "none"),
             "allow_dirty": bool(getattr(args, "allow_dirty", False)),
             "allow_push": bool(getattr(args, "allow_push", False)),
+            "allow_deploy": bool(getattr(args, "allow_deploy", False)),
         },
         "next_action": result.get("next_action"),
     }
@@ -5426,6 +5428,7 @@ def build_parser() -> argparse.ArgumentParser:
     for field in ('task-id', 'snapshot', 'sha256'): context_verify.add_argument('--' + field, required=True)
     context_verify.set_defaults(func=cmd_context_verify)
     for command_parser in (go, auto, *[sub.choices[name] for name in ('loop', 'go-loop')]):
+        command_parser.add_argument('--allow-deploy', action='store_true')
         for field in ('task-id', 'workspace-path', 'workspace-branch', 'base-branch', 'base-commit', 'run-id'):
             command_parser.add_argument('--' + field, default='')
     managed_parser = sub.add_parser('managed', help='Internal managed-run process boundary')
@@ -5450,6 +5453,7 @@ def build_parser() -> argparse.ArgumentParser:
         if operation == 'prepare':
             item.add_argument('--ship-policy', choices=['none', 'push'], default='none')
             item.add_argument('--allow-push', action='store_true')
+            item.add_argument('--allow-deploy', action='store_true')
         item.set_defaults(func=cmd_release)
     completion_parser = sub.add_parser('completion', help='Capture and inspect content-bound lifecycle proof')
     completion_sub = completion_parser.add_subparsers(dest='completion_operation', required=True)
@@ -5729,7 +5733,7 @@ def cmd_release(args):
     repo = Path(args.repo).resolve()
     if args.release_operation == 'prepare':
         result = prepare_release(repo, args.task_id, args.owner, args.run_id,
-            ship_policy=args.ship_policy, allow_push=args.allow_push)
+            ship_policy=args.ship_policy, allow_push=args.allow_push, allow_deploy=args.allow_deploy)
     elif args.release_operation == 'publish':
         result = publish_release(repo, args.task_id, args.owner, args.run_id)
     else:

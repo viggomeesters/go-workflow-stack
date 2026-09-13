@@ -20,12 +20,17 @@ def validate_release_profiles(value):
         if not isinstance(name, str) or not name.strip() or not isinstance(profile, dict):
             errors.append('Invalid release profile name/object'); continue
         required = {'provider', 'remote', 'branch'} | ({'repository'} if profile.get('provider') == 'github-release' else set())
-        if (not isinstance(profile.get('provider'), str) or profile.get('provider') not in {'git-tag', 'github-release'} or set(profile) - {'publication'} != required
-                or not all(isinstance(item, str) and item.strip() for key, item in profile.items() if key != 'publication')):
+        if (not isinstance(profile.get('provider'), str) or profile.get('provider') not in {'git-tag', 'github-release'} or set(profile) - {'publication', 'deployment'} != required
+                or not all(isinstance(item, str) and item.strip() for key, item in profile.items() if key not in {'publication', 'deployment'})):
             errors.append('Invalid/unsupported release profile: ' + name)
         if 'publication' in profile:
             from .release import validate_publication
             errors.extend(validate_publication(profile['publication']))
+        if 'deployment' in profile:
+            from .deployment import validate_profile, required
+            errors.extend(validate_profile(profile['deployment']))
+            if required(profile['deployment']) and 'publication' not in profile:
+                errors.append('Required deployment needs an explicit publication profile')
     return errors
 
 
@@ -36,7 +41,7 @@ def release_profile(repo, task):
     if not isinstance(profile, dict) or profile.get('provider') not in {'git-tag', 'github-release'}:
         raise CompletionError('Required release profile has no supported verifier/publisher configuration')
     required = {'provider', 'remote', 'branch'} | ({'repository'} if profile['provider'] == 'github-release' else set())
-    profile = {key: value for key, value in profile.items() if key != 'publication'}
+    profile = {key: value for key, value in profile.items() if key not in {'publication', 'deployment'}}
     if set(profile) != required or not all(isinstance(value, str) and value for value in profile.values()):
         raise CompletionError('Release profile has missing or unknown fields')
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', profile['remote']):
@@ -108,6 +113,9 @@ def capture_release(repo, task_id, owner, tag):
             raise CompletionError('Published commit differs from current product content')
         proof = {'schema': 'go-workflow.release-evidence.v1', 'status': 'verified', 'task_id': task_id,
                  'project': task['project'], 'contract_digest': contract_digest(task), 'content_digest': digest, **observed}
+        from .deployment import release_reference
+        deployment = release_reference(repo, task, observed['commit'], digest)
+        if deployment: proof['deployment'] = deployment
         ref = save_artifact(root, task_id, 'release', proof)
         attach(root, task_id, owner, 'release', ref)
         with repository_lock(root, 'task-' + task_id):
@@ -147,3 +155,7 @@ def verify_release_evidence(repo, task, proof, digest, *, remote=True):
         observed = observe_release(repo, task, proof['tag'])
         if any(observed[key] != proof.get(key) for key in ('tag_object', 'commit', 'profile', 'remote_url')):
             raise CompletionError('Remote release changed after recorded readback')
+
+
+    from .deployment import verify_completion
+    verify_completion(repo, task, proof, current=False)

@@ -26,6 +26,7 @@ from .worktrees import (active_task, checked_scope, git, git_text, owned_record,
 
 SCHEMA = 'go-workflow.publication-state.v1'
 BUDGET = ContextVar('publication_budget', default=None)
+ACTIVE_SESSION = ContextVar('publication_session', default=None)
 VERSION = re.compile(r'^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$')
 
 
@@ -85,7 +86,11 @@ def publication_profile(control, task):
     value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
     errors = validate_publication(value)
     if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
-    return {**identity, 'publication': deepcopy(value)}
+    result = {**identity, 'publication': deepcopy(value)}
+    from .deployment import profile as deployment_profile
+    deployment = deployment_profile(control, task)
+    if deployment is not None: result['deployment'] = deployment
+    return result
 
 
 def configured(control, task):
@@ -104,8 +109,8 @@ def validate_state(value):
                 'contract_digest', 'authority', 'base_commit', 'remote_base', 'remote_url', 'version', 'tag',
                 'phase', 'preparation', 'effects', 'observations', 'reservation', 'notes'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence'}
-            or value.get('schema') != SCHEMA or not isinstance(value.get('phase'), str) or value.get('phase') not in {'preparing', 'prepared', 'publishing', 'finishing', 'published'}
+            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence', 'deployment'}
+            or value.get('schema') != SCHEMA or not isinstance(value.get('phase'), str) or value.get('phase') not in {'preparing', 'prepared', 'publishing', 'deploying', 'finishing', 'published'}
             or not isinstance(value.get('preparation'), list) or not isinstance(value.get('effects'), dict)
             or not isinstance(value.get('observations'), list)):
         raise PublicationError('Invalid publication checkpoint')
@@ -113,7 +118,11 @@ def validate_state(value):
         if not isinstance(value[name], str) or not value[name]: raise PublicationError('Invalid publication ' + name)
     for name in ('base_commit', 'remote_base', 'commit', 'tag_object'):
         if name in value and not re.fullmatch('[0-9a-f]{40}', str(value[name])): raise PublicationError('Invalid publication Git identity')
-    if value['authority'] != {'ship_policy': 'push', 'allow_push': True, 'actor': value['owner']}:
+    expected_authority = {'ship_policy': 'push', 'allow_push': True, 'actor': value['owner']}
+    deployment = value['profile'].get('deployment') if isinstance(value['profile'], dict) else None
+    if isinstance(deployment, dict) and deployment.get('mode') == 'required':
+        expected_authority['deployment'] = {'allowed': True, 'target': deployment.get('target')}
+    if value['authority'] != expected_authority:
         raise PublicationError('Publication checkpoint lacks explicit authorization')
     if not isinstance(value['profile'], dict) or validate_publication(value['profile'].get('publication')) or not VERSION.fullmatch(value['version']):
         raise PublicationError('Invalid frozen publication profile/version')
@@ -152,6 +161,9 @@ def validate_state(value):
         if (not isinstance(ref, dict) or set(ref) != {'path', 'sha256'} or not isinstance(ref['path'], str)
                 or not isinstance(ref['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', ref['sha256'])):
             raise PublicationError('Invalid publication evidence reference')
+    if 'deployment' in value:
+        from .deployment import validate_state as validate_deployment
+        validate_deployment(value['deployment'])
     return value
 
 
@@ -204,13 +216,15 @@ def publication_slot(control, task_id, owner, run_id):
                 'models': {}, 'task_hash': contract_digest(task), 'code': {}, 'execution_cwd': str(control),
                 'controller': {'host': socket.gethostname(), 'pid': os.getpid()}, 'worker_group': None, 'inflight': None})
         session = RunSession(control, task_id, 'publication')
+        token = ACTIVE_SESSION.set(session)
         try: yield record, session
         finally:
+            ACTIVE_SESSION.reset(token)
             if not group_alive(session.load().get('worker_group')):
                 session.update(phase='complete', worker_group=None, inflight=None)
 
 
-def _write_command(session, cwd, argv):
+def _write_command(session, cwd, argv, *, check=True):
     from .cli import run_shell_with_timeout
     budget = BUDGET.get()
     if budget and budget['used'] >= budget['maximum']:
@@ -221,7 +235,7 @@ def _write_command(session, cwd, argv):
     with session.operation():
         result = run_shell_with_timeout(cwd, shlex.join(argv), _environment(), timeout)
     session.update(inflight=None)
-    if result['returncode']:
+    if check and result['returncode']:
         raise PublicationError('Publication command failed; inspect/reconcile before retry: ' + result['stderr'][-1500:])
     return result
 
@@ -282,7 +296,7 @@ def _version_change(text, spec, replacement=None):
 def _hash(text): return hashlib.sha256(text.encode()).hexdigest()
 
 
-def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allow_push=False):
+def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allow_push=False, allow_deploy=False):
     control = Path(control).resolve()
     with publication_slot(control, task_id, owner, run_id) as (record, session):
         task = active_task(control, task_id, owner); profile = publication_profile(control, task)
@@ -293,6 +307,8 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
         resuming = path.exists()
         if resuming: state = _load(control, task, owner, run_id)
         else:
+            from .deployment import authorize
+            authorize(profile.get('deployment'), allow_deploy)
             if ship_policy != 'push' or allow_push is not True: raise PublicationError('Explicit push authorization is required')
             url, refs = _remote(control, profile)
             remote_base = refs.get('refs/heads/' + profile['branch'])
@@ -326,6 +342,8 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
                 'preparation': [{'path': spec['version']['path'], 'before': _hash(before),
                                  'after': _version_change(before, spec['version'], version)},
                                 {'path': spec['changelog'], 'before': _hash(old_log), 'after': notes + '\n' + old_log}]}
+            if (profile.get('deployment') or {}).get('mode') == 'required':
+                state['authority']['deployment'] = {'allowed': True, 'target': profile['deployment']['target']}
             _save(control, state)  # intent precedes both the reservation and file writes
         reservation = control / state['reservation']
         if reservation.exists():
@@ -472,7 +490,7 @@ def _release_reservation(control, state):
 
 def publish_release(control, task_id, owner, run_id):
     from . import cli as api
-    from .shipping import capture_release, verify_release_evidence
+    from .shipping import capture_release, verify_release_evidence, observe_release
     from argparse import Namespace
     control = Path(control).resolve()
     with publication_slot(control, task_id, owner, run_id) as (record, session):
@@ -487,7 +505,7 @@ def publish_release(control, task_id, owner, run_id):
         worker = Path(record['path']); verify_workspace(record); checked_scope(record)
         if any(outcome['status'] in {'blocked', 'rejected'} for outcome in task.get('requested_outcomes', [])):
             raise PublicationError('Explicitly blocked/rejected requirement needs resolution before publication')
-        if state['phase'] != 'finishing':
+        if state['phase'] not in {'deploying', 'finishing'}:
             findings = completion_findings(worker, task, phase_only=True)
             if findings: raise PublicationError('Final candidate proof blocked: ' + '; '.join(findings))
             if api.architecture_finish_findings(control / '.go', task):
@@ -502,6 +520,14 @@ def publish_release(control, task_id, owner, run_id):
             if content_snapshot(control, task)['digest'] != state['content_digest']:
                 raise PublicationError('Integrated product content differs from final proof')
             _tag(control, state, session); _push(control, state, session); _publish_github(control, state, session)
+            state['phase'] = 'deploying'; _save(control, state)
+        if state['phase'] == 'deploying':
+            observed = observe_release(control, task, state['tag'])
+            if (observed['commit'] != state['commit'] or observed['tag_object'] != state['tag_object']
+                    or observed['remote_url'] != state['remote_url']):
+                raise PublicationError('Published release identity changed before deployment/readback')
+            from .deployment import run_deployment
+            run_deployment(control, task, state, session)
             _, ref = capture_release(control, task_id, owner, state['tag'])
             state.update(phase='finishing', release_evidence=ref); _save(control, state)
         remaining_timeout(120)

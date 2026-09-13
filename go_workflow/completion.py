@@ -297,6 +297,8 @@ def completion_findings(repo, task, *, current=True, remote=True, phase_only=Fal
             from .shipping import verify_release_evidence
             proof = read_artifact(root, manifest.get('release'))
             verify_release_evidence(repo, task, proof, digest, remote=remote)
+            from .deployment import verify_completion
+            verify_completion(repo, task, proof, current=current)
             refs.add(manifest['release']['path'])
         elif release.get('mode') != 'none' or not release.get('reason'):
             raise CompletionError('Explicit release policy is required')

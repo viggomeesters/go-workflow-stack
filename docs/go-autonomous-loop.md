@@ -253,5 +253,9 @@ critic → publication/readback → finish/review → cleanup. See
 for profile, scope and authority requirements. A budget boundary retains the
 same task/run/workspace and publication intent; it never starts a replacement
 builder to recover an acknowledged commit, push, tag or release. Unconfigured
-profiles keep their existing explicit pending handoff. Deployment and live
-service proof are still a separate adapter and are not implied by publication.
+profiles keep their existing explicit pending handoff. As of v0.3.23, an explicit deployment profile and separate `--allow-deploy`
+authority add package/deploy/live-readback before finish. Accepted or unknown
+deployments preserve the same operation identity and a resumable pending state.
+Finish and approval require a fresh matching live observation; historical reports
+retain the original proof without contacting an obsolete target. See the
+[deployment contract](task-release-contract.md#deployment-and-live-proof-v0323).

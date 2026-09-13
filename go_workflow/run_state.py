@@ -62,8 +62,9 @@ def validate_state(value):
 
     if 'publication' in value:
         spec = value['publication']
-        if (not isinstance(spec, dict) or set(spec) != {'profile', 'ship_policy', 'allow_push'}
+        if (not isinstance(spec, dict) or not {'profile', 'ship_policy', 'allow_push'}.issubset(spec) or set(spec) - {'profile', 'ship_policy', 'allow_push', 'allow_deploy'}
                 or not isinstance(spec['ship_policy'], str) or spec['ship_policy'] not in {'none', 'commit', 'push'}
+                or ('allow_deploy' in spec and type(spec['allow_deploy']) is not bool)
                 or type(spec['allow_push']) is not bool or (spec['profile'] is not None and not isinstance(spec['profile'], dict))):
             raise RunStateError('Invalid frozen publication selection/authority')
 
@@ -137,11 +138,14 @@ def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
         if state.get('worker_group') is not None:
             raise RunStateError('This phase already registered a worker')
         if channel in {'completion', 'publication'}:
-            active_task(control, task_id, owner)
+            task = active_task(control, task_id)
+            readback_after_finish = (state['phase'] == 'verify' and task['status'] == 'done'
+                                     and (task.get('claim') or {}).get('agent') == owner)
+            if not readback_after_finish: active_task(control, task_id, owner)
             if not isinstance(state.get('execution_cwd'), str) or str(Path.cwd().resolve()) != state['execution_cwd']:
                 raise RunStateError('Verification bootstrap cwd changed')
             if Path.cwd().resolve() != control:
-                record = owned_record(control, task_id, owner, run_id)
+                record = owned_record(control, task_id, owner, run_id, active=not readback_after_finish)
                 verify_workspace(record)
                 if str(Path.cwd().resolve()) != record['path']: raise RunStateError('Foreign verification workspace')
         else:
@@ -398,10 +402,13 @@ def _execute_managed(control, args, task_id, api, result):
                  'code': {},
                  'publication': {'profile': publisher.publication_profile(control, task) if publisher.configured(control, task) else None,
                                  'ship_policy': getattr(args, 'ship_policy', 'none'),
-                                 'allow_push': bool(getattr(args, 'allow_push', False))},
+                                 'allow_push': bool(getattr(args, 'allow_push', False)),
+                                 'allow_deploy': bool(getattr(args, 'allow_deploy', False))},
                  'controller': {'host': socket.gethostname(), 'pid': os.getpid()},
                  'worker_group': None, 'inflight': None, 'setup_task': task}
         policy = state['publication']
+        from .deployment import authorize
+        authorize((policy['profile'] or {}).get('deployment'), policy.get('allow_deploy', False))
         if policy['profile'] is not None and (policy['ship_policy'] != 'push' or policy['allow_push'] is not True):
             raise RunStateError('Managed publication requires explicit --ship-policy push --allow-push at initial setup')
         atomic_json(state_path(control, task_id), state)
@@ -455,7 +462,7 @@ def _execute_managed(control, args, task_id, api, result):
     current_code = run_code(workspace, record, task)
     publication_in_progress = (publishing and state['phase'] == 'release'
         and publisher.state_path(control, task_id).exists()
-        and publisher._load(control, task, args.agent, state['run_id'])['phase'] in {'publishing', 'finishing', 'published'})
+        and publisher._load(control, task, args.agent, state['run_id'])['phase'] in {'publishing', 'deploying', 'finishing', 'published'})
     if not publication_in_progress and (state['inflight'] or current_code != state['code']):
         history = state['history'] + [{'event': 'reconciled_interruption_or_drift', 'previous_phase': state['phase'],
                                      'inflight': state['inflight'], 'code_before': state['code'], 'code_now': current_code,
@@ -515,7 +522,8 @@ def _execute_managed(control, args, task_id, api, result):
             try:
                 with publisher.publication_budget(1, started + minutes * 60):
                     publisher.prepare_release(control, task_id, args.agent, state['run_id'],
-                        ship_policy=publication['ship_policy'], allow_push=publication['allow_push'])
+                        ship_policy=publication['ship_policy'], allow_push=publication['allow_push'],
+                        allow_deploy=publication.get('allow_deploy', False))
             except publisher.PublicationBudget as exc:
                 result.update(status='budget_exhausted', budget_exhausted=True, summary=str(exc)); break
             except (ValueError, api.StateLockError, api.RepoLocalError) as exc:
@@ -586,6 +594,7 @@ def _execute_managed(control, args, task_id, api, result):
                    '--max-attempts', str(args.max_attempts), '--command-timeout-seconds', str(args.command_timeout_seconds), '--json']
     if publication['ship_policy'] == 'push' and publication['allow_push']:
         resume_args += ['--ship-policy', 'push', '--allow-push']
+    if publication.get('allow_deploy'): resume_args += ['--allow-deploy']
     resume = {'schema': 'go-workflow.managed-resume.v1', 'task_id': task_id, 'run_id': state['run_id'],
               'runtime_required_ref': read_object(root / 'project.json')['stack_ref'], 'args': resume_args,
               'resolution': 'Resolve and preflight the immutable project runtime before invoking these CLI arguments.'}

@@ -167,6 +167,9 @@
         },
         "allow_push": {
           "type": "boolean"
+        },
+        "allow_deploy": {
+          "type": "boolean"
         }
       }
     }

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.23 — explicit deployment and live-version proof
+
+- Configure separate deployment authorization, target and idempotent command adapters.
+- Bind package bytes and authoritative live commit/version to released content.
+- Resume uncertain deployments without replacing their operation identity; preserve
+  partial packages, reject wrong live data and recheck before finish/approval.
+- Preserve release-only profiles and historical proof in ordinary clones.
+
 ## 0.3.22 — resumable configured publication
 
 - Explicit profiles reserve and prepare a scoped semantic version/changelog, then

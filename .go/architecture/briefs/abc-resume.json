@@ -1,0 +1,89 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-resume",
+  "project": "go-workflow-stack",
+  "title": "Managed task phase checkpoints and exclusive recovery",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Resume a bounded active task from its proven phase without stealing a live runner or repeating unconfirmed side effects."
+  ],
+  "scope": {
+    "in": [
+      "Managed native task phase checkpoints, budget resume, ownership/process checks, explicit workspace relocation and side-effect intent/readback interfaces"
+    ],
+    "out": [
+      "Release publisher implementation, deployment providers and live model topology benchmark"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Canonical run state, workspace process/integration locks and native phase subprocess"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Opt-in managed native execution uses explicit initial task/workspace/base bindings and frozen model profiles.",
+    "Persist intent before a phase/effect and confirmation after it; preserve requirement, context and evidence references.",
+    "A process lock plus live parent/worker checks controls recovery; time expiration alone never authorizes a second writer.",
+    "Preserve changed code; invalidate affected proof rather than reset files or invent a successful phase.",
+    "Local relocation requires explicit identity/path mapping and stopped owners; do not guess another host is idle.",
+    "Keep publisher/deployment effects behind explicit intent/readback interfaces for abc-05/06/07."
+  ],
+  "quality_attributes": [
+    {
+      "id": "phase-resume",
+      "scenario": "Budget exhausted after build then increased",
+      "measure": "Completed build repeated or active task requeued",
+      "threshold": 0
+    },
+    {
+      "id": "exclusive-recovery",
+      "scenario": "Competing runner or live orphan worker",
+      "measure": "Concurrent owners admitted",
+      "threshold": 0
+    },
+    {
+      "id": "proof-preservation",
+      "scenario": "Crash, code/profile drift or checkout relocation",
+      "measure": "Lost requirements/evidence or stale proof treated as passed",
+      "threshold": 0
+    },
+    {
+      "id": "effect-reconciliation",
+      "scenario": "Interrupted external effect or cleanup failure",
+      "measure": "Unconfirmed effects repeated without readback",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Old active tasks without managed checkpoints cannot be assigned a guessed phase; they require explicit recovery context."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d06-managed-resume"
+  ]
+}

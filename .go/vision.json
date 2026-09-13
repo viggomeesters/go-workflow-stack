@@ -34,8 +34,8 @@
   ],
   "planned_direction": {
     "id": "abc-lifecycle",
-    "status": "in_progress",
-    "implementation_status": "in_progress",
+    "status": "completed",
+    "implementation_status": "released_and_verified",
     "target": "Zelfstandig releasbare Go-taken met expliciete model/effortkeuze en hervatbare contextoverdracht; done vereist de afgesproken geverifieerde release.",
     "coordinator_project": "go-workflow-stack",
     "plan_ref": ".go/plans/abc-lifecycle.json",
@@ -47,13 +47,15 @@
       "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
     ],
     "non_goals": [
-      "Implementatie in deze intake",
       "Parallelle builders als standaard",
       "Mid-turn hot-switching zonder bewijs",
       "Vault als execution state",
       "GitHub Actions",
       "Ongekozen productieprovider of automatische privilege-uitbreiding"
     ],
-    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+    "legacy_insights_ref": ".go/plans/legacy-insights.json",
+    "stack_release": "v0.3.26",
+    "template_release": "v0.3.16",
+    "completion_note": "Thirteen ABC tasks completed. Opt-in product lifecycle, explicit task/critic models, durable context, primary controller with owned worktrees and serial verified release. Fresh phase workers supported; persistent-session/subagent adapters remain deferred."
   }
 }

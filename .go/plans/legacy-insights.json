@@ -3,7 +3,7 @@
   "format_version": 1,
   "id": "legacy-insights",
   "status": "in_progress",
-  "implementation_status": "in_progress",
+  "implementation_status": "completed",
   "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
   "coordinator_project": "go-workflow-stack",
   "sources": [
@@ -115,7 +115,8 @@
     "abc-07": "v0.3.23 explicit deployment permission, authoritative live-version/artifact proof, stable effect identity, resumed packaging/deploy and historical clone verification; no legacy vault writer reused",
     "abc-08": "v0.3.24 explicit quiescent lifecycle adoption/recovery, pending requirement intake, source profile preservation, complete non-executable review bundles and local skill instructions; no vault writer or global skill mutation",
     "abc-09": "v0.3.25 supported fresh phase workers with canonical context and one workspace; versioned local protocol evidence; persistent-session and subagent adapters explicitly deferred",
-    "abc-10": "v0.3.26 deterministic ordered campaign, completeness/roundtrip failure matrix, real Terra High/Astra Medium local task releases, and repaired pre-publication critic/canonical writer instructions; failed live evidence retained"
+    "abc-10": "v0.3.26 deterministic ordered campaign, completeness/roundtrip failure matrix, real Terra High/Astra Medium local task releases, and repaired pre-publication critic/canonical writer instructions; failed live evidence retained",
+    "abc-template-01/02": "Template v0.3.15/v0.3.16 onboarding, exact ordinary/linked runtime, two local task releases, model phase continuity, primary-controller restriction, unmerged preservation and 18 migration/recovery regressions; source history archived outside starter queue."
   },
-  "remaining_direction": "Template integration remains in template-01/02; all stack ABC tasks are completed."
+  "remaining_direction": "No ABC implementation tasks remain; optional persistent-session/subagent adapters are explicitly deferred by the accepted topology decision."
 }

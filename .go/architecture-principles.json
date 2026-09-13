@@ -43,54 +43,54 @@
       "id": "abc-release-evidence",
       "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
       "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
-      "enforcement": "abc-05 v0.3.21 strict completion, abc-06 v0.3.22 resumable publication and abc-07 v0.3.23 explicit deployment and live proof shipped. Default adoption and broad E2E remain abc-08/10.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-explicit-model-contract",
       "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
       "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
-      "enforcement": "abc-01/02 shipped opt-in profiles and native model arguments/capability checks/frozen selection; abc-04 v0.3.19 retains profiles through exclusive phase resume. Effective identity remains unconfirmed.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-durable-worker-context",
       "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
       "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
-      "enforcement": "abc-03 shipped immutable context in v0.3.18; abc-04 shipped exclusive phase resume and local relocation in v0.3.19. Live topology proof remains abc-09/10.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-task-workspace",
       "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
       "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
-      "enforcement": "abc-11 v0.3.17 owned workspace primitives, abc-03 v0.3.18 durable worker context and abc-04 v0.3.19 exclusive resume/local relocation shipped. Template orchestration remains template-01/02.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-final-candidate-proof",
       "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
       "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
-      "enforcement": "abc-06 v0.3.22 final candidate publication and abc-07 v0.3.23 released profile/version/package live proof shipped. Wider scenario proof remains abc-10.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-selective-legacy-reuse",
       "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
       "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
-      "enforcement": "abc-01/03/05 phase, context and failure proof plus abc-08 v0.3.24 explicit migration and complete intake provenance shipped. Wider property/E2E proof remains abc-10.",
-      "status": "proposed",
-      "implementation_status": "partially_implemented",
+      "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+      "status": "accepted",
+      "implementation_status": "released_and_verified",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     }
   ]

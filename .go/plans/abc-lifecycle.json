@@ -2,8 +2,8 @@
   "kind": "planning_artifact",
   "format_version": 1,
   "id": "abc-lifecycle",
-  "status": "in_progress",
-  "implementation_status": "in_progress",
+  "status": "completed",
+  "implementation_status": "completed",
   "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
   "created_on": "2026-09-13",
   "coordinator_project": "go-workflow-stack",
@@ -28,7 +28,7 @@
     "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
     "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
   ],
-  "planning_contract": "All eleven stack ABC tasks shipped through v0.3.26, including ordered profiled task releases, real native workers and two live-discovered phase-boundary repairs. Two template tasks remain.",
+  "planning_contract": "All thirteen ABC implementation tasks are completed and released: eleven stack tasks through v0.3.26 plus template onboarding v0.3.15 and complete clone proof v0.3.16. Template source task records are non-executable archives, preserving a reusable starter queue.",
   "execution_boundary": {
     "authorized_now": [
       "bounded task implementation",
@@ -476,7 +476,7 @@
   "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
   "legacy_insights_ref": ".go/plans/legacy-insights.json",
   "execution": {
-    "status": "in_progress",
+    "status": "completed",
     "authority": "User GO and Ga verder met de taken: go",
     "active_task": null,
     "completed_tasks": [
@@ -495,12 +495,16 @@
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "resolve_after_campaign",
+    "candidate_version": null,
     "verification_ref": ".go/evidence/abc-05-v021-verification.json",
-    "next_ready": [
-      "go-project-template:abc-template-01"
+    "next_ready": [],
+    "last_release": "v0.3.26",
+    "template_release": "v0.3.16",
+    "template_completed_tasks": [
+      "abc-template-01",
+      "abc-template-02"
     ],
-    "last_release": "v0.3.26"
+    "template_archive": "https://github.com/viggomeesters/go-project-template/tree/main/.go/evidence/abc-source-history-final"
   },
   "original_planning_boundary": {
     "authorized_now": [

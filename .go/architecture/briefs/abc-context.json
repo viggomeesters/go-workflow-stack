@@ -1,0 +1,87 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-context",
+  "project": "go-workflow-stack",
+  "title": "Durable revision-bound worker context",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "A fresh worker receives complete current task context and refuses stale state before writing."
+  ],
+  "scope": {
+    "in": [
+      "Unique run/phase/attempt snapshots, code/state hashes, feedback references and bounded adapter environments"
+    ],
+    "out": [
+      "Active-task ownership/resume state machine and release publisher"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Canonical .go snapshots and the registered workspace/native adapter process"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Write immutable snapshot and feedback before dispatch; no attempt artifact overwrites.",
+    "Canonical task and workspace identity, Git revision/index/workdiff and referenced evidence are verified before writing.",
+    "New opt-in context uses file references; legacy adapters keep their existing environment shape.",
+    "Use explicitly referenced repo-local skills/context; notepad prose cannot replace structured evidence."
+  ],
+  "quality_attributes": [
+    {
+      "id": "snapshot-uniqueness",
+      "scenario": "Repeated phase/attempt dispatch",
+      "measure": "Earlier snapshots overwritten",
+      "threshold": 0
+    },
+    {
+      "id": "stale-state-refusal",
+      "scenario": "Changed task/code/index/untracked content or evidence before launch",
+      "measure": "Stale snapshots accepted",
+      "threshold": 0
+    },
+    {
+      "id": "repair-feedback",
+      "scenario": "Fresh repair worker after failed verification or critic",
+      "measure": "Missing current checks/findings",
+      "threshold": 0
+    },
+    {
+      "id": "bounded-environment",
+      "scenario": "Large project context",
+      "measure": "Full context copies in opted-in environment",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "A verified prelaunch snapshot detects drift; process isolation and active resume belong to separate contracts."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d05-durable-context"
+  ]
+}

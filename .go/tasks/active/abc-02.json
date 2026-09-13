@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-02",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Modelkeuze afdwingen en gebruik registreren",
   "description": "Laat Codex build, critic en repair het gevalideerde taakprofiel gebruiken en registreer aangevraagde en bevestigde effectieve runtime-instellingen per fase.\nAfhankelijk van: go-workflow-stack:abc-01. Controleer dependencybewijs vóór claim; de huidige runtime dwingt dit nog niet af. Scope en acceptatie beschrijven gepland gedrag. Alleen een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -50,10 +50,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T13:30:13+02:00",
+    "base_commit": "c06beda2fec2190bc8a73fa4986814c4e0d5c88e"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -67,7 +68,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "not_started",
+    "implementation_status": "in_progress",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -189,5 +190,11 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "execution_workspace": {
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-02",
+    "branch": "codex/abc-02",
+    "coordinator_checkout": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "mode": "manual serialized execution until abc-11"
   }
 }

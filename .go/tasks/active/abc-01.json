@@ -35,7 +35,9 @@
       "docs/releases/**",
       "schemas/phase-contract.schema.json",
       "schemas/verification-evidence.schema.json",
-      "tests/test_abc_phase_contracts.py"
+      "tests/test_abc_phase_contracts.py",
+      "tests/test_smoke.py",
+      "scripts/release-check-inner.sh"
     ]
   },
   "acceptance": [
@@ -173,7 +175,8 @@
     "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
     "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
     "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
-    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task.",
+    "Execution scope refinement: update current-version test fixtures and immutable v0.3.15 template pairing, required by the existing release procedure. Preserve historical release assertions and security checks."
   ],
   "architecture": {
     "impact": "material",

@@ -18,6 +18,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
 from go_workflow.task_state import pending_review_task_ids
+from go_workflow.constants import STACK_VERSION, STACK_REF
 
 
 def template_repo() -> Path:
@@ -2641,7 +2642,7 @@ def test_modular_core_and_adapter_protocol_are_published_as_repo_contracts():
         cwd=ROOT, text=True, capture_output=True,
     )
     assert imported.returncode == 0, imported.stderr
-    assert imported.stdout.strip() == "0.3.14 v0.3.14 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
+    assert imported.stdout.strip() == f"{STACK_VERSION} {STACK_REF} 2 go-workflow.agent-adapter-request.v1 go-workflow.agent-adapter-result.v1"
     for path in [
         ROOT / "schemas" / "agent-adapter-request.schema.json",
         ROOT / "schemas" / "agent-adapter-result.schema.json",
@@ -3239,8 +3240,8 @@ def test_doctor_reports_wsl_hermes_readiness_and_version_contract(tmp_path: Path
         "path": str(fake_hermes),
         "prompt_flag": "-z",
     }
-    assert result["stack"]["version"] == "0.3.14"
-    assert result["stack"]["ref"] == "v0.3.14"
+    assert result["stack"]["version"] == STACK_VERSION
+    assert result["stack"]["ref"] == STACK_REF
     assert result["stack"]["required_ref"] == "v9.9.9"
     assert result["stack"]["exact_ref"] is False
     assert result["stack"]["development_override"] is True
@@ -3270,7 +3271,7 @@ def test_adopt_writes_and_validate_enforces_deterministic_stack_ref(tmp_path: Pa
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     project_path = repo / ".go" / "project.json"
     project = json.loads(project_path.read_text(encoding="utf-8"))
-    assert project["stack_ref"] == "v0.3.14"
+    assert project["stack_ref"] == STACK_REF
 
     project["stack_ref"] = "main"
     project_path.write_text(json.dumps(project, indent=2) + "\n", encoding="utf-8")
@@ -3592,7 +3593,7 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF], cwd=repo, check=True)
     subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
     subprocess.run(["git", "init", "-q", "--bare", str(attacker)], check=True)
     subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
@@ -3602,13 +3603,13 @@ def test_release_preflight_is_local_and_version_synchronized(tmp_path: Path):
     env["TMPDIR"] = str(release_tmp)
     result = subprocess.run(
         [
-            "./scripts/release-check.sh", "0.3.14",
+            "./scripts/release-check.sh", STACK_VERSION,
             "--validate-existing", "--allow-local-origin",
         ],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
-    assert "release preflight: v0.3.14" in result.stdout
+    assert f"release preflight: {STACK_REF}" in result.stdout
     assert "publish: not performed" in result.stdout
     assert not attacker_marker.exists()
     assert list(release_tmp.iterdir()) == []
@@ -3633,11 +3634,11 @@ def test_release_preflight_allows_normal_tag_gate_before_origin_push(tmp_path: P
     subprocess.run(["git", "add", "release-marker.txt"], cwd=repo, check=True)
     subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo, check=True,
     )
     assert subprocess.run(
-        ["git", "--git-dir", str(origin), "show-ref", "--verify", "--quiet", "refs/tags/v0.3.14"],
+        ["git", "--git-dir", str(origin), "show-ref", "--verify", "--quiet", f"refs/tags/{STACK_REF}"],
     ).returncode != 0
 
     upload_pack_marker = tmp_path / "release-source-upload-pack-invoked"
@@ -3663,7 +3664,7 @@ def test_release_preflight_allows_normal_tag_gate_before_origin_push(tmp_path: P
     index_path = repo / ".git" / "index"
     index_before = hashlib.sha256(index_path.read_bytes()).hexdigest()
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 0, result.stderr + result.stdout
@@ -3740,7 +3741,7 @@ def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -3767,7 +3768,7 @@ def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
     env["BASH_FUNC_pwd%%"] = f"() {{ printf invoked > {shlex.quote(str(exported_function_marker))}; }}"
     env["BASH_FUNC_cd%%"] = f"() {{ printf invoked > {shlex.quote(str(exported_function_marker))}; builtin cd \"$@\"; }}"
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3782,7 +3783,7 @@ def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
     assert "release-gate-ran" in result.stdout
 
     explicit_template_result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3793,7 +3794,7 @@ def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
     assert "release-gate-ran" not in explicit_template_result.stdout
 
     empty_template_result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3816,7 +3817,7 @@ def test_release_preflight_sanitizes_git_config_for_real_gate(tmp_path: Path):
         encoding="utf-8",
     )
     bash_env_result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3835,13 +3836,13 @@ def test_release_preflight_rejects_tag_that_does_not_point_to_head(tmp_path: Pat
     subprocess.run(["git", "init", "-q", "-b", "main"], cwd=repo, check=True)
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "release", "-q"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "later", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 1
@@ -3867,7 +3868,7 @@ def test_release_preflight_rejects_explicit_template_before_historical_gate_exec
     commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
     subprocess.run([*commit, "-m", "unsafe historical release"], cwd=repo, check=True)
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -3878,7 +3879,7 @@ def test_release_preflight_rejects_explicit_template_before_historical_gate_exec
     subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3901,14 +3902,14 @@ def test_release_preflight_fails_closed_when_git_status_cannot_read_index(tmp_pa
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
     (repo / ".git" / "index").write_bytes(b"broken")
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3946,7 +3947,7 @@ def test_release_preflight_does_not_execute_repo_local_clean_filter(tmp_path: Pa
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -3963,7 +3964,7 @@ def test_release_preflight_does_not_execute_repo_local_clean_filter(tmp_path: Pa
     (repo / "payload.txt").write_text("release payload\n", encoding="utf-8")
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -3991,7 +3992,7 @@ def test_release_preflight_cannot_hide_modified_file_with_index_flag(tmp_path: P
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -3999,7 +4000,7 @@ def test_release_preflight_cannot_hide_modified_file_with_index_flag(tmp_path: P
     (repo / "payload.txt").write_text("modified payload\n", encoding="utf-8")
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -4029,7 +4030,7 @@ def test_historical_release_gate_cannot_write_relative_file_into_caller_checkout
     commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
     subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -4040,7 +4041,7 @@ def test_historical_release_gate_cannot_write_relative_file_into_caller_checkout
     subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -4067,7 +4068,7 @@ def test_release_launcher_refuses_hidden_modified_inner_payload(tmp_path: Path):
         check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -4084,7 +4085,7 @@ def test_release_launcher_refuses_hidden_modified_inner_payload(tmp_path: Path):
     )
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -4113,7 +4114,7 @@ def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: P
     subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
     original_head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=repo, text=True).strip()
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo,
         check=True,
     )
@@ -4168,7 +4169,7 @@ def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: P
     trusted_launcher.chmod(0o755)
 
     result = subprocess.run(
-        [str(trusted_launcher), "--repo", str(repo), "0.3.14", "--allow-local-origin"],
+        [str(trusted_launcher), "--repo", str(repo), STACK_VERSION, "--allow-local-origin"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -4193,6 +4194,7 @@ def test_existing_release_uses_immutable_canonical_template_pairing():
     assert "0.3.13:https://*)" in inner
     assert "ab89ae489fd88e464c052c076e4c6f48a06d5b2b" in inner
     assert "0.3.14:https://*)" in inner
+    assert "0.3.15:https://*)" in inner
     assert "490dd50671dd740e5902ad17ed475258bb7c939b" in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
     assert "PYTHONSAFEPATH=" not in inner
@@ -4256,7 +4258,7 @@ def test_external_release_launcher_rejects_unproven_head_before_inner_execution(
     )
 
     result = subprocess.run(
-        [str(trusted_launcher), "--repo", str(repo), "0.3.14", "--allow-candidate"],
+        [str(trusted_launcher), "--repo", str(repo), STACK_VERSION, "--allow-candidate"],
         cwd=repo,
         text=True,
         capture_output=True,
@@ -4279,7 +4281,7 @@ def test_release_preflight_cannot_hide_untracked_files_with_git_config(tmp_path:
         cwd=repo, check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo, check=True,
     )
     (repo / "untracked-release-input.txt").write_text("must be detected\n", encoding="utf-8")
@@ -4295,7 +4297,7 @@ def test_release_preflight_cannot_hide_untracked_files_with_git_config(tmp_path:
     env = os.environ.copy()
     env["GIT_CONFIG_PARAMETERS"] = "'status.showUntrackedFiles'='no'"
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14"],
+        ["./scripts/release-check.sh", STACK_VERSION],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 1
@@ -4324,7 +4326,7 @@ def test_release_preflight_validates_existing_tag_from_separate_shallow_tips(tmp
     (repo / "release.txt").write_text("release\n", encoding="utf-8")
     subprocess.run(["git", "add", "release.txt"], cwd=repo, check=True)
     subprocess.run([*commit, "-m", "release"], cwd=repo, check=True)
-    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"], cwd=repo, check=True)
+    subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF], cwd=repo, check=True)
     (repo / "after-tag.txt").write_text("later\n", encoding="utf-8")
     subprocess.run(["git", "add", "after-tag.txt"], cwd=repo, check=True)
     subprocess.run([*commit, "-m", "later"], cwd=repo, check=True)
@@ -4332,14 +4334,14 @@ def test_release_preflight_validates_existing_tag_from_separate_shallow_tips(tmp
     subprocess.run(["git", "clone", "-q", "--depth", "1", "--no-tags", f"file://{origin}", str(shallow)], check=True)
     subprocess.run(["git", "remote", "set-url", "origin", "../origin"], cwd=shallow, check=True)
     assert subprocess.run(
-        ["git", "show-ref", "--verify", "--quiet", "refs/tags/v0.3.14"], cwd=shallow,
+        ["git", "show-ref", "--verify", "--quiet", f"refs/tags/{STACK_REF}"], cwd=shallow,
     ).returncode != 0
     assert subprocess.run(
-        ["git", "merge-base", "--is-ancestor", "v0.3.14", "HEAD"], cwd=shallow,
+        ["git", "merge-base", "--is-ancestor", STACK_REF, "HEAD"], cwd=shallow,
     ).returncode != 0
 
     result = subprocess.run(
-        ["./scripts/release-check.sh", "0.3.14", "--validate-existing", "--allow-local-origin"],
+        ["./scripts/release-check.sh", STACK_VERSION, "--validate-existing", "--allow-local-origin"],
         cwd=shallow, text=True, capture_output=True,
     )
     assert result.returncode == 0, result.stderr + result.stdout
@@ -4368,7 +4370,7 @@ def test_release_preflight_rejects_untrusted_origin(
         cwd=repo, check=True,
     )
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF],
         cwd=repo, check=True,
     )
     subprocess.run(["git", "remote", "add", "origin", origin_url], cwd=repo, check=True)
@@ -4380,7 +4382,7 @@ def test_release_preflight_rejects_untrusted_origin(
         assert rewritten.stdout.strip() == str(repo)
     env = os.environ.copy()
     command = [
-        "./scripts/release-check.sh", "0.3.14",
+        "./scripts/release-check.sh", STACK_VERSION,
         "--validate-existing",
     ]
     if allow_local:
@@ -4403,11 +4405,11 @@ def test_release_preflight_rejects_rewritten_annotated_tag_object(tmp_path: Path
     subprocess.run(["git", "add", "."], cwd=repo, check=True)
     commit = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-q"]
     subprocess.run([*commit, "-m", "remote release"], cwd=repo, check=True)
-    tag = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.14", "-m", "v0.3.14"]
+    tag = ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", STACK_REF, "-m", STACK_REF]
     subprocess.run(tag, cwd=repo, check=True)
     subprocess.run(["git", "clone", "-q", "--bare", str(repo), str(origin)], check=True)
     subprocess.run(
-        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-f", "-a", "v0.3.14", "-m", "rewritten metadata", "HEAD"],
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-f", "-a", STACK_REF, "-m", "rewritten metadata", "HEAD"],
         cwd=repo, check=True,
     )
     subprocess.run(["git", "remote", "add", "origin", str(origin)], cwd=repo, check=True)
@@ -4415,13 +4417,13 @@ def test_release_preflight_rejects_rewritten_annotated_tag_object(tmp_path: Path
     env["TMPDIR"] = str(release_tmp)
     result = subprocess.run(
         [
-            "./scripts/release-check.sh", "0.3.14",
+            "./scripts/release-check.sh", STACK_VERSION,
             "--validate-existing", "--allow-local-origin",
         ],
         cwd=repo, text=True, capture_output=True, env=env,
     )
     assert result.returncode == 1
-    assert "origin tag object v0.3.14 does not match local annotated tag" in result.stderr
+    assert f"origin tag object {STACK_REF} does not match local annotated tag" in result.stderr
     assert list(release_tmp.iterdir()) == []
 
 
@@ -4467,8 +4469,8 @@ def test_migrate_plans_then_applies_legacy_contract_without_implicit_writes(tmp_
     migrated = json.loads(project_path.read_text(encoding="utf-8"))
     assert migrated["contract_version"] == 2
     assert migrated["project_mode"] == "project"
-    assert migrated["required_stack_version"] == "0.3.14"
-    assert migrated["stack_ref"] == "v0.3.14"
+    assert migrated["required_stack_version"] == STACK_VERSION
+    assert migrated["stack_ref"] == STACK_REF
     migrated_hierarchy = json.loads(hierarchy_path.read_text(encoding="utf-8"))
     assert "epics" in migrated_hierarchy
     assert "legacy-history" in migrated_hierarchy["epics"][0]["tasks"]

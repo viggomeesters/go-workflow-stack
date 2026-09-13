@@ -479,12 +479,19 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": "abc-01",
-    "completed_tasks": [],
+    "active_task": null,
+    "completed_tasks": [
+      "abc-01"
+    ],
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
     "candidate_version": "0.3.15",
-    "verification_ref": ".go/evidence/abc-01-verification.json"
+    "verification_ref": ".go/evidence/abc-01-verification.json",
+    "next_ready": [
+      "abc-02",
+      "abc-11"
+    ],
+    "last_release": "v0.3.15"
   }
 }

@@ -1,0 +1,24 @@
+{
+  "schema": "go-workflow.release-publication-proof.v1",
+  "task_id": "abc-01",
+  "tag": "v0.3.15",
+  "commit": "0dbffb09766a3a1d10f769195f81638923eafba9",
+  "tag_object": "19c857deb413dada903b00d010e6fb8676da0fac",
+  "remote_refs": {
+    "refs/heads/main": "0dbffb09766a3a1d10f769195f81638923eafba9",
+    "refs/tags/v0.3.15": "19c857deb413dada903b00d010e6fb8676da0fac",
+    "refs/tags/v0.3.15^{}": "0dbffb09766a3a1d10f769195f81638923eafba9"
+  },
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-13T11:26:24Z",
+    "tagName": "v0.3.15",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.15"
+  },
+  "tag_gate": {
+    "status": "passed",
+    "log_ref": ".go/evidence/abc-01-tag.log",
+    "sha256": "0136ad068ff3d6c760288f0561ce97477dc2025cbe52af95d741e2d6cf5d0cb2"
+  }
+}

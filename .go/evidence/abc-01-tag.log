@@ -1,0 +1,46 @@
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle codex/abc-01 refs/tags/v0.3.15:refs/tags/v0.3.15
+From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
+ * branch            codex/abc-01 -> FETCH_HEAD
+ * [new tag]         v0.3.15    -> v0.3.15
+RUN: git merge --ff-only FETCH_HEAD
+Updating 7dad63b..0dbffb0
+Fast-forward
+ .go/architecture/events.jsonl         |   1 +
+ .go/evidence/abc-01-candidate.log     | 108 ++++++++++++++++++++++++++++++++++
+ .go/evidence/abc-01-verification.json |  30 ++++++++++
+ .go/evidence/events.jsonl             |   7 +++
+ .go/plans/abc-lifecycle.json          |  18 +++++-
+ .go/tasks/active/abc-01.json          |  70 +++++++++++++++++-----
+ .go/vision.json                       |   4 +-
+ 7 files changed, 219 insertions(+), 19 deletions(-)
+ create mode 100644 .go/evidence/abc-01-candidate.log
+ create mode 100644 .go/evidence/abc-01-verification.json
+RUN: git rev-parse HEAD
+0dbffb09766a3a1d10f769195f81638923eafba9
+RUN: uv run --python 3.12 --no-project --with pytest>=8,<9 --with jsonschema>=4.23 python -m pytest tests/test_architecture.py tests/test_abc_contracts.py tests/test_abc_phase_contracts.py -q
+............................                                             [100%]
+28 passed in 3.84s
+RUN: ./scripts/release-check.sh 0.3.15
+release preflight: v0.3.15
+tag: annotated v0.3.15 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 117.79s (0:01:57)
+ok: /tmp/tmp.XevvBYSwXL/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 3ms
+   Building go-workflow-stack @ file:///tmp/tmp.XevvBYSwXL/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.XevvBYSwXL/go-workflow-stack
+Prepared 1 package in 1.24s
+Installed 1 package in 18ms
+ + go-workflow-stack==0.3.15 (from file:///tmp/tmp.XevvBYSwXL/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.hY7SgjNm7U/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.hY7SgjNm7U/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.hY7SgjNm7U/fixture/.go
+ok: /tmp/tmp.hY7SgjNm7U/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+ABC_FINAL_TAG_ALL_PASSED

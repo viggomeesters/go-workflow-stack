@@ -50,7 +50,7 @@ runtime file hashes. This is never presented as an exact released-pin run. The
 harness refuses existing destinations, preserves failed runs and raw invocation
 results, and creates no hosted release or production deployment.
 
-Live result: PENDING_LIVE_PROOF. Evidence distinguishes requested/enforced profiles
+Live result: PASS — real Terra High and Astra Medium workers each completed a separate local Git release (1.2.0 then 1.3.0), with verification, critic, exact tag/remote readback and cleanup. Raw successful and failed trials, runtime hashes and invocation results are in `.go/evidence/abc-10-live/manifest.json`; successful source commit `c5765e2` is explicitly a development candidate after released-pin preflight. Evidence distinguishes requested/enforced profiles
 from effective model identity, which remains unconfirmed. A passing small live
 sample does not measure general model quality or guarantee future availability.
 

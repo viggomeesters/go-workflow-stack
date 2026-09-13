@@ -212,5 +212,12 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/abc-06/completion/verification-58c499ba954f414d9a510a153f8658ef.json",
+      "sha256": "5a573b969f64dc5e4524c797d3cb4c24e9b225d8b722d392ccafb04dfe442e07"
+    }
   }
 }

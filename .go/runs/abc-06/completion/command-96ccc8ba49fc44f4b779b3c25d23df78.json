@@ -1,0 +1,14 @@
+{
+  "task_id": "abc-06",
+  "project": "go-workflow-stack",
+  "contract_digest": "a59db7cedd372c1f2216c15b91e1e0af26fb1ed8d46484fbd0c576e07ed6dfb3",
+  "revision": "0d398992e98b03a3f591ca1f6d72566862bd00c0",
+  "content_digest": "d69b3f9a19f2a63a26e2480175a5dc4a72bacd23f17b6445c30e75709ddbadb8",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.5169675419456325,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

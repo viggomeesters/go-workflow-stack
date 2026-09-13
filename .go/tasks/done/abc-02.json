@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-02",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Modelkeuze afdwingen en gebruik registreren",
   "description": "Laat Codex build, critic en repair het gevalideerde taakprofiel gebruiken en registreer aangevraagde en bevestigde effectieve runtime-instellingen per fase.\nAfhankelijk van: go-workflow-stack:abc-01. Controleer dependencybewijs vóór claim; de huidige runtime dwingt dit nog niet af. Scope en acceptatie beschrijven gepland gedrag. Alleen een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -54,10 +54,88 @@
     "claimed_at": "2026-09-13T13:30:13+02:00",
     "base_commit": "c06beda2fec2190bc8a73fa4986814c4e0d5c88e"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-13T13:55:08+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Same-agent critic passed after repairs; 240 tests and tagged release gate green. Published commit/tag readback in .go/evidence/abc-02-release.json. No independent reviewer claimed.",
+      "transaction_id": "10eb40d1a3c74f23ab56d40849c4175f",
+      "delivery": {
+        "delivery_id": "autonomous-go-runtime-v3",
+        "html": ".go/deliveries/autonomous-go-runtime-v3/index.html",
+        "manifest": ".go/deliveries/autonomous-go-runtime-v3/manifest.json",
+        "source_sha256": "1b38c8a17ac0a2c91552aec52e3ba23952aea5f950911bc9cedbe936a36f4a74",
+        "html_sha256": "db21ce1e350f16ea5faf0aacaf3c44a690705230a84ac073217a025ec9465ceb"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T13:55:08+02:00",
+      "task_id": "abc-02",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-02-candidate.log,.go/evidence/abc-02-catalog.json,.go/evidence/abc-02-focused.log,.go/evidence/abc-02-make.log,.go/evidence/abc-02-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-02.json,CHANGELOG.md,docs/agent-adapter-protocol.md,docs/releases/v0.3.16.md,go_workflow/adapter_protocol.py,go_workflow/adapters.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/model_profiles.py,pyproject.toml,schemas/agent-adapter-request.schema.json,schemas/agent-adapter-result.schema.json,scripts/release-check-inner.sh,tests/test_abc_models.py; verification_command=pytest smoke architecture ABC contracts and phases, make check, candidate and tagged release-check; verification_result=passed (240 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.16 b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.16; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/abc-02-candidate.log",
+        ".go/evidence/abc-02-catalog.json",
+        ".go/evidence/abc-02-focused.log",
+        ".go/evidence/abc-02-make.log",
+        ".go/evidence/abc-02-verification.json",
+        ".go/evidence/events.jsonl",
+        ".go/plans/abc-lifecycle.json",
+        ".go/project.json",
+        ".go/tasks/active/abc-02.json",
+        "CHANGELOG.md",
+        "docs/agent-adapter-protocol.md",
+        "docs/releases/v0.3.16.md",
+        "go_workflow/adapter_protocol.py",
+        "go_workflow/adapters.py",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/model_profiles.py",
+        "pyproject.toml",
+        "schemas/agent-adapter-request.schema.json",
+        "schemas/agent-adapter-result.schema.json",
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_models.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "c06beda2fec2190bc8a73fa4986814c4e0d5c88e",
+        "observed_head_commit": "b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002"
+      },
+      "verification": {
+        "command": "pytest smoke architecture ABC contracts and phases, make check, candidate and tagged release-check",
+        "result": "passed (240 tests plus release gates, distribution and template pairing)"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent adversarial review with repaired regressions",
+        "skip_reason": null
+      }
+    }
+  ],
   "order": 20,
   "dependencies": [
     {
@@ -68,7 +146,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "in_progress",
+    "implementation_status": "completed",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -102,8 +180,8 @@
     "capability_evidence": "Codex app-server model/list returned gpt-6-astra high on 2026-09-13"
   },
   "release_intent": {
-    "status": "planned",
-    "version": "resolve_against_latest_release_at_execution",
+    "status": "published",
+    "version": "0.3.16",
     "policy": "independent_task_release",
     "receipt_required": true
   },
@@ -183,8 +261,14 @@
       "id": "R6",
       "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:55:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Published v0.3.16 after candidate and annotated-tag gates. main and peeled tag match b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002. Proof: .go/evidence/abc-02-release.json; https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.16"
+        }
+      ]
     }
   ],
   "verification_notes": [
@@ -226,5 +310,17 @@
     "branch": "codex/abc-02",
     "coordinator_checkout": "/Users/viggomeesters/Dev/go-workflow-stack",
     "mode": "manual serialized execution until abc-11"
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "project": "go-workflow-stack",
+    "task_id": "abc-02",
+    "status": "verified",
+    "commit": "b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002",
+    "tag": "v0.3.16",
+    "evidence": [
+      ".go/evidence/abc-02-release.json",
+      "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.16"
+    ]
   }
 }

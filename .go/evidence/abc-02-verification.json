@@ -2,7 +2,7 @@
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-02",
   "revision": "9c8339c9abaa7730ccbc1de5d122e93aeab44575",
-  "status": "targeted_passed_final_tag_pending",
+  "status": "passed",
   "candidate_baseline": {
     "revision": "936946d05bce562580dba16708f48dab1fb5ffa0",
     "checks": [
@@ -34,5 +34,13 @@
     "Live worker generation and model-switch topology proof are later ABC tasks",
     "Hermes/custom controlled model execution is explicitly unsupported; legacy behavior preserved"
   ],
-  "self_reflect": "No durable agent/process improvement needed; bounded code defects repaired. No skill/memory/config changes."
+  "self_reflect": "No durable agent/process improvement needed; bounded code defects repaired. No skill/memory/config changes.",
+  "final_tag_commit": "b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002",
+  "final_tag_checks": [
+    "43 model/contract/architecture tests passed",
+    "197 smoke tests passed",
+    "template pairing passed",
+    "standalone distribution passed"
+  ],
+  "publication_ref": ".go/evidence/abc-02-release.json"
 }

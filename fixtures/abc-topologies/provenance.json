@@ -1,0 +1,23 @@
+{
+  "schema": "go-workflow.topology-protocol-evidence.v1",
+  "binary_version": "codex-cli 0.153.4",
+  "source": "Installed official Codex CLI; local generated protocol, not remote documentation",
+  "commands": [
+    "codex --version",
+    "codex app-server generate-json-schema --out <scratch>",
+    "codex exec resume --help"
+  ],
+  "files_sha256": {
+    "ThreadStartParams.json": "792e2f32e37cece971bd616664ea2053741acbed4e9c92e9d1766427718f2ecd",
+    "ThreadResumeParams.json": "8ac68582a81d60940b10b330be8546123f56bfe246b56f8a4f121da00f347cf2",
+    "ThreadForkParams.json": "60540b97d453ddbc5e12bfaa007a3718f31847d18dec0da59a5e4b89be4717ad",
+    "TurnStartParams.json": "a3835e8c1e942e4b358e1a670939b89918b16c4d13105a579899892b7ade6dea",
+    "exec-resume-help.txt": "8746529c945b4342fc140f68e4f4d0893c945be73fe2d6892573fa235454308d"
+  },
+  "proof_levels": {
+    "fresh_worker": "Go process/workspace/context integration tested with doubles; live proof is abc-10",
+    "persistent_turn": "local protocol only; Go adapter deferred",
+    "subagent": "profile/ownership contract requirements only; Go adapter deferred"
+  },
+  "effective_model_attestation": false
+}

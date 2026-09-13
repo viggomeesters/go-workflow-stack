@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.25 — verified phase worker topology
+
+- Keep fresh ephemeral workers with frozen phase profiles, canonical context and
+  one owned task worktree as the supported model-switching baseline.
+- Capture versioned local session/turn protocol evidence and real process tests.
+- Explicitly defer persistent-session and subagent adapters; distinguish protocol
+  capability, fixture control proof and live model confirmation.
+
 ## 0.3.24 — explicit lifecycle adoption and preserved intake provenance
 
 - Separate runtime pin updates from explicit project lifecycle configuration.

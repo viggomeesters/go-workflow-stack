@@ -1,0 +1,95 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-adoption",
+  "project": "go-workflow-stack",
+  "title": "Explicit lifecycle adoption and lossless intake provenance",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Configured projects create complete task contracts consistently and adopt open legacy tasks through reviewable recoverable state migration."
+  ],
+  "scope": {
+    "in": [
+      "Explicit project lifecycle settings, preview/apply/rollback, open task adoption or needs-configuration reporting, full review-bundle contract/provenance preservation and local skill instructions"
+    ],
+    "out": [
+      "Historical execution/evidence fabrication",
+      "Active-run or cross-host transfer",
+      "Automatic global skill installation",
+      "Automatic production targets/permissions",
+      "New public router command"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Canonical repository controller; quiescent task queue; existing task and integration locks plus durable migration journal"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Stack pin updates and legacy schema migration remain distinct from explicit lifecycle adoption. Never infer settings or authority from a version pin.",
+    "Adoption requires a validated explicit settings document and a quiescent repository. Preserve existing execution overrides, selected phase profiles, verification commands and every historical done/blocked record; report records requiring manual configuration.",
+    "Default dry-run is nonmutating. Apply persists exact before/after bytes and intent before writes, checks snapshots for drift and is idempotent. Interrupted migration blocks execution until explicit retry/rollback. Rollback refuses unrelated edits and never overwrites advanced task history.",
+    "All intake paths use resolved defaults/overrides, retain model/workspace/release/phase contracts, create pending requirement coverage when needed, and inherit no prior completion or publication authority.",
+    "Export/import remains a review/reconcile artifact, not executable cross-host handoff. Preserve full task and selected project contract/provenance fields; mark external evidence references and omitted runtime/artifact contents explicitly.",
+    "Local skills describe actual phase inputs, outputs, scope, evidence and handoff. Selected lessons cite agent-brain and predecessor viggo-agent-skills; no vault writer, mandatory broad skill chain or global edits.",
+    "No GitHub Actions; named provider/target configuration is explicit onboarding input."
+  ],
+  "quality_attributes": [
+    {
+      "id": "historical-preservation",
+      "scenario": "Adopt a project with done and overridden tasks",
+      "measure": "Reexecuted or fabricated historical records",
+      "threshold": 0
+    },
+    {
+      "id": "recoverable-adoption",
+      "scenario": "Interrupted apply or rollback after concurrent edits",
+      "measure": "Silent lost state or runnable partial migration",
+      "threshold": 0
+    },
+    {
+      "id": "intake-fidelity",
+      "scenario": "Create intent/brief/followup/scaffold and export/import",
+      "measure": "Lost contract/provenance fields or inherited completion authority",
+      "threshold": 0
+    },
+    {
+      "id": "explicit-policy",
+      "scenario": "Update runtime pin without adoption configuration",
+      "measure": "Inferred model/publication/deployment authority",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Migration coordinates supported repository writers; arbitrary edits remain protected by exact snapshot drift checks, not an OS sandbox.",
+    "Review bundles preserve references but do not supply absent external proof objects or active runtime transfer."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d10-explicit-lifecycle-adoption"
+  ]
+}

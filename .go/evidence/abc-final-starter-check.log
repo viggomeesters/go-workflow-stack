@@ -1,0 +1,14 @@
+/Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12 "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-template-runtime"/cli/go.py validate .
+ok: /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-final-proof/go-project-template/.go
+/Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12 "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-template-runtime"/cli/go.py readback .
+Project: Go Project Template (go-project-template)
+North star: A clone-local agent contract proves repo-local continuation.
+Wedge: Self-contained project OS, not a central workflow database.
+Principles: json-first; abc-release-evidence; abc-explicit-model-contract; abc-durable-worker-context; abc-task-workspace; abc-final-candidate-proof; abc-selective-legacy-reuse
+Epics: workflow-contract; complete-advice-to-outcome-model; architecture-lane
+Architecture: briefs=2; open_deviations=0; active_waivers=0
+Next task: task-schema-smoke — Prove the cloned template can execute its repo-local contract
+/Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12 "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-template-runtime"/cli/go.py status . --json >/tmp/go-project-template-status.json
+cd "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-template-runtime" && stack_cli="$PWD/cli/go.py" && cd / && /Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12 "$stack_cli" template-check "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-final-proof/go-project-template" --json >/tmp/go-project-template-pairing.json
+architecture lane template contract: ok
+advice-to-outcome template contract: ok

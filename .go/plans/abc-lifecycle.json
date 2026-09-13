@@ -480,10 +480,11 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": "abc-11",
+    "active_task": null,
     "completed_tasks": [
       "abc-01",
-      "abc-02"
+      "abc-02",
+      "abc-11"
     ],
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
@@ -491,8 +492,8 @@
     "candidate_version": "0.3.17",
     "verification_ref": ".go/evidence/abc-11-verification.json",
     "next_ready": [
-      "abc-11"
+      "abc-03"
     ],
-    "last_release": "v0.3.16"
+    "last_release": "v0.3.17"
   }
 }

@@ -52,9 +52,9 @@
       "id": "abc-explicit-model-contract",
       "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
       "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
-      "enforcement": "Te implementeren in abc-01/02/04; momenteel niet afgedwongen.",
+      "enforcement": "abc-01/02 shipped v0.3.15/16: opt-in profiles and native model arguments/capability checks/frozen selection. Effective attribution remains unconfirmed; active resume follows in abc-04.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
@@ -70,9 +70,9 @@
       "id": "abc-task-workspace",
       "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
       "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
-      "enforcement": "Te implementeren in abc-11/03/04; template-01/02; nog niet afgedwongen.",
+      "enforcement": "abc-11 shipped v0.3.17: explicit owned workspaces, canonical state, scope/integration/cleanup primitives. Fresh-worker/resume and template orchestration remain abc-03/04 and template-01/02.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {

@@ -10,7 +10,7 @@
         {
           "id": "abc-contracts",
           "title": "A/B/C-contracten en migratie",
-          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "description": "abc-01 contracts published v0.3.15; migration remains abc-08. See .go/plans/abc-lifecycle.json.",
           "tasks": [
             "abc-01",
             "abc-08"
@@ -19,7 +19,7 @@
         {
           "id": "abc-models",
           "title": "Modelsturing en uitvoeringsvormen",
-          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "description": "abc-02 native model control published v0.3.16; live topology/model proof remains abc-09.",
           "tasks": [
             "abc-02",
             "abc-09"
@@ -28,7 +28,7 @@
         {
           "id": "abc-context",
           "title": "Taakwerkplekken, contextoverdracht en hervatting",
-          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "description": "abc-11 owned workspace primitives published v0.3.17; durable context and active resume remain abc-03/04.",
           "tasks": [
             "abc-03",
             "abc-04",

@@ -2,7 +2,7 @@
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-11",
   "revision": "f32daf6d759119202e376cbcef4e3604c1dca2c0",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "candidate_baseline": {
     "revision": "d0a4969ba47663bbe6cd3a2c3e3f47b4d13faf88",
     "checks": [
@@ -35,5 +35,13 @@
     "Worktree isolation is not a service/database or hostile-process sandbox",
     "Local linked-source smoke run: 232 passed and 23 failed (19 Linux memfd gate requirements; 4 template linked-source launcher cases assigned to template tasks). Full supported Linux ordinary-clone run above passed all 255."
   ],
-  "self_reflect": "No durable agent/process improvement needed; bounded code defects repaired and platform limitations recorded. No skill/memory/config changes."
+  "self_reflect": "No durable agent/process improvement needed; bounded code defects repaired and platform limitations recorded. No skill/memory/config changes.",
+  "final_tag_commit": "778d27dc7ba89c1986ec1c5d257e5c3d315e0675",
+  "final_tag_checks": [
+    "59 workspace/model/contract/architecture tests passed",
+    "197 smoke tests passed",
+    "template pairing passed",
+    "standalone distribution passed"
+  ],
+  "publication_ref": ".go/evidence/abc-11-release.json"
 }

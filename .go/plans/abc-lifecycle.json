@@ -490,7 +490,7 @@
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
     "candidate_version": "0.3.18",
-    "verification_ref": ".go/evidence/abc-11-verification.json",
+    "verification_ref": ".go/evidence/abc-03-verification.json",
     "next_ready": [
       "abc-03"
     ],

@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-03",
+  "revision": "75b74f77299dc7b2f3fb624d579216b222272eb4",
+  "status": "candidate_passed_final_tag_pending",
+  "checks": [
+    "270 Linux tests passed (197 smoke and 73 focused)",
+    "make check passed in Linux and ordinary macOS clone",
+    "candidate release gate passed including distribution/template pairing",
+    "actual owned workspace staging/integration succeeded; canonical user uv.lock preserved",
+    "git diff --check passed"
+  ],
+  "critic": {
+    "status": "passed",
+    "method": "same-agent adversarial review and fresh-process/real-Git regression fixtures",
+    "repairs": [
+      "Verify in parent and child before native command; preserve raw process result hashes",
+      "Reload canonical outcome evidence between phases without accepting changed protected task inputs",
+      "Use explicit feedback reference fields and verify current raw files",
+      "Bound large environment context via snapshot references; clear foreign inherited snapshot variables for legacy adapters",
+      "Fingerprint actual tracked bytes; reject hidden index flags before workspace staging/integration/cleanup",
+      "Preserve distinct managed attempts/critic output and canonical absolute references"
+    ]
+  },
+  "limitations": [
+    "Durable transport is managed native protocol; legacy/custom inline behavior retained",
+    "Active task resume and moved-checkout recovery remain abc-04; live model/topology proof abc-09/10",
+    "Tests use fixture processes and do not claim live model generation or independent effective identity",
+    "Snapshot/selected/captured changed files have explicit 16 MiB limits; unchanged tracked content is streamed",
+    "Managed worker command guards require controller-side test invocation; focused tests ran outside the managed cwd with explicit source PYTHONPATH. Source code was then tested in ordinary clones."
+  ],
+  "self_reflect": "No durable agent/process improvement needed; in-scope review defects repaired and fixture invocation boundary recorded. No skill/memory/config changes."
+}

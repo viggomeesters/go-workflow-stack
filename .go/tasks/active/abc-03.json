@@ -123,36 +123,66 @@
       "id": "R1",
       "text": "Een unieke run/phase/attempt-identiteit voorkomt overschrijven van eerdere artifacts; snapshot wordt vóór workerstart vastgelegd.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:54+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Every managed native dispatch uses run/phase/attempt/UUID identity; repeated attempts preserve prior snapshot, raw process and critic artifacts. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Context bevat doel, scope, relevante besluiten, contracthash, Git-baseline, actuele wijzigingen inclusief nieuwe bestanden, checks, concrete criticbevindingen, resterende stappen en releasebewijzen.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:54+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Snapshots include canonical project/task/architecture, contract/requirements, Git base/current/index/tracked bytes, untracked/raw files, feedback and release receipt; schema fixtures pass. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Het request geeft een pad/hash door; de worker verifieert taak en actuele repositorytoestand. Samenvattingen vervangen geen code of ruwe bewijsbestanden.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:54+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Request exposes path/hash; parent and child bootstrap verify current task/control/Git/evidence before worker launch. Fresh process fixture proves drift refusal before writes. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Repair ontvangt de actuele mislukte checks en criticbevindingen vóór start; een overdracht naar een andere worker behoudt dit zonder de oorspronkelijke chat.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:54+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Repair receives current checks/build/critic and remaining steps explicitly; raw process/evidence hashes are retained and modified feedback files rejected. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Grote context wordt niet onbeperkt verdrievoudigd in environmentvariabelen; compatibiliteit met het bestaande adapterprotocol is expliciet getest.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:54+02:00",
+          "agent": "codex-astra-high",
+          "summary": "A fresh worker reads more than 2 MiB context while request/task/context environment remains below 8 KiB; legacy inline task/context and foreign snapshot clearing tested. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R6",
@@ -165,15 +195,27 @@
       "id": "R7",
       "text": "Een nieuwe worker krijgt dezelfde taakbranch/worktree, eigenaar/lease, actuele fase, requirementsdekking, geteste inhoud en reeds bevestigde publicatiestappen. Hij controleert het snapshot tegen Git en de canonieke control state voordat hij schrijft; geen eigen queue uit een worktreekopie.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:55+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Snapshot binds the same registered workspace/run/owner to canonical task and outcome state. Actual abc-03 development staged/integrated through the shipped workspace manager. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     },
     {
       "id": "R8",
       "text": "Laad alleen relevante skills/fasecontext volgens het contract; een notepad is aanvullende uitleg en kan gestructureerde status of bewijs niet overschrijven. Een andere worker kan zonder chatgeschiedenis verder in dezelfde werkplek.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:58:55+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Only explicitly selected phase skills/context and repo instructions are included; escaping/missing files rejected; notepad remains supplementary; fresh-process no-chat fixture passes. Proof: .go/evidence/abc-03-verification.json; candidate 75b74f77299dc7b2f3fb624d579216b222272eb4"
+        }
+      ]
     }
   ],
   "verification_notes": [

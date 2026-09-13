@@ -1,7 +1,7 @@
 {
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-09",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "1c3318c43008fdde96805258f6cde43782f45762",
   "checks": [
     "52 relevant topology/model/context/workspace tests on macOS and Linux",
@@ -25,5 +25,12 @@
     "Fixture critic checks read-only arguments, not OS sandbox enforcement",
     "No live model execution or effective identity confirmation; live baseline proof is abc-10"
   ],
-  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Protocol assumptions were corrected against actual local schema evidence within task scope."
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Protocol assumptions were corrected against actual local schema evidence within task scope.",
+  "final_tag_commit": "0a0ed9981bfb6520b66cb92e48cf292e37e3cbf4",
+  "final_tag_checks": [
+    "197 smoke tests passed on annotated tag",
+    "52 relevant tests passed on matching candidate content",
+    "immutable template and standalone distribution gates passed"
+  ],
+  "publication_ref": ".go/evidence/abc-09-release.json"
 }

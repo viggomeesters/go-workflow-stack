@@ -1,0 +1,21 @@
+{
+  "task_id": "abc-09",
+  "tag": "v0.3.25",
+  "commit": "0a0ed9981bfb6520b66cb92e48cf292e37e3cbf4",
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-13T18:26:19Z",
+    "tagName": "v0.3.25",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.25"
+  },
+  "readback": {
+    "path": ".go/runs/abc-09/completion/release-1398355cb0954b3ca26444397b07a925.json",
+    "sha256": "7f1d0909b2f93ec1beed0e881f7ee09418309778eabe787f4d84822949afa28d"
+  },
+  "tag_gate": {
+    "status": "passed",
+    "log_ref": ".go/evidence/abc-09-tag.log",
+    "sha256": "778fdca591c0a8bf804765f4c77589d5c230354106e1fb186989cc9d02f2417b"
+  }
+}

@@ -113,7 +113,8 @@
     "abc-05": "v0.3.21 executed content-bound checks, same-agent review, release readback and shared completion/approval/reporting gate",
     "abc-06": "v0.3.22 explicit publication profile, final-candidate proof, task-workspace integration, durable effects/readback, process ownership and separate cleanup; no legacy vault writer reused",
     "abc-07": "v0.3.23 explicit deployment permission, authoritative live-version/artifact proof, stable effect identity, resumed packaging/deploy and historical clone verification; no legacy vault writer reused",
-    "abc-08": "v0.3.24 explicit quiescent lifecycle adoption/recovery, pending requirement intake, source profile preservation, complete non-executable review bundles and local skill instructions; no vault writer or global skill mutation"
+    "abc-08": "v0.3.24 explicit quiescent lifecycle adoption/recovery, pending requirement intake, source profile preservation, complete non-executable review bundles and local skill instructions; no vault writer or global skill mutation",
+    "abc-09": "v0.3.25 supported fresh phase workers with canonical context and one workspace; versioned local protocol evidence; persistent-session and subagent adapters explicitly deferred"
   },
-  "remaining_direction": "Topology comparison, broad end-to-end proof and template integration remain in abc-09/10 and template-01/02."
+  "remaining_direction": "Broad end-to-end/live proof and template integration remain in abc-10 and template-01/02."
 }

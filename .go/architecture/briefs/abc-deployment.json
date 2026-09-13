@@ -1,0 +1,95 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-deployment",
+  "project": "go-workflow-stack",
+  "title": "Explicit deployment and live-version proof",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "A configured release closes only after the declared target reports the expected released commit/version and optional package hash, with resumable effect identity."
+  ],
+  "scope": {
+    "in": [
+      "Explicit no-deployment policy or required target/package/deploy/readback profile; controlled command adapters; package hash and live target observations; frozen deployment authority and resume-only recovery; shared finish/readback gates"
+    ],
+    "out": [
+      "Selecting or configuring a real production provider",
+      "Destructive rollback or data migrations",
+      "Default onboarding/migration (abc-08/template)",
+      "Cross-host transfer implementation"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Trusted canonical controller and explicit command adapter; configured target must provide authoritative operation/live-state observations"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Deployment is a separate explicit run authorization, never inferred from model choice, Git push permission or an adopted profile. Freeze target, commands, recovery policy and authority for resume.",
+    "Profiles explicitly choose no deployment with a reason or a required target. Providers and credentials remain user/onboarding inputs; only local fixtures are configured in this task.",
+    "Only structured argv adapters are supported. Package output is confined to controller-owned operational storage and hashed; released commit/version and target are bound to every observation. Commands must preserve verified product content.",
+    "Package/deploy command success alone is insufficient. Require structured authoritative target readback for the exact commit/version, optional package hash and operation identity. Missing credentials, wrong target/version and unknown readback keep the task pending.",
+    "Persist intent before effects. Require adapter idempotency support with a stable task/run/commit/target key; reconcile accepted-but-not-live, absent and unknown separately. Never infer absence from transport errors or retry an unknown effect with a new identity.",
+    "Reuse the serial publication reservation, native process guard and budgets. Cleanup stays separate; no rollback or destructive recovery is inferred from ordinary release authority.",
+    "Use the strict completion gate and preserve historical release proof meaning. Explicit no-deployment and absent legacy deployment settings do not claim live service verification.",
+    "No GitHub Actions and no invented production destinations."
+  ],
+  "quality_attributes": [
+    {
+      "id": "live-identity",
+      "scenario": "Deploy exits zero but wrong commit/version is running",
+      "measure": "False completed releases",
+      "threshold": 0
+    },
+    {
+      "id": "at-most-one-effect",
+      "scenario": "Deploy acknowledgement is lost or live propagation is delayed",
+      "measure": "Duplicate deployment effects with a new identity",
+      "threshold": 0
+    },
+    {
+      "id": "explicit-target-authority",
+      "scenario": "Target, credentials, recovery policy or deploy permission is absent",
+      "measure": "Implicit deployment writes",
+      "threshold": 0
+    },
+    {
+      "id": "compatible-proof",
+      "scenario": "Legacy release-only history is read after deployment support lands",
+      "measure": "Fabricated live proof or broken historical reporting",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "A command adapter is trusted infrastructure: it must query the target rather than echo requested values and must honor its idempotency contract.",
+    "External deployment and live health are separate observations; accepted or unknown operations must not be called complete."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d09-explicit-deployment-proof"
+  ]
+}

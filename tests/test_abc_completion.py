@@ -239,3 +239,17 @@ def test_check_proof_must_preserve_requirement_binding(tmp_path):
     ref=save_artifact(repo/'.go',task['id'],'verification',artifact)
     task=json.loads(source.read_text());task['completion_evidence']['verification']=ref;source.write_text(json.dumps(task))
     assert any('Mandatory check' in finding for finding in completion_findings(repo,task))
+
+
+def test_historical_completion_is_readable_in_an_ordinary_clone(tmp_path):
+    from go_workflow.completion import lifecycle_report
+    repo,source,task=fixture(tmp_path)
+    prepare_proofs(repo,task)
+    result=call(repo,'finish',task['id'],'--repo',repo,'--agent','owner','--evidence',SUMMARY)
+    assert result.returncode==0,result.stderr
+    git(repo,'add','.go');git(repo,'commit','-qm','persist completion history')
+    clone=tmp_path/'ordinary clone'
+    subprocess.run(['git','clone','--no-hardlinks','-q',str(repo),str(clone)],check=True)
+    report=lifecycle_report(clone)
+    assert report['evidence_valid'],report
+    assert task['id'] in report['verified_done']

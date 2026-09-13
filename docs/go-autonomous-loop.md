@@ -235,6 +235,8 @@ non-draft release. Readback never publishes or rewrites refs.
 Status distinguishes recorded and verified done records and excludes invalid
 opted-in completion from goal success. Historical records without adoption remain
 `historical_unmigrated`; status uses saved historical readback, while finish and
-approval read the remote again. Explicit `release.mode: none` still requires its
+approval read the remote again. Ordinary clones read historical proof without
+reusing old controller or process identities; the referenced Git objects and
+evidence must be available. Explicit `release.mode: none` still requires its
 contract reason, actual verification and review. Older runtimes do not enforce
 these proofs; preserve them and use this version or newer for opted-in tasks.

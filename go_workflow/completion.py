@@ -218,11 +218,14 @@ def record_critic(repo, task_id, owner, review):
 def completion_findings(repo, task, *, current=True, remote=True):
     if 'execution_contract' not in task: return []
     root = workflow_root(repo)
-    try:
-        from .worktrees import require_run_idle
-        require_run_idle({'control_repo': str(root.parent), 'task_id': task['id']})
-    except ValueError as exc:
-        return ['lifecycle: ' + str(exc)]
+    # Historical proof is portable Git/evidence data. Old process identities
+    # govern current mutation, never whether a completed release can be read.
+    if current:
+        try:
+            from .worktrees import require_run_idle
+            require_run_idle({'control_repo': str(root.parent), 'task_id': task['id']})
+        except ValueError as exc:
+            return ['lifecycle: ' + str(exc)]
     manifest = task.get('completion_evidence')
     if not isinstance(manifest, dict) or manifest.get('schema') != 'go-workflow.completion-evidence.v1':
         return ['lifecycle evidence is missing; run declared verification, record review and verify required shipping']

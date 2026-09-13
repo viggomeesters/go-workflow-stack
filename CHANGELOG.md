@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.22 — resumable configured publication
+
+- Explicit profiles reserve and prepare a scoped semantic version/changelog, then
+  require final executed checks, review and architecture proof before shipping.
+- Reconcile commit, fast-forward integration, annotated tag, atomic push and
+  GitHub publication from durable intent and exact readback after interruption.
+- Managed tasks retain budgets and requested model settings through publication,
+  finish and separate cleanup; live orphan processes prevent competing writes.
+- Keep unknown remote responses, conflicts and missing authority explicit.
+  Existing profiles retain their pending handoff; no deployment or Actions added.
+
 ## 0.3.21 — outcome evidence interoperability
 
 - Accept exact proof references from the attributed evidence objects written by

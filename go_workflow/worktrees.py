@@ -283,19 +283,22 @@ def checked_scope(record):
 def require_run_idle(record):
     from .run_state import state_path, read_state, require_stopped, RunStateError
     control = Path(record['control_repo'])
-    for channel in ('managed', 'completion'):
+    for channel in ('managed', 'completion', 'publication'):
         if state_path(control, record['task_id'], channel).exists():
             try: require_stopped(read_state(control, record['task_id'], channel))
             except RunStateError as exc: raise WorkspaceError(str(exc)) from exc
 
 
-def stage_workspace(control, task_id, owner, run_id):
+def stage_workspace(control, task_id, owner, run_id, *, command_runner=None):
     with repository_lock(Path(control) / '.go', 'workspace-execution-' + task_id):
         record = verify_workspace(owned_record(control, task_id, owner, run_id))
         require_run_idle(record)
         if record['state'] != 'ready': raise WorkspaceError('Workspace must be ready for staging')
         paths = checked_scope(record)
-        if paths: git(Path(record['path']), '--literal-pathspecs', 'add', '--all', '--', *paths)
+        if paths:
+            argv = ['git', '--literal-pathspecs', 'add', '--all', '--', *paths]
+            if command_runner: command_runner(Path(record['path']), argv)
+            else: git(Path(record['path']), *argv[1:])
         return {'task_id': task_id, 'staged_paths': paths}
 
 

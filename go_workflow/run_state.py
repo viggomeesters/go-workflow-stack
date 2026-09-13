@@ -39,9 +39,9 @@ def validate_state(value):
     arrays = {'checks', 'phase_evidence', 'budgets', 'history', 'requirements'}
     required = strings | objects | arrays | {'schema', 'phase', 'attempt', 'check_index', 'worker_group', 'inflight'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd'}
+            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd', 'publication'}
             or value['schema'] != SCHEMA
-            or value['phase'] not in {'setup', 'build', 'verify', 'critic', 'repair', 'release', 'cleanup', 'complete'}
+            or value['phase'] not in {'setup', 'build', 'release_prepare', 'verify', 'critic', 'repair', 'release', 'cleanup', 'complete'}
             or any(not isinstance(value[name], str) or not value[name] for name in strings)
             or any(not isinstance(value[name], dict) for name in objects)
             or any(not isinstance(value[name], list) for name in arrays)):
@@ -60,11 +60,19 @@ def validate_state(value):
     if 'execution_cwd' in value and (not isinstance(value['execution_cwd'], str) or not value['execution_cwd']):
         raise RunStateError('Invalid verification execution directory')
 
+    if 'publication' in value:
+        spec = value['publication']
+        if (not isinstance(spec, dict) or set(spec) != {'profile', 'ship_policy', 'allow_push'}
+                or not isinstance(spec['ship_policy'], str) or spec['ship_policy'] not in {'none', 'commit', 'push'}
+                or type(spec['allow_push']) is not bool or (spec['profile'] is not None and not isinstance(spec['profile'], dict))):
+            raise RunStateError('Invalid frozen publication selection/authority')
+
 
 def state_path(control, task_id, channel="managed"):
     registry_path(control, task_id)  # validates the identifier before path use
-    if channel not in {'managed', 'completion'}: raise RunStateError('Invalid process checkpoint channel')
-    return control / '.go/runs' / task_id / ('run-state.json' if channel == 'managed' else 'completion-state.json')
+    names = {'managed': 'run-state.json', 'completion': 'completion-state.json', 'publication': 'publication-process.json'}
+    if channel not in names: raise RunStateError('Invalid process checkpoint channel')
+    return control / '.go/runs' / task_id / names[channel]
 
 
 def read_state(control, task_id, channel="managed"):
@@ -128,7 +136,7 @@ def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
             raise RunStateError('Stale worker bootstrap; controller/run/phase no longer owns execution')
         if state.get('worker_group') is not None:
             raise RunStateError('This phase already registered a worker')
-        if channel == 'completion':
+        if channel in {'completion', 'publication'}:
             active_task(control, task_id, owner)
             if not isinstance(state.get('execution_cwd'), str) or str(Path.cwd().resolve()) != state['execution_cwd']:
                 raise RunStateError('Verification bootstrap cwd changed')
@@ -306,7 +314,7 @@ def select_managed_task(control, args, api):
     if len(candidates) > 1: raise RunStateError('Multiple managed active tasks; select --task-id explicitly')
     if candidates: return candidates[0]
     cleanup = [read_object(path) for path in (control / '.go/tasks/done').glob('*.json')
-               if state_path(control, path.stem).exists() and read_state(control, path.stem)['phase'] == 'cleanup']
+               if state_path(control, path.stem).exists() and read_state(control, path.stem)['phase'] in {'release', 'cleanup'}]
     if len(cleanup) > 1: raise RunStateError('Multiple pending cleanups; select --task-id explicitly')
     if cleanup: return cleanup[0]
     tasks = api.open_tasks(control)
@@ -329,6 +337,8 @@ def execute_managed(control, args, mode, task, api):
 
 
 def _execute_managed(control, args, task_id, api, result):
+    from . import release as publisher
+    from . import completion
     root = control / '.go'
     session = RunSession(control, task_id)
     task = active_task(control, task_id)
@@ -346,7 +356,7 @@ def _execute_managed(control, args, task_id, api, result):
             supplied = getattr(args, arg, '')
             expected = state['run_id'] if key == 'run_id' else state['workspace'][key]
             if supplied and supplied != expected: raise RunStateError('Resume binding changed: ' + arg)
-        if state['phase'] not in {'setup', 'cleanup', 'complete'} and json_hash(protected_task(task)) != state['task_hash']:
+        if state['phase'] not in {'setup', 'release', 'cleanup', 'complete'} and json_hash(protected_task(task)) != state['task_hash']:
             raise RunStateError('Task/model contract changed; explicit checkpoint migration is required')
         with repository_lock(root, 'managed-state-' + task_id):
             state = session.load()
@@ -379,10 +389,22 @@ def _execute_managed(control, args, task_id, api, result):
                  'budgets': [], 'history': [], 'requirements': task.get('requested_outcomes', []),
                  'models': models, 'task_hash': json_hash(protected_task(task)),
                  'code': {},
+                 'publication': {'profile': publisher.publication_profile(control, task) if publisher.configured(control, task) else None,
+                                 'ship_policy': getattr(args, 'ship_policy', 'none'),
+                                 'allow_push': bool(getattr(args, 'allow_push', False))},
                  'controller': {'host': socket.gethostname(), 'pid': os.getpid()},
                  'worker_group': None, 'inflight': None, 'setup_task': task}
+        policy = state['publication']
+        if policy['profile'] is not None and (policy['ship_policy'] != 'push' or policy['allow_push'] is not True):
+            raise RunStateError('Managed publication requires explicit --ship-policy push --allow-push at initial setup')
         atomic_json(state_path(control, task_id), state)
     state = session.load()
+    publication = state.get('publication', {'profile': None, 'ship_policy': 'none', 'allow_push': False})
+    profile = publisher.publication_profile(control, task) if publisher.configured(control, task) else None
+    if profile != publication['profile']: raise RunStateError('Frozen publication profile changed; explicit checkpoint migration required')
+    publishing = profile is not None
+    if publishing and (publication['ship_policy'] != 'push' or publication['allow_push'] is not True):
+        raise RunStateError('Managed publication requires explicit --ship-policy push --allow-push at initial setup')
     if state['phase'] == 'setup':
         expected = state['setup_task']
         with repository_lock(root, 'task-' + task_id):
@@ -409,7 +431,7 @@ def _execute_managed(control, args, task_id, api, result):
         if record['state'] != 'cleaned': raise RunStateError('Completed checkpoint lacks confirmed workspace cleanup')
         cleanup_proof(control, record)
         result.update(status='task_complete' if api.open_tasks(control) else 'done', completed_tasks=[task_id]); return 0, result
-    record = owned_record(control, task_id, args.agent, state['run_id'], active=state['phase'] != 'cleanup')
+    record = owned_record(control, task_id, args.agent, state['run_id'], active=state['phase'] not in {'release', 'cleanup'})
     binding = ('control_repo', 'path', 'owner', 'run_id', 'branch', 'base_branch', 'base_commit',
                'common_dir', 'repository_id', 'generation')
     if any(record[key] != state['workspace'].get(key) for key in binding):
@@ -424,14 +446,17 @@ def _execute_managed(control, args, task_id, api, result):
     workspace = Path(record['path'])
     if freeze_selection(control, task) != state['models']: raise RunStateError('Frozen model selection changed')
     current_code = run_code(workspace, record, task)
-    if state['inflight'] or current_code != state['code']:
+    publication_in_progress = (publishing and state['phase'] == 'release'
+        and publisher.state_path(control, task_id).exists()
+        and publisher._load(control, task, args.agent, state['run_id'])['phase'] in {'publishing', 'finishing', 'published'})
+    if not publication_in_progress and (state['inflight'] or current_code != state['code']):
         history = state['history'] + [{'event': 'reconciled_interruption_or_drift', 'previous_phase': state['phase'],
                                      'inflight': state['inflight'], 'code_before': state['code'], 'code_now': current_code,
                                      'invalidated_checks': state['checks']}]
         if state['effects']: raise RunStateError('External effects need readback before code drift/recovery can advance')
         # A confirmed build is kept. All affected verification and critic proof
         # is invalidated, while an unconfirmed build/repair repeats its own phase.
-        phase = state['phase'] if state['phase'] in {'build', 'repair'} else 'verify'
+        phase = state['phase'] if state['phase'] in {'build', 'repair', 'release_prepare'} else 'verify'
         session.update(phase=phase, check_index=0, checks=[], history=history, code=current_code,
                        inflight=None, worker_group=None)
     maximum = max(int(args.max_commands), 1)
@@ -443,7 +468,7 @@ def _execute_managed(control, args, task_id, api, result):
     while True:
         state = session.load()
         phase = state['phase']
-        if phase == 'release':
+        if phase == 'release' and not publishing:
             result.update(status='release_pending', summary='Build, verification and critic confirmed; lifecycle publisher required.')
             break
         if result['commands_run'] >= maximum or time.monotonic() - started >= minutes * 60:
@@ -451,18 +476,62 @@ def _execute_managed(control, args, task_id, api, result):
             break
         if state['attempt'] > max(int(args.max_attempts), 1):
             result.update(status='attempts_exhausted', blocked_task=task_id); break
+        if phase == 'release':
+            used = None
+            try:
+                with publisher.publication_budget(maximum - result['commands_run'], started + minutes * 60) as used:
+                    published = publisher.publish_release(control, task_id, args.agent, state['run_id'])
+                session.update(phase='cleanup', inflight=None)
+                result['release'] = published
+            except publisher.PublicationBudget:
+                result.update(status='budget_exhausted', budget_exhausted=True, summary='Publication intent saved; resume readback with a new budget.')
+                break
+            except (ValueError, api.StateLockError, api.RepoLocalError) as exc:
+                result.update(status='resume_gate', blocked_task=task_id, summary=str(exc))
+                break
+            finally:
+                if used:
+                    result['commands_run'] += used['used']
+                    latest = session.load(); latest['budgets'][-1]['commands_used'] = result['commands_run']
+                    session.update(budgets=latest['budgets'])
+            continue
+        if phase == 'cleanup':
+            cleanup = cleanup_workspace(control, task_id, args.agent, state['run_id'])
+            session.update(phase='complete', cleanup=cleanup, inflight=None)
+            result.update(status='task_complete' if api.open_tasks(control) else 'done', completed_tasks=[task_id])
+            return 0, result
         task = active_task(control, task_id, args.agent)
         if json_hash(protected_task(task)) != state['task_hash']: raise RunStateError('Task contract changed during execution')
         verify_workspace(record); checked_scope(record)
         timeout = min(max(int(args.command_timeout_seconds), 1), max(1, int(minutes * 60 - (time.monotonic() - started))))
+        if phase == 'release_prepare':
+            try:
+                with publisher.publication_budget(1, started + minutes * 60):
+                    publisher.prepare_release(control, task_id, args.agent, state['run_id'],
+                        ship_policy=publication['ship_policy'], allow_push=publication['allow_push'])
+            except publisher.PublicationBudget as exc:
+                result.update(status='budget_exhausted', budget_exhausted=True, summary=str(exc)); break
+            except (ValueError, api.StateLockError, api.RepoLocalError) as exc:
+                result.update(status='resume_gate', blocked_task=task_id, summary=str(exc)); break
+            result['commands_run'] += 1
+            state['budgets'][-1]['commands_used'] = result['commands_run']
+            session.update(phase='verify', check_index=0, checks=[], code=run_code(workspace, record, task), budgets=state['budgets'])
+            continue
         if phase == 'verify' and state['check_index'] >= len(task['verification']):
+            if publishing:
+                artifact, _ = completion.finalize_checks(workspace, task, args.agent, [item['completion_check'] for item in state['checks']])
+                if artifact['status'] != 'passed': raise RunStateError('Final verification manifest is stale or failed')
             session.update(phase='critic'); continue
         before = run_code(workspace, record, task)
-        with session.operation():
+        with session.operation() if phase != 'verify' or not publishing else __import__('contextlib').nullcontext():
             if phase == 'verify':
                 command = task['verification'][state['check_index']]
                 with execution_lease(workspace, task_id, args.agent, state['run_id']):
-                    output = api.run_verification_commands(workspace, {**task, 'verification': [command]}, timeout_seconds=timeout)[0]
+                    if publishing:
+                        check, output = completion.execute_check(workspace, task, command, session, timeout_seconds=timeout)
+                        output = {'returncode': output['returncode'], 'completion_check': check}
+                    else:
+                        output = api.run_verification_commands(workspace, {**task, 'verification': [command]}, timeout_seconds=timeout)[0]
             else:
                 feedback = {'checks': state['checks'], 'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {}}
                 if phase == 'critic':
@@ -484,7 +553,14 @@ def _execute_managed(control, args, task_id, api, result):
             changes.update(checks=state['checks'] + [output], check_index=state['check_index'] + 1)
             if not success: changes.update(phase='repair', attempt=state['attempt'] + 1)
         elif success:
-            changes.update(phase='release' if phase == 'critic' else 'verify')
+            if phase == 'critic' and publishing:
+                completion.record_critic(workspace, task_id, args.agent, {
+                    'schema': 'go-workflow.critic-review.v1', **completion.bind(workspace, task),
+                    'status': 'passed', 'reviewer': args.agent, 'review_mode': 'same_agent',
+                    'summary': output.get('summary') or 'Native critic returned success for the current candidate',
+                    'blocking_findings': [], 'reviewed_paths': sorted(completion.changed_content(workspace, task, completion.content_snapshot(workspace, task))),
+                    'native_result': output})
+            changes.update(phase='release' if phase == 'critic' else ('release_prepare' if publishing else 'verify'))
             if phase != 'critic': changes.update(check_index=0, checks=[])
         else:
             changes.update(phase='repair', attempt=state['attempt'] + 1)
@@ -501,6 +577,8 @@ def _execute_managed(control, args, task_id, api, result):
                    '--task-id', task_id, '--agent', args.agent, '--executor-agent', 'codex',
                    '--max-commands', str(maximum), '--max-minutes', str(minutes),
                    '--max-attempts', str(args.max_attempts), '--command-timeout-seconds', str(args.command_timeout_seconds), '--json']
+    if publication['ship_policy'] == 'push' and publication['allow_push']:
+        resume_args += ['--ship-policy', 'push', '--allow-push']
     resume = {'schema': 'go-workflow.managed-resume.v1', 'task_id': task_id, 'run_id': state['run_id'],
               'runtime_required_ref': read_object(root / 'project.json')['stack_ref'], 'args': resume_args,
               'resolution': 'Resolve and preflight the immutable project runtime before invoking these CLI arguments.'}

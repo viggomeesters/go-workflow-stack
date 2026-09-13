@@ -58,6 +58,7 @@
       "enum": [
         "setup",
         "build",
+        "release_prepare",
         "verify",
         "critic",
         "repair",
@@ -141,6 +142,33 @@
     "execution_cwd": {
       "type": "string",
       "minLength": 1
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "profile",
+        "ship_policy",
+        "allow_push"
+      ],
+      "properties": {
+        "profile": {
+          "type": [
+            "object",
+            "null"
+          ]
+        },
+        "ship_policy": {
+          "enum": [
+            "none",
+            "push",
+            "commit"
+          ]
+        },
+        "allow_push": {
+          "type": "boolean"
+        }
+      }
     }
   },
   "additionalProperties": false

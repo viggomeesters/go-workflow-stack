@@ -41,6 +41,7 @@ from go_workflow.adapter_protocol import build_adapter_request, normalize_adapte
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.execution_context import ContextError, create_snapshot, verify_snapshot
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
+from go_workflow.release import PublicationError
 from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run
 from go_workflow.completion import CompletionError, require_completion, lifecycle_report
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
@@ -574,13 +575,22 @@ def validate_repo(repo: Path) -> list[str]:
         except (WorkspaceError, RepoLocalError) as exc:
             errors.append(f'{path}: {exc}')
     from go_workflow.run_state import validate_state
-    for path in sorted([* (root / 'runs').glob('*/run-state.json'), * (root / 'runs').glob('*/completion-state.json')]):
+    for path in sorted([* (root / 'runs').glob('*/run-state.json'), * (root / 'runs').glob('*/completion-state.json'),
+                        * (root / 'runs').glob('*/publication-process.json')]):
         try:
             run = load_json(path)
             validate_state(run)
             if run['task_id'] != path.parent.name or run['task_id'] not in task_ids or run['project'] != project_id:
                 errors.append(f'{path}: managed run task/project identity mismatch')
         except (RunStateError, RepoLocalError) as exc:
+            errors.append(f'{path}: {exc}')
+    from go_workflow.release import validate_state as validate_publication_state
+    for path in sorted((root / 'runs').glob('*/release-state.json')):
+        try:
+            publication = validate_publication_state(load_json(path))
+            if publication['task_id'] != path.parent.name or publication['task_id'] not in task_ids or publication['project'] != project_id:
+                errors.append(f'{path}: publication task/project identity mismatch')
+        except (PublicationError, RepoLocalError) as exc:
             errors.append(f'{path}: {exc}')
     errors.extend(validate_architecture_state(root, project_id))
     recommendation_paths = list((root / "recommendations").glob("*.json"))
@@ -2177,7 +2187,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
         "Run the task verification commands before exiting.",
-        "For tasks with requested_outcomes, record every R# disposition and evidence with `go-workflow task outcome` before exiting.",
+        "Record implemented R# evidence with `go-workflow task outcome`; leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification.",
         "Exit non-zero if you cannot safely repair within scope.",
     ])
     return native_agent_command(
@@ -2218,7 +2228,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
-        "For tasks with requested_outcomes, record every R# as verified, blocked, or rejected with concrete evidence using `go-workflow task outcome` before exiting.",
+        "Record implemented R# evidence with `go-workflow task outcome`; leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
     return native_agent_command(
@@ -5423,13 +5433,24 @@ def build_parser() -> argparse.ArgumentParser:
     enter = managed_sub.add_parser('worker-enter')
     enter.add_argument('repo')
     for field in ('task-id', 'run-id', 'nonce', 'owner'): enter.add_argument('--' + field, required=True)
-    enter.add_argument('--channel', choices=['managed', 'completion'], default='managed')
+    enter.add_argument('--channel', choices=['managed', 'completion', 'publication'], default='managed')
     enter.set_defaults(func=cmd_managed_worker_enter)
     relocate = managed_sub.add_parser('relocate')
     relocate.add_argument('repo')
     for field in ('task-id', 'run-id', 'owner', 'old-control', 'old-workspace', 'workspace'):
         relocate.add_argument('--' + field, required=True)
     relocate.set_defaults(func=cmd_managed_relocate)
+    release_parser = sub.add_parser('release', help='Explicit configured task publication')
+    release_sub = release_parser.add_subparsers(dest='release_operation', required=True)
+    for operation in ('prepare', 'publish', 'status'):
+        item = release_sub.add_parser(operation)
+        item.add_argument('repo')
+        for field in ('task-id', 'owner', 'run-id'): item.add_argument('--' + field, required=True)
+        item.add_argument('--json', action='store_true')
+        if operation == 'prepare':
+            item.add_argument('--ship-policy', choices=['none', 'push'], default='none')
+            item.add_argument('--allow-push', action='store_true')
+        item.set_defaults(func=cmd_release)
     completion_parser = sub.add_parser('completion', help='Capture and inspect content-bound lifecycle proof')
     completion_sub = completion_parser.add_subparsers(dest='completion_operation', required=True)
     for operation in ('verify', 'critic', 'readback', 'status'):
@@ -5703,6 +5724,20 @@ def cmd_managed_relocate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_release(args):
+    from go_workflow.release import prepare_release, publish_release, _load
+    repo = Path(args.repo).resolve()
+    if args.release_operation == 'prepare':
+        result = prepare_release(repo, args.task_id, args.owner, args.run_id,
+            ship_policy=args.ship_policy, allow_push=args.allow_push)
+    elif args.release_operation == 'publish':
+        result = publish_release(repo, args.task_id, args.owner, args.run_id)
+    else:
+        result = _load(repo, active_task(repo, args.task_id), args.owner, args.run_id)
+    print(json.dumps(result, indent=2))
+    return 0
+
+
 def completion_target(args):
     control = Path(args.repo).resolve()
     if args.workspace:
@@ -5746,7 +5781,7 @@ def main() -> int:
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError, PublicationError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

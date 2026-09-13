@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Durable task publication intent and exact readback",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "authority",
+    "base_commit",
+    "contract_digest",
+    "control_repo",
+    "effects",
+    "notes",
+    "observations",
+    "owner",
+    "phase",
+    "preparation",
+    "profile",
+    "project",
+    "remote_base",
+    "remote_url",
+    "reservation",
+    "run_id",
+    "schema",
+    "tag",
+    "task_id",
+    "version",
+    "workspace"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "owner": {
+      "type": "string",
+      "minLength": 1
+    },
+    "run_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "control_repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "remote_url": {
+      "type": "string",
+      "minLength": 1
+    },
+    "version": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tag": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reservation": {
+      "type": "string",
+      "minLength": 1
+    },
+    "notes": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "remote_base": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "tag_object": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "contract_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "schema": {
+      "const": "go-workflow.publication-state.v1"
+    },
+    "workspace": {
+      "type": "object"
+    },
+    "profile": {
+      "type": "object"
+    },
+    "authority": {
+      "type": "object",
+      "required": [
+        "ship_policy",
+        "allow_push",
+        "actor"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "ship_policy": {
+          "const": "push"
+        },
+        "allow_push": {
+          "const": true
+        },
+        "actor": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "phase": {
+      "enum": [
+        "preparing",
+        "prepared",
+        "publishing",
+        "finishing",
+        "published"
+      ]
+    },
+    "preparation": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "before",
+          "after"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!\\.(?:go|git)(?:/|$))[^\\r\\n\\u0000]+$"
+          },
+          "before": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "after": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "effects": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "expected",
+          "status"
+        ],
+        "properties": {
+          "expected": {},
+          "status": {
+            "enum": [
+              "pending",
+              "confirmed"
+            ]
+          }
+        }
+      }
+    },
+    "observations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "effect",
+          "observed"
+        ],
+        "properties": {
+          "effect": {
+            "type": "string",
+            "minLength": 1
+          },
+          "observed": {}
+        }
+      }
+    },
+    "release_evidence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    }
+  }
+}

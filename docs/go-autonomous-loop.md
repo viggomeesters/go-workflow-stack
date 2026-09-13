@@ -243,3 +243,15 @@ reusing old controller or process identities; the referenced Git objects and
 evidence must be available. Explicit `release.mode: none` still requires its
 contract reason, actual verification and review. Older runtimes do not enforce
 these proofs; preserve them and use this version or newer for opted-in tasks.
+
+### Configured task publication
+
+As of v0.3.22 an explicitly configured managed task can continue beyond
+`release_pending`: build → release preparation → per-command verification →
+critic → publication/readback → finish/review → cleanup. See
+[task release contracts](task-release-contract.md#configured-publication-v0322)
+for profile, scope and authority requirements. A budget boundary retains the
+same task/run/workspace and publication intent; it never starts a replacement
+builder to recover an acknowledged commit, push, tag or release. Unconfigured
+profiles keep their existing explicit pending handoff. Deployment and live
+service proof are still a separate adapter and are not implied by publication.

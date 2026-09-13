@@ -1,0 +1,139 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Explicit release identity and optional publication settings",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "provider",
+    "remote",
+    "branch"
+  ],
+  "properties": {
+    "provider": {
+      "enum": [
+        "git-tag",
+        "github-release"
+      ]
+    },
+    "remote": {
+      "type": "string",
+      "minLength": 1
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "repository": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "bump",
+        "tag_prefix",
+        "changelog"
+      ],
+      "properties": {
+        "version": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "path",
+            "format"
+          ],
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!\\.(?:go|git)(?:/|$))[^\\r\\n\\u0000]+$"
+            },
+            "format": {
+              "enum": [
+                "text",
+                "json"
+              ]
+            },
+            "key": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "format": {
+                    "const": "json"
+                  }
+                }
+              },
+              "then": {
+                "required": [
+                  "key"
+                ]
+              },
+              "else": {
+                "not": {
+                  "required": [
+                    "key"
+                  ]
+                }
+              }
+            }
+          ]
+        },
+        "bump": {
+          "enum": [
+            "major",
+            "minor",
+            "patch"
+          ]
+        },
+        "tag_prefix": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]*$"
+        },
+        "changelog": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "^(?!/)(?!.*(?:^|/)\\.\\.(?:/|$))(?!\\.(?:go|git)(?:/|$))[^\\r\\n\\u0000]+$"
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "provider": {
+            "const": "github-release"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "repository"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "provider": {
+            "const": "git-tag"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "required": [
+            "repository"
+          ]
+        }
+      }
+    }
+  ]
+}

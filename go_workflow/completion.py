@@ -157,8 +157,46 @@ def verification_session(repo, task):
     return RunSession(root.parent, task_id, 'completion')
 
 
-def capture_verification(repo, task_id, owner, *, timeout_seconds=900):
+def execute_check(repo, task, command, session, *, timeout_seconds=900, binding=None):
+    """Execute one declared command; retain full raw output before checkpointing."""
     from .cli import run_shell_with_timeout
+    if command not in task['verification']: raise CompletionError('Undeclared verification command')
+    root = workflow_root(repo)
+    binding = binding or bind(repo, task)
+    env = os.environ.copy()
+    started = time.monotonic()
+    with tempfile.TemporaryDirectory(prefix='go-completion-cache-') as cache:
+        env['PYTHONPYCACHEPREFIX'] = cache
+        env['PYTEST_ADDOPTS'] = env.get('PYTEST_ADDOPTS', '') + ' -p no:cacheprovider'
+        with session.operation():
+            output = run_shell_with_timeout(repo, command, env, timeout_seconds)
+        session.update(inflight=None)
+    raw = save_artifact(root, task['id'], 'command', {**binding, 'command': command, 'cwd': str(repo),
+                         'elapsed_seconds': time.monotonic() - started, **output})
+    proof = {'schema': 'go-workflow.verification-evidence.v1', 'task_id': task['id'], 'phase_id': 'verify',
+        'requirement_ids': [item['id'] for item in task.get('requested_outcomes', [])] or ['acceptance'],
+        'status': 'passed' if output['returncode'] == 0 else 'failed', 'command': command, 'cwd': str(repo),
+        'revision': binding['revision'], 'worktree_digest': binding['content_digest'],
+        'exit_code': output['returncode'], 'evidence': [raw['path']]}
+    return {'verification': proof, 'raw': raw}, output
+
+
+def finalize_checks(repo, task, owner, checks, *, binding=None, task_lock_held=False):
+    root = workflow_root(repo)
+    binding = binding or bind(repo, task)
+    unchanged = content_snapshot(repo, task)['digest'] == binding['content_digest']
+    matched = len(checks) == len(task['verification']) and all(
+        item['verification']['command'] == command and item['verification']['exit_code'] == 0
+        and all(read_artifact(root, item['raw']).get(key) == value for key, value in binding.items())
+        for command, item in zip(task['verification'], checks))
+    artifact = {'schema': 'go-workflow.executed-verification.v1', **binding, 'checks': checks,
+        'content_unchanged': unchanged, 'status': 'passed' if unchanged and matched else 'failed'}
+    ref = save_artifact(root, task['id'], 'verification', artifact)
+    attach(root, task['id'], owner, 'verification', ref, task_lock_held=task_lock_held)
+    return artifact, ref
+
+
+def capture_verification(repo, task_id, owner, *, timeout_seconds=900):
     root = workflow_root(repo)
     with repository_lock(root, 'completion-' + task_id):
         task = active_task(root.parent, task_id, owner)
@@ -167,28 +205,9 @@ def capture_verification(repo, task_id, owner, *, timeout_seconds=900):
             task = active_task(root.parent, task_id, owner)
             binding = bind(repo, task)
             session = verification_session(repo, task)
-            checks = []
-            requirements = [item['id'] for item in task.get('requested_outcomes', [])] or ['acceptance']
-            for command in task['verification']:
-                env = os.environ.copy()
-                started = time.monotonic()
-                with tempfile.TemporaryDirectory(prefix='go-completion-cache-') as cache:
-                    env['PYTHONPYCACHEPREFIX'] = cache
-                    with session.operation():
-                        output = run_shell_with_timeout(repo, command, env, timeout_seconds)
-                    session.update(inflight=None)
-                raw = save_artifact(root, task_id, 'command', {**binding, 'command': command, 'cwd': str(repo),
-                                                             'elapsed_seconds': time.monotonic() - started, **output})
-                verification = {'schema': 'go-workflow.verification-evidence.v1', 'task_id': task_id, 'phase_id': 'verify',
-                                'requirement_ids': requirements, 'status': 'passed' if output['returncode'] == 0 else 'failed',
-                                'command': command, 'cwd': str(repo), 'revision': binding['revision'],
-                                'worktree_digest': binding['content_digest'], 'exit_code': output['returncode'], 'evidence': [raw['path']]}
-                checks.append({'verification': verification, 'raw': raw})
-            unchanged = content_snapshot(repo, task)['digest'] == binding['content_digest']
-            artifact = {'schema': 'go-workflow.executed-verification.v1', **binding, 'checks': checks,
-                        'content_unchanged': unchanged, 'status': 'passed' if unchanged and all(item['verification']['exit_code'] == 0 for item in checks) else 'failed'}
-            ref = save_artifact(root, task_id, 'verification', artifact)
-            attach(root, task_id, owner, 'verification', ref, task_lock_held=True)
+            checks = [execute_check(repo, task, command, session, timeout_seconds=timeout_seconds, binding=binding)[0]
+                      for command in task['verification']]
+            artifact, ref = finalize_checks(repo, task, owner, checks, binding=binding, task_lock_held=True)
             session.update(phase='complete', checks=checks)
             return artifact, ref
 
@@ -215,7 +234,7 @@ def record_critic(repo, task_id, owner, review):
         return ref
 
 
-def completion_findings(repo, task, *, current=True, remote=True):
+def completion_findings(repo, task, *, current=True, remote=True, phase_only=False):
     if 'execution_contract' not in task: return []
     root = workflow_root(repo)
     # Historical proof is portable Git/evidence data. Old process identities
@@ -269,6 +288,9 @@ def completion_findings(repo, task, *, current=True, remote=True):
             raise CompletionError('Critic evidence is incomplete or blocked')
         if current and not changed_content(repo, task, snapshot).issubset(set(critic['reviewed_paths'])):
             raise CompletionError('Critic proof does not cover current changed product paths')
+        # Internal publisher precondition, before a release can exist. Public
+        # finish/approval always use the default complete lifecycle gate.
+        if phase_only: return []
         refs = {manifest[name]['path'] for name in ('verification', 'critic')}
         release = task['execution_contract']['release']
         if release['mode'] == 'required':

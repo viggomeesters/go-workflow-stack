@@ -1,12 +1,11 @@
 # Task execution contracts
 
 The optional `execution_contract` adds typed execution intent to a task. Its
-schema is `go-workflow.execution-contract.v1`. This release implements data
-validation, intake preservation and dependency readiness. Actual per-model
-dispatch, task worktrees, crash checkpoints and release publication belong to
-the subsequent ABC tasks. A valid model selection is not evidence that a model
-ran; a `release.mode` declaration alone does not enforce shipping in the legacy
-finish engine.
+schema is `go-workflow.execution-contract.v1`. The runtime implements data validation, intake preservation, dependency
+readiness, model selection, owned workspaces and resumable phases. Opted-in
+completion requires executed checks, critic evidence and required shipping
+readback. Configured publication is available as described below; model identity
+remains requested/unconfirmed unless independently observed.
 
 ## Selection and compatibility
 
@@ -25,7 +24,7 @@ finish engine.
 ```
 
 `main` and the model above are examples, not hidden defaults. Supported effort
-names are a structural vocabulary; the later adapter capability check must
+names are a structural vocabulary; the native adapter capability check must
 validate the actual model/effort combination before invoking a worker.
 
 Projects can set `execution_defaults` to a complete contract. Task intake merges
@@ -117,9 +116,9 @@ for another task is invalid.
 
 Schema/skill lint validates document structure. Test evidence documents command
 execution. Release proof establishes the final published revision. They must
-not substitute for one another. Evidence invalidation after edits/rebase and
-mandatory phase/requirement enforcement at finish are subsequent lifecycle
-work, not claims made by this contract-only increment.
+not substitute for one another. The shared completion gate invalidates evidence after content changes and
+requires matching executed verification, critic and applicable release proof.
+Configured publication verifies the prepared candidate before integration.
 
 ## Verification
 
@@ -133,3 +132,77 @@ release gate.
 Legacy provenance and exclusions are recorded in
 `.go/plans/legacy-insights.json`. Selected ideas are translated into the current
 JSON runtime; historical vault writers and monolithic pipelines are not loaded.
+
+## Configured publication (v0.3.22)
+
+Managed task worktrees can now publish a fully verified candidate. Configure
+publication explicitly under the task's named `release_profiles` entry:
+
+```json
+{
+  "provider": "github-release",
+  "remote": "origin",
+  "branch": "main",
+  "repository": "example/app",
+  "publication": {
+    "version": {"path": "package.json", "format": "json", "key": "version"},
+    "bump": "minor",
+    "tag_prefix": "v",
+    "changelog": "CHANGELOG.md"
+  }
+}
+```
+
+The alternative version source is `{"path":"VERSION","format":"text"}`.
+JSON keys can use an explicit dotted object path. Supported bumps are major,
+minor and patch on semantic `X.Y.Z` versions. Both files must be in the task's
+modify scope, separate from `.go/` and Git state. A Git-only publisher uses
+`provider: git-tag` and omits `repository`. No arbitrary publisher shell command
+or deployment hook is inferred.
+
+Start the managed run with its explicit workspace bindings and
+`--ship-policy push --allow-push`. The controller freezes profile and authority;
+model choice never grants publication permission. Profiles without
+`publication` retain `release_pending`. Existing tasks and profiles are not
+silently migrated. Publisher mutations run in the canonical checkout; workers
+may record their own outcomes but cannot publish through the CLI.
+
+The controller builds, reserves a version against the current remote base and
+latest matching release, prepares the version/changelog, then executes every
+check and the critic on that final content. Full command output is retained in
+content-bound proof files. Workers leave deferred shipping outcomes pending;
+blocked/rejected requirements prevent publication. The existing architecture
+conformance gate also applies before the first publication effect.
+
+A successful candidate is committed within scope, integrated by fast-forward,
+tagged with an annotated tag, atomically pushed with its branch and published
+when the profile requires GitHub. Every effect has durable intent before its
+write and exact readback afterward. A lost response is reconciled; a conflicting
+tag, changed base/profile, unknown readback or live orphan process blocks further
+writes. A competing task cannot acquire the integration slot or reuse an active
+release-channel reservation. Base reconciliation is explicit: this publisher
+does not automatically rebase a changed remote or reuse pre-rebase proof.
+
+`.go/runs/<task>/release-state.json` holds the frozen identity, preparation,
+effects and readbacks. Command and time budgets preserve an exact resumable
+phase, including publication. The managed resume arguments retain the original
+explicit authority. Successful release readback allows finish and approval;
+cleanup is a separate checkpoint and never republishes. Local canonical workflow
+state is durable between invocations; publishing the product is not a promise
+that every changing operational checkpoint has been replicated to another host.
+Cross-host transfer and default adoption remain separate tasks.
+
+For a controller that already owns a task workspace, the same driver is exposed
+as `release prepare REPO --task-id ID --owner OWNER --run-id RUN
+--ship-policy push --allow-push`, `release publish REPO --task-id ID --owner OWNER
+--run-id RUN`, and read-only `release status` with those identity arguments.
+Standalone publication leaves cleanup to the workspace command. Keep the
+canonical state and workspace together for recovery. Do not delete reservations,
+overwrite conflicting tags or fabricate observations to bypass a pending run.
+
+Verification commands must leave the owned workspace clean enough to integrate;
+Python and pytest caches are redirected/disabled by the controlled collector.
+User files and other generated output are preserved and can block cleanup.
+GitHub Actions are never consulted. Local bare-Git fixtures exercise the complete
+managed lifecycle, while process fixtures cover orphan protection and lost GitHub
+responses without contacting an external publisher.

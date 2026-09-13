@@ -20,9 +20,12 @@ def validate_release_profiles(value):
         if not isinstance(name, str) or not name.strip() or not isinstance(profile, dict):
             errors.append('Invalid release profile name/object'); continue
         required = {'provider', 'remote', 'branch'} | ({'repository'} if profile.get('provider') == 'github-release' else set())
-        if (profile.get('provider') not in {'git-tag', 'github-release'} or set(profile) != required
-                or not all(isinstance(item, str) and item.strip() for item in profile.values())):
+        if (not isinstance(profile.get('provider'), str) or profile.get('provider') not in {'git-tag', 'github-release'} or set(profile) - {'publication'} != required
+                or not all(isinstance(item, str) and item.strip() for key, item in profile.items() if key != 'publication')):
             errors.append('Invalid/unsupported release profile: ' + name)
+        if 'publication' in profile:
+            from .release import validate_publication
+            errors.extend(validate_publication(profile['publication']))
     return errors
 
 
@@ -33,6 +36,7 @@ def release_profile(repo, task):
     if not isinstance(profile, dict) or profile.get('provider') not in {'git-tag', 'github-release'}:
         raise CompletionError('Required release profile has no supported verifier/publisher configuration')
     required = {'provider', 'remote', 'branch'} | ({'repository'} if profile['provider'] == 'github-release' else set())
+    profile = {key: value for key, value in profile.items() if key != 'publication'}
     if set(profile) != required or not all(isinstance(value, str) and value for value in profile.values()):
         raise CompletionError('Release profile has missing or unknown fields')
     if not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9._-]*', profile['remote']):
@@ -44,6 +48,7 @@ def release_profile(repo, task):
 
 
 def observe_release(repo, task, tag):
+    from .release import remaining_timeout
     profile = release_profile(repo, task)
     git(repo, 'check-ref-format', 'refs/tags/' + tag)
     url = git_text(repo, 'remote', 'get-url', profile['remote'])
@@ -59,7 +64,7 @@ def observe_release(repo, task, tag):
     try:
         result = subprocess.run(['git', '-C', str(repo), '-c', 'protocol.ext.allow=never', 'ls-remote', '--', profile['remote'],
                                  'refs/heads/' + profile['branch'], 'refs/tags/' + tag, 'refs/tags/' + tag + '^{}'],
-                                env=env, text=True, capture_output=True, timeout=30)
+                                env=env, text=True, capture_output=True, timeout=remaining_timeout(30))
     except subprocess.TimeoutExpired as exc: raise CompletionError('Remote release readback timed out') from exc
     if result.returncode: raise CompletionError('Remote release readback failed: ' + result.stderr[-1000:])
     refs = {}
@@ -81,7 +86,7 @@ def observe_release(repo, task, tag):
     if profile['provider'] == 'github-release':
         command = ['gh', 'release', 'view', tag, '--repo', profile['repository'], '--json',
                    'tagName,url,isDraft,isPrerelease,publishedAt']
-        try: completed = subprocess.run(command, text=True, capture_output=True, timeout=30)
+        try: completed = subprocess.run(command, text=True, capture_output=True, timeout=remaining_timeout(30))
         except subprocess.TimeoutExpired as exc: raise CompletionError('GitHub release readback timed out') from exc
         if completed.returncode: raise CompletionError('GitHub release readback failed: ' + completed.stderr[-1000:])
         publication = json.loads(completed.stdout)

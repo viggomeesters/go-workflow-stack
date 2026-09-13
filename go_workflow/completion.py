@@ -279,7 +279,14 @@ def completion_findings(repo, task, *, current=True, remote=True):
         elif release.get('mode') != 'none' or not release.get('reason'):
             raise CompletionError('Explicit release policy is required')
         for outcome in task.get('requested_outcomes', []):
-            if outcome.get('status') != 'verified' or not refs.intersection(outcome.get('evidence') or []):
+            evidence = outcome.get('evidence') or []
+            if not isinstance(evidence, list): raise CompletionError('Requirement evidence must be a list')
+            # The public outcome command stores attribution objects. Their
+            # exact summary is the proof pointer; older direct references remain
+            # readable, but arbitrary prose or nested objects are never paths.
+            pointers = [item.get('summary') if isinstance(item, dict) else item for item in evidence]
+            pointers = {item for item in pointers if isinstance(item, str)}
+            if outcome.get('status') != 'verified' or not refs.intersection(pointers):
                 raise CompletionError('Requirement lacks verified lifecycle proof: ' + str(outcome.get('id')))
         return []
     except (ValueError, OSError, KeyError, TypeError) as exc:

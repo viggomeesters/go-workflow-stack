@@ -253,3 +253,21 @@ def test_historical_completion_is_readable_in_an_ordinary_clone(tmp_path):
     report=lifecycle_report(clone)
     assert report['evidence_valid'],report
     assert task['id'] in report['verified_done']
+
+
+def test_standard_outcome_cli_proof_allows_tracked_task_finish_and_approval(tmp_path):
+    repo,source,task=fixture(tmp_path)
+    task.update(outcome_tracking_version=1,requested_outcomes=[
+        {'id':'R1','text':'Delivered app','source':'fixture','status':'pending','evidence':[]}])
+    source.write_text(json.dumps(task))
+    _,verification,_,_,_=prepare_proofs(repo,task)
+    result=call(repo,'task','outcome',repo,'--task-id',task['id'],'--outcome','R1',
+                '--status','verified','--evidence',verification['path'],'--agent','owner')
+    assert result.returncode==0,result.stderr
+    task=json.loads(source.read_text())
+    assert task['requested_outcomes'][0]['evidence'][0]['summary']==verification['path']
+    result=call(repo,'finish',task['id'],'--repo',repo,'--agent','owner','--evidence',SUMMARY)
+    assert result.returncode==0,result.stderr
+    result=call(repo,'task','review',repo,'--task-id',task['id'],'--status','approved',
+                '--agent','owner','--evidence','Same-agent fixture review and real release proof passed')
+    assert result.returncode==0,result.stderr

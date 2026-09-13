@@ -226,7 +226,10 @@ attestation. A same-agent review must say so.
 
 Verification, critic and release references are stored in canonical task
 `completion_evidence`; each requirement needs a verified outcome with an exact
-validated phase reference in its evidence list. Source, version, architecture or
+validated phase reference in its evidence list. Use `task outcome --evidence
+<exact-phase-artifact-path>`; v0.3.21 reads that reference from the attributed
+record's `summary`. v0.3.20 rejects this standard CLI shape and leaves the task
+active, so use v0.3.21 or newer for tracked-outcome completion. Source, version, architecture or
 contract changes invalidate affected proof. Operational task, run, evidence and
 planning updates do not change the product digest. Required shipping verifies the
 annotated remote tag, released content, branch ancestry and, for GitHub, a published

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.21 — outcome evidence interoperability
+
+- Accept exact proof references from the attributed evidence objects written by
+  the standard task outcome CLI. v0.3.20 safely blocked these tracked tasks.
+- Exercise real CLI outcome, finish and approval together; arbitrary summaries
+  still cannot replace validated lifecycle proof. Published v0.3.20 is retained.
+
 ## 0.3.20 — verified lifecycle completion
 
 - Opted-in finish, review approval and completion reporting share content-bound

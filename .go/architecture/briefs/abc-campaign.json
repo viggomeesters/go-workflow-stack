@@ -1,0 +1,94 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-campaign",
+  "project": "go-workflow-stack",
+  "title": "End-to-end evidence for independent task releases",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Two different task profiles deliver ordered independent releases with durable proof and an honest separate live runtime receipt."
+  ],
+  "scope": {
+    "in": [
+      "Reusable local Git remote campaign, rejected critic/repair and dependency ordering, failure/property regressions, small live Codex worker run"
+    ],
+    "out": [
+      "New model/session/subagent adapter",
+      "External production deployment",
+      "Provider invoice/effective-model attestation",
+      "Synthetic proof labeled live"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Disposable campaign repository and local bare remote; canonical source .go remains separate; supported managed native CLI path"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Use the shipped lifecycle primitives; test doubles must exercise actual subprocess/verification/Git/readback boundaries.",
+    "Different model/effort profiles and required release dependency are explicit. Failed or missing release proof must prevent the next claim.",
+    "Reuse focused existing regressions for crash/effect/cleanup boundaries and add cross-task campaign/completeness/state-roundtrip coverage; no copied fake implementation.",
+    "Live proof uses available Terra High and Astra Medium as requested by task; preserve raw results and mark access failure as a real proof blocker. Never replace a failed live run with fixture claims.",
+    "A worktree is a Git organization mechanism, not a security or dependency/test-environment isolation boundary.",
+    "No GitHub Actions, global skills edits or production targets."
+  ],
+  "quality_attributes": [
+    {
+      "id": "ordered-releases",
+      "scenario": "Execute two dependent profiled tasks",
+      "measure": "Second claim before first required release",
+      "threshold": 0
+    },
+    {
+      "id": "proof-integrity",
+      "scenario": "Fail critic or mutate verified state",
+      "measure": "Untested content marked released or done",
+      "threshold": 0
+    },
+    {
+      "id": "recovery-completeness",
+      "scenario": "Interrupt phases/effects/cleanup",
+      "measure": "Lost proof or duplicate confirmed effects",
+      "threshold": 0
+    },
+    {
+      "id": "live-attribution",
+      "scenario": "Run real native models separately from fixtures",
+      "measure": "Simulated execution represented as live",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Live runtime access may fail despite model catalog availability.",
+    "Local bare remote proves Git release/readback, not an external deployment provider."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d02-worker-topology",
+    "abc-d07-verified-completion"
+  ]
+}

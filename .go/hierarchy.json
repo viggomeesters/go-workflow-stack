@@ -19,7 +19,7 @@
         {
           "id": "abc-models",
           "title": "Modelsturing en uitvoeringsvormen",
-          "description": "abc-02 native model control published v0.3.16; live topology/model proof remains abc-09.",
+          "description": "abc-02 model control v0.3.16 and abc-09 topology proof v0.3.25 shipped; fresh phase workers supported, session/subagent adapters deferred; live baseline proof remains abc-10.",
           "tasks": [
             "abc-02",
             "abc-09"
@@ -38,7 +38,7 @@
         {
           "id": "abc-release",
           "title": "Volledige geverifieerde taakreleases",
-          "description": "abc-05 v0.3.21 completion, abc-06 v0.3.22 resumable publication and abc-07 v0.3.23 explicit deployment/live proof shipped. Migration and broad end-to-end proof remain abc-08/10.",
+          "description": "abc-05 v0.3.21 completion, abc-06 v0.3.22 publication, abc-07 v0.3.23 deployment proof and abc-08 v0.3.24 adoption shipped; broad end-to-end/live proof remains abc-10.",
           "tasks": [
             "abc-05",
             "abc-06",

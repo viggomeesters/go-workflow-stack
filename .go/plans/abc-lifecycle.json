@@ -478,7 +478,7 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": null,
+    "active_task": "abc-10",
     "completed_tasks": [
       "abc-01",
       "abc-02",
@@ -494,7 +494,7 @@
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "resolve_after_proof",
+    "candidate_version": "resolve_after_campaign",
     "verification_ref": ".go/evidence/abc-05-v021-verification.json",
     "next_ready": [
       "abc-10"

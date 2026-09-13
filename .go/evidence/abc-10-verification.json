@@ -1,7 +1,7 @@
 {
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-10",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
   "checks": [
     "176 broad ABC regressions on ca37d7407cd45826e5ac30bb2487c397f89bdaf7 before final native writer-instruction repair",
@@ -27,5 +27,12 @@
     "Astra Medium: dependent local release 1.3.0"
   ],
   "limitations": "local bare Git; no hosted publication or production deployment; effective model identity unconfirmed; candidate-source override was explicit and limited to disposable proof; worktrees do not isolate security or external effects; boundary tests are not exhaustive model checking",
-  "self_reflect": "Self-reflect: two concrete live-discovered product instruction faults were repaired in task scope and verified with red/green regressions and real workers. No additional durable agent/process change, global skill, memory or configuration mutation needed."
+  "self_reflect": "Self-reflect: two concrete live-discovered product instruction faults were repaired in task scope and verified with red/green regressions and real workers. No additional durable agent/process change, global skill, memory or configuration mutation needed.",
+  "final_tag_commit": "b2d235610691eead011cc738f278887a99e4bbe0",
+  "final_tag_checks": [
+    "197 smoke tests passed on annotated tag",
+    "20 affected model/campaign tests passed on final runtime; 176 broad regressions passed before last writer instruction fix; two real native releases match all 53 candidate runtime files",
+    "immutable template and standalone distribution gates passed"
+  ],
+  "publication_ref": ".go/evidence/abc-10-release.json"
 }

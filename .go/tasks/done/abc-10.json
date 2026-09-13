@@ -1,0 +1,494 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-10",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "A/B/C end-to-end bewijzen en vrijgeven",
+  "description": "Bewijs de geïntegreerde garanties met twee zelfstandige release-taken, verschillende modelprofielen, review/herstel en onderbrekingen; publiceer een compatibele stackrelease met traceerbare bewijzen.\nAfhankelijk van: go-workflow-stack:abc-08, go-workflow-stack:abc-09. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "tests/test_abc_end_to_end.py",
+      "fixtures/abc-campaign/**",
+      "scripts/check-abc.sh",
+      "docs/autonomy-benchmark.md",
+      "docs/distribution-and-pilots.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh",
+      "go_workflow/cli.py",
+      "go_workflow/run_state.py"
+    ]
+  },
+  "acceptance": [
+    "Twee taken gebruiken verschillende model/effortprofielen en leveren elk een afzonderlijk geverifieerde release; de tweede begint pas na de vereiste release van de eerste.",
+    "Een afgekeurde critic veroorzaakt herstel met actuele bevindingen en nieuwe verificatie; geen taak is done vóór de laatste vereiste release/deploycheck.",
+    "Deterministische scenario’s bewijzen crashherstel op alle side-effectgrenzen, model-onbeschikbaarheid, stale context, mislukte push/deploy en niet-omzeilbare handmatige finish.",
+    "Voer bij latere uitvoering een kleine live Codex-proof uit met beschikbare Terra High/Astra Medium of expliciet gekozen alternatieven; ontbrekende toegang blijft een expliciete proof-blocker, geen gesimuleerde live claim.",
+    "Stackrelease bevat raw evidence, versie/commit/tag/publicatielink en readback; onderscheid deterministische testdekking van live modelkwaliteit en hergebruik de bestaande releasechecks.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Voeg lokale regressies toe voor ontbrekend fasebewijs/requirements, stale HEAD, gewijzigde basis na groen, mergeconflict, verlopen claim met levende worker, pushfout, onderbroken publicatie en cleanupfout. Bewijs dat ongeacht het model geen release of done aan ongeteste inhoud wordt gekoppeld.",
+    "Neem gerichte legacy propertytests voor state-roundtrip en completeness over onder het nieuwe schema; een optionele tweede taakworktree mag integratie of versie-uitgifte niet laten racen. Worktrees claimen geen beveiligings- of testomgevingisolatie."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_end_to_end.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T20:28:57+02:00",
+    "base_commit": "5ac4621960b59ef8d75c33aa408d19176a60c30e"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-13T20:58:35+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Same-agent review and final candidate/tag gates passed; fresh release readback confirmed by strict completion gate. No independent identity attestation claimed.",
+      "transaction_id": "d5b7121fc36744feaa8c1d15d6d1921d",
+      "delivery": {
+        "delivery_id": "autonomous-go-runtime-v12",
+        "html": ".go/deliveries/autonomous-go-runtime-v12/index.html",
+        "manifest": ".go/deliveries/autonomous-go-runtime-v12/manifest.json",
+        "source_sha256": "e6f439244f04383296d3098fae845676d49ef6eb79d19c75de3943115951423b",
+        "html_sha256": "570647944d97df5cc525fccc6889742382ed3d121d407da2443369d422d8b594"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T20:58:35+02:00",
+      "task_id": "abc-10",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-10-candidate.log,.go/evidence/abc-10-critic-green.log,.go/evidence/abc-10-critic-red.log,.go/evidence/abc-10-integration.json,.go/evidence/abc-10-live-binding.json,.go/evidence/abc-10-live/candidate-success/controller.log,.go/evidence/abc-10-live/candidate-success/invocations/001.json,.go/evidence/abc-10-live/candidate-success/invocations/002.json,.go/evidence/abc-10-live/candidate-success/live-result.json,.go/evidence/abc-10-live/candidate-success/mode.json,.go/evidence/abc-10-live/candidate-success/project/.go/architecture-principles.json,.go/evidence/abc-10-live/candidate-success/project/.go/evidence/events.jsonl,.go/evidence/abc-10-live/candidate-success/project/.go/hierarchy.json,.go/evidence/abc-10-live/candidate-success/project/.go/project.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/attempt-01/deep-critic-16872f39d9f94e418038abcad303345d.txt,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/changes.patch,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/context.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/process-result.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/changes.patch,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/context.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/process-result.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/critic-0e88512dfb274cc18ee86a784573e6ab.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/release-b8e3f8f6cfa148779b10239d38a21281.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/verification-f69ce19a5b384012b8100f70236b69e7.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/model-selection.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/publication-process.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/release-state.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/run-state.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/attempt-01/deep-critic-d9a1ab42ef4a45b0a60a6a5e80c6592c.txt,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/changes.patch,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/context.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/process-result.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-08dfe6dcb3e85f2a246aadc7239b940c1d7068ad7b5d26fe1f33613250b9bb6f,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-27dd8ed44a83ff94d557f9fd0412ed5a8cbca69ea04922d88c01184a07300a5a,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/changes.patch,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/context.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/process-result.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/command-1784f31f01634f3a9a3da9c00263fe1f.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/critic-8ac0d1fa100946b987503894907c9091.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/verification-4a0527cf7a7144e587bce0e21ef5e345.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/model-selection.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/publication-process.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/release-state.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/run-state.json,.go/evidence/abc-10-live/candidate-success/project/.go/runs/events.jsonl,.go/evidence/abc-10-live/candidate-success/project/.go/runs/publication-reservations/b84fd57712be8d08af0d3f3e09267f1f1f76fabeebf70d5f88f44a97f5fd2afb.json,.go/evidence/abc-10-live/candidate-success/project/.go/tasks/done/campaign-1.json,.go/evidence/abc-10-live/candidate-success/project/.go/tasks/done/campaign-2.json,.go/evidence/abc-10-live/candidate-success/project/.go/vision.json,.go/evidence/abc-10-live/candidate-success/project/.go/workspaces/campaign-1.json,.go/evidence/abc-10-live/candidate-success/project/.go/workspaces/campaign-2.json,.go/evidence/abc-10-live/candidate-success/repository.bundle,.go/evidence/abc-10-live/candidate-success/runtime-source.json,.go/evidence/abc-10-live/candidate-writer-failure/controller.log,.go/evidence/abc-10-live/candidate-writer-failure/interruption.json,.go/evidence/abc-10-live/candidate-writer-failure/invocations/001.json,.go/evidence/abc-10-live/candidate-writer-failure/mode.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/architecture-principles.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/evidence/events.jsonl,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/hierarchy.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/project.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/changes.patch,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/context.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/process-result.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/changes.patch,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/context.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/model-selection.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/run-state.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/events.jsonl,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/tasks/active/campaign-1.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/tasks/open/campaign-2.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/vision.json,.go/evidence/abc-10-live/candidate-writer-failure/project/.go/workspaces/campaign-1.json,.go/evidence/abc-10-live/candidate-writer-failure/repository.bundle,.go/evidence/abc-10-live/candidate-writer-failure/runtime-source.json,.go/evidence/abc-10-live/manifest.json,.go/evidence/abc-10-live/released-runtime-failure/controller.log,.go/evidence/abc-10-live/released-runtime-failure/interruption.json,.go/evidence/abc-10-live/released-runtime-failure/invocations/001.json,.go/evidence/abc-10-live/released-runtime-failure/mode.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/architecture-principles.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/evidence/events.jsonl,.go/evidence/abc-10-live/released-runtime-failure/project/.go/hierarchy.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/project.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/attempt-01/deep-critic-9240eb885ca24cc6b7f4fc2fab0c4af9.txt,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/changes.patch,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/context.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/process-result.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/changes.patch,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/context.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/process-result.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/changes.patch,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/context.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/completion/command-906013d551754008a631b8132964dd5d.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/completion/verification-afb216a3634846c0beecc723da293ee8.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/model-selection.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/publication-process.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/release-state.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/run-state.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/events.jsonl,.go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/publication-reservations/639456a6e7d927a3eb01a675edd14e11bb9da2abfce7ee48b646af57186fdfb2.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/tasks/active/campaign-1.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/tasks/open/campaign-2.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/vision.json,.go/evidence/abc-10-live/released-runtime-failure/project/.go/workspaces/campaign-1.json,.go/evidence/abc-10-live/released-runtime-failure/repository.bundle,.go/evidence/abc-10-make.log,.go/evidence/abc-10-regressions.log,.go/evidence/abc-10-verification.json,.go/evidence/abc-10-writer-green.log,.go/evidence/abc-10-writer-red.log,.go/evidence/events.jsonl,.go/project.json,.go/runs/abc-10/completion-state.json,.go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json,.go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json,.go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json,.go/runs/abc-10/completion/critic-62b66dc27522409f9868edb4b66d76ac.json,.go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json,.go/tasks/active/abc-10.json,.go/workspaces/abc-10.json,CHANGELOG.md,docs/autonomy-benchmark.md,docs/distribution-and-pilots.md,docs/releases/v0.3.26.md,fixtures/abc-campaign/campaign.py,fixtures/abc-campaign/coverage.json,fixtures/abc-campaign/worker.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/run_state.py,pyproject.toml,scripts/check-abc.sh,scripts/release-check-inner.sh,tests/test_abc_end_to_end.py; verification_command=pytest ABC campaign models failure matrix and smoke, make check, candidate/tagged release-check and canonical completion verify; verification_result=passed (176 broad regressions before final writer fix; 20 affected cases on final runtime; 197 smoke cases; two successful real native task releases; candidate and final tag gates; distribution/template pairing); critic=passed same-agent review of all changed content; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.26 b2d235610691eead011cc738f278887a99e4bbe0 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.26; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product proof improvements tested in scope.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/abc-10-candidate.log",
+        ".go/evidence/abc-10-critic-green.log",
+        ".go/evidence/abc-10-critic-red.log",
+        ".go/evidence/abc-10-integration.json",
+        ".go/evidence/abc-10-live-binding.json",
+        ".go/evidence/abc-10-live/candidate-success/controller.log",
+        ".go/evidence/abc-10-live/candidate-success/invocations/001.json",
+        ".go/evidence/abc-10-live/candidate-success/invocations/002.json",
+        ".go/evidence/abc-10-live/candidate-success/live-result.json",
+        ".go/evidence/abc-10-live/candidate-success/mode.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/architecture-principles.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/evidence/events.jsonl",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/hierarchy.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/project.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/attempt-01/deep-critic-16872f39d9f94e418038abcad303345d.txt",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/changes.patch",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/context.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/process-result.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/changes.patch",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/context.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/process-result.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/critic-0e88512dfb274cc18ee86a784573e6ab.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/release-b8e3f8f6cfa148779b10239d38a21281.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/completion/verification-f69ce19a5b384012b8100f70236b69e7.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/model-selection.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/publication-process.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/release-state.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-1/run-state.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/attempt-01/deep-critic-d9a1ab42ef4a45b0a60a6a5e80c6592c.txt",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/changes.patch",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/context.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/build-01-7a2e69575e3e4f0c8b31e95a4823d082/process-result.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-08dfe6dcb3e85f2a246aadc7239b940c1d7068ad7b5d26fe1f33613250b9bb6f",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-27dd8ed44a83ff94d557f9fd0412ed5a8cbca69ea04922d88c01184a07300a5a",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/blob-64d23f858ef51b0f996e4966d4e27c0371b437e2d2787890b1f7ad22d4ec5663",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/changes.patch",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/context.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/process-result.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/command-1784f31f01634f3a9a3da9c00263fe1f.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/critic-8ac0d1fa100946b987503894907c9091.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/completion/verification-4a0527cf7a7144e587bce0e21ef5e345.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/model-selection.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/publication-process.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/release-state.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/campaign-2/run-state.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/events.jsonl",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/runs/publication-reservations/b84fd57712be8d08af0d3f3e09267f1f1f76fabeebf70d5f88f44a97f5fd2afb.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/tasks/done/campaign-1.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/tasks/done/campaign-2.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/vision.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/workspaces/campaign-1.json",
+        ".go/evidence/abc-10-live/candidate-success/project/.go/workspaces/campaign-2.json",
+        ".go/evidence/abc-10-live/candidate-success/repository.bundle",
+        ".go/evidence/abc-10-live/candidate-success/runtime-source.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/controller.log",
+        ".go/evidence/abc-10-live/candidate-writer-failure/interruption.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/invocations/001.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/mode.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/architecture-principles.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/evidence/events.jsonl",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/hierarchy.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/project.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/changes.patch",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/context.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-bbe70a29b9a54562a39ecc02b5d72f8e/process-result.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/changes.patch",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-27ccb0843ab14ae892dfe2ec4d6c87f5/context.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/model-selection.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/campaign-1/run-state.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/runs/events.jsonl",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/tasks/active/campaign-1.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/tasks/open/campaign-2.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/vision.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/project/.go/workspaces/campaign-1.json",
+        ".go/evidence/abc-10-live/candidate-writer-failure/repository.bundle",
+        ".go/evidence/abc-10-live/candidate-writer-failure/runtime-source.json",
+        ".go/evidence/abc-10-live/manifest.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/controller.log",
+        ".go/evidence/abc-10-live/released-runtime-failure/interruption.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/invocations/001.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/mode.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/architecture-principles.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/evidence/events.jsonl",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/hierarchy.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/project.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/attempt-01/deep-critic-9240eb885ca24cc6b7f4fc2fab0c4af9.txt",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/changes.patch",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/context.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/build-01-5f4a62e5facb441eaf361e9364d084d3/process-result.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/changes.patch",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/context.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/critic-01-8076a64b1e5c45eeab2a615f75224caf/process-result.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/changes.patch",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/campaign-1-run/repair-02-4dfdcfc33c69472b9e22c54d53d16cce/context.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/completion/command-906013d551754008a631b8132964dd5d.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/completion/verification-afb216a3634846c0beecc723da293ee8.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/model-selection.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/publication-process.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/release-state.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/campaign-1/run-state.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/events.jsonl",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/runs/publication-reservations/639456a6e7d927a3eb01a675edd14e11bb9da2abfce7ee48b646af57186fdfb2.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/tasks/active/campaign-1.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/tasks/open/campaign-2.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/vision.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/project/.go/workspaces/campaign-1.json",
+        ".go/evidence/abc-10-live/released-runtime-failure/repository.bundle",
+        ".go/evidence/abc-10-make.log",
+        ".go/evidence/abc-10-regressions.log",
+        ".go/evidence/abc-10-verification.json",
+        ".go/evidence/abc-10-writer-green.log",
+        ".go/evidence/abc-10-writer-red.log",
+        ".go/evidence/events.jsonl",
+        ".go/project.json",
+        ".go/runs/abc-10/completion-state.json",
+        ".go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json",
+        ".go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json",
+        ".go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json",
+        ".go/runs/abc-10/completion/critic-62b66dc27522409f9868edb4b66d76ac.json",
+        ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json",
+        ".go/tasks/active/abc-10.json",
+        ".go/workspaces/abc-10.json",
+        "CHANGELOG.md",
+        "docs/autonomy-benchmark.md",
+        "docs/distribution-and-pilots.md",
+        "docs/releases/v0.3.26.md",
+        "fixtures/abc-campaign/campaign.py",
+        "fixtures/abc-campaign/coverage.json",
+        "fixtures/abc-campaign/worker.py",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/run_state.py",
+        "pyproject.toml",
+        "scripts/check-abc.sh",
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_end_to_end.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "5ac4621960b59ef8d75c33aa408d19176a60c30e",
+        "observed_head_commit": "b2d235610691eead011cc738f278887a99e4bbe0"
+      },
+      "verification": {
+        "command": "pytest ABC campaign models failure matrix and smoke, make check, candidate/tagged release-check and canonical completion verify",
+        "result": "passed (176 broad regressions before final writer fix"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review of all changed content",
+        "skip_reason": null
+      }
+    }
+  ],
+  "order": 100,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-08",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-09",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "completed",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json",
+    "execution_authority": {
+      "source": "User GO and continue",
+      "ship_policy": "push",
+      "allow_push": true,
+      "production_deployment": "not authorized; fixtures only"
+    },
+    "scope_note": "Two-task local-remote campaign, deterministic failure/property matrix and separately recorded live native worker proof. Live task profiles Terra High and Astra Medium are explicitly in acceptance; no external production deployment. Existing regressions are reused through the campaign check script. Live v0.3.25 proof exposed a pre-publication critic demanding downstream release receipt. Bounded in-scope repair adds explicit managed pre-publication critic instructions without weakening completion or publication gates; preserve failed live evidence and retest. Second live trial exposed native worker instructions requiring canonical outcome writes outside its sandbox; keep canonical single-writer ownership and have managed workers report evidence for the controller."
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-benchmark-promotion"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "campaign-resume-e2e"
+    }
+  ],
+  "execution_selection": {
+    "status": "user_selected",
+    "requested_model": "gpt-6-astra",
+    "requested_reasoning_effort": "high",
+    "effective_confirmation": "User-selected current session; independent identity unconfirmed"
+  },
+  "release_intent": {
+    "status": "published",
+    "version": "0.3.26",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Bewijs de geïntegreerde garanties met twee zelfstandige release-taken, verschillende modelprofielen, review/herstel en onderbrekingen; publiceer een compatibele stackrelease met traceerbare bewijzen.",
+    "sha256": "d090d598fbe9e6bf6aca4aa5a08a82399766fb2b0db96f4c71468b238e354790",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Twee taken gebruiken verschillende model/effortprofielen en leveren elk een afzonderlijk geverifieerde release; de tweede begint pas na de vereiste release van de eerste.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Een afgekeurde critic veroorzaakt herstel met actuele bevindingen en nieuwe verificatie; geen taak is done vóór de laatste vereiste release/deploycheck.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Deterministische scenario’s bewijzen crashherstel op alle side-effectgrenzen, model-onbeschikbaarheid, stale context, mislukte push/deploy en niet-omzeilbare handmatige finish.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Voer bij latere uitvoering een kleine live Codex-proof uit met beschikbare Terra High/Astra Medium of expliciet gekozen alternatieven; ontbrekende toegang blijft een expliciete proof-blocker, geen gesimuleerde live claim.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Stackrelease bevat raw evidence, versie/commit/tag/publicatielink en readback; onderscheid deterministische testdekking van live modelkwaliteit en hergebruik de bestaande releasechecks.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:58:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/release-754de8838bbd455cb1d2fcf9cd49dc1a.json"
+        }
+      ]
+    },
+    {
+      "id": "R7",
+      "text": "Voeg lokale regressies toe voor ontbrekend fasebewijs/requirements, stale HEAD, gewijzigde basis na groen, mergeconflict, verlopen claim met levende worker, pushfout, onderbroken publicatie en cleanupfout. Bewijs dat ongeacht het model geen release of done aan ongeteste inhoud wordt gekoppeld.",
+      "source": "legacy_insights_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    },
+    {
+      "id": "R8",
+      "text": "Neem gerichte legacy propertytests voor state-roundtrip en completeness over onder het nieuwe schema; een optionele tweede taakworktree mag integratie of versie-uitgifte niet laten racen. Worktrees claimen geen beveiligings- of testomgevingisolatie.",
+      "source": "legacy_insights_planning",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:55:44+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json"
+        }
+      ]
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "abc-d02-worker-topology",
+      "abc-d07-verified-completion"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/abc-10/completion/verification-cdcfd84dcc444b41b898c2ac17c40917.json",
+      "sha256": "0c007cfbd419bf3f9d301e637a2059efbe128ab38aefc15c2688db18690188dc"
+    },
+    "critic": {
+      "path": ".go/runs/abc-10/completion/critic-62b66dc27522409f9868edb4b66d76ac.json",
+      "sha256": "b870cefefdadcf59e21c3cde772a4ad754acbed1c9681f0d1a435b389ec4bdf8"
+    },
+    "release": {
+      "path": ".go/runs/abc-10/completion/release-754de8838bbd455cb1d2fcf9cd49dc1a.json",
+      "sha256": "e9cffee05c73a67a2576d4770abcf13091542f103e16a231a252efa1fff6fca3"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "abc-10",
+    "project": "go-workflow-stack",
+    "commit": "b2d235610691eead011cc738f278887a99e4bbe0",
+    "tag": "v0.3.26",
+    "evidence": [
+      ".go/runs/abc-10/completion/release-754de8838bbd455cb1d2fcf9cd49dc1a.json"
+    ]
+  }
+}

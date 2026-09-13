@@ -28,7 +28,7 @@
     "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
     "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
   ],
-  "planning_contract": "Lifecycle contracts, model control, owned context/resume, completion, publication, deployment, adoption and topology proof shipped through v0.3.25. End-to-end/live proof and template tasks remain.",
+  "planning_contract": "All eleven stack ABC tasks shipped through v0.3.26, including ordered profiled task releases, real native workers and two live-discovered phase-boundary repairs. Two template tasks remain.",
   "execution_boundary": {
     "authorized_now": [
       "bounded task implementation",
@@ -478,7 +478,7 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": "abc-10",
+    "active_task": null,
     "completed_tasks": [
       "abc-01",
       "abc-02",
@@ -489,7 +489,8 @@
       "abc-06",
       "abc-07",
       "abc-08",
-      "abc-09"
+      "abc-09",
+      "abc-10"
     ],
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
@@ -497,9 +498,9 @@
     "candidate_version": "resolve_after_campaign",
     "verification_ref": ".go/evidence/abc-05-v021-verification.json",
     "next_ready": [
-      "abc-10"
+      "go-project-template:abc-template-01"
     ],
-    "last_release": "v0.3.25"
+    "last_release": "v0.3.26"
   },
   "original_planning_boundary": {
     "authorized_now": [

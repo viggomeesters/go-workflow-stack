@@ -1,0 +1,36 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-04",
+  "revision": "1e2e6cabea26bb289e22bc579b2ce4e39f88acd3",
+  "status": "candidate_passed_final_tag_pending",
+  "checks": [
+    "281 Linux tests passed (197 smoke and 84 focused)",
+    "84 focused tests passed on macOS",
+    "make check passed in Linux and ordinary macOS clone",
+    "candidate release gate passed including distribution/template pairing",
+    "actual owned workspace staging/integration succeeded; canonical user uv.lock preserved",
+    "git diff --check passed"
+  ],
+  "critic": {
+    "status": "passed",
+    "method": "same-agent adversarial review with real Git/process regression fixtures",
+    "repairs": [
+      "Synchronize canonical project version with package/constants before candidate release validation",
+      "Persist setup intent before claim/workspace creation so a preparation failure can resume",
+      "Register child process group before payload and invalidate old nonce under state lock before recovery",
+      "Apply orphan/controller liveness guards to standalone workspace operations too",
+      "Preserve files but invalidate check/critic proof on code/base/canonical contract drift",
+      "Recover interrupted explicit relocation without rewriting historical context",
+      "Keep active task at release_pending; cleanup retry cannot restart publication",
+      "Bind stable external effect intent to exact observed remote result; unknown readback stays pending"
+    ]
+  },
+  "limitations": [
+    "Managed runner requires native Codex and explicit initial task/workspace/base/run bindings; legacy unopted execution retained",
+    "Publication remains abc-05/06/07; green phases return release_pending",
+    "Tests use fixture processes and do not claim live model generation or independent effective identity",
+    "Cross-host liveness and multiple-workspace relocation require explicit reconciliation; detached background workers are outside the supported process contract",
+    "Old active tasks without managed checkpoints require explicit recovery context rather than inferred phases"
+  ],
+  "self_reflect": "Release preparation corrected: synchronize the canonical version contract before candidate validation; preserve failed gate evidence. In-scope review defects repaired and tested; no skill/memory/config changes."
+}

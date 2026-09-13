@@ -128,36 +128,66 @@
       "id": "R1",
       "text": "De gereproduceerde budgetuitputting na build hervat dezelfde actieve taak met groter budget; geen handmatige requeue of herstart vanaf nul nodig.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Native CLI fixture exhausts its first budget after build, then resumes the same active task at verification and invokes build only once. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Checkpoint, modelprofiel, context, poging en resterend budget blijven gekoppeld; wisselen gebeurt alleen na beëindiging of bevestigde onderbreking van de vorige worker.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Canonical run checkpoint persists frozen model profiles, context/process-result refs, attempts, command budgets and requirements. Parent and process-group termination precede any successor phase. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Een levende eigenaar wordt niet gestolen; twee runners kunnen niet tegelijk dezelfde taak of publicatiefase bezitten.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Real concurrent controller and killed-controller/live-worker fixtures reject takeover; standalone staging also rejects the orphan. Shared run/integration locks retain one publisher slot. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Crashherstel controleert Git- en externe toestand voordat een stap opnieuw wordt uitgevoerd; externe side effects krijgen een vastgelegde intentie en bevestiging.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Interrupted phase recovery reads current Git and scope. Stable side-effect intent retains pending status after lost acknowledgement, and real bare-Git remote readback confirms the exact expected SHA before further action. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Tests bewijzen overname na procesuitval, refusal bij live eigenaar, behoud van unrelated changes en hervatting na verplaatsing van de checkout.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Real process-death/live-owner, unrelated user-file preservation, explicit checkout relocation and interrupted-Git-repair recovery fixtures pass. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R6",
@@ -170,15 +200,27 @@
       "id": "R7",
       "text": "Hervatten verifieert en hergebruikt de taakworktree en claim; een verlopen lease alleen rechtvaardigt geen tweede schrijver zolang de oude worker nog actief is. Wijziging van HEAD, basis, werkdiff of profiel maakt getroffen context/checkbewijs ongeldig.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Resume reuses the registered workspace/run/claim and rejects changed owner/model/bindings. Git bytes/index/HEAD/base and canonical context fingerprint changes invalidate affected check proof without resetting files. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     },
     {
       "id": "R8",
       "text": "State-roundtrip- en crashtests behouden requirementdekking, fase-evidence en publicatie-intenties; herstel van een cleanupfout hervat uitsluitend cleanup en start geen nieuwe release.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T15:45:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Checkpoint/schema roundtrip retains requirements and raw phase evidence; confirmed delivery with failed cleanup resumes only cleanup, leaving release receipt and builder/critic invocation count unchanged. Proof: .go/evidence/abc-04-verification.json; candidate 1e2e6cabea26bb289e22bc579b2ce4e39f88acd3"
+        }
+      ]
     }
   ],
   "verification_notes": [

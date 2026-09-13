@@ -1,0 +1,21 @@
+{
+  "task_id": "abc-07",
+  "status": "passed",
+  "clone_source": "canonical origin, ordinary clone",
+  "observed_main": "4afa3d1421a9821c15a30991710f91e3e50a029d",
+  "verified_done": [
+    "abc-05",
+    "abc-06",
+    "abc-07"
+  ],
+  "invalid_done": {},
+  "tasks": {
+    "open": 3,
+    "active": 0,
+    "blocked": 0,
+    "done": 130
+  },
+  "tag": "v0.3.23",
+  "tag_object": "ceb776e5f428ddd8d7de6f1a6ccd08b0c959ba26",
+  "released_commit": "654077aceee71c136a7c2473140b301d4385fc53"
+}

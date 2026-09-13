@@ -74,7 +74,13 @@
     "created_on": "2026-09-13",
     "updated_on": "2026-09-13",
     "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
-    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+    "legacy_insights_ref": ".go/plans/legacy-insights.json",
+    "execution_authority": {
+      "source": "GO 2026-09-13",
+      "scope": "prepared ABC task sequence including declared independent task releases",
+      "ship_policy": "push",
+      "allow_push": true
+    }
   },
   "builds_on": [
     {
@@ -87,8 +93,11 @@
     }
   ],
   "execution_selection": {
-    "status": "not_selected",
-    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+    "status": "user_selected",
+    "requested_model": "gpt-6-astra",
+    "requested_reasoning_effort": "high",
+    "source": "User: laat ik hem op astra high staan: GO",
+    "effective_confirmation": "not independently observed; current session selected by user"
   },
   "release_intent": {
     "status": "planned",
@@ -165,5 +174,17 @@
     "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
     "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
     "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
-  ]
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-contracts"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "abc-d01-release-unit"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
 }

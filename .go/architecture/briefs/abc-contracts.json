@@ -1,0 +1,81 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-contracts",
+  "project": "go-workflow-stack",
+  "title": "Opt-in task execution and lifecycle contracts",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Validate explicit task execution, dependency and phase contracts before mutation while preserving legacy tasks."
+  ],
+  "scope": {
+    "in": [
+      "Versioned task/project/brief contracts and dependency claim gates"
+    ],
+    "out": [
+      "Model dispatch, task worktrees and release execution; follow-up ABC tasks own these"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Task intake, persisted .go state and dependency participant repositories"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Opt-in: historical done and unconfigured legacy tasks remain unchanged.",
+    "Product tasks require release profiles; mechanical/no-change outcomes require an explicit reason under a non-release profile; source smoke fixtures remain reusable.",
+    "Do not treat model selection metadata as proof of dispatch.",
+    "Missing participant, cyclic dependency or absent required completion evidence fails closed."
+  ],
+  "quality_attributes": [
+    {
+      "id": "invalid-input-atomicity",
+      "scenario": "Invalid execution profile or dependency supplied at intake",
+      "measure": "Task or hierarchy writes before rejection",
+      "threshold": 0
+    },
+    {
+      "id": "legacy-compatibility",
+      "scenario": "Existing valid tasks without execution contracts",
+      "measure": "Existing smoke/regression failures",
+      "threshold": 0
+    },
+    {
+      "id": "dependency-safety",
+      "scenario": "Unfulfilled, missing or cyclic dependency at next/claim",
+      "measure": "Incorrectly eligible task claims",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Cross-repository availability may block readiness; return actionable blockers instead of guessing a sibling."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d01-release-unit"
+  ]
+}

@@ -129,50 +129,92 @@
       "id": "R1",
       "text": "Per uitvoerbare taak wordt één branch/worktree aangemaakt of strikt herkend aan repository-identiteit, taak, run/eigenaar en expliciete basisbranch/revisie; onbekende bestaande paden, branchbotsingen en main/master-heuristiek worden geweigerd.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Real Git fixtures bind explicit task/owner/run/path/branch/base; foreign paths and second owners rejected without mutation. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Create/reuse/recovery is idempotent en exclusief: gelijktijdige of onderbroken creatie levert geen dubbele schrijvers op. Een model- of fasewissel hergebruikt dezelfde werkplek; claimoverdracht verloopt via het bestaande statecontract.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Concurrent create returns one generation; interrupted create recovers only exact clean work; claim-following rebind retains same workspace; held execution leases exclude competing writers. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Eén repositorygebonden control state heeft een expliciete schrijver; losse .go-kopieën in worktrees kunnen geen onafhankelijke queues worden. Linked-worktrees worden via Git ontdekt, inclusief .git-bestand en git-common-dir; Git-prunelocks vervangen geen claim- of integratielocks.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Linked worktree status and owned outcomes use canonical .go; copied queues and missing markers cannot become independent writers; common Git directory shares state locks. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Scopecontrole omvat de volledige taakdiff vanaf de basis plus staged/unstaged/untracked wijzigingen; alleen toegestane paden worden gestaged. Canonieke gebruikerswijzigingen worden niet meegenomen, gereset of automatisch gecommit.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Committed foreign files and copied runtime state block staging before index changes; complete diff/index/untracked scope and literal pathspecs tested; canonical user dirt preserved. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Een interface levert een exclusief integratieslot en expliciete kandidaat-/basisrevisies aan de toekomstige shipfase. Gewijzigde basis of conflict blijft herstelbaar met worktreebehoud; deze taak implementeert geen tweede publisher.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Held integration context exposes exact revisions and excludes competitors; advanced base refuses without deleting workspace. No publisher implemented. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R6",
       "text": "Cleanup weigert dirty, ongeïntegreerd of onbevestigd opgeleverd werk en vreemde worktrees; vereist integraal bewaard werk plus de geconfigureerde releasebewijzen. Een cleanupfout krijgt een herstelactie zonder herpublicatie of verlies van de bewezen release.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Cleanup requires ancestry, completion and required release receipt; dirty/ignored/unproven/locked work preserved; removal failures retain recovery action without republishing. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R7",
       "text": "Lokale Git-fixtures bewijzen gewone clone, linked worktree, pad met spaties, crash/retry, tweede eigenaar, vreemde bestaande workspace, out-of-scope gecommitteerd werk en veilige cleanup. Tests werken zonder externe accounts of publicatie.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T14:25:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Sixteen real Git workspace fixtures and 59 focused tests pass; candidate baseline has all 255 Linux tests green; ordinary Mac clone make check passes. Final tag will repeat the complete 256-test set. Proof: .go/evidence/abc-11-verification.json; candidate f32daf6d759119202e376cbcef4e3604c1dca2c0"
+        }
+      ]
     },
     {
       "id": "R8",

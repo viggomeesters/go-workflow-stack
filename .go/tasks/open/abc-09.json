@@ -28,7 +28,8 @@
       "go_workflow/constants.py",
       "CHANGELOG.md",
       ".go/project.json",
-      "docs/releases/**"
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
     ]
   },
   "acceptance": [
@@ -73,7 +74,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "not_started",
+    "implementation_status": "in_progress",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -81,12 +82,21 @@
     "created_on": "2026-09-13",
     "updated_on": "2026-09-13",
     "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
-    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+    "legacy_insights_ref": ".go/plans/legacy-insights.json",
+    "execution_authority": {
+      "source": "User GO and continue",
+      "ship_policy": "push",
+      "allow_push": true,
+      "production_deployment": "not authorized; fixtures only"
+    },
+    "scope_note": "Bounded protocol capability and real local process/workspace proof; no new persistent-session or subagent adapter. Immutable template pairing is part of each source release."
   },
   "builds_on": [],
   "execution_selection": {
-    "status": "not_selected",
-    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+    "status": "user_selected",
+    "requested_model": "gpt-6-astra",
+    "requested_reasoning_effort": "high",
+    "effective_confirmation": "User-selected current session; independent identity unconfirmed"
   },
   "release_intent": {
     "status": "planned",
@@ -156,5 +166,34 @@
     "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
     "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
     "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
-  ]
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-topologies"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "abc-d02-worker-topology"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
 }

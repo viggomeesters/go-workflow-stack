@@ -1,0 +1,86 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-topologies",
+  "project": "go-workflow-stack",
+  "title": "Phase-bound workers with durable repository ownership",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Choose a supported worker topology with separate protocol, fixture and live proof levels."
+  ],
+  "scope": {
+    "in": [
+      "Compare fresh workers, persistent turn overrides and subagents using versioned local protocol and actual existing workspace/context/process guards"
+    ],
+    "out": [
+      "Implement persistent-session or subagent controller",
+      "Mid-turn hot switching",
+      "New user-facing Codex task per phase",
+      "Live model generation (abc-10)"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "One canonical repository controller, one task workspace, frozen phase profiles and exclusive writer; reviewer read-only"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Retain fresh ephemeral CLI workers per phase as the supported baseline. Each phase reconstructs context from canonical .go and verifies ownership before payload.",
+    "Protocol capability alone is not an implemented or live-confirmed Go adapter. Record exact local binary version and source schema digests.",
+    "Persistent turn overrides persist to later turns in the inspected protocol; any future adapter must explicitly select each phase and retain exact thread identity. Ephemeral sessions cannot be assumed to survive process loss.",
+    "Subagents require their own verified profile, process ownership, scope, context and recovery adapter; defer without making this a baseline dependency.",
+    "No mid-turn switching or active frozen-profile edits. The same task worktree survives safe phase transitions. Only canonical controller publishes; critic is read-only."
+  ],
+  "quality_attributes": [
+    {
+      "id": "ownership-continuity",
+      "scenario": "Switch build critic repair with different profiles",
+      "measure": "New task worktrees or concurrent writers",
+      "threshold": 0
+    },
+    {
+      "id": "context-recovery",
+      "scenario": "Parent process exits between phases",
+      "measure": "Missing canonical context or lost feedback",
+      "threshold": 0
+    },
+    {
+      "id": "truthful-capability",
+      "scenario": "Compare supported and deferred adapters",
+      "measure": "Protocol or fixture proof mislabeled as live runtime confirmation",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Versioned app-server protocol is evidence for this inspected binary, not a promise across all installations.",
+    "Fixture workers validate control boundaries but do not attest provider execution identity."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d02-worker-topology"
+  ]
+}

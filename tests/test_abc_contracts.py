@@ -87,6 +87,7 @@ def test_execution_brief_preserves_profiles_and_rejects_bad_batch_atomically(tmp
     {'release': {'mode': 'none'}},
     {'unexpected': True},
     {'workspace': {'mode': 'task_worktree', 'control_state': 'chat'}},
+    {'workspace': None},
 ])
 def test_invalid_contract_cli_rejects_before_task_or_hierarchy_write(tmp_path, mutation):
     repo = fixture(tmp_path)
@@ -142,6 +143,18 @@ def test_intent_and_followup_inherit_contract_without_rewriting_legacy(tmp_path)
     follow = create_followup_task(repo, parent, ['Repair one failure'], 'pytest')
     assert follow['execution_contract'] == parent['execution_contract']
     assert (root / 'tasks/open/task-schema-smoke.json').read_bytes() == smoke
+    result = run(repo, 'validate', repo)
+    assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_partial_workspace_override_matches_brief_schema():
+    from jsonschema import Draft202012Validator
+    from go_workflow.execution_contracts import validate_execution_contract
+    schema = json.loads((ROOT / 'schemas/execution-brief.schema.json').read_text())
+    definition = schema['$defs']['executionOverride']
+    value = {'workspace': {'base_branch': 'main'}}
+    assert Draft202012Validator(definition).is_valid(value)
+    assert not validate_execution_contract(value, partial=True)
 
 
 def test_contract_schema_and_runtime_agree_on_compatibility_profiles():

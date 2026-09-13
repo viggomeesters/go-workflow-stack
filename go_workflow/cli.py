@@ -1991,7 +1991,7 @@ def create_followup_task(repo: Path, task: dict[str, Any], findings: list[str], 
     followup_id = slugify(f"followup-{task.get('id', 'task')}-{len(findings)}").lower()
     base = followup_id
     index = 2
-    while task_path(root, "open", followup_id).exists() or task_path(root, "done", followup_id).exists() or task_path(root, "active", followup_id).exists():
+    while any(task_path(root, state, followup_id).exists() for state in ("open", "active", "blocked", "done")):
         followup_id = f"{base}-{index}"
         index += 1
     project = load_json(root / "project.json")
@@ -2008,11 +2008,20 @@ def create_followup_task(repo: Path, task: dict[str, Any], findings: list[str], 
         "scope": task.get("scope", {"read": [], "modify": []}),
         "acceptance": ["All listed critic findings are resolved or explicitly reclassified as non-blocking."],
         "verification": task.get("verification", []),
+        "claim": {},
         "evidence": [],
         "created_from": {"task_id": task.get("id"), "agent": agent, "created_at": now_iso(), "findings": findings},
     }
     apply_intake_contract(repo, followup, task)
+    findings_before_write = validate_task(followup, followup_id, expected_status="open") + dependency_findings(repo, followup)
+    if findings_before_write:
+        raise RepoLocalError("invalid followup: " + "; ".join(findings_before_write))
+    hierarchy = load_json(root / "hierarchy.json")
+    owners = [epic for epic in hierarchy_epics(hierarchy) if task['id'] in epic_task_ids(epic)]
+    if len(owners) != 1:
+        raise RepoLocalError("followup requires one source-task owning epic")
     dump_json(task_path(root, "open", followup_id), followup)
+    append_task_to_epic(root, owners[0]['id'], followup_id)
     append_jsonl(root / "runs" / "events.jsonl", event(followup_id, "run.checked", agent, {"action": "critic.followup_created", "source_task": task.get("id"), "findings": findings}))
     return followup
 
@@ -3794,6 +3803,10 @@ def cmd_template_check(args: argparse.Namespace) -> int:
 
 def apply_intake_contract(repo: Path, task: dict[str, Any], source: dict[str, Any] | None = None) -> None:
     source = source or {}
+    if "execution_contract" in source:
+        errors = validate_execution_contract(source["execution_contract"], partial=True)
+        if errors:
+            raise RepoLocalError("invalid execution override: " + "; ".join(errors))
     try:
         profile = resolve_execution_contract(load_json(go_root(repo) / "project.json"), source.get("execution_contract"))
     except (ValueError, TypeError) as exc:

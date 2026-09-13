@@ -228,7 +228,7 @@ def validate_execution_contract(data: Any, *, partial: bool = False) -> list[str
             errors.append(f'execution_contract {key}.effort invalid')
     release = data.get('release')
     if release is None and not partial: errors.append('execution_contract release required')
-    if release is not None:
+    if 'release' in data:
         if not isinstance(release, dict):
             errors.append('execution_contract release must be an object')
         else:
@@ -243,13 +243,13 @@ def validate_execution_contract(data: Any, *, partial: bool = False) -> list[str
                 if key in release and (not isinstance(release[key], str) or not release[key].strip()):
                     errors.append(f'execution_contract release.{key} must be non-empty')
     workspace = data.get('workspace')
-    if workspace is not None:
+    if 'workspace' in data:
         if not isinstance(workspace, dict):
             errors.append('execution_contract workspace must be an object')
         else:
             if workspace.keys() - {'mode', 'base_branch', 'control_state'}: errors.append('execution_contract workspace unknown fields')
-            if workspace.get('mode') not in ('task_worktree', 'current'): errors.append('execution_contract workspace.mode invalid')
-            if workspace.get('control_state') != 'repo_local_single_writer': errors.append('execution_contract workspace.control_state invalid')
+            if (not partial or 'mode' in workspace) and workspace.get('mode') not in ('task_worktree', 'current'): errors.append('execution_contract workspace.mode invalid')
+            if (not partial or 'control_state' in workspace) and workspace.get('control_state') != 'repo_local_single_writer': errors.append('execution_contract workspace.control_state invalid')
             if 'base_branch' in workspace and (not isinstance(workspace['base_branch'], str) or not workspace['base_branch'].strip()):
                 errors.append('execution_contract workspace.base_branch must be non-empty')
     if 'phase_profile' in data and (not isinstance(data['phase_profile'], str) or not data['phase_profile'].strip()):

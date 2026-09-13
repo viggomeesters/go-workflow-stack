@@ -436,10 +436,7 @@
         "workspace": {
           "type": "object",
           "additionalProperties": false,
-          "required": [
-            "mode",
-            "control_state"
-          ],
+          "required": [],
           "properties": {
             "mode": {
               "enum": [

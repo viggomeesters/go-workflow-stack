@@ -6,15 +6,15 @@
   "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-05",
   "branch": "codex/abc-05",
   "base_branch": "main",
-  "base_commit": "a06c52696201114f080196bb5503e39357742d84",
+  "base_commit": "4c404cef5e09887ef8029ace832d401e77c75eb2",
   "schema": "go-workflow.workspace-state.v1",
   "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
   "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
   "generation": "0e209b8806b94fbf823c93ab76e130db",
   "state": "integrated",
-  "recovery_action": "Explicit same-owner reconciliation for a pre-publication clone-reporting defect; prior integration preserved in evidence.",
+  "recovery_action": "Explicit same-owner continuation to repair CLI outcome evidence interoperability in v0.3.21; published v0.3.20 retained.",
   "integration": {
-    "workspace_head": "5f723bb7028046e461ff1cadd2d06977f1144b65",
-    "integrated_commit": "5f723bb7028046e461ff1cadd2d06977f1144b65"
+    "workspace_head": "92f78f30c679ac74c37f74d1d619b4d81fe1a556",
+    "integrated_commit": "92f78f30c679ac74c37f74d1d619b4d81fe1a556"
   }
 }

@@ -30,6 +30,11 @@ is retained. Managed pre-publication critics now judge candidate readiness and
 leave downstream shipping requirements pending. They cannot waive failed checks,
 create release evidence or mark the task complete. Manual critics retain their
 existing contract, and the publisher/completion gate still requires actual proof.
+A second live trial also exposed instructions asking a sandboxed worker to write
+canonical outcome state. Managed task-worktree workers now report R# evidence in
+their phase result; the controller validates and persists outcome updates. The
+worker does not need write access to canonical `.go`. Legacy in-place outcome
+recording is preserved. Both failed live trials remain separate evidence.
 
 Live execution is separate and opt-in:
 

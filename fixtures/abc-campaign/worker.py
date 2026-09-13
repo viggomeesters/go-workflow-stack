@@ -17,7 +17,8 @@ else:
     task=snapshot['context']['task'];phase=os.environ['GO_HOOK'];capture=Path(os.environ['ABC_CAMPAIGN_CAPTURE'])
     previous=[json.loads(line) for line in capture.read_text().splitlines()] if capture.exists() else []
     missing_boundary=phase=='critic' and 'This critic runs before controller-owned publication.' not in sys.argv[-1]
-    reject=missing_boundary or (phase=='critic' and task['id']=='campaign-1' and not any(x['phase']=='critic' for x in previous))
+    missing_controller_boundary=phase in {'build','repair'} and 'Report implemented R# evidence in your phase result; the controller owns canonical outcome updates.' not in sys.argv[-1]
+    reject=missing_boundary or missing_controller_boundary or (phase=='critic' and task['id']=='campaign-1' and not any(x['phase']=='critic' for x in previous))
     if phase in {'build','repair'}:Path('app.txt').write_text('one\n' if task['id']=='campaign-1' else 'two\n')
     with capture.open('a') as out:out.write(json.dumps({'task_id':task['id'],'phase':phase,'cwd':str(Path.cwd()),'argv':sys.argv[1:],'feedback':snapshot.get('feedback'),'context_ref':request['context_ref']})+'\n')
     message={'schema':'go-workflow.agent-adapter-result.v1','phase':phase,'status':'blocked' if reject else 'success','summary':'Please recheck current app content: forced critic finding C1' if reject else 'campaign step checked'}

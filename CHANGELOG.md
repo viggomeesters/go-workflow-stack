@@ -7,6 +7,8 @@
 - Fix a live-discovered circular critic requirement: pre-publication review checks
   readiness while downstream release/deployment evidence stays pending for the
   controller; final completion still requires that evidence.
+- Keep task-worktree outcome writes with the controller; sandboxed workers report
+  evidence instead of attempting canonical state mutations.
 - Add a reproducible failure/property matrix and separate live runtime receipts,
   preserving failed live evidence and explicit candidate-source attribution.
 

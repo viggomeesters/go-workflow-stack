@@ -2198,6 +2198,15 @@ def repair_agent_available(agent: str) -> dict[str, Any]:
     }
 
 
+def worker_outcome_instructions(task: dict[str, Any]) -> str:
+    workspace = ((task.get("execution_contract") or {}).get("workspace") or {})
+    if workspace.get("mode") == "task_worktree":
+        reporting = "Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted."
+    else:
+        reporting = "Record implemented R# evidence with `go-workflow task outcome`."
+    return reporting + " Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification."
+
+
 def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
     availability = repair_agent_available(agent)
     if not availability["available"]:
@@ -2211,7 +2220,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
         "Run the task verification commands before exiting.",
-        "Record implemented R# evidence with `go-workflow task outcome`; leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification.",
+        worker_outcome_instructions(task),
         "Exit non-zero if you cannot safely repair within scope.",
     ])
     return native_agent_command(
@@ -2252,7 +2261,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
-        "Record implemented R# evidence with `go-workflow task outcome`; leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification.",
+        worker_outcome_instructions(task),
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
     return native_agent_command(

@@ -2,18 +2,58 @@
   "schema": "go-workflow.abc-campaign-coverage.v1",
   "execution": "bash scripts/check-abc.sh; real model calls are separate and explicit",
   "scenarios": {
-    "ordered profiles, rejected critic, current repair feedback, two releases": ["test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order"],
-    "model unavailable and frozen selection": ["test_abc_models.py::test_unknown_critic_model_blocks_before_build_writes", "test_abc_models.py::test_changed_selection_is_rejected_between_phases"],
-    "stale context and bytes": ["test_abc_context.py::test_child_bootstrap_rejects_drift_between_snapshot_and_worker_start", "test_abc_completion.py::test_drift_and_tampered_proof_cannot_finish_previously_green_work"],
-    "manual finish and requirement completeness": ["test_abc_completion.py::test_manual_finish_refuses_prose_without_executed_check_and_release_proof", "test_abc_completion.py::test_requirements_need_references_to_validated_phase_evidence"],
-    "side-effect acknowledgement loss": ["test_abc_release.py::test_lost_command_acknowledgement_reconciles_without_duplicate_effect", "test_abc_release.py::test_github_create_lost_response_uses_readback_without_republication", "test_abc_release.py::test_partial_preparation_retries_only_the_unwritten_file"],
-    "push conflict or unknown remote": ["test_abc_release.py::test_managed_conflicting_remote_preserves_explicit_resume_handoff", "test_abc_release.py::test_unknown_github_response_is_never_treated_as_absence"],
-    "deployment delay, failure and identity": ["test_abc_deployment.py::test_wrong_or_uncertain_target_stays_pending_and_recovers_without_second_effect", "test_abc_deployment.py::test_interrupted_packaging_preserves_partial_file_and_rebuilds_fresh", "test_abc_deployment.py::test_live_version_is_rechecked_after_interrupted_finish"],
-    "base changed after green, conflicting content": ["test_abc_end_to_end.py::test_conflicting_base_after_green_preserves_both_sides_without_release"],
-    "dead owner with surviving worker": ["test_abc_resume.py::test_dead_controller_does_not_authorize_takeover_of_a_live_worker", "test_abc_release.py::test_dead_publisher_with_live_child_blocks_successor_and_workspace_mutations"],
-    "separate cleanup retry and preservation": ["test_abc_resume.py::test_cleanup_retry_only_cleans_the_already_delivered_task", "test_abc_worktrees.py::test_cleanup_failure_has_recovery_without_republishing_and_preserves_ignored_files"],
-    "optional concurrent workspace integration serialization": ["test_abc_release.py::test_global_integration_slot_blocks_a_competing_publisher", "test_abc_worktrees.py::test_execution_and_integration_leases_exclude_competing_writers"],
-    "state roundtrip and malformed ownership": ["test_abc_resume.py::test_state_schema_roundtrip_and_malformed_owner_fail_closed", "test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order"]
+    "ordered profiles, rejected critic, current repair feedback, two releases": [
+      "test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order"
+    ],
+    "model unavailable and frozen selection": [
+      "test_abc_models.py::test_unknown_critic_model_blocks_before_build_writes",
+      "test_abc_models.py::test_changed_selection_is_rejected_between_phases"
+    ],
+    "stale context and bytes": [
+      "test_abc_context.py::test_child_bootstrap_rejects_drift_between_snapshot_and_worker_start",
+      "test_abc_completion.py::test_drift_and_tampered_proof_cannot_finish_previously_green_work"
+    ],
+    "manual finish and requirement completeness": [
+      "test_abc_completion.py::test_manual_finish_refuses_prose_without_executed_check_and_release_proof",
+      "test_abc_completion.py::test_requirements_need_references_to_validated_phase_evidence"
+    ],
+    "side-effect acknowledgement loss": [
+      "test_abc_release.py::test_lost_command_acknowledgement_reconciles_without_duplicate_effect",
+      "test_abc_release.py::test_github_create_lost_response_uses_readback_without_republication",
+      "test_abc_release.py::test_partial_preparation_retries_only_the_unwritten_file"
+    ],
+    "push conflict or unknown remote": [
+      "test_abc_release.py::test_managed_conflicting_remote_preserves_explicit_resume_handoff",
+      "test_abc_release.py::test_unknown_github_response_is_never_treated_as_absence"
+    ],
+    "deployment delay, failure and identity": [
+      "test_abc_deployment.py::test_wrong_or_uncertain_target_stays_pending_and_recovers_without_second_effect",
+      "test_abc_deployment.py::test_interrupted_packaging_preserves_partial_file_and_rebuilds_fresh",
+      "test_abc_deployment.py::test_live_version_is_rechecked_after_interrupted_finish"
+    ],
+    "base changed after green, conflicting content": [
+      "test_abc_end_to_end.py::test_conflicting_base_after_green_preserves_both_sides_without_release"
+    ],
+    "dead owner with surviving worker": [
+      "test_abc_resume.py::test_dead_controller_does_not_authorize_takeover_of_a_live_worker",
+      "test_abc_release.py::test_dead_publisher_with_live_child_blocks_successor_and_workspace_mutations"
+    ],
+    "separate cleanup retry and preservation": [
+      "test_abc_resume.py::test_cleanup_retry_only_cleans_the_already_delivered_task",
+      "test_abc_worktrees.py::test_cleanup_failure_has_recovery_without_republishing_and_preserves_ignored_files"
+    ],
+    "optional concurrent workspace integration serialization": [
+      "test_abc_release.py::test_global_integration_slot_blocks_a_competing_publisher",
+      "test_abc_worktrees.py::test_execution_and_integration_leases_exclude_competing_writers"
+    ],
+    "state roundtrip and malformed ownership": [
+      "test_abc_resume.py::test_state_schema_roundtrip_and_malformed_owner_fail_closed",
+      "test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order"
+    ],
+    "managed phase instructions preserve downstream gates and canonical writer": [
+      "test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order",
+      "test_abc_end_to_end.py::test_manual_critic_does_not_infer_pending_controller_publication"
+    ]
   },
   "limits": [
     "Boundary and lost-ack fixtures cover the listed operations; this is not exhaustive process scheduling/model checking.",

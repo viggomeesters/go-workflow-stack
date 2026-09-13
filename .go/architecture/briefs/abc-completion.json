@@ -1,0 +1,89 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-completion",
+  "project": "go-workflow-stack",
+  "title": "Content-bound completion and release readback",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "A current opted-in task can complete only after its declared checks, review, requirements and release are proven for the delivered content."
+  ],
+  "scope": {
+    "in": [
+      "Typed local verification capture, critic evidence, declared release readback and one completion gate across finish/approval/reporting"
+    ],
+    "out": [
+      "Automatic version/tag/publish orchestration and deployment adapters; those remain abc-06/07"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Canonical task proof, local Git content and read-only release provider verification"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Opt-in execution contracts require strict completion evidence on every current finish/approval path; preserve historical done records and unconfigured legacy semantics under abc-d01.",
+    "Run declared local verification commands and retain exact task/revision/content/cwd/exit/raw-evidence binding. Empty prose or copied stale success is insufficient.",
+    "Separate work/review/release state; a failed required push or unknown publisher cannot become done or completed_tasks.",
+    "Verify explicit remote branch/tag/publication identity for the final product content; operational .go evidence writes are distinguished from material source/config changes.",
+    "Support read-only Git-tag and GitHub-release proof; do not perform publication or infer deployment. Unknown release profiles fail closed.",
+    "Keep all task and campaign reporting honest when another open/active/blocked task remains."
+  ],
+  "quality_attributes": [
+    {
+      "id": "no-false-done",
+      "scenario": "Failed/missing shipping proof through any finish/approval route",
+      "measure": "Invalid opted-in done transitions admitted",
+      "threshold": 0
+    },
+    {
+      "id": "content-binding",
+      "scenario": "Code or verification evidence changes after green",
+      "measure": "Stale proof accepted for delivered content",
+      "threshold": 0
+    },
+    {
+      "id": "executed-checks",
+      "scenario": "Empty, failed, forged-shape or unrelated command evidence",
+      "measure": "Mandatory checks bypassed by field presence",
+      "threshold": 0
+    },
+    {
+      "id": "compatibility",
+      "scenario": "Historical/unconfigured legacy task records",
+      "measure": "Implicit retroactive evidence migration",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Local evidence hashes establish consistency and provenance within the trusted controller boundary; they are not cryptographic attestation of a model or an independent reviewer."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d07-verified-completion"
+  ]
+}

@@ -14,5 +14,13 @@
   "links": {
     "repo": ""
   },
-  "contract_version": 2
+  "contract_version": 2,
+  "release_profiles": {
+    "github-release": {
+      "provider": "github-release",
+      "remote": "origin",
+      "branch": "main",
+      "repository": "viggomeesters/go-workflow-stack"
+    }
+  }
 }

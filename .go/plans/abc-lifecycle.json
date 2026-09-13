@@ -2,8 +2,8 @@
   "kind": "planning_artifact",
   "format_version": 1,
   "id": "abc-lifecycle",
-  "status": "prepared",
-  "implementation_status": "not_started",
+  "status": "in_progress",
+  "implementation_status": "in_progress",
   "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
   "created_on": "2026-09-13",
   "coordinator_project": "go-workflow-stack",
@@ -28,24 +28,22 @@
     "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
     "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
   ],
-  "planning_contract": "This manifest and supplemental task metadata describe planned work; the current runtime does not enforce the dependency graph or implement model/release dispatch.",
+  "planning_contract": "Task dependencies and opt-in model/workspace/context/resume contracts shipped in v0.3.15–0.3.19. Verified completion/publication, migration, live topology proof and template integration remain open in their recorded tasks.",
   "execution_boundary": {
     "authorized_now": [
-      "task creation",
-      "planning updates",
-      "required preflight metadata updates",
-      "read-only validation"
+      "bounded task implementation",
+      "local verification/review",
+      "scoped commits and pushes",
+      "independent task releases under explicit profiles",
+      "planning and evidence updates"
     ],
     "not_authorized_now": [
-      "claim",
-      "implementation",
-      "task execution",
-      "commit",
-      "push",
-      "tag",
-      "release",
-      "deploy"
-    ]
+      "GitHub Actions",
+      "unrelated user-file changes",
+      "unconfigured production deployment",
+      "global/vault workflow mutation"
+    ],
+    "source": "Subsequent user GO and Ga verder met de taken: go"
   },
   "tasks": [
     {
@@ -480,7 +478,7 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": null,
+    "active_task": "abc-05",
     "completed_tasks": [
       "abc-01",
       "abc-02",
@@ -491,12 +489,30 @@
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "0.3.19",
+    "candidate_version": "resolve_after_implementation",
     "verification_ref": ".go/evidence/abc-04-verification.json",
     "next_ready": [
       "abc-05",
       "abc-09"
     ],
     "last_release": "v0.3.19"
+  },
+  "original_planning_boundary": {
+    "authorized_now": [
+      "task creation",
+      "planning updates",
+      "required preflight metadata updates",
+      "read-only validation"
+    ],
+    "not_authorized_now": [
+      "claim",
+      "implementation",
+      "task execution",
+      "commit",
+      "push",
+      "tag",
+      "release",
+      "deploy"
+    ]
   }
 }

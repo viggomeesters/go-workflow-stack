@@ -1,0 +1,32 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-07",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "2e4e28d66017610f84870e4fcfe69e4c5911daef",
+  "checks": [
+    "349 Linux tests (197 smoke + 152 focused)",
+    "18 deployment cases on macOS and Linux",
+    "make check on ordinary macOS clone and Linux",
+    "candidate distribution gate with immutable template pairing",
+    "all declared commands executed by canonical completion collector"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-07/completion/verification-796ec90e05374f0e99221dc31330997a.json",
+    "sha256": "524627b66c72dedef19ffba59c5c021834fa281ade5f2eecd54dc893d364e371"
+  },
+  "critic": {
+    "path": ".go/runs/abc-07/completion/critic-de4b342711964c499f45f935ece22778.json",
+    "sha256": "097ca79a983649e8e2aba3dac493358fca12d3533e800f553d368d0527177b14"
+  },
+  "critic_method": "same-agent; no independent identity attestation",
+  "limitations": [
+    "Adapters are trusted infrastructure and must query authoritative target state and enforce idempotency",
+    "No real deployment target or production credentials configured",
+    "Required deployment requires explicit publication and separate run authority",
+    "Canonical operational checkpoint replication and cross-host transfer remain separate",
+    "Historical reporting validates saved proof; current finish and approval perform new read-only target observation",
+    "No automatic rollback or data migration authority",
+    "Requested model and reviewer identity are not independently attested"
+  ],
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product validation and proof refinements were fixed in scope and checked by regression fixtures."
+}

@@ -1,0 +1,159 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "abc-07",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-51a7c63ef78a499abe4dd69e1e30245a",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_deployment.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "2e4e28d66017610f84870e4fcfe69e4c5911daef",
+        "worktree_digest": "5ac7894b220b80c80e9de9149abc723aafe938860418c5d80ebb3d80e5cfb240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-07/completion/command-3eb1667d91b04424908532fe946db912.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-07/completion/command-3eb1667d91b04424908532fe946db912.json",
+        "sha256": "2b0dacecbb2db026ad8d5cbf084151f00b3da43f0ecde0162da10718eb5936fc"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "2e4e28d66017610f84870e4fcfe69e4c5911daef",
+        "worktree_digest": "5ac7894b220b80c80e9de9149abc723aafe938860418c5d80ebb3d80e5cfb240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-07/completion/command-938af935678b4c7c814c59ddf78ba826.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-07/completion/command-938af935678b4c7c814c59ddf78ba826.json",
+        "sha256": "9cb28205b616c286504681bcb242c427d8780cdc95cd9e8432b8cf21db1194ba"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "2e4e28d66017610f84870e4fcfe69e4c5911daef",
+        "worktree_digest": "5ac7894b220b80c80e9de9149abc723aafe938860418c5d80ebb3d80e5cfb240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-07/completion/command-0e926971056a4c50b4ef5652b636ef8c.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-07/completion/command-0e926971056a4c50b4ef5652b636ef8c.json",
+        "sha256": "f3d42fbdd57e18b9ca381f55d0a356508751ef50826304d16ed96b7a9cb4ff0c"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Een profiel maakt expliciet welke package/deploy- en nacontroles vereist zijn; een library, webapp en project zonder deployment hebben passende eindvoorwaarden.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Deployed commit/artifact, doelomgeving en livecheckresultaat worden gecontroleerd en opgeslagen; een succesvolle deploy-commandexit alleen is onvoldoende.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Foutieve livecheck, ontbrekende bestemming of ontbrekende credentials blijft pending/blocked, met hervatting en zonder onbedoelde tweede deploy.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "De runner serialiseert integratie/publicatie per project en controleert vooraf vastgelegd herstelbeleid; geen destructieve rollback of productiedatawijziging afleiden uit gewone releasetoestemming.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Providerspecifieke targets blijven onboardinginputs; mock command-adapters bewijzen de lifecycle zonder voor deze repositories een productieomgeving te verzinnen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "84dfe3e0cd80302c86ade82f772a2b74482a0a540fafd8714570b6909755c30d",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 6334
+  },
+  "worker_group": null,
+  "inflight": null
+}

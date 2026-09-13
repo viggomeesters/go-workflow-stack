@@ -139,6 +139,7 @@ def verify_workspace(record, *, pending=False):
 
 
 def create_workspace(control, task_id, owner, run_id, path, branch, base_branch, base_commit):
+    if Path(path).is_symlink(): raise WorkspaceError('Foreign existing workspace symlink; preserve and inspect it')
     control, path = Path(control).resolve(), Path(path).resolve()
     if not is_git_checkout(control) or not (control / '.git').is_dir():
         raise WorkspaceError('Workspace creation requires the explicit primary control checkout')

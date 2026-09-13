@@ -272,3 +272,12 @@ def test_worker_outcome_targets_only_its_active_owned_canonical_task(tmp_path):
     assert result.returncode==0,result.stderr
     assert json.loads(path.read_text())['requested_outcomes'][0]['status']=='verified'
     assert 'requested_outcomes' not in json.loads((workspace/'.go/tasks/active/task-schema-smoke.json').read_text())
+
+
+def test_creation_refuses_a_dangling_symlink_without_creating_its_target(tmp_path):
+    repo,base=setup_repo(tmp_path)
+    target=tmp_path/'foreign target';workspace=tmp_path/'existing link'
+    workspace.symlink_to(target,target_is_directory=True)
+    result=create(repo,base,workspace)
+    assert result.returncode!=0
+    assert workspace.is_symlink() and not target.exists()

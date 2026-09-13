@@ -1,0 +1,29 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_________ test_historical_completion_is_readable_in_an_ordinary_clone __________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-184/test_historical_completion_is_0')
+
+    def test_historical_completion_is_readable_in_an_ordinary_clone(tmp_path):
+        from go_workflow.completion import lifecycle_report
+        repo,source,task=fixture(tmp_path)
+        prepare_proofs(repo,task)
+        result=call(repo,'finish',task['id'],'--repo',repo,'--agent','owner','--evidence',SUMMARY)
+        assert result.returncode==0,result.stderr
+        git(repo,'add','.go');git(repo,'commit','-qm','persist completion history')
+        clone=tmp_path/'ordinary clone'
+        subprocess.run(['git','clone','--no-hardlinks','-q',str(repo),str(clone)],check=True)
+        report=lifecycle_report(clone)
+>       assert report['evidence_valid'],report
+E       AssertionError: {'verified_done': [], 'invalid_done': {'task-schema-smoke': ['lifecycle: Managed run control/task identity mismatch']}, 'historical_unmigrated': [], 'evidence_valid': False, ...}
+E       assert False
+
+work/abc-05/tests/test_abc_completion.py:254: AssertionError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-184/test_historical_completion_is_0/origin.git
+ * [new branch]      main -> main
+ * [new tag]         v1.2 -> v1.2
+=========================== short test summary info ============================
+FAILED work/abc-05/tests/test_abc_completion.py::test_historical_completion_is_readable_in_an_ordinary_clone
+1 failed, 20 deselected in 1.52s

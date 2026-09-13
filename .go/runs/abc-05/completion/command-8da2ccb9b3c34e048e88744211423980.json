@@ -1,0 +1,14 @@
+{
+  "task_id": "abc-05",
+  "project": "go-workflow-stack",
+  "contract_digest": "3c71c85a4ce46ffd4fe0f3476b51ea29fcb70a4464b7fdeeb45b07f73e010250",
+  "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
+  "content_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
+  "command": "python3 -m pytest tests/test_abc_completion.py -q",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 19.367273207986727,
+  "returncode": 0,
+  "stdout": ".....................                                                    [100%]\n21 passed in 18.31s\n",
+  "stderr": "",
+  "timed_out": false
+}

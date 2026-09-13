@@ -4,7 +4,7 @@
   "project": "go-workflow-stack",
   "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
   "owner": "codex-astra-high",
-  "run_id": "verify-0fc43b6cb5bb4c31bae378ae802a3d0b",
+  "run_id": "verify-519e3ce141bc4eb59f24669a71223f1b",
   "workspace": {
     "path": "/Users/viggomeesters/Dev/go-workflow-stack",
     "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
@@ -31,16 +31,16 @@
         "status": "passed",
         "command": "python3 -m pytest tests/test_abc_completion.py -q",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
-        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
+        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json"
+          ".go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json",
-        "sha256": "f827f73a736c799dab07e2bd88c1f620e7bf12afc3ac4d4b16ef468fcf181fbc"
+        "path": ".go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json",
+        "sha256": "3a400c1218beae320815e24440b80f6491816da2cb6cb32e2a931c320c38cab8"
       }
     },
     {
@@ -61,16 +61,16 @@
         "status": "passed",
         "command": "python3 cli/go.py validate .",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
-        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
+        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json"
+          ".go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json",
-        "sha256": "57d34709c3118b891475820cd3ab04bedd0af15ee9be01c12ed3f480c05a962f"
+        "path": ".go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json",
+        "sha256": "40c3a29f382fffc54f45386e895b1eaebf05d398f3ad434f018a219bd3137002"
       }
     },
     {
@@ -91,58 +91,93 @@
         "status": "passed",
         "command": "git diff --check",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "1a43709b8395e39cdd7d6fe650333465d99c8a6f",
-        "worktree_digest": "21893011a2d40cbc8f3b163a76f9b8faec849cea8ea588de2ceb781f919d50a6",
+        "revision": "71328de2ec18f5fc809dbaeea29031d3b1a83bf6",
+        "worktree_digest": "f31d704e2060c456cfac31cbe52b6bdb6eccbebd3278a43552caf96e16123b58",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json"
+          ".go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json",
-        "sha256": "6a85c70d6d818be508992ea33769ddf51bfd2e6699903e040e7f162bfec8011f"
+        "path": ".go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json",
+        "sha256": "10f06aa646eece59fc9c1341d1938fd0a37627e0b6376eaf330213ef4c7ad3f0"
       }
     }
   ],
   "phase_evidence": [],
   "effects": {},
   "budgets": [],
-  "history": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
   "requirements": [
     {
       "id": "R1",
       "text": "Een mislukte of niet-bevestigde push laat releaseplichtig werk pending/active/blocked en nooit done of completed_tasks; taakstatus en runstatus blijven consistent.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Handmatige finish, automatische finish, approval en taak-/goalrapportage gebruiken dezelfde gate; alleen proza of een model-success kan bewijs niet vervangen.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Work, review en releasevoortgang zijn onderscheiden. Eén afgeronde taak vereist niet dat de hele backlog leeg is; een campagne claimt geen volledige goal-completion zolang werk resteert.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Commit, gecontroleerde inhoud en geverifieerde remote branch/SHA zijn gekoppeld; latere integratie of releasevoorbereiding invalideert verouderde relevante checks.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Een releaseprofiel waarvoor nog geen publisher bestaat wordt eerlijk geblokkeerd; legacy gedrag verandert uitsluitend volgens de gekozen migratiepolicy.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R6",
@@ -155,15 +190,27 @@
       "id": "R7",
       "text": "Verificatie voert de afgesproken lokale commando’s uit en registreert cwd, argv/commando, exitcode, geteste revisie/werkdiff en bewijsreferentie. Alleen een gevuld veld, test_evidence:none of een oud geslaagd resultaat kan verplichte checks niet vervangen.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     },
     {
       "id": "R8",
       "text": "Alle verplichte requirements en fasebewijzen zijn inhoudelijk geldig vóór finish; ontbrekende/failed checks, mislukte push en onbevestigde remote readback blokkeren done. Regressies dekken de agent-brain push-fail/done-route en legacy finish-before-ship, ook via handmatige bypassroutes.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T16:42:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        }
+      ]
     }
   ],
   "models": {},
@@ -172,7 +219,7 @@
   "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
   "controller": {
     "host": "macbook-pro-van-viggo-1.home",
-    "pid": 92967
+    "pid": 21077
   },
   "worker_group": null,
   "inflight": null

@@ -1,23 +1,67 @@
-RUN: git update-ref -d refs/tags/v0.3.20 b99a31956f1825ec9d5d5d33fbd7d38532a086bc
 RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle main
 From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
  * branch              main       -> FETCH_HEAD
 RUN: git merge --ff-only FETCH_HEAD
-Updating a06c5269..5f723bb7
+Updating 41c211fd..1a43709b
 Fast-forward
- docs/go-autonomous-loop.md   |  4 +++-
- go_workflow/completion.py    | 13 ++++++++-----
- tests/test_abc_completion.py | 14 ++++++++++++++
- 3 files changed, 25 insertions(+), 6 deletions(-)
+ .go/architecture-principles.json                   |   6 +-
+ .go/architecture/briefs/abc-completion.json        |  89 ++++++
+ .go/decisions/events.jsonl                         |   1 +
+ .go/deliveries/autonomous-go-runtime-v6/index.html |  10 +
+ .../autonomous-go-runtime-v6/manifest.json         | 289 +++++++++++++++++++
+ .go/evidence/abc-04-cleanup.json                   |  20 ++
+ .go/evidence/abc-04-release.json                   |  24 ++
+ .go/evidence/abc-04-tag.log                        |  54 ++++
+ .go/evidence/abc-04-verification.json              |  12 +-
+ .go/evidence/events.jsonl                          |   3 +
+ .go/hierarchy.json                                 |   2 +-
+ .go/plans/abc-lifecycle.json                       |  60 ++--
+ .go/plans/legacy-insights.json                     |  16 +-
+ .go/project.json                                   |  14 +-
+ .go/runs/events.jsonl                              |   2 +
+ .go/tasks/{open => active}/abc-05.json             |  64 ++++-
+ .go/tasks/{active => done}/abc-04.json             | 117 +++++++-
+ .go/workspaces/abc-04.json                         |   5 +-
+ .go/workspaces/abc-05.json                         |  19 ++
+ CHANGELOG.md                                       |   9 +
+ docs/go-autonomous-loop.md                         |  53 +++-
+ docs/releases/v0.3.20.md                           |  18 ++
+ go_workflow/cli.py                                 |  85 +++++-
+ go_workflow/completion.py                          | 315 +++++++++++++++++++++
+ go_workflow/constants.py                           |   2 +-
+ go_workflow/run_state.py                           |  61 ++--
+ go_workflow/shipping.py                            | 144 ++++++++++
+ go_workflow/worktrees.py                           |   7 +-
+ pyproject.toml                                     |   2 +-
+ schemas/project.schema.json                        |  64 +++++
+ schemas/release-evidence.schema.json               |  86 ++++++
+ schemas/run-state.schema.json                      |   4 +
+ scripts/release-check-inner.sh                     |  16 ++
+ tests/test_abc_completion.py                       | 241 ++++++++++++++++
+ 34 files changed, 1823 insertions(+), 91 deletions(-)
+ create mode 100644 .go/architecture/briefs/abc-completion.json
+ create mode 100644 .go/deliveries/autonomous-go-runtime-v6/index.html
+ create mode 100644 .go/deliveries/autonomous-go-runtime-v6/manifest.json
+ create mode 100644 .go/evidence/abc-04-cleanup.json
+ create mode 100644 .go/evidence/abc-04-release.json
+ create mode 100644 .go/evidence/abc-04-tag.log
+ rename .go/tasks/{open => active}/abc-05.json (82%)
+ rename .go/tasks/{active => done}/abc-04.json (68%)
+ create mode 100644 .go/workspaces/abc-05.json
+ create mode 100644 docs/releases/v0.3.20.md
+ create mode 100644 go_workflow/completion.py
+ create mode 100644 go_workflow/shipping.py
+ create mode 100644 schemas/release-evidence.schema.json
+ create mode 100644 tests/test_abc_completion.py
 RUN: git rev-parse HEAD
-5f723bb7028046e461ff1cadd2d06977f1144b65
+1a43709b8395e39cdd7d6fe650333465d99c8a6f
 RUN: uv run --python 3.12 --no-project --with pytest>=8,<9 --with jsonschema>=4.23 python -m pytest tests/test_smoke.py tests/test_architecture.py tests/test_abc_contracts.py tests/test_abc_phase_contracts.py tests/test_abc_models.py tests/test_abc_worktrees.py tests/test_abc_context.py tests/test_abc_resume.py tests/test_abc_completion.py -q
 ........................................................................ [ 23%]
 ........................................................................ [ 47%]
 ........................................................................ [ 71%]
 ........................................................................ [ 95%]
-..............                                                           [100%]
-302 passed in 234.15s (0:03:54)
+.............                                                            [100%]
+301 passed in 235.62s (0:03:55)
 RUN: uv run --python 3.12 --no-project make check
 python3 -m py_compile cli/go.py go_workflow/cli.py
 TEMPLATE=$(if [ -d ../go-project-template/.go ]; then printf '%s' ../go-project-template; else printf '%s' fixtures/minimal; fi); \
@@ -71,19 +115,19 @@ TMP=$(mktemp -d); \
   python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["recommended"]["command"] == "go-loop"' /tmp/go-router-loop-smoke.json; \
   python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \
   python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["normalized_command"] == "go-loop" and p["recommended"]["command"] == "go-loop"' /tmp/go-router-direct-loop-smoke.json
-adopted: /tmp/tmp.ZcHMmUU5yn/adopt-smoke/.go
+adopted: /tmp/tmp.C6FH6cMW8F/adopt-smoke/.go
 .go/tasks/open/smoke-task.json
-ok: /tmp/tmp.ZcHMmUU5yn/adopt-smoke/.go
+ok: /tmp/tmp.C6FH6cMW8F/adopt-smoke/.go
 smoke-task — Smoke task
-/tmp/tmp.ZcHMmUU5yn/adopt-smoke-bundle.json
-adopted: /tmp/tmp.ZcHMmUU5yn/import-target/.go
-.go/imports/adopt-smoke-20260913T145442804397Z.json
-ok: /tmp/tmp.ZcHMmUU5yn/import-target/.go
-spike: /tmp/tmp.ZcHMmUU5yn/spike-smoke
+/tmp/tmp.C6FH6cMW8F/adopt-smoke-bundle.json
+adopted: /tmp/tmp.C6FH6cMW8F/import-target/.go
+.go/imports/adopt-smoke-20260913T144021675923Z.json
+ok: /tmp/tmp.C6FH6cMW8F/import-target/.go
+spike: /tmp/tmp.C6FH6cMW8F/spike-smoke
 project: spike-smoke
 created_tasks: first, second
 next: first
-ok: /tmp/tmp.ZcHMmUU5yn/spike-smoke/.go
+ok: /tmp/tmp.C6FH6cMW8F/spike-smoke/.go
 RUN: ./scripts/release-check.sh 0.3.20 --allow-candidate
 release preflight: v0.3.20
 tag: v0.3.20 candidate mode; final gate still requires the annotated tag
@@ -91,20 +135,20 @@ local Linux/WSL verification with Python 3.11.15
 ........................................................................ [ 36%]
 ........................................................................ [ 73%]
 .....................................................                    [100%]
-197 passed in 123.25s (0:02:03)
+197 passed in 125.58s (0:02:05)
 ok: /tmp/go-abc-01-xjyg7dz7/go-workflow-stack/.go
 template pairing: ok
 local Linux/WSL verification: ok
-Resolved 1 package in 2ms
+Resolved 1 package in 3ms
    Building go-workflow-stack @ file:///tmp/go-abc-01-xjyg7dz7/go-workflow-stack
       Built go-workflow-stack @ file:///tmp/go-abc-01-xjyg7dz7/go-workflow-stack
-Prepared 1 package in 1.18s
-Installed 1 package in 16ms
+Prepared 1 package in 1.32s
+Installed 1 package in 17ms
  + go-workflow-stack==0.3.20 (from file:///tmp/go-abc-01-xjyg7dz7/go-workflow-stack)
 Installed 1 executable: go-workflow
-warning: `/tmp/tmp.cSZSWjNYU4/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.cSZSWjNYU4/bin:$PATH"` or `uv tool update-shell`.
-initialized: /tmp/tmp.cSZSWjNYU4/fixture/.go
-ok: /tmp/tmp.cSZSWjNYU4/fixture/.go
+warning: `/tmp/tmp.sSboSseLof/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.sSboSseLof/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.sSboSseLof/fixture/.go
+ok: /tmp/tmp.sSboSseLof/fixture/.go
 standalone uv tool distribution: ok
 publish: not performed
 ABC_CANDIDATE_ALL_PASSED

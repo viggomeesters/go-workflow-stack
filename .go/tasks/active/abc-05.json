@@ -139,6 +139,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -152,6 +157,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -165,6 +175,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -178,6 +193,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:03+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -191,6 +211,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -211,6 +236,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     },
@@ -224,6 +254,11 @@
           "created_at": "2026-09-13T16:42:48+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json"
+        },
+        {
+          "created_at": "2026-09-13T16:57:04+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json"
         }
       ]
     }
@@ -266,12 +301,12 @@
   "completion_evidence": {
     "schema": "go-workflow.completion-evidence.v1",
     "verification": {
-      "path": ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json",
-      "sha256": "2d43f500a91c20fc2787c65c1cf0d65d22713eeaedb0066ddfcaed444f96bdec"
+      "path": ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json",
+      "sha256": "f3fc5ae954aa5b73e64a6dd6786b96713e4e66e838df472a1afb5f8c3d4e581e"
     },
     "critic": {
-      "path": ".go/runs/abc-05/completion/critic-4936aa4aaf0a44a39241ce80ab9df912.json",
-      "sha256": "49f53a0a035521ccd4440c580b09410ee62a20342ca5def50ed59a3d7cfa1fa7"
+      "path": ".go/runs/abc-05/completion/critic-16b75e5486a94a568b7417e947cf96cb.json",
+      "sha256": "675c5e606632f8167981aea089436051794c28207f265d0566323ca713cc9c3f"
     }
   }
 }

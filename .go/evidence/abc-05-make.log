@@ -50,16 +50,16 @@ TMP=$(mktemp -d); \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["recommended"]["command"] == "go-loop"' /tmp/go-router-loop-smoke.json; \
 	  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \
 	  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p["normalized_command"] == "go-loop" and p["recommended"]["command"] == "go-loop"' /tmp/go-router-direct-loop-smoke.json
-adopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/adopt-smoke/.go
+adopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/adopt-smoke/.go
 .go/tasks/open/smoke-task.json
-ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/adopt-smoke/.go
+ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/adopt-smoke/.go
 smoke-task — Smoke task
-/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/adopt-smoke-bundle.json
-adopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/import-target/.go
-.go/imports/adopt-smoke-20260913T143628931768Z.json
-ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/import-target/.go
-spike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/spike-smoke
+/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/adopt-smoke-bundle.json
+adopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/import-target/.go
+.go/imports/adopt-smoke-20260913T145115652953Z.json
+ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/import-target/.go
+spike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/spike-smoke
 project: spike-smoke
 created_tasks: first, second
 next: first
-ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.u4oDgk23wh/spike-smoke/.go
+ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.9BKyUyalLn/spike-smoke/.go

@@ -1,7 +1,7 @@
 {
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-07",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "2e4e28d66017610f84870e4fcfe69e4c5911daef",
   "checks": [
     "349 Linux tests (197 smoke + 152 focused)",
@@ -28,5 +28,12 @@
     "No automatic rollback or data migration authority",
     "Requested model and reviewer identity are not independently attested"
   ],
-  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product validation and proof refinements were fixed in scope and checked by regression fixtures."
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product validation and proof refinements were fixed in scope and checked by regression fixtures.",
+  "final_tag_commit": "654077aceee71c136a7c2473140b301d4385fc53",
+  "final_tag_checks": [
+    "197 smoke tests passed on annotated tag",
+    "349 full tests passed on matching candidate content",
+    "immutable template and standalone distribution gates passed"
+  ],
+  "publication_ref": ".go/evidence/abc-07-release.json"
 }

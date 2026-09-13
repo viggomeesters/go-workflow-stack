@@ -43,7 +43,7 @@
       "id": "abc-release-evidence",
       "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
       "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
-      "enforcement": "abc-05 v0.3.21 strict executed checks/critic/readback and abc-06 v0.3.22 explicit configured version/publication/resume shipped. Deployment/live proof remains abc-07.",
+      "enforcement": "abc-05 v0.3.21 strict completion, abc-06 v0.3.22 resumable publication and abc-07 v0.3.23 explicit deployment and live proof shipped. Default adoption and broad E2E remain abc-08/10.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
@@ -79,7 +79,7 @@
       "id": "abc-final-candidate-proof",
       "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
       "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
-      "enforcement": "abc-06 v0.3.22 prepares versions before checks/critic and binds commit/integration/tag/push/publication to final content. Wider scenario proof remains abc-10.",
+      "enforcement": "abc-06 v0.3.22 final candidate publication and abc-07 v0.3.23 released profile/version/package live proof shipped. Wider scenario proof remains abc-10.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"

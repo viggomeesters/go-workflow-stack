@@ -111,7 +111,8 @@
     "abc-03": "v0.3.18 durable native phase context and evidence",
     "abc-04": "v0.3.19 exclusive phase resume, local relocation and effect intent/readback interfaces",
     "abc-05": "v0.3.21 executed content-bound checks, same-agent review, release readback and shared completion/approval/reporting gate",
-    "abc-06": "v0.3.22 explicit publication profile, final-candidate proof, task-workspace integration, durable effects/readback, process ownership and separate cleanup; no legacy vault writer reused"
+    "abc-06": "v0.3.22 explicit publication profile, final-candidate proof, task-workspace integration, durable effects/readback, process ownership and separate cleanup; no legacy vault writer reused",
+    "abc-07": "v0.3.23 explicit deployment permission, authoritative live-version/artifact proof, stable effect identity, resumed packaging/deploy and historical clone verification; no legacy vault writer reused"
   },
   "remaining_direction": "Verified finish/publication, migration, live topology proof and template integration remain open in their existing ABC tasks."
 }

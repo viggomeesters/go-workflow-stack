@@ -52,7 +52,7 @@
       "id": "abc-explicit-model-contract",
       "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
       "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
-      "enforcement": "abc-01/02 shipped v0.3.15/16: opt-in profiles and native model arguments/capability checks/frozen selection. Effective attribution remains unconfirmed; active resume follows in abc-04.",
+      "enforcement": "abc-01/02 shipped opt-in profiles and native model arguments/capability checks/frozen selection; abc-04 v0.3.19 retains profiles through exclusive phase resume. Effective identity remains unconfirmed.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
@@ -61,7 +61,7 @@
       "id": "abc-durable-worker-context",
       "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
       "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
-      "enforcement": "abc-03 shipped v0.3.18: immutable managed-native context, parent/child drift checks, raw feedback and bounded references. Active resume remains abc-04 and live topology proof abc-09/10.",
+      "enforcement": "abc-03 shipped immutable context in v0.3.18; abc-04 shipped exclusive phase resume and local relocation in v0.3.19. Live topology proof remains abc-09/10.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
@@ -70,7 +70,7 @@
       "id": "abc-task-workspace",
       "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
       "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
-      "enforcement": "abc-11 shipped v0.3.17: explicit owned workspaces, canonical state, scope/integration/cleanup primitives. Fresh-worker/resume and template orchestration remain abc-03/04 and template-01/02.",
+      "enforcement": "abc-11 v0.3.17 owned workspace primitives, abc-03 v0.3.18 durable worker context and abc-04 v0.3.19 exclusive resume/local relocation shipped. Template orchestration remains template-01/02.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"

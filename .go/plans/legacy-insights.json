@@ -2,8 +2,8 @@
   "kind": "planning_artifact",
   "format_version": 1,
   "id": "legacy-insights",
-  "status": "prepared",
-  "implementation_status": "not_started",
+  "status": "in_progress",
+  "implementation_status": "in_progress",
   "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
   "coordinator_project": "go-workflow-stack",
   "sources": [
@@ -102,6 +102,14 @@
     "mandatory parallel agents",
     "GitHub Actions"
   ],
-  "planning_only": true,
-  "participant_project": "go-workflow-stack"
+  "planning_only": false,
+  "participant_project": "go-workflow-stack",
+  "execution_authority": "Subsequent user GO and Ga verder met de taken: go authorize bounded implementation; original source was planning only.",
+  "implemented_evidence": {
+    "abc-01": "v0.3.15 opt-in phase/requirement/dependency contracts",
+    "abc-11": "v0.3.17 owned task workspaces and serial integration/cleanup primitives",
+    "abc-03": "v0.3.18 durable native phase context and evidence",
+    "abc-04": "v0.3.19 exclusive phase resume, local relocation and effect intent/readback interfaces"
+  },
+  "remaining_direction": "Verified finish/publication, migration, live topology proof and template integration remain open in their existing ABC tasks."
 }

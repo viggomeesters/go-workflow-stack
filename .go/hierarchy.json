@@ -28,7 +28,7 @@
         {
           "id": "abc-context",
           "title": "Taakwerkplekken, contextoverdracht en hervatting",
-          "description": "abc-11 workspaces published v0.3.17 and abc-03 durable context published v0.3.18; active resume remains abc-04.",
+          "description": "abc-11 owned workspaces v0.3.17, abc-03 durable context v0.3.18 and abc-04 exclusive phase resume/local relocation v0.3.19 shipped.",
           "tasks": [
             "abc-03",
             "abc-04",

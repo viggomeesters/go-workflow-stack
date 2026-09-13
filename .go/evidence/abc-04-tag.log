@@ -1,0 +1,54 @@
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle main refs/tags/v0.3.19:refs/tags/v0.3.19
+From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
+ * branch              main       -> FETCH_HEAD
+ * [new tag]           v0.3.19    -> v0.3.19
+RUN: git merge --ff-only FETCH_HEAD
+Updating 1e2e6cab..41c211fd
+Fast-forward
+ .go/architecture/events.jsonl                    |    1 +
+ .go/evidence/abc-04-candidate-unsynchronized.log | 1061 ++++++++++++++++++++++
+ .go/evidence/abc-04-candidate.log                |  106 +++
+ .go/evidence/abc-04-focused.log                  |    4 +
+ .go/evidence/abc-04-integration.json             |   29 +
+ .go/evidence/abc-04-make.log                     |   65 ++
+ .go/evidence/abc-04-verification.json            |   36 +
+ .go/evidence/events.jsonl                        |    7 +
+ .go/plans/abc-lifecycle.json                     |    2 +-
+ .go/tasks/active/abc-04.json                     |   70 +-
+ 10 files changed, 1366 insertions(+), 15 deletions(-)
+ create mode 100644 .go/evidence/abc-04-candidate-unsynchronized.log
+ create mode 100644 .go/evidence/abc-04-candidate.log
+ create mode 100644 .go/evidence/abc-04-focused.log
+ create mode 100644 .go/evidence/abc-04-integration.json
+ create mode 100644 .go/evidence/abc-04-make.log
+ create mode 100644 .go/evidence/abc-04-verification.json
+RUN: git rev-parse HEAD
+41c211fd6da52677ad212917e8be8085616fd0a4
+RUN: uv run --python 3.12 --no-project --with pytest>=8,<9 --with jsonschema>=4.23 python -m pytest tests/test_architecture.py tests/test_abc_contracts.py tests/test_abc_phase_contracts.py tests/test_abc_models.py tests/test_abc_worktrees.py tests/test_abc_context.py tests/test_abc_resume.py -q
+........................................................................ [ 85%]
+............                                                             [100%]
+84 passed in 75.60s (0:01:15)
+RUN: ./scripts/release-check.sh 0.3.19
+release preflight: v0.3.19
+tag: annotated v0.3.19 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 134.12s (0:02:14)
+ok: /tmp/tmp.mJWrhe24Hn/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.mJWrhe24Hn/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.mJWrhe24Hn/go-workflow-stack
+Prepared 1 package in 1.44s
+Installed 1 package in 17ms
+ + go-workflow-stack==0.3.19 (from file:///tmp/tmp.mJWrhe24Hn/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.jngBRrJpf9/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.jngBRrJpf9/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.jngBRrJpf9/fixture/.go
+ok: /tmp/tmp.jngBRrJpf9/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+ABC_FINAL_TAG_ALL_PASSED

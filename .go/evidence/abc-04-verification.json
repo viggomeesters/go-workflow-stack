@@ -2,7 +2,7 @@
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-04",
   "revision": "1e2e6cabea26bb289e22bc579b2ce4e39f88acd3",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "checks": [
     "281 Linux tests passed (197 smoke and 84 focused)",
     "84 focused tests passed on macOS",
@@ -32,5 +32,13 @@
     "Cross-host liveness and multiple-workspace relocation require explicit reconciliation; detached background workers are outside the supported process contract",
     "Old active tasks without managed checkpoints require explicit recovery context rather than inferred phases"
   ],
-  "self_reflect": "Release preparation corrected: synchronize the canonical version contract before candidate validation; preserve failed gate evidence. In-scope review defects repaired and tested; no skill/memory/config changes."
+  "self_reflect": "Release preparation corrected: synchronize the canonical version contract before candidate validation; preserve failed gate evidence. In-scope review defects repaired and tested; no skill/memory/config changes.",
+  "final_tag_commit": "41c211fd6da52677ad212917e8be8085616fd0a4",
+  "final_tag_checks": [
+    "84 resume/context/workspace/model/contract/architecture tests passed",
+    "197 smoke tests passed",
+    "template pairing passed",
+    "standalone distribution passed"
+  ],
+  "publication_ref": ".go/evidence/abc-04-release.json"
 }

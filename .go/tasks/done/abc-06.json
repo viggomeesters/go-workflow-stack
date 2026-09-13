@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-06",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Versies en releases hervatbaar publiceren",
   "description": "Voeg de volledige generieke releasefase toe: productversie/changelog, definitieve kandidaat, integratie, push, annotated tag, publicatie en readback.\nAfhankelijk van: go-workflow-stack:abc-05. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -62,10 +62,107 @@
     "claimed_at": "2026-09-13T17:21:00+02:00",
     "base_commit": "8c891956acf81c90a37a3aafc15a45319eae0457"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-13T18:38:43+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Same-agent review and final candidate/tag gates passed; fresh release readback confirmed by strict completion gate. No independent identity attestation claimed.",
+      "transaction_id": "9b09729fbbf045f18d6d3cb77378f4a6",
+      "delivery": {
+        "delivery_id": "autonomous-go-runtime-v8",
+        "html": ".go/deliveries/autonomous-go-runtime-v8/index.html",
+        "manifest": ".go/deliveries/autonomous-go-runtime-v8/manifest.json",
+        "source_sha256": "82a0cc2e7a01b36ec02fd15241e502265bde01ccfab5b3114bd33003c08c7aa2",
+        "html_sha256": "770b054bb9ef38ca42807238b97cc254e99354c917e782663e553926a82e13fd"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T18:38:42+02:00",
+      "task_id": "abc-06",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-06-candidate-final.log,.go/evidence/abc-06-focused.log,.go/evidence/abc-06-handoff.log,.go/evidence/abc-06-integration.json,.go/evidence/abc-06-make-final.log,.go/evidence/abc-06-queue-fix.log,.go/evidence/abc-06-queue-red.log,.go/evidence/abc-06-reconciliation.json,.go/evidence/abc-06-verification.json,.go/evidence/events.jsonl,.go/project.json,.go/runs/abc-06/completion-state.json,.go/runs/abc-06/completion/command-3f97c0d2a1924c67b24a7bd474de1e9b.json,.go/runs/abc-06/completion/command-4fc1d249f81943c9af56a7f791e82162.json,.go/runs/abc-06/completion/command-596722ea3ebe4af792bb14c99147dda9.json,.go/runs/abc-06/completion/command-803fb045f0cc4cb481805f419a029b04.json,.go/runs/abc-06/completion/command-96ccc8ba49fc44f4b779b3c25d23df78.json,.go/runs/abc-06/completion/command-e6af2e18c3dd484f8c0f1242e5198d6f.json,.go/runs/abc-06/completion/critic-cf94c74d62dd483194de6f9d37f77dfb.json,.go/runs/abc-06/completion/verification-58c499ba954f414d9a510a153f8658ef.json,.go/runs/abc-06/completion/verification-642050e82a1247fa922f930c0bf26145.json,.go/tasks/active/abc-06.json,.go/workspaces/abc-06.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.22.md,docs/task-release-contract.md,go_workflow/cli.py,go_workflow/completion.py,go_workflow/constants.py,go_workflow/release.py,go_workflow/run_state.py,go_workflow/shipping.py,go_workflow/worktrees.py,pyproject.toml,schemas/project.schema.json,schemas/publication-state.schema.json,schemas/release-profile.schema.json,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_release.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion release, make check, candidate/tagged release-check and canonical completion verify; verification_result=passed (331 Linux tests; 28 publication cases; candidate and final tag gates; distribution/template pairing); critic=passed same-agent review of all changed content; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.22 deb9256983b4e94527c698cfbec1324331f7329e https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.22; Self-reflect: reused locks and process guards, fixed staging/orphan/reservation and queue-done boundaries with actual regressions; no global skills or memory changes.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/abc-06-candidate-final.log",
+        ".go/evidence/abc-06-focused.log",
+        ".go/evidence/abc-06-handoff.log",
+        ".go/evidence/abc-06-integration.json",
+        ".go/evidence/abc-06-make-final.log",
+        ".go/evidence/abc-06-queue-fix.log",
+        ".go/evidence/abc-06-queue-red.log",
+        ".go/evidence/abc-06-reconciliation.json",
+        ".go/evidence/abc-06-verification.json",
+        ".go/evidence/events.jsonl",
+        ".go/project.json",
+        ".go/runs/abc-06/completion-state.json",
+        ".go/runs/abc-06/completion/command-3f97c0d2a1924c67b24a7bd474de1e9b.json",
+        ".go/runs/abc-06/completion/command-4fc1d249f81943c9af56a7f791e82162.json",
+        ".go/runs/abc-06/completion/command-596722ea3ebe4af792bb14c99147dda9.json",
+        ".go/runs/abc-06/completion/command-803fb045f0cc4cb481805f419a029b04.json",
+        ".go/runs/abc-06/completion/command-96ccc8ba49fc44f4b779b3c25d23df78.json",
+        ".go/runs/abc-06/completion/command-e6af2e18c3dd484f8c0f1242e5198d6f.json",
+        ".go/runs/abc-06/completion/critic-cf94c74d62dd483194de6f9d37f77dfb.json",
+        ".go/runs/abc-06/completion/verification-58c499ba954f414d9a510a153f8658ef.json",
+        ".go/runs/abc-06/completion/verification-642050e82a1247fa922f930c0bf26145.json",
+        ".go/tasks/active/abc-06.json",
+        ".go/workspaces/abc-06.json",
+        "CHANGELOG.md",
+        "docs/go-autonomous-loop.md",
+        "docs/releases/v0.3.22.md",
+        "docs/task-release-contract.md",
+        "go_workflow/cli.py",
+        "go_workflow/completion.py",
+        "go_workflow/constants.py",
+        "go_workflow/release.py",
+        "go_workflow/run_state.py",
+        "go_workflow/shipping.py",
+        "go_workflow/worktrees.py",
+        "pyproject.toml",
+        "schemas/project.schema.json",
+        "schemas/publication-state.schema.json",
+        "schemas/release-profile.schema.json",
+        "schemas/run-state.schema.json",
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_release.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "8c891956acf81c90a37a3aafc15a45319eae0457",
+        "observed_head_commit": "deb9256983b4e94527c698cfbec1324331f7329e"
+      },
+      "verification": {
+        "command": "pytest smoke architecture ABC contracts models workspaces contexts resume completion release, make check, candidate/tagged release-check and canonical completion verify",
+        "result": "passed (331 Linux tests"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review of all changed content",
+        "skip_reason": null
+      }
+    }
+  ],
   "order": 60,
   "dependencies": [
     {
@@ -76,7 +173,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "in_progress",
+    "implementation_status": "completed",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -109,8 +206,8 @@
     "effective_confirmation": "User-selected current session; independent identity unconfirmed"
   },
   "release_intent": {
-    "status": "planned",
-    "version": "resolve_against_latest_release_at_execution",
+    "status": "published",
+    "version": "0.3.22",
     "policy": "independent_task_release",
     "receipt_required": true
   },
@@ -190,8 +287,14 @@
       "id": "R6",
       "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T18:38:40+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-06/completion/release-9d7456b68d5e49debcc420a6878fe48b.json"
+        }
+      ]
     },
     {
       "id": "R7",
@@ -264,6 +367,21 @@
     "critic": {
       "path": ".go/runs/abc-06/completion/critic-cf94c74d62dd483194de6f9d37f77dfb.json",
       "sha256": "157e12c3192618d7b820378cb75f330882f5f1e5ec6f0a29f720f75234abebd5"
+    },
+    "release": {
+      "path": ".go/runs/abc-06/completion/release-9d7456b68d5e49debcc420a6878fe48b.json",
+      "sha256": "fc7f1b679b74f534ac48b1e2291a422bc75f5d23e2fff95c20604b4376e1dfb5"
     }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "abc-06",
+    "project": "go-workflow-stack",
+    "commit": "deb9256983b4e94527c698cfbec1324331f7329e",
+    "tag": "v0.3.22",
+    "evidence": [
+      ".go/runs/abc-06/completion/release-9d7456b68d5e49debcc420a6878fe48b.json"
+    ]
   }
 }

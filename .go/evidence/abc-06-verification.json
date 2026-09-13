@@ -1,7 +1,7 @@
 {
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-06",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "757fec160f3eda7bfe489e9e95bd71f92d37d3af",
   "checks": [
     "331 Linux tests (197 smoke + 134 focused)",
@@ -36,5 +36,12 @@
     "Canonical operational checkpoint replication is separate from product publication",
     "Requested model and same-agent critic are not independently attested"
   ],
-  "self_reflect": "Reused execution locks, process guards and shared completion producers. After a real final review found a queue-status false-done, preserved the earlier passing candidate evidence, reopened only the clean owned workspace and added a regression before publication. No global skills or memory edits."
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product defects were repaired in scope with real regressions. Same-task integration recovery preserved prior proof and unrelated work; task-local scripts now use explicit repository paths and disable bytecode during clean-workspace integration.",
+  "final_tag_commit": "deb9256983b4e94527c698cfbec1324331f7329e",
+  "final_tag_checks": [
+    "197 smoke tests passed on annotated tag",
+    "331 full tests passed on matching candidate content",
+    "immutable template and standalone distribution gates passed"
+  ],
+  "publication_ref": ".go/evidence/abc-06-release.json"
 }

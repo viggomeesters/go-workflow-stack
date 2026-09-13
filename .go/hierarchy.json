@@ -38,7 +38,7 @@
         {
           "id": "abc-release",
           "title": "Volledige geverifieerde taakreleases",
-          "description": "abc-05 v0.3.21 ships verified completion and portable historical evidence. Idempotent publication, deployment and full lifecycle proof remain abc-06/07/10.",
+          "description": "abc-05 v0.3.21 verified completion and abc-06 v0.3.22 configured resumable publication shipped. Deployment and broad end-to-end proof remain abc-07/10.",
           "tasks": [
             "abc-05",
             "abc-06",

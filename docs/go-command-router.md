@@ -195,3 +195,20 @@ Do not auto-continue when any of these apply:
 - dirty owned scope not created by this run;
 - secret-looking path or data;
 - invalid generated workflow state.
+
+
+### Configured lifecycle intake
+
+As of v0.3.24, explicit lifecycle adoption and all intake paths share project
+execution defaults and task overrides. Stack freshness alone does not adopt policy.
+Use the [adoption contract](stack-updates.md#lifecycle-adoption-v0324) to preview,
+apply or recover a migration. An unfinished migration is a contract gate; resolve
+its journal before starting new work. Planning and review-bundle import never
+start workers or grant publication/deployment authority.
+
+Go task status belongs to `.go/tasks`; worker phase and process ownership belong
+to the managed run; the outer chat may finish a turn while repository work remains.
+A model/effort choice is an explicit request, not independent proof of effective
+identity. A task becomes verified done only after current checks, critic and its
+required release/deployment proof pass. Skills explain the process; schema/skill
+lint cannot substitute for executed command and publication evidence.

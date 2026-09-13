@@ -279,3 +279,18 @@ read-only observation before finish and approval. Historical reporting checks sa
 proof without contacting an old target or requiring its old local artifact cache.
 The adapters themselves remain trusted infrastructure; no real target is configured
 by the stack. Cross-host recovery and adopted project defaults are separate work.
+
+
+## Adoption and portability (v0.3.24)
+
+Use [explicit lifecycle settings](stack-updates.md#lifecycle-adoption-v0324) to
+configure new-project defaults or migrate eligible open task records. Updating
+a runtime pin is not policy adoption. Existing named profiles, task overrides,
+verification commands, scope and historical proof are preserved; new task coverage
+starts pending. Configuration grants no execution, push or deployment permission.
+
+Exported review bundles preserve full contract and provenance fields, including
+phase profiles and typed evidence references. They remain review artifacts;
+referenced files/Git objects and managed runtime state are not copied or attested.
+Historical records without strict completion adoption remain historical, not newly
+verified by migration.

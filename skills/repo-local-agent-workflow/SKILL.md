@@ -270,3 +270,40 @@ A first proof is not done until it shows:
 - Do not conflate project architecture principles with workflow rules.
 - Do not collapse vision, hierarchy, task state, and evidence into one giant JSON file.
 - Do not let implementation tasks violate the Vision non-goals just because they are technically easy.
+
+
+## Explicit task lifecycle and adoption
+
+Released through v0.3.24: `.go/project.json` may explicitly define execution
+(default model/effort, workspace, release, optional phase profiles), publication
+and deployment policies. New intake resolves these defaults plus task overrides.
+Task creation, intent, execution brief, recommendation promotion, follow-up and
+configured scaffolding retain the same contract and pending acceptance coverage.
+A stack pin update does not adopt lifecycle policy. Use `migrate --lifecycle` for
+a preview, `--config SETTINGS --apply` for explicit quiescent adoption, and the
+returned journal with `--resume` or `--rollback` for recovery. Do not start work
+through a pending migration or overwrite changed task history. See
+`docs/stack-updates.md` for exact settings and recovery boundaries.
+
+Each executing phase reads the owned task scope, immutable context and current
+feedback; it writes only its permitted output and records raw verification or
+critic findings. The controller prepares version/changelog before final checks,
+serializes integration/publication and retains exact effect identity through
+recovery. Required deployment has separate authorization and authoritative live
+commit/version/artifact readback. A successful worker turn or command exit alone
+is not task completion. Task status, managed worker phase and outer chat status
+are different records.
+
+Handoff retains the same task/run/workspace and requested model selection through
+`.go` context and resume artifacts. Never silently switch models or treat metadata
+as independent effective-model attestation. Review-bundle export/import preserves
+full contract/provenance records and references, but does not transfer an active
+runtime or restore executable tasks. Report this distinction explicitly.
+
+Choose relevant skills for the task's scope and risk. Required lifecycle checks
+remain enforced; skill/schema lint is structural evidence and does not replace
+executed checks, review, exact publication or live proof. Reuse the selected legacy
+lessons recorded in `.go/plans/legacy-insights.json`, without restoring a vault
+writer, broad mandatory skill chain, task-ID release versions, global skill edits
+or GitHub Actions. Updating this repository-local skill source does not authorize
+automatic installation or configuration changes in another runtime.

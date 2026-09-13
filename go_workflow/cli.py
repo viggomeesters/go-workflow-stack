@@ -509,12 +509,15 @@ def validate_event(data: dict[str, Any], rel: str, line_number: int) -> list[str
     return errors
 
 
-def validate_repo(repo: Path) -> list[str]:
+def validate_repo(repo: Path, *, skip_lifecycle_migration: bool = False) -> list[str]:
     repo = repo.resolve()
     root = go_root(repo)
     errors: list[str] = []
     if not root.is_dir():
         return [f"missing .go directory: {root}"]
+    if not skip_lifecycle_migration:
+        from go_workflow.migrations import pending_lifecycle_findings
+        errors.extend(pending_lifecycle_findings(repo))
     validators = {
         "project.json": validate_project,
         "architecture-principles.json": validate_architecture_principles,
@@ -1076,8 +1079,28 @@ def default_spike_tasks() -> list[tuple[str, str]]:
     ]
 
 
+def scaffold_lifecycle_settings(repo, args):
+    path = getattr(args, 'lifecycle_settings', '')
+    if not path: return None
+    from go_workflow.migrations import configured_project, MigrationError
+    settings = load_json(Path(path))
+    existing = go_root(repo) / 'project.json'
+    if existing.exists() and load_json(existing).get('id') != 'go-project-template':
+        raise RepoLocalError('Use migrate --lifecycle --config for an existing project; scaffold settings are for a new project')
+    try: configured_project(load_json(FIXTURE_ROOT / 'project.json'), settings)
+    except MigrationError as exc: raise RepoLocalError(str(exc)) from exc
+    return settings
+
+
+def scaffold_project(project, settings):
+    if settings is None: return project
+    from go_workflow.migrations import configured_project
+    return configured_project(project, settings)
+
+
 def cmd_adopt(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    lifecycle = scaffold_lifecycle_settings(repo, args)
     repo.mkdir(parents=True, exist_ok=True)
     root = go_root(repo)
     if root.exists() and any(root.iterdir()) and not args.force:
@@ -1088,7 +1111,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     project_id = slugify(args.project_id or repo.name)
     name = args.name or repo.name
     default_verification = args.verification or ["git diff --check"]
-    dump_json(root / "project.json", {
+    dump_json(root / "project.json", scaffold_project({
         "schema": PROJECT_SCHEMA,
         "kind": "project",
         "id": project_id,
@@ -1100,7 +1123,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
         "stack_ref": STACK_REF,
         "default_verification": default_verification,
         "links": {"repo": args.repo_url or ""},
-    })
+    }, lifecycle))
     dump_json(root / "architecture-principles.json", {
         "schema": ARCH_SCHEMA,
         "kind": "architecture_principles",
@@ -1143,6 +1166,7 @@ def spike_task_scope(scope_name: str) -> dict[str, list[str]]:
 
 def cmd_spike(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    lifecycle = scaffold_lifecycle_settings(repo, args)
     ensure_git_repo(repo)
     name = args.name or repo.name.replace("-", " ").title()
     project_id = slugify(args.project_id or repo.name)
@@ -1154,7 +1178,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             shutil.rmtree(root)
     if not (root / "project.json").exists():
         ensure_go_dirs(root)
-        dump_json(root / "project.json", {
+        dump_json(root / "project.json", scaffold_project({
             "schema": PROJECT_SCHEMA,
             "kind": "project",
             "id": project_id,
@@ -1166,7 +1190,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "stack_ref": STACK_REF,
             "default_verification": args.verification or ["make check"],
             "links": {"repo": args.repo_url or ""},
-        })
+        }, lifecycle))
         dump_json(root / "architecture-principles.json", {
             "schema": ARCH_SCHEMA,
             "kind": "architecture_principles",
@@ -2689,6 +2713,9 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 task = load_json(open_path)
                 if task.get("status") != "open" or task.get("claim", {}).get("agent"):
                     continue
+                from go_workflow.migrations import pending_lifecycle_findings
+                pending = pending_lifecycle_findings(repo)
+                if pending: raise RepoLocalError('; '.join(pending))
                 dependency_errors = dependency_findings(repo, task, readiness=True)
                 if dependency_errors:
                     result.update({"status": "blocked", "blocked_task": task["id"], "summary": "; ".join(dependency_errors)})
@@ -3948,6 +3975,19 @@ def cmd_template_check(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def ensure_intake_outcomes(task):
+    """New adopted intake carries pending acceptance coverage, never old proof."""
+    if 'execution_contract' not in task or not task.get('acceptance') or task.get('outcome_tracking_version'):
+        return
+    text = str(task.get('description') or task.get('summary') or task['id'])
+    task['outcome_tracking_version'] = 1
+    task.setdefault('intent_source', {'text': text, 'sha256': hashlib.sha256(text.encode()).hexdigest(),
+                             'source_ref': 'repo-local-intake:' + task['id']})
+    task['requested_outcomes'] = [{'id': 'R' + str(index), 'text': value, 'source': 'intake_acceptance',
+                                    'status': 'pending', 'evidence': []}
+                                  for index, value in enumerate(task['acceptance'], 1)]
+
+
 def apply_intake_contract(repo: Path, task: dict[str, Any], source: dict[str, Any] | None = None) -> None:
     source = source or {}
     if "execution_contract" in source:
@@ -3972,6 +4012,8 @@ def apply_intake_contract(repo: Path, task: dict[str, Any], source: dict[str, An
         if errors:
             raise RepoLocalError("invalid dependencies: " + "; ".join(errors))
         task["dependencies"] = source["dependencies"]
+
+    ensure_intake_outcomes(task)
 
 
 def cmd_task_create(args: argparse.Namespace) -> int:
@@ -4141,8 +4183,14 @@ def cmd_task_review(args: argparse.Namespace) -> int:
 
 def cmd_init(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    lifecycle = scaffold_lifecycle_settings(repo, args)
     repo.mkdir(parents=True, exist_ok=True)
     copy_fixture_init(repo, force=args.force)
+    if lifecycle is not None:
+        root = go_root(repo)
+        dump_json(root / 'project.json', scaffold_project(load_json(root / 'project.json'), lifecycle))
+        for path in (root / 'tasks/open').glob('*.json'):
+            task = load_json(path); apply_intake_contract(repo, task); dump_json(path, task)
     errors = validate_repo(repo)
     if errors:
         for error in errors:
@@ -4154,6 +4202,21 @@ def cmd_init(args: argparse.Namespace) -> int:
 
 def cmd_migrate(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    from go_workflow.migrations import adopt_lifecycle, resume_lifecycle, rollback_lifecycle, MigrationError
+    lifecycle = getattr(args, 'lifecycle', False)
+    config = getattr(args, 'config', '')
+    resume = getattr(args, 'resume', '')
+    rollback = getattr(args, 'rollback', '')
+    if lifecycle or config or resume or rollback:
+        try:
+            if sum(bool(value) for value in (lifecycle or config, resume, rollback)) != 1:
+                raise MigrationError('Choose lifecycle adoption, resume, or rollback')
+            if resume: result = resume_lifecycle(repo, resume, apply=args.apply)
+            elif rollback: result = rollback_lifecycle(repo, rollback, apply=args.apply)
+            else: result = adopt_lifecycle(repo, load_json(Path(config)) if config else None, apply=args.apply)
+        except (ValueError, OSError) as exc: raise RepoLocalError(str(exc)) from exc
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+        return 0
     root = go_root(repo)
     try:
         plan, documents = plan_contract_migration(
@@ -4235,6 +4298,9 @@ def cmd_claim(args: argparse.Namespace) -> int:
     root = go_root(repo)
     try:
         with repository_lock(root, f"task-{args.task_id}"):
+            from go_workflow.migrations import pending_lifecycle_findings
+            pending = pending_lifecycle_findings(repo)
+            if pending: raise RepoLocalError('; '.join(pending))
             path, data = find_task(root, args.task_id)
             if data.get("status") != "open":
                 raise RepoLocalError(f"task is not open: {data.get('status')}")
@@ -4378,6 +4444,12 @@ def build_export_bundle(repo: Path, include_done: bool = False, max_events: int 
     hierarchy = load_json(root / "hierarchy.json")
     tasks = collect_tasks(root, include_done=include_done)
     next_tasks = tasks["records"].get("open", [])
+    lifecycle_contracts = {'schema': 'go-workflow.lifecycle-review-bundle.v1', 'project': project,
+        'tasks': [load_json(path) for state in ('open', 'active', 'blocked', 'done') if state != 'done' or include_done
+                  for path in sorted((root / 'tasks' / state).glob('*.json'))],
+        'purpose': 'review_only', 'runtime_transfer': False,
+        'evidence_policy': 'Full source records and references preserved; external evidence objects, Git history and active runtime contents are not embedded or attested.'}
+    lifecycle_contracts['sha256'] = hashlib.sha256(json.dumps(lifecycle_contracts, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
     return {
         "schema": EXPORT_BUNDLE_SCHEMA,
         "kind": "export_bundle",
@@ -4396,6 +4468,7 @@ def build_export_bundle(repo: Path, include_done: bool = False, max_events: int 
             "next_task": None if not next_tasks else {"id": next_tasks[0].get("id"), "summary": next_tasks[0].get("summary")},
         },
         "tasks": tasks,
+        "lifecycle_contracts": lifecycle_contracts,
         "history": {
             "runs": load_jsonl_events(root / "runs" / "events.jsonl", max_events),
             "evidence": load_jsonl_events(root / "evidence" / "events.jsonl", max_events),
@@ -4414,6 +4487,30 @@ def validate_export_bundle(data: dict[str, Any]) -> None:
         raise RepoLocalError("bundle source.project_id required")
     if not data.get("bundle_id"):
         raise RepoLocalError("bundle_id required")
+    if 'lifecycle_contracts' in data:
+        value = data['lifecycle_contracts']
+        fields = {'schema', 'project', 'tasks', 'purpose', 'runtime_transfer', 'evidence_policy', 'sha256'}
+        if (not isinstance(value, dict) or set(value) != fields
+                or value.get('schema') != 'go-workflow.lifecycle-review-bundle.v1'
+                or value.get('purpose') != 'review_only' or value.get('runtime_transfer') is not False
+                or not isinstance(value.get('evidence_policy'), str) or not value['evidence_policy'].strip()
+                or not isinstance(value.get('tasks'), list) or not isinstance(value.get('project'), dict)):
+            raise RepoLocalError('Invalid lifecycle review bundle')
+        payload = {key: item for key, item in value.items() if key != 'sha256'}
+        if value['sha256'] != hashlib.sha256(json.dumps(payload, sort_keys=True, separators=(',', ':')).encode()).hexdigest():
+            raise RepoLocalError('Lifecycle review bundle digest changed')
+        errors = validate_project(value['project'], 'lifecycle_contracts.project')
+        seen = set()
+        for task in value['tasks']:
+            if (not isinstance(task, dict) or not isinstance(task.get('id'), str)
+                    or task.get('status') not in ('open', 'active', 'blocked', 'done')):
+                raise RepoLocalError('Invalid lifecycle task record')
+            errors.extend(validate_task(task, str(task.get('id', '')), expected_status=task.get('status')))
+            if task.get('project') != source['project_id'] or task.get('id') in seen:
+                errors.append('Lifecycle task project/identity mismatch')
+            seen.add(task.get('id'))
+        if value['project'].get('id') != source['project_id']: errors.append('Lifecycle project identity mismatch')
+        if errors: raise RepoLocalError('; '.join(errors))
 
 
 def cmd_bundle_export(args: argparse.Namespace) -> int:
@@ -5028,6 +5125,7 @@ def build_parser() -> argparse.ArgumentParser:
     adopt.add_argument("--feature-group", action="append", default=[], help="legacy alias for epic: id|title")
     adopt.add_argument("--feature", action="append", default=[], help="epic_id|feature_id|title")
     adopt.add_argument("--force", action="store_true")
+    adopt.add_argument('--lifecycle-settings', default='', help='Explicit lifecycle settings for a new project; no execution authority')
     adopt.set_defaults(func=cmd_adopt)
     spike = sub.add_parser("spike", help="Bootstrap a repo and .go contract from rough intent")
     spike.add_argument("repo")
@@ -5052,6 +5150,7 @@ def build_parser() -> argparse.ArgumentParser:
     spike.add_argument("--skip-repo-complete", action="store_true")
     spike.add_argument("--agent", default="agent")
     spike.add_argument("--json", action="store_true")
+    spike.add_argument('--lifecycle-settings', default='', help='Explicit lifecycle settings for a new project; no execution authority')
     spike.set_defaults(func=cmd_spike)
     go = sub.add_parser("go", help="Bare go universal router: loose command vs repo-local .go autonomous loop")
     go.add_argument("repo", nargs="?", default=".")
@@ -5351,10 +5450,15 @@ def build_parser() -> argparse.ArgumentParser:
     migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")
     migrate.add_argument("--agent", default="agent")
     migrate.add_argument("--json", action="store_true")
+    migrate.add_argument('--lifecycle', action='store_true', help='Preview explicit lifecycle policy adoption, separate from schema/pin updates')
+    migrate.add_argument('--config', default='', help='Explicit lifecycle settings JSON; never grants execution authority')
+    migrate.add_argument('--resume', default='', help='Resume a preserved lifecycle journal; --apply writes')
+    migrate.add_argument('--rollback', default='', help='Restore a preserved lifecycle journal; --apply writes')
     migrate.set_defaults(func=cmd_migrate)
     init = sub.add_parser("init", help="Initialize .go fixture state in a repo")
     init.add_argument("repo", nargs="?", default=".")
     init.add_argument("--force", action="store_true")
+    init.add_argument('--lifecycle-settings', default='', help='Explicit lifecycle settings for a new project; no execution authority')
     init.set_defaults(func=cmd_init)
     validate = sub.add_parser("validate", help="Validate repo-local .go state")
     validate.add_argument("repo", nargs="?", default=".")

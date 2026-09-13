@@ -1,0 +1,112 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema": {
+      "const": "go-workflow.lifecycle-adoption.v1"
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "enum": [
+        "dry_run",
+        "applied",
+        "noop",
+        "rollback_dry_run",
+        "resume_dry_run",
+        "rolled_back"
+      ]
+    },
+    "write_required": {
+      "type": "boolean"
+    },
+    "settings_configured": {
+      "type": "boolean"
+    },
+    "changes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "before_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "after_sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        },
+        "required": [
+          "path",
+          "before_sha256",
+          "after_sha256"
+        ]
+      }
+    },
+    "tasks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "status": {
+            "enum": [
+              "open",
+              "active",
+              "blocked",
+              "done"
+            ]
+          },
+          "disposition": {
+            "enum": [
+              "adopted",
+              "existing_contract",
+              "needs_configuration",
+              "preserved_active",
+              "preserved_blocked",
+              "preserved_done"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "disposition"
+        ]
+      }
+    },
+    "authority": {
+      "type": "string",
+      "minLength": 1
+    },
+    "journal": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  },
+  "required": [
+    "schema",
+    "project",
+    "status",
+    "write_required",
+    "settings_configured",
+    "changes",
+    "tasks",
+    "authority"
+  ],
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

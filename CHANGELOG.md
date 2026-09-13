@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.24 — explicit lifecycle adoption and preserved intake provenance
+
+- Separate runtime pin updates from explicit project lifecycle configuration.
+- Preview, apply, resume and roll back open-task adoption through exact durable
+  snapshots, preserving historical tasks, named profiles and user changes.
+- Keep model/workspace/release/phase settings and pending acceptance coverage
+  across intake and configured scaffolds; preserve full review-bundle provenance.
+- Block unfinished migrations and stale stack-update rollback; no execution,
+  push, deployment or global skill authority is inferred from configuration.
+
 ## 0.3.23 — explicit deployment and live-version proof
 
 - Configure separate deployment authorization, target and idempotent command adapters.

@@ -422,6 +422,9 @@ def _execute_managed(control, args, task_id, api, result):
     if state['phase'] == 'setup':
         expected = state['setup_task']
         with repository_lock(root, 'task-' + task_id):
+            from .migrations import pending_lifecycle_findings
+            pending = pending_lifecycle_findings(control)
+            if pending: raise RunStateError('; '.join(pending))
             task = active_task(control, task_id)
             if task['status'] == 'open':
                 if task != expected: raise RunStateError('Task changed during setup; inspect the saved intake')

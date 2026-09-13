@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
-from .state_io import atomic_json
+from .state_io import atomic_json, repository_lock
 
 STACK_UPDATE_SCHEMA = "go-workflow.stack-update-plan.v1"
 ROLLBACK_SCHEMA = "go-workflow.stack-update-rollback.v1"
@@ -84,6 +84,7 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         "resolved_commit": resolved.stdout.strip(),
         "runtime_contract_version": runtime_contract,
         "project_contract_version": project_contract,
+        "lifecycle_policy_migrated": False,
         "up_to_date": up_to_date,
         "changes": [] if up_to_date else [".go/project.json:required_stack_version", ".go/project.json:stack_ref"],
         "before_project": project,
@@ -92,6 +93,17 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
 
 
 def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
+    from .migrations import pending_lifecycle_findings
+    with repository_lock(repo / '.go', 'lifecycle-migration'):
+        findings = pending_lifecycle_findings(repo)
+        if findings: raise StackUpdateError('; '.join(findings))
+        current = json.loads((repo / '.go/project.json').read_text())
+        if current != plan.get('before_project'):
+            raise StackUpdateError('Project changed after stack update planning; replan without overwriting lifecycle policy')
+        return _apply_stack_update(repo, plan)
+
+
+def _apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
     if plan.get("up_to_date"):
         result = {key: value for key, value in plan.items() if key not in {"before_project", "after_project"}}
         result.update({"mode": "noop", "rollback_record": None})
@@ -126,8 +138,22 @@ def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
 
 
 def rollback_stack_update(repo: Path, rollback_record: str) -> None:
+    from .migrations import pending_lifecycle_findings
+    repo = repo.resolve()
     path = repo / rollback_record
-    data = json.loads(path.read_text(encoding="utf-8"))
-    atomic_json(repo / ".go" / "project.json", data["before_project"])
-    data["status"] = "rolled_back"
-    atomic_json(path, data)
+    if path.parent != repo / '.go/updates' or path.resolve() != path.absolute() or path.is_symlink():
+        raise StackUpdateError('Rollback must use a repository-owned stack update record')
+    with repository_lock(repo / '.go', 'lifecycle-migration'):
+        findings = pending_lifecycle_findings(repo)
+        if findings: raise StackUpdateError('; '.join(findings))
+        data = json.loads(path.read_text(encoding='utf-8'))
+        if data.get('schema') != ROLLBACK_SCHEMA or data.get('status') not in {'applied', 'rolled_back'}:
+            raise StackUpdateError('Invalid stack update rollback record')
+        before, after = data.get('before_project'), data.get('after_project')
+        current = json.loads((repo / '.go/project.json').read_text())
+        if not isinstance(before, dict) or not isinstance(after, dict) or current not in (before, after):
+            raise StackUpdateError('Project changed after stack update; preserve adopted lifecycle policy and replan')
+        if data['status'] == 'rolled_back' and current != before:
+            raise StackUpdateError('Project advanced after recorded rollback')
+        if current != before: atomic_json(repo / '.go/project.json', before)
+        data['status'] = 'rolled_back'; atomic_json(path, data)

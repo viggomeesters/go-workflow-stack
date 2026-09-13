@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-07",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Deployments en draaiende versie verifiëren",
   "description": "Ondersteun projectgebonden package/deploy-stappen en controleer na publicatie de daadwerkelijk beschikbare versie, binnen hetzelfde lifecyclecontract.\nAfhankelijk van: go-workflow-stack:abc-06. Controleer dependencybewijs vóór claim; de huidige runtime dwingt dit nog niet af. Scope en acceptatie beschrijven gepland gedrag. Alleen een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -57,10 +57,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T18:44:15+02:00",
+    "base_commit": "9b861961375ca83dcee8a15a3447e980cf5c0f55"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],

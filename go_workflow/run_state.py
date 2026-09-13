@@ -553,7 +553,7 @@ def _execute_managed(control, args, task_id, api, result):
             else:
                 feedback = {'checks': state['checks'], 'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {}}
                 if phase == 'critic':
-                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback)
+                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback, publication_pending=publishing)
                 else:
                     command = (api.default_executor_agent_command if phase == 'build' else api.default_repair_agent_command)('codex', task)
                     output = api.run_hook_command(workspace, command, task, state['attempt'], 'direct_fix', phase, timeout,

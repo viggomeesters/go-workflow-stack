@@ -37,3 +37,14 @@ go-workflow proof validate /tmp/go-hermes-v032/proof.json \
 ```
 
 The copy is not created when `--evidence-root` is omitted, or when the structure, timezone, native task/phase evidence, raw run semantics, or a raw-result hash is invalid.
+
+## A/B/C release campaign
+
+`fixtures/abc-campaign` and `scripts/check-abc.sh` add a two-release local pilot with
+explicit profiles and dependency order. The failure matrix identifies the exact
+reused regressions. Deterministic process doubles and real Codex worker evidence
+are separate: see `docs/autonomy-benchmark.md` for execution, preserved failure,
+source identity and attribution limits. Published source evidence lives under
+`.go/evidence/abc-10-*`; canonical project tasks and fixture state never share a
+writer. Hosted publication fixtures remain simulations, even when the model worker
+in the separate live sample is real. Template adoption follows in template-01/02.

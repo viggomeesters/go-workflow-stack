@@ -2272,6 +2272,7 @@ def run_default_critic_agent(
     strategy: str,
     timeout_seconds: int,
     feedback: dict[str, Any] | None = None,
+    *, publication_pending: bool = False,
 ) -> dict[str, Any]:
     output = go_root(repo) / "runs" / str(task.get("id", "unknown")) / f"attempt-{attempt:02d}" / "deep-critic.txt"
     if registered_workspace(repo) is not None:
@@ -2283,6 +2284,14 @@ def run_default_critic_agent(
         "Do not edit files.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
+    if publication_pending:
+        instructions += " " + " ".join([
+            "This critic runs before controller-owned publication.",
+            "Judge whether the current scoped candidate, prepared version/changelog, executed checks and release configuration are ready for publication.",
+            "Task-level push, tag, release-readback and live-deployment requirements remain pending downstream controller work. Do not block solely because their post-publication receipts do not exist yet.",
+            "Still block missing or failed current verification, unsafe release readiness, scope violations and implementation defects. Never invent release evidence or waive a required downstream check.",
+            "Do not publish or mark shipping outcomes verified. Your success approves only this critic phase; the controller must prove publication and any required deployment before task completion.",
+        ])
     availability = repair_agent_available(agent)
     if not availability["available"]:
         raise RepoLocalError(f"critic agent '{agent}' is not available on PATH")

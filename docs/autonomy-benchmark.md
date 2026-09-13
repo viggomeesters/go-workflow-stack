@@ -2,6 +2,53 @@
 
 This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; claims must stay tied to the proven runtime boundary.
 
+
+## A/B/C campaign (v0.3.26)
+
+The reproducible two-task campaign is `fixtures/abc-campaign/campaign.py` with the
+failure matrix in `fixtures/abc-campaign/coverage.json`. Run deterministic evidence
+with `bash scripts/check-abc.sh` in a normal source checkout using Python 3.11+
+and the test dependencies. It makes no model calls. It uses actual managed CLI,
+Git worktrees, verification collectors, publication/readback and cleanup with an
+executable native protocol double and local bare remotes.
+
+The first task selects Terra High and releases 1.2.0; the second selects Astra
+Medium and releases 1.3.0 only after its dependency has valid release proof. A
+rejected critic passes current feedback into repair, which receives new checks
+and a new critic verdict. Roundtrip and missing-proof mutations test completeness;
+a conflicting base preserves both versions and cannot become a release.
+
+The matrix reuses tests for unsupported models, stale context/HEAD, missing phase
+or requirement evidence, surviving workers, commit/integration/tag/push and hosted
+publication acknowledgement loss, deployment/readback failure, and cleanup retry.
+These are tested boundaries, not exhaustive schedule exploration. Worktrees do not
+isolate security, dependencies, test environments or external side effects.
+
+The first real v0.3.25 worker run exposed a circular critic requirement: it demanded
+a release receipt before the controller's publication phase. The failed live proof
+is retained. Managed pre-publication critics now judge candidate readiness and
+leave downstream shipping requirements pending. They cannot waive failed checks,
+create release evidence or mark the task complete. Manual critics retain their
+existing contract, and the publisher/completion gate still requires actual proof.
+
+Live execution is separate and opt-in:
+
+```bash
+python3 fixtures/abc-campaign/campaign.py --live \
+  --destination /absolute/new/evidence-directory --runtime /absolute/stack-checkout
+```
+
+For a development candidate after the source repository's released-pin preflight,
+`--candidate-runtime` explicitly permits the development override **only inside the
+disposable campaign**. Its receipt records this distinction, source revision and
+runtime file hashes. This is never presented as an exact released-pin run. The
+harness refuses existing destinations, preserves failed runs and raw invocation
+results, and creates no hosted release or production deployment.
+
+Live result: PENDING_LIVE_PROOF. Evidence distinguishes requested/enforced profiles
+from effective model identity, which remains unconfirmed. A passing small live
+sample does not measure general model quality or guarantee future availability.
+
 ## Scale
 
 | Mark | Meaning |

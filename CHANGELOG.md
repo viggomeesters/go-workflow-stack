@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.26 — ordered release campaign and phase-aware critic
+
+- Prove two different task profiles, dependent releases, rejected-critic repair,
+  current verification and cleanup through the managed native lifecycle.
+- Fix a live-discovered circular critic requirement: pre-publication review checks
+  readiness while downstream release/deployment evidence stays pending for the
+  controller; final completion still requires that evidence.
+- Add a reproducible failure/property matrix and separate live runtime receipts,
+  preserving failed live evidence and explicit candidate-source attribution.
+
 ## 0.3.25 — verified phase worker topology
 
 - Keep fresh ephemeral workers with frozen phase profiles, canonical context and

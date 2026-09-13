@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.16
+
+- Enforce explicit model/effort arguments for native Codex phases after installed-runtime capability checks.
+- Freeze phase profiles, reject unsupported Hermes/custom model control before build, and preserve legacy execution.
+- Record requested/unconfirmed model attribution, native per-turn token counts and measured time without fabricated invoice costs.
+
 ## Unreleased
 
 ## 0.3.15 — 2026-09-13

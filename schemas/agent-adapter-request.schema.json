@@ -3,17 +3,106 @@
   "$id": "go-workflow.agent-adapter-request.v1",
   "title": "Go Workflow Agent Adapter Request",
   "type": "object",
-  "required": ["schema", "phase", "repo", "task_id", "attempt", "strategy", "task", "context", "result_schema"],
+  "required": [
+    "schema",
+    "phase",
+    "repo",
+    "task_id",
+    "attempt",
+    "strategy",
+    "task",
+    "context",
+    "result_schema"
+  ],
   "properties": {
-    "schema": {"const": "go-workflow.agent-adapter-request.v1"},
-    "phase": {"enum": ["build", "critic", "repair"]},
-    "repo": {"type": "string", "minLength": 1},
-    "task_id": {"type": "string", "minLength": 1},
-    "attempt": {"type": "integer", "minimum": 1},
-    "strategy": {"type": "string", "minLength": 1},
-    "task": {"type": "object"},
-    "context": {"type": "object"},
-    "result_schema": {"const": "go-workflow.agent-adapter-result.v1"}
+    "schema": {
+      "const": "go-workflow.agent-adapter-request.v1"
+    },
+    "phase": {
+      "enum": [
+        "build",
+        "critic",
+        "repair"
+      ]
+    },
+    "repo": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "strategy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "task": {
+      "type": "object"
+    },
+    "context": {
+      "type": "object"
+    },
+    "result_schema": {
+      "const": "go-workflow.agent-adapter-result.v1"
+    },
+    "model_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "effective",
+        "confirmation",
+        "reason",
+        "capabilities"
+      ],
+      "properties": {
+        "requested": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "effective": {
+          "type": "null"
+        },
+        "confirmation": {
+          "const": "unconfirmed"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities": {
+          "type": "object"
+        }
+      }
+    }
   },
   "additionalProperties": true
 }

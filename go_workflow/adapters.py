@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+import json
 import shlex
 import subprocess
 
@@ -52,11 +53,16 @@ def native_agent_command(
     instructions: str = "",
     *,
     hermes_prompt_flag: str = "-z",
+    model_profile: dict[str, str] | None = None,
 ) -> str:
     prompt = shlex.quote(native_agent_prompt(phase, instructions))
     if agent == "codex":
         sandbox = "read-only" if phase == "critic" else "workspace-write"
-        return f"codex exec --sandbox {sandbox} --ephemeral -C {{repo_shell}} {prompt}"
+        selection = ""
+        if model_profile is not None:
+            selection = " --json --model " + shlex.quote(model_profile["id"])
+            selection += " --config " + shlex.quote("model_reasoning_effort=" + json.dumps(model_profile["effort"]))
+        return f"codex exec --sandbox {sandbox} --ephemeral{selection} -C {{repo_shell}} {prompt}"
     if agent == "hermes":
         if hermes_prompt_flag not in {"-z", "-p"}:
             raise ValueError(f"unsupported Hermes prompt flag: {hermes_prompt_flag}")

@@ -3,14 +3,144 @@
   "$id": "go-workflow.agent-adapter-result.v1",
   "title": "Go Workflow Agent Adapter Result",
   "type": "object",
-  "required": ["schema", "phase", "status", "summary"],
+  "required": [
+    "schema",
+    "phase",
+    "status",
+    "summary"
+  ],
   "properties": {
-    "schema": {"const": "go-workflow.agent-adapter-result.v1"},
-    "phase": {"enum": ["build", "critic", "repair"]},
-    "status": {"enum": ["success", "failure", "blocked"]},
-    "summary": {"type": "string", "minLength": 1},
-    "evidence": {"type": "array"},
-    "findings": {"type": "array"}
+    "schema": {
+      "const": "go-workflow.agent-adapter-result.v1"
+    },
+    "phase": {
+      "enum": [
+        "build",
+        "critic",
+        "repair"
+      ]
+    },
+    "status": {
+      "enum": [
+        "success",
+        "failure",
+        "blocked"
+      ]
+    },
+    "summary": {
+      "type": "string",
+      "minLength": 1
+    },
+    "evidence": {
+      "type": "array"
+    },
+    "findings": {
+      "type": "array"
+    },
+    "model_selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requested",
+        "effective",
+        "confirmation",
+        "reason",
+        "capabilities"
+      ],
+      "properties": {
+        "requested": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "effective": {
+          "type": "null"
+        },
+        "confirmation": {
+          "const": "unconfirmed"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "capabilities": {
+          "type": "object"
+        }
+      }
+    }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": {
+        "required": [
+          "model_selection"
+        ]
+      },
+      "then": {
+        "properties": {
+          "usage": {
+            "type": "object",
+            "required": [
+              "source",
+              "turns",
+              "elapsed_seconds",
+              "provider_invoice_cost_usd"
+            ],
+            "properties": {
+              "source": {
+                "enum": [
+                  "codex_json_stream",
+                  "unavailable"
+                ]
+              },
+              "turns": {
+                "type": [
+                  "array",
+                  "null"
+                ],
+                "items": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "integer",
+                    "minimum": 0
+                  }
+                }
+              },
+              "elapsed_seconds": {
+                "type": "number",
+                "minimum": 0
+              },
+              "provider_invoice_cost_usd": {
+                "type": "null"
+              }
+            },
+            "additionalProperties": false
+          }
+        }
+      }
+    }
+  ]
 }

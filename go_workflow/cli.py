@@ -37,8 +37,9 @@ if str(STACK_ROOT) not in sys.path:
 from go_workflow.execution_contracts import (dependency_findings, resolve_execution_contract, validate_dependencies, validate_execution_contract, validate_phase_profiles, validate_verification_evidence)
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
 from go_workflow.migrations import plan_contract_migration
-from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result
+from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result, codex_stream_payload
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
+from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
 from go_workflow.capacity_policy import plan_capacity
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, pending_review_task_ids as task_state_pending_review_task_ids, task_path
@@ -1746,8 +1747,20 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
 
 def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False) -> dict[str, Any]:
     rendered = format_hook_command(command, repo, task, attempt, strategy)
+    try:
+        model_selection = controlled_preflight(repo, task, hook, rendered, require_protocol)
+    except (ValueError, OSError, StateLockError, subprocess.SubprocessError) as exc:
+        return {"schema": "go-workflow.agent-adapter-result.v1", "phase": hook,
+                "status": "blocked", "summary": str(exc), "hook": hook,
+                "command": rendered, "returncode": 78, "stdout": "", "stderr": str(exc),
+                "timed_out": False}
     context = build_execution_context(repo, task)
     request = build_adapter_request(repo, task, context, hook, attempt, strategy)
+    if model_selection is not None:
+        request["model_selection"] = model_selection
+        append_jsonl(go_root(repo) / "runs" / "events.jsonl", event(task["id"], "run.checked", "model-runtime", {
+            "action": "model.phase_started", "phase": hook, "attempt": attempt, "model_selection": model_selection,
+        }))
     env = os.environ.copy()
     env.update({
         "GO_REPO": str(repo),
@@ -1759,8 +1772,23 @@ def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: in
         "GO_STRATEGY": strategy,
         "GO_HOOK": hook,
     })
+    started = time.monotonic()
     completed = run_shell_with_timeout(repo, rendered, env, timeout_seconds)
-    return normalize_adapter_result(hook, rendered, completed, require_protocol=require_protocol)
+    elapsed = time.monotonic() - started
+    turns = None
+    if model_selection is not None:
+        completed, turns = codex_stream_payload(completed)
+    result = normalize_adapter_result(hook, rendered, completed, require_protocol=require_protocol)
+    if model_selection is not None:
+        result["model_selection"] = model_selection
+        result["usage"] = {"source": "codex_json_stream" if turns else "unavailable",
+                           "turns": turns, "elapsed_seconds": elapsed,
+                           "provider_invoice_cost_usd": None}
+        append_jsonl(go_root(repo) / "runs" / "events.jsonl", event(task["id"], "run.checked", "model-runtime", {
+            "action": "model.phase_completed", "phase": hook, "attempt": attempt,
+            "model_selection": model_selection, "usage": result["usage"], "returncode": result["returncode"],
+        }))
+    return result
 
 
 def arg_str(args: argparse.Namespace, name: str, default: str = "") -> str:
@@ -2054,6 +2082,7 @@ def repair_agent_available(agent: str) -> dict[str, Any]:
         "compatible": compatible,
         "path": path,
         "prompt_flag": prompt_flag,
+        "model_selection_capabilities": adapter_capabilities(agent),
     }
 
 
@@ -2078,6 +2107,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "repair",
         instructions,
         hermes_prompt_flag=availability["prompt_flag"] or "-z",
+        model_profile=phase_model(task, "repair"),
     )
 
 
@@ -2118,6 +2148,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "build",
         instructions,
         hermes_prompt_flag=availability["prompt_flag"] or "-z",
+        model_profile=phase_model(task, "build"),
     )
 
 
@@ -2147,6 +2178,7 @@ def run_default_critic_agent(
         "critic",
         instructions,
         hermes_prompt_flag=availability["prompt_flag"] or "-z",
+        model_profile=phase_model(task, "critic"),
     )
     result = run_hook_command(repo, command, task, attempt, strategy, "critic", timeout_seconds, require_protocol=True)
     output.write_text(result.get("stdout") or "", encoding="utf-8")
@@ -2365,6 +2397,7 @@ def write_resume_script(root: Path, mode: str, args: argparse.Namespace) -> Path
         "",
     ])
     path = root / "runs" / "resume.sh"
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(script, encoding="utf-8")
     path.chmod(0o755)
     return path
@@ -2529,6 +2562,14 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     "summary": str(exc),
                     "next_action": "install/select an executor agent, provide --build-command, or explicitly mark the task mechanical",
                 })
+                break
+        if "execution_contract" in task and task.get("execution_mode") == "agent":
+            requested_repair = arg_str(args, "repair_agent", "")
+            if (build_command or critic_command or repair_command or selected_executor_agent != "codex"
+                    or requested_repair not in {"", "codex"}):
+                result.update({"status": "adapter_gate", "blocked_task": task["id"],
+                               "summary": "Controlled model selection is unsupported for Hermes/custom phase adapters.",
+                               "next_action": "configure native Codex phases; unsupported adapters require explicit model-control implementation"})
                 break
         task_owned_patterns = [
             pattern for pattern in task.get("scope", {}).get("modify", [])

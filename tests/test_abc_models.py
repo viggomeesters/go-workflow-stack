@@ -56,10 +56,13 @@ if sys.argv[1]=='app-server':
 else:
  pathlib.Path(os.environ['ABC_MODEL_CAPTURE']).write_text(json.dumps(sys.argv[1:]))
  message=json.dumps({'schema':'go-workflow.agent-adapter-result.v1','phase':os.environ['GO_HOOK'],'status':'success','summary':'worker fixture completed','model_selection':{'effective':{'id':'invented'}},'usage':{'input_tokens':999}})
- if os.environ.get('ABC_MODEL_STREAM'):
+ mode=os.environ.get('ABC_MODEL_STREAM')
+ if mode=='plain': print(message)
+ else:
   print(json.dumps({'type':'item.completed','item':{'type':'agent_message','text':message}}))
-  print(json.dumps({'type':'turn.completed','usage':{'input_tokens':12,'cached_input_tokens':4,'output_tokens':3}}))
- else: print(message)
+  if mode=='failed': print(json.dumps({'type':'turn.failed','error':{'message':'fixture runtime failure'}}))
+  elif mode=='1': print(json.dumps({'type':'turn.completed','usage':{'input_tokens':12,'cached_input_tokens':4,'output_tokens':3}}))
+  else: print(json.dumps({'type':'turn.completed'}))
 ''')
     binary.chmod(0o755)
     monkeypatch.setenv('PATH',str(tmp_path)+os.pathsep+os.environ['PATH'])
@@ -173,3 +176,14 @@ def test_protocol_schema_rejects_invalid_model_attribution():
     result={'schema':'go-workflow.agent-adapter-result.v1','phase':'build','status':'success','summary':'fixture',
             'model_selection':{'requested':{'id':'gpt-6-astra','effort':'bogus'},'effective':None,'confirmation':'unconfirmed','reason':'fixture','capabilities':{}}}
     assert not Draft202012Validator(schema).is_valid(result)
+
+
+@pytest.mark.parametrize("stream_mode", ["failed", "plain"])
+def test_runtime_failure_cannot_be_overruled_by_worker_success_text(tmp_path,monkeypatch,stream_mode):
+    from go_workflow.cli import run_hook_command
+    catalog_codex(tmp_path,monkeypatch);repo=controlled_fixture(tmp_path)
+    monkeypatch.setenv('ABC_MODEL_STREAM',stream_mode)
+    selected=task();command=default_executor_agent_command('codex',selected)
+    result=run_hook_command(repo,command,selected,1,'direct','build',require_protocol=True)
+    assert result['returncode'] != 0
+    assert result['status'] != 'success'

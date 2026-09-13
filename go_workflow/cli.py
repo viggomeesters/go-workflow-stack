@@ -1780,6 +1780,8 @@ def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: in
         completed, turns = codex_stream_payload(completed)
     result = normalize_adapter_result(hook, rendered, completed, require_protocol=require_protocol)
     if model_selection is not None:
+        if result["returncode"] and result["status"] == "success":
+            result["status"] = "failure"
         result["model_selection"] = model_selection
         result["usage"] = {"source": "codex_json_stream" if turns else "unavailable",
                            "turns": turns, "elapsed_seconds": elapsed,

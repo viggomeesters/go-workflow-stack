@@ -132,6 +132,8 @@ def codex_stream_payload(completed: dict[str, Any]) -> tuple[dict[str, Any], lis
     """
     messages, turns = [], []
     stream_seen = False
+    turn_completed = False
+    turn_failed = False
     for line in str(completed.get('stdout') or '').splitlines():
         try: record = json.loads(line)
         except ValueError: continue
@@ -139,6 +141,8 @@ def codex_stream_payload(completed: dict[str, Any]) -> tuple[dict[str, Any], lis
         event_type = record.get('type')
         if event_type in ('thread.started', 'turn.started', 'item.started', 'item.completed', 'turn.completed', 'turn.failed'):
             stream_seen = True
+        if event_type == 'turn.completed': turn_completed = True
+        if event_type == 'turn.failed': turn_failed = True
         if event_type == 'item.completed':
             item = record.get('item')
             if isinstance(item, dict) and item.get('type') == 'agent_message' and isinstance(item.get('text'), str):
@@ -148,5 +152,8 @@ def codex_stream_payload(completed: dict[str, Any]) -> tuple[dict[str, Any], lis
             counts = {name: usage[name] for name in ('input_tokens', 'cached_input_tokens', 'output_tokens')
                       if type(usage.get(name)) is int and usage[name] >= 0}
             if counts: turns.append(counts)
-    if not stream_seen: return completed, None
+    if not stream_seen or not turn_completed or turn_failed:
+        reason = 'Codex turn failed' if turn_failed else 'Codex JSON stream has no completed turn'
+        completed = {**completed, 'returncode': completed.get('returncode') or 65,
+                     'stderr': str(completed.get('stderr') or '') + '\n' + reason}
     return {**completed, 'stdout': '\n'.join(messages)}, turns or None

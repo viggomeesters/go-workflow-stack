@@ -1,0 +1,15 @@
+{
+  "task_id": "campaign-1",
+  "owner": "campaign-owner",
+  "run_id": "campaign-1-run",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-fixed/project",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-fixed/campaign-1-worker",
+  "branch": "task/campaign-1",
+  "base_branch": "main",
+  "base_commit": "0d3408eac8316137a5e43869506494b66b8475c7",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-fixed/project/.git",
+  "repository_id": "163c97daf4004ddfb9f802ffedf46c03",
+  "generation": "1b6c4342b0e34cfebb2b8e16508fe112",
+  "state": "ready"
+}

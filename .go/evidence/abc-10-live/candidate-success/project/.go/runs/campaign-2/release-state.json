@@ -1,0 +1,133 @@
+{
+  "schema": "go-workflow.publication-state.v1",
+  "task_id": "campaign-2",
+  "project": "repo-local-spike-fixture",
+  "owner": "campaign-owner",
+  "run_id": "campaign-2-run",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+  "workspace": {
+    "task_id": "campaign-2",
+    "owner": "campaign-owner",
+    "run_id": "campaign-2-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-2-worker",
+    "branch": "task/campaign-2",
+    "base_branch": "main",
+    "base_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+    "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+    "generation": "6d1a7078ab924c4c8b88f595c7981e18",
+    "state": "ready"
+  },
+  "profile": {
+    "name": "local",
+    "provider": "git-tag",
+    "remote": "origin",
+    "branch": "main",
+    "publication": {
+      "version": {
+        "path": "VERSION",
+        "format": "text"
+      },
+      "bump": "minor",
+      "tag_prefix": "v",
+      "changelog": "CHANGELOG.md"
+    },
+    "deployment": {
+      "mode": "none",
+      "reason": "Local Git release proof; no deployment target"
+    }
+  },
+  "contract_digest": "faa734427b1260f3c726c9e43a7ca1eb638894702c60df5f16d6d4e77ee661f3",
+  "authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "actor": "campaign-owner"
+  },
+  "base_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "remote_base": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "remote_url": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/remote.git",
+  "version": "1.3.0",
+  "tag": "v1.3.0",
+  "phase": "published",
+  "effects": {
+    "commit": {
+      "expected": {
+        "parent": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+        "tree": "95edbca5403d9c5707ec615f9f8cc805d4db6d30",
+        "message": "go release: campaign-2 campaign-2-run v1.3.0"
+      },
+      "status": "confirmed"
+    },
+    "integration": {
+      "expected": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+      "status": "confirmed"
+    },
+    "tag": {
+      "expected": {
+        "commit": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+        "message": "go release campaign-2 campaign-2-run 16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+      },
+      "status": "confirmed"
+    },
+    "push": {
+      "expected": {
+        "refs/heads/main": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+        "refs/tags/v1.3.0": "077dbe43c36f8bf82af05bfcde9ee176abbddbe4",
+        "refs/tags/v1.3.0^{}": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+      },
+      "status": "confirmed"
+    }
+  },
+  "observations": [
+    {
+      "effect": "commit",
+      "observed": {
+        "parent": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+        "tree": "95edbca5403d9c5707ec615f9f8cc805d4db6d30",
+        "message": "go release: campaign-2 campaign-2-run v1.3.0"
+      }
+    },
+    {
+      "effect": "integration",
+      "observed": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+    },
+    {
+      "effect": "tag",
+      "observed": {
+        "commit": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+        "message": "go release campaign-2 campaign-2-run 16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+      }
+    },
+    {
+      "effect": "push",
+      "observed": {
+        "refs/heads/main": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+        "refs/tags/v1.3.0": "077dbe43c36f8bf82af05bfcde9ee176abbddbe4",
+        "refs/tags/v1.3.0^{}": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+      }
+    }
+  ],
+  "reservation": ".go/runs/publication-reservations/b84fd57712be8d08af0d3f3e09267f1f1f76fabeebf70d5f88f44a97f5fd2afb.json",
+  "notes": "## 1.3.0\n\n- Deliver local campaign step 2\n",
+  "preparation": [
+    {
+      "path": "VERSION",
+      "before": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+      "after": "1.3.0\n"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "before": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736",
+      "after": "## 1.3.0\n\n- Deliver local campaign step 2\n\n## 1.2.0\n\n- Deliver local campaign step 1\n\n# Local campaign\n"
+    }
+  ],
+  "content_digest": "51a65ef4f7bf525da271aaa1e3f3166d49669dfa8e90932b72cbb3ce550c7dba",
+  "commit": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+  "tag_object": "077dbe43c36f8bf82af05bfcde9ee176abbddbe4",
+  "release_evidence": {
+    "path": ".go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json",
+    "sha256": "65560ed2b4a3301e68aaa001f9b629eea8ea544160b5bf36c60a3dc6a5b653a4"
+  }
+}

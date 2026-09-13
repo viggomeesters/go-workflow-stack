@@ -1,0 +1,520 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+  "owner": "campaign-owner",
+  "run_id": "campaign-1-run",
+  "workspace": {
+    "task_id": "campaign-1",
+    "owner": "campaign-owner",
+    "run_id": "campaign-1-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+    "branch": "task/campaign-1",
+    "base_branch": "main",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+    "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+    "generation": "baea9dca61934dc59cc0babcbbecc887",
+    "state": "ready"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 1,
+  "checks": [
+    {
+      "returncode": 0,
+      "completion_check": {
+        "verification": {
+          "schema": "go-workflow.verification-evidence.v1",
+          "task_id": "campaign-1",
+          "phase_id": "verify",
+          "requirement_ids": [
+            "R1"
+          ],
+          "status": "passed",
+          "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\"",
+          "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+          "revision": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+          "worktree_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+          "exit_code": 0,
+          "evidence": [
+            ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json"
+          ]
+        },
+        "raw": {
+          "path": ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json",
+          "sha256": "37b70bef76c78b7d59944d2aecf59a5ab0ee9e1c6ab0c43fabee25a9c3e3d523"
+        }
+      }
+    }
+  ],
+  "phase_evidence": [
+    {
+      "phase": "build",
+      "attempt": 1,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "build",
+        "status": "success",
+        "summary": "R1 build evidence: app.txt contains exact bytes one\\n (sha256 2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806); scoped-change check passed with only untracked app.txt. Full release assertion is deferred to controller because VERSION remains controller-owned 1.1.0 pending 1.2.0.",
+        "hook": "build",
+        "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-5.6-terra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker 'You are the build executor for a repo-local .go task. Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope. Implement the task, run focused verification, and leave only scoped changes. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"build\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 0,
+        "stdout": "I’ll read the controller-provided task context and request, then implement only the permitted change in `app.txt` and run the requested focused checks.\nThe supplied verification command is a multiword command stored in one environment variable, so I’m invoking it through the shell as intended before reading the immutable snapshot.\nThe task permits exactly one authored file. `VERSION` is still `1.1.0`, which is the controller-owned release prerequisite; I’ll leave it untouched and implement the requested app content.\n`app.txt` now has the exact required bytes and the scoped content checks pass. The complete release assertion remains pending exactly as expected because the controller has not yet set the controller-owned version to `1.2.0`.\nImplemented `app.txt` as exactly `one\\n`; only scoped change present. R1 evidence: content and byte checks passed (SHA-256 `2c8b…3406`). Release assertion is pending controller-owned `VERSION` update from `1.1.0` to `1.2.0`.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"build\",\"status\":\"success\",\"summary\":\"R1 build evidence: app.txt contains exact bytes one\\\\n (sha256 2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806); scoped-change check passed with only untracked app.txt. Full release assertion is deferred to controller because VERSION remains controller-owned 1.1.0 pending 1.2.0.\"}",
+        "stderr": "Reading additional input from stdin...\n2026-09-13T18:46:14.324895Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:46:14.324914Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:46:14.407010Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:46:14.410846Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:46:14.414189Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:46:14.417929Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:46:14.814734Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:46:14.814747Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/context.json",
+          "sha256": "d3230a630bccd1531c7c04d10267d9a5a1eb74a103052a355634b56b11614ae6",
+          "snapshot_id": "1b7ae993f19d4a75b09545bd7cd78c18"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/build-01-1b7ae993f19d4a75b09545bd7cd78c18/process-result.json",
+          "sha256": "f7994adbde8a5921586117904d7844d4bbb60ceae3f027ae5fd44c2b70493852"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-5.6-terra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 203744,
+              "cached_input_tokens": 182272,
+              "output_tokens": 2733
+            }
+          ],
+          "elapsed_seconds": 67.64428454102017,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      "code_before": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "fea7a7eafc9bc163c62609c281b17372b60dc6d6b3c68c6644f29c57105e359a",
+        "files": {},
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      },
+      "code_after": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "fea7a7eafc9bc163c62609c281b17372b60dc6d6b3c68c6644f29c57105e359a",
+        "files": {
+          "app.txt": {
+            "kind": "file",
+            "mode": 420,
+            "size": 4,
+            "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+          }
+        },
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 1,
+      "result": {
+        "returncode": 0,
+        "completion_check": {
+          "verification": {
+            "schema": "go-workflow.verification-evidence.v1",
+            "task_id": "campaign-1",
+            "phase_id": "verify",
+            "requirement_ids": [
+              "R1"
+            ],
+            "status": "passed",
+            "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\"",
+            "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+            "revision": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+            "worktree_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+            "exit_code": 0,
+            "evidence": [
+              ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json"
+            ]
+          },
+          "raw": {
+            "path": ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json",
+            "sha256": "37b70bef76c78b7d59944d2aecf59a5ab0ee9e1c6ab0c43fabee25a9c3e3d523"
+          }
+        }
+      },
+      "code_before": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+        "files": {
+          "CHANGELOG.md": {
+            "kind": "file",
+            "mode": 384,
+            "size": 60,
+            "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+          },
+          "VERSION": {
+            "kind": "file",
+            "mode": 384,
+            "size": 6,
+            "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+          },
+          "app.txt": {
+            "kind": "file",
+            "mode": 420,
+            "size": 4,
+            "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+          }
+        },
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      },
+      "code_after": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+        "files": {
+          "CHANGELOG.md": {
+            "kind": "file",
+            "mode": 384,
+            "size": 60,
+            "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+          },
+          "VERSION": {
+            "kind": "file",
+            "mode": 384,
+            "size": 6,
+            "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+          },
+          "app.txt": {
+            "kind": "file",
+            "mode": 420,
+            "size": 4,
+            "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+          }
+        },
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      }
+    },
+    {
+      "phase": "critic",
+      "attempt": 1,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "critic",
+        "status": "success",
+        "summary": "Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.",
+        "hook": "critic",
+        "command": "codex exec --sandbox read-only --ephemeral --json --model gpt-5.6-terra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker 'You are the blocking critic for a repo-local .go task. Review the current repository result for task campaign-1 against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence. Do not edit files. Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings. This critic runs before controller-owned publication. Judge whether the current scoped candidate, prepared version/changelog, executed checks and release configuration are ready for publication. Task-level push, tag, release-readback and live-deployment requirements remain pending downstream controller work. Do not block solely because their post-publication receipts do not exist yet. Still block missing or failed current verification, unsafe release readiness, scope violations and implementation defects. Never invent release evidence or waive a required downstream check. Do not publish or mark shipping outcomes verified. Your success approves only this critic phase; the controller must prove publication and any required deployment before task completion. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 0,
+        "stdout": "I’ll inspect the repository contract, context snapshot, candidate diff, and recorded verification evidence without changing anything.\nI’m using the repository audit workflow because this is a release-readiness review; it will keep the assessment evidence-based and non-mutating.\nThe context snapshot’s integrity check passes. I’m now comparing its frozen patch, raw file evidence, and verification receipt against the live candidate, including the controller-prepared version and changelog.\nThe scoped candidate matches the frozen evidence and its task-specific verification passes. One additional project-default pytest invocation cannot initialize its temporary capture directory in this read-only review environment, so I’m separating that environment limitation from the recorded task verification while checking the repository validator directly.\nCritic phase approved: context integrity, exact `app.txt` content, prepared `1.2.0` version/changelog, scope, task verification, and `.go` validation all pass. Publication/readback remains controller-owned and unverified.\n\n`python -m pytest` could not create temporary capture files in this read-only review sandbox; it is not the task’s recorded verification.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.\"}",
+        "stderr": "Reading additional input from stdin...\n2026-09-13T18:47:27.071964Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.072065Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.144641Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.154393Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.162636Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.170871Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.578494Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.578507Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/context.json",
+          "sha256": "02e7844df9ffe23b8a97d4dd373b5ebfd12c68f78c0fd5704910bdffd0d0b62a",
+          "snapshot_id": "737ffbd15c5e4d508b75bc691bffc054"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/process-result.json",
+          "sha256": "6a5dc6f54428892d39a81d49e05c1214b418a0ef8d3233aff810d83b34a4d2b9"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-5.6-terra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 337388,
+              "cached_input_tokens": 288512,
+              "output_tokens": 5458
+            }
+          ],
+          "elapsed_seconds": 114.7874723749701,
+          "provider_invoice_cost_usd": null
+        },
+        "verdict_text": "I’ll inspect the repository contract, context snapshot, candidate diff, and recorded verification evidence without changing anything.\nI’m using the repository audit workflow because this is a release-readiness review; it will keep the assessment evidence-based and non-mutating.\nThe context snapshot’s integrity check passes. I’m now comparing its frozen patch, raw file evidence, and verification receipt against the live candidate, including the controller-prepared version and changelog.\nThe scoped candidate matches the frozen evidence and its task-specific verification passes. One additional project-default pytest invocation cannot initialize its temporary capture directory in this read-only review environment, so I’m separating that environment limitation from the recorded task verification while checking the repository validator directly.\nCritic phase approved: context integrity, exact `app.txt` content, prepared `1.2.0` version/changelog, scope, task verification, and `.go` validation all pass. Publication/readback remains controller-owned and unverified.\n\n`python -m pytest` could not create temporary capture files in this read-only review sandbox; it is not the task’s recorded verification.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.\"}"
+      },
+      "code_before": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+        "files": {
+          "CHANGELOG.md": {
+            "kind": "file",
+            "mode": 384,
+            "size": 60,
+            "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+          },
+          "VERSION": {
+            "kind": "file",
+            "mode": 384,
+            "size": 6,
+            "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+          },
+          "app.txt": {
+            "kind": "file",
+            "mode": 420,
+            "size": 4,
+            "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+          }
+        },
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      },
+      "code_after": {
+        "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "branch": "task/campaign-1",
+        "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+        "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+        "files": {
+          "CHANGELOG.md": {
+            "kind": "file",
+            "mode": 384,
+            "size": 60,
+            "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+          },
+          "VERSION": {
+            "kind": "file",
+            "mode": 384,
+            "size": 6,
+            "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+          },
+          "app.txt": {
+            "kind": "file",
+            "mode": 420,
+            "size": 4,
+            "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+          }
+        },
+        "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+        "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      }
+    }
+  ],
+  "effects": {},
+  "budgets": [
+    {
+      "max_commands": 30,
+      "max_minutes": 8,
+      "commands_used": 9,
+      "started_at": 1789325171.5239081
+    }
+  ],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Deliver step 1 with release proof",
+      "source": "campaign",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {
+    "schema": "go-workflow.model-selection.v1",
+    "task_id": "campaign-1",
+    "profiles": {
+      "build": {
+        "id": "gpt-5.6-terra",
+        "effort": "high"
+      },
+      "critic": {
+        "id": "gpt-5.6-terra",
+        "effort": "high"
+      },
+      "repair": {
+        "id": "gpt-5.6-terra",
+        "effort": "high"
+      }
+    }
+  },
+  "task_hash": "de5b35eca7f4a62e8689672fe383d520a322abeb1a6d0bd003d3574347424955",
+  "code": {
+    "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "branch": "task/campaign-1",
+    "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+    "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+    "files": {
+      "CHANGELOG.md": {
+        "kind": "file",
+        "mode": 384,
+        "size": 60,
+        "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+      },
+      "VERSION": {
+        "kind": "file",
+        "mode": 384,
+        "size": 6,
+        "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+      },
+      "app.txt": {
+        "kind": "file",
+        "mode": 420,
+        "size": 4,
+        "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+      }
+    },
+    "contract_context_sha256": "c0811700cede6f63527d78686405cbae268ffca1911072c62c4a0b4ef2fe5471",
+    "control_base_head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+  },
+  "publication": {
+    "profile": {
+      "name": "local",
+      "provider": "git-tag",
+      "remote": "origin",
+      "branch": "main",
+      "publication": {
+        "version": {
+          "path": "VERSION",
+          "format": "text"
+        },
+        "bump": "minor",
+        "tag_prefix": "v",
+        "changelog": "CHANGELOG.md"
+      },
+      "deployment": {
+        "mode": "none",
+        "reason": "Local Git release proof; no deployment target"
+      }
+    },
+    "ship_policy": "push",
+    "allow_push": true,
+    "allow_deploy": false
+  },
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 79171
+  },
+  "worker_group": null,
+  "inflight": null,
+  "setup_task": {
+    "schema": "go-workflow.repo-local.task.v1",
+    "kind": "task",
+    "id": "campaign-1",
+    "project": "repo-local-spike-fixture",
+    "status": "open",
+    "summary": "Deliver local campaign step 1",
+    "scope": {
+      "read": [
+        ".go/**",
+        "app.txt",
+        "VERSION",
+        "CHANGELOG.md"
+      ],
+      "modify": [
+        "app.txt",
+        "VERSION",
+        "CHANGELOG.md"
+      ]
+    },
+    "acceptance": [
+      "app.txt contains 'one\\n'; release 1.2.0 has verified local remote readback"
+    ],
+    "verification": [
+      "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\""
+    ],
+    "claim": {
+      "agent": null,
+      "claimed_at": null
+    },
+    "description": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+    "execution_mode": "agent",
+    "shareable_delivery": "none",
+    "order": 1,
+    "work_status": "pending",
+    "review_status": "none",
+    "outcome_tracking_version": 1,
+    "intent_source": {
+      "text": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+      "sha256": "71114d93ae9b64b3c539959ea7f0442bdbe9e264b6232c2a6390b1737372f487",
+      "source_ref": "abc-10 bounded campaign"
+    },
+    "requested_outcomes": [
+      {
+        "id": "R1",
+        "text": "Deliver step 1 with release proof",
+        "source": "campaign",
+        "status": "pending",
+        "evidence": []
+      }
+    ],
+    "execution_contract": {
+      "schema": "go-workflow.execution-contract.v1",
+      "task_kind": "product",
+      "model": {
+        "id": "gpt-5.6-terra",
+        "effort": "high"
+      },
+      "release": {
+        "mode": "required",
+        "profile": "local"
+      },
+      "workspace": {
+        "mode": "task_worktree",
+        "base_branch": "main",
+        "control_state": "repo_local_single_writer"
+      }
+    }
+  },
+  "cleanup": {
+    "task_id": "campaign-1",
+    "owner": "campaign-owner",
+    "run_id": "campaign-1-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+    "branch": "task/campaign-1",
+    "base_branch": "main",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+    "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+    "generation": "baea9dca61934dc59cc0babcbbecc887",
+    "state": "cleaned",
+    "integration": {
+      "workspace_head": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+      "integrated_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c"
+    },
+    "recovery_action": "No action; delivered branch is retained"
+  }
+}

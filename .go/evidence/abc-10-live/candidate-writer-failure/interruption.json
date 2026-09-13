@@ -1,0 +1,8 @@
+{
+  "reason": "Live worker cannot write canonical outcome state outside task-workspace sandbox; preserve failure and fix managed worker/controller instruction boundary",
+  "controller_pid": 68802,
+  "worker_group": 71638,
+  "phase": "repair",
+  "attempt": 2,
+  "worker_group_stopped": true
+}

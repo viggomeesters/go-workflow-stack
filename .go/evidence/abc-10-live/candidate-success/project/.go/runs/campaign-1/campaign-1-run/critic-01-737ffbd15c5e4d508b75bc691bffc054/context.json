@@ -1,0 +1,391 @@
+{
+  "schema": "go-workflow.execution-context-snapshot.v1",
+  "snapshot_id": "737ffbd15c5e4d508b75bc691bffc054",
+  "task_id": "campaign-1",
+  "phase": "critic",
+  "attempt": 1,
+  "strategy": "direct_fix",
+  "workspace": {
+    "task_id": "campaign-1",
+    "owner": "campaign-owner",
+    "run_id": "campaign-1-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+    "branch": "task/campaign-1",
+    "base_branch": "main",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+    "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+    "generation": "baea9dca61934dc59cc0babcbbecc887",
+    "state": "ready"
+  },
+  "git": {
+    "head": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "branch": "task/campaign-1",
+    "index_sha256": "25ca058eab9d69801da247ed56811326ca15d4a77bf5e45a7e341430270222de",
+    "tracked_content_sha256": "f1a786076ecebb2d17047300764fbaa24a7865156a6e065b91a782004cbe4b98",
+    "files": {
+      "CHANGELOG.md": {
+        "kind": "file",
+        "mode": 384,
+        "size": 60,
+        "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+      },
+      "VERSION": {
+        "kind": "file",
+        "mode": 384,
+        "size": 6,
+        "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+      },
+      "app.txt": {
+        "kind": "file",
+        "mode": 420,
+        "size": 4,
+        "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+      }
+    }
+  },
+  "contract_sha256": "7c3412ac7acfcee73510f99891d4347ff8377d3185ba2935ac1c1fb8233010bd",
+  "task_sha256": "2c2c51fedb85c026117472321f5e5e1cd9a1ce44928f4b36143d8bbbb569ef57",
+  "canonical_sources": {
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/project.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 784,
+      "sha256": "19fbc77de688b1ec046cbea78a54773c5a024ccea82b80472e3258621b23a14b"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/vision.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 650,
+      "sha256": "7a0a7bc6c24ff125658118ad51ba76cc0ee16456ca6c5bd6bf09c8c1fda7cfb7"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/architecture-principles.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 352,
+      "sha256": "c88d1fa4c3a2a7341bc90ee1f5a23db49a40599dc96d3b6593b3218983f6d1bb"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/hierarchy.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 445,
+      "sha256": "e562f81bda4d93cbbaeede389f7b198881b991305cb73d90d66df362cf64a14e"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/tasks/active/campaign-1.json": {
+      "kind": "file",
+      "mode": 384,
+      "size": 2906,
+      "sha256": "4ef742395149d1df54474e4046218dbc66980131d3d567ab27e9b93f164513c5"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/decisions/events.jsonl": {
+      "kind": "missing"
+    },
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/model-selection.json": {
+      "kind": "file",
+      "mode": 384,
+      "size": 320,
+      "sha256": "9f5a63be883c67373db5a834378f69b445380e4c55e341b5a07138a12090c9e5"
+    }
+  },
+  "selected_files": [
+    {
+      "kind": "instructions",
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker/AGENTS.md",
+      "state": {
+        "kind": "file",
+        "mode": 420,
+        "size": 192,
+        "sha256": "501b9cd7839a37736ad2f57815a0bf6a1b543fb86c666baf09828ff3bc1ce29f"
+      }
+    }
+  ],
+  "phase_contract": null,
+  "context": {
+    "schema": "go-workflow.execution-context.v1",
+    "project": {
+      "schema": "go-workflow.repo-local.project.v1",
+      "kind": "project",
+      "id": "repo-local-spike-fixture",
+      "name": "Repo Local Spike Fixture",
+      "source_of_truth": "repo-local",
+      "contract_version": 2,
+      "required_stack_version": "0.3.26",
+      "stack_ref": "v0.3.26",
+      "default_verification": [
+        "python -m pytest"
+      ],
+      "release_profiles": {
+        "local": {
+          "provider": "git-tag",
+          "remote": "origin",
+          "branch": "main",
+          "publication": {
+            "version": {
+              "path": "VERSION",
+              "format": "text"
+            },
+            "bump": "minor",
+            "tag_prefix": "v",
+            "changelog": "CHANGELOG.md"
+          },
+          "deployment": {
+            "mode": "none",
+            "reason": "Local Git release proof; no deployment target"
+          }
+        }
+      }
+    },
+    "vision": {
+      "schema": "go-workflow.repo-local.vision.v1",
+      "kind": "vision",
+      "project": "repo-local-spike-fixture",
+      "status": "active",
+      "north_star": "A clone-local agent contract proves repo-local continuation.",
+      "wedge": "Self-contained project OS, not a central workflow database.",
+      "target_user": "Agents continuing repo work from a fresh clone.",
+      "core_promise": "Understand and continue the project from `.go/` only.",
+      "product_principles": [
+        "repo-local state",
+        "JSON/JSONL canonical"
+      ],
+      "non_goals": [
+        "central vault execution database",
+        "broad migration"
+      ],
+      "success_metrics": [
+        "go validate passes"
+      ]
+    },
+    "architecture_principles": {
+      "schema": "go-workflow.repo-local.architecture-principles.v1",
+      "kind": "architecture_principles",
+      "project": "repo-local-spike-fixture",
+      "principles": [
+        {
+          "id": "json-first",
+          "statement": "Durable state is JSON/JSONL.",
+          "rationale": "Agents need deterministic contracts.",
+          "enforcement": "go validate"
+        }
+      ]
+    },
+    "hierarchy": {
+      "schema": "go-workflow.repo-local.hierarchy.v1",
+      "kind": "hierarchy",
+      "project": "repo-local-spike-fixture",
+      "epics": [
+        {
+          "id": "workflow-contract",
+          "title": "Workflow Contract",
+          "features": [
+            {
+              "id": "schema-validation",
+              "title": "Schema validation",
+              "tasks": [
+                "campaign-1",
+                "campaign-2"
+              ]
+            }
+          ],
+          "tasks": []
+        }
+      ]
+    },
+    "task": {
+      "schema": "go-workflow.repo-local.task.v1",
+      "kind": "task",
+      "id": "campaign-1",
+      "project": "repo-local-spike-fixture",
+      "status": "active",
+      "summary": "Deliver local campaign step 1",
+      "scope": {
+        "read": [
+          ".go/**",
+          "app.txt",
+          "VERSION",
+          "CHANGELOG.md"
+        ],
+        "modify": [
+          "app.txt",
+          "VERSION",
+          "CHANGELOG.md"
+        ]
+      },
+      "acceptance": [
+        "app.txt contains 'one\\n'; release 1.2.0 has verified local remote readback"
+      ],
+      "verification": [
+        "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\""
+      ],
+      "claim": {
+        "agent": "campaign-owner",
+        "claimed_at": "2026-09-13T20:46:10+02:00",
+        "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+      },
+      "description": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+      "execution_mode": "agent",
+      "shareable_delivery": "none",
+      "order": 1,
+      "work_status": "in_progress",
+      "review_status": "none",
+      "outcome_tracking_version": 1,
+      "intent_source": {
+        "text": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+        "sha256": "71114d93ae9b64b3c539959ea7f0442bdbe9e264b6232c2a6390b1737372f487",
+        "source_ref": "abc-10 bounded campaign"
+      },
+      "requested_outcomes": [
+        {
+          "id": "R1",
+          "text": "Deliver step 1 with release proof",
+          "source": "campaign",
+          "status": "pending",
+          "evidence": []
+        }
+      ],
+      "execution_contract": {
+        "schema": "go-workflow.execution-contract.v1",
+        "task_kind": "product",
+        "model": {
+          "id": "gpt-5.6-terra",
+          "effort": "high"
+        },
+        "release": {
+          "mode": "required",
+          "profile": "local"
+        },
+        "workspace": {
+          "mode": "task_worktree",
+          "base_branch": "main",
+          "control_state": "repo_local_single_writer"
+        }
+      },
+      "completion_evidence": {
+        "schema": "go-workflow.completion-evidence.v1",
+        "verification": {
+          "path": ".go/runs/campaign-1/completion/verification-f69ce19a5b384012b8100f70236b69e7.json",
+          "sha256": "26009f2890f814be179a056517d6697f6245f9a57679e587cdd80c979e548ea6"
+        }
+      }
+    },
+    "recent_evidence": [
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "run.checked",
+        "created_at": "2026-07-02T00:00:00+00:00",
+        "task_id": "task-schema-smoke",
+        "agent": "fixture",
+        "data": {
+          "result": "seed"
+        }
+      }
+    ],
+    "recent_decisions": [],
+    "applicable_architecture": {
+      "enabled": false,
+      "classification": {
+        "impact": "none"
+      },
+      "briefs": [],
+      "principles": [],
+      "decisions": [],
+      "quality_attributes": [],
+      "open_deviations": [],
+      "active_waivers": [],
+      "missing_scope_refs": [],
+      "missing_decision_ids": []
+    }
+  },
+  "feedback": {
+    "checks": [
+      {
+        "returncode": 0,
+        "completion_check": {
+          "verification": {
+            "schema": "go-workflow.verification-evidence.v1",
+            "task_id": "campaign-1",
+            "phase_id": "verify",
+            "requirement_ids": [
+              "R1"
+            ],
+            "status": "passed",
+            "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\"",
+            "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+            "revision": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+            "worktree_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+            "exit_code": 0,
+            "evidence": [
+              ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json"
+            ]
+          },
+          "raw": {
+            "path": ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json",
+            "sha256": "37b70bef76c78b7d59944d2aecf59a5ab0ee9e1c6ab0c43fabee25a9c3e3d523"
+          }
+        }
+      }
+    ],
+    "result": {
+      "returncode": 0,
+      "completion_check": {
+        "verification": {
+          "schema": "go-workflow.verification-evidence.v1",
+          "task_id": "campaign-1",
+          "phase_id": "verify",
+          "requirement_ids": [
+            "R1"
+          ],
+          "status": "passed",
+          "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\"",
+          "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+          "revision": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+          "worktree_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+          "exit_code": 0,
+          "evidence": [
+            ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json"
+          ]
+        },
+        "raw": {
+          "path": ".go/runs/campaign-1/completion/command-df4984edd99e47028c5582b694d5bc82.json",
+          "sha256": "37b70bef76c78b7d59944d2aecf59a5ab0ee9e1c6ab0c43fabee25a9c3e3d523"
+        }
+      }
+    }
+  },
+  "feedback_refs": [],
+  "raw_evidence": {
+    "diff": {
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/changes.patch",
+      "sha256": "48fd937d6a62f553fec71ccf549dec2058f6d05a850aad1d20a4673c55552103"
+    },
+    "files": {
+      "CHANGELOG.md": {
+        "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736",
+        "sha256": "ca8da2abc5df7dc5f2867734c54b1e2604ddccbc08ba8809acd54dd9cc2ea736"
+      },
+      "VERSION": {
+        "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d",
+        "sha256": "1e5b51cde515396a9fa762909cf8ca6584ccc564b325d2eebeea76175fe95c4d"
+      },
+      "app.txt": {
+        "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/blob-2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806",
+        "sha256": "2c8b08da5ce60398e1f19af0e5dccc744df274b826abe585eaba68c525434806"
+      }
+    }
+  },
+  "remaining_outcomes": [
+    {
+      "id": "R1",
+      "text": "Deliver step 1 with release proof",
+      "source": "campaign",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "release_receipt": null,
+  "notepad_policy": "Supplementary explanation; cannot override task, code, phase or raw evidence"
+}

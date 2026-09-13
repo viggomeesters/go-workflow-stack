@@ -1,0 +1,62 @@
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle codex/abc-10
+From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
+ * branch                codex/abc-10 -> FETCH_HEAD
+RUN: git merge --ff-only FETCH_HEAD
+Updating 0a0ed9981..ca37d7407
+Fast-forward
+ .go/architecture/briefs/abc-campaign.json          |  94 +++++++
+ .../autonomous-go-runtime-v11/index.html           |  10 +
+ .../autonomous-go-runtime-v11/manifest.json        | 309 +++++++++++++++++++++
+ .go/evidence/abc-09-clone-proof.json               | 148 ++++++++++
+ .go/evidence/abc-09-release.json                   |  21 ++
+ .go/evidence/abc-09-tag.log                        |  59 ++++
+ .go/evidence/abc-09-verification.json              |  11 +-
+ .go/evidence/events.jsonl                          |   3 +
+ .go/hierarchy.json                                 |   4 +-
+ .go/plans/abc-lifecycle.json                       |  13 +-
+ .go/plans/legacy-insights.json                     |   5 +-
+ .go/project.json                                   |   4 +-
+ .../release-1398355cb0954b3ca26444397b07a925.json  |  33 +++
+ .go/runs/events.jsonl                              |   2 +
+ .go/tasks/{open => active}/abc-10.json             |  61 +++-
+ .go/tasks/{active => done}/abc-09.json             | 126 ++++++++-
+ .go/workspaces/abc-09.json                         |   5 +-
+ CHANGELOG.md                                       |  10 +
+ docs/autonomy-benchmark.md                         |  47 ++++
+ docs/distribution-and-pilots.md                    |  11 +
+ docs/releases/v0.3.26.md                           |  27 ++
+ fixtures/abc-campaign/campaign.py                  | 107 +++++++
+ fixtures/abc-campaign/coverage.json                |  25 ++
+ fixtures/abc-campaign/worker.py                    |  25 ++
+ go_workflow/cli.py                                 |   9 +
+ go_workflow/constants.py                           |   2 +-
+ go_workflow/run_state.py                           |   2 +-
+ pyproject.toml                                     |   2 +-
+ scripts/check-abc.sh                               |  13 +
+ scripts/release-check-inner.sh                     |  16 ++
+ tests/test_abc_end_to_end.py                       | 110 ++++++++
+ 31 files changed, 1275 insertions(+), 39 deletions(-)
+ create mode 100644 .go/architecture/briefs/abc-campaign.json
+ create mode 100644 .go/deliveries/autonomous-go-runtime-v11/index.html
+ create mode 100644 .go/deliveries/autonomous-go-runtime-v11/manifest.json
+ create mode 100644 .go/evidence/abc-09-clone-proof.json
+ create mode 100644 .go/evidence/abc-09-release.json
+ create mode 100644 .go/evidence/abc-09-tag.log
+ create mode 100644 .go/runs/abc-09/completion/release-1398355cb0954b3ca26444397b07a925.json
+ rename .go/tasks/{open => active}/abc-10.json (82%)
+ rename .go/tasks/{active => done}/abc-09.json (61%)
+ create mode 100644 docs/releases/v0.3.26.md
+ create mode 100644 fixtures/abc-campaign/campaign.py
+ create mode 100644 fixtures/abc-campaign/coverage.json
+ create mode 100644 fixtures/abc-campaign/worker.py
+ create mode 100755 scripts/check-abc.sh
+ create mode 100644 tests/test_abc_end_to_end.py
+RUN: git rev-parse HEAD
+ca37d7407cd45826e5ac30bb2487c397f89bdaf7
+RUN: uv run --python 3.12 --no-project --with pytest>=8,<9 --with jsonschema>=4.23 bash scripts/check-abc.sh
+........................................................................ [ 40%]
+........................................................................ [ 81%]
+................................                                         [100%]
+176 passed in 415.45s (0:06:55)
+ok: /tmp/go-abc-01-xjyg7dz7/go-workflow-stack/.go
+ABC_REGRESSIONS_ALL_PASSED

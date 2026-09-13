@@ -1,0 +1,16 @@
+{
+  "mode": "live-native-codex",
+  "profiles": [
+    {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    }
+  ],
+  "runtime": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-release-runtime",
+  "effective_identity": "unconfirmed",
+  "remote": "local bare Git; no hosted publication/deployment"
+}

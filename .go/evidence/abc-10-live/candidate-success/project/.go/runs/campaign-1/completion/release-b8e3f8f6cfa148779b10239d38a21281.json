@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.release-evidence.v1",
+  "status": "verified",
+  "task_id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "contract_digest": "686b215eb4a9d4116082a09a6d80454af53dc8224433676d50b2874250ab6c30",
+  "content_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+  "profile": {
+    "name": "local",
+    "provider": "git-tag",
+    "remote": "origin",
+    "branch": "main"
+  },
+  "remote_url": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/remote.git",
+  "tag": "v1.2.0",
+  "commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "tag_object": "52295cccbf013b8dd9b2b8b4588c0427b0c69f1b",
+  "branch_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "refs": {
+    "refs/heads/main": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+    "refs/tags/v1.2.0": "52295cccbf013b8dd9b2b8b4588c0427b0c69f1b",
+    "refs/tags/v1.2.0^{}": "0faff9bea81ee25d36dc33de6aac46887e42e89c"
+  },
+  "publication": null,
+  "observed_at": "2026-09-13T18:49:24.819979+00:00"
+}

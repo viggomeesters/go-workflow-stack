@@ -1,0 +1,55 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "campaign-2",
+  "project": "repo-local-spike-fixture",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+  "owner": "campaign-owner",
+  "run_id": "campaign-2-run",
+  "workspace": {
+    "task_id": "campaign-2",
+    "owner": "campaign-owner",
+    "run_id": "campaign-2-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-2-worker",
+    "branch": "task/campaign-2",
+    "base_branch": "main",
+    "base_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+    "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+    "generation": "6d1a7078ab924c4c8b88f595c7981e18",
+    "state": "ready"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [
+    {
+      "event": "publication_controller_resumed",
+      "previous_inflight": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Deliver step 2 with release proof",
+      "source": "campaign",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "faa734427b1260f3c726c9e43a7ca1eb638894702c60df5f16d6d4e77ee661f3",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 86904
+  },
+  "worker_group": null,
+  "inflight": null
+}

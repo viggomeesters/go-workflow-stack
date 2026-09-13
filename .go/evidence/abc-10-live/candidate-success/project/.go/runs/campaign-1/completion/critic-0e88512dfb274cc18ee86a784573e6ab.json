@@ -1,0 +1,67 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "contract_digest": "686b215eb4a9d4116082a09a6d80454af53dc8224433676d50b2874250ab6c30",
+  "revision": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+  "content_digest": "fd9810ce20ee961e380d4c97058b2e3a996eba0bf60a1f35376fe51479c00574",
+  "status": "passed",
+  "reviewer": "campaign-owner",
+  "review_mode": "same_agent",
+  "summary": "Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    "CHANGELOG.md",
+    "VERSION",
+    "app.txt"
+  ],
+  "native_result": {
+    "schema": "go-workflow.agent-adapter-result.v1",
+    "phase": "critic",
+    "status": "success",
+    "summary": "Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.",
+    "hook": "critic",
+    "command": "codex exec --sandbox read-only --ephemeral --json --model gpt-5.6-terra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker 'You are the blocking critic for a repo-local .go task. Review the current repository result for task campaign-1 against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence. Do not edit files. Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings. This critic runs before controller-owned publication. Judge whether the current scoped candidate, prepared version/changelog, executed checks and release configuration are ready for publication. Task-level push, tag, release-readback and live-deployment requirements remain pending downstream controller work. Do not block solely because their post-publication receipts do not exist yet. Still block missing or failed current verification, unsafe release readiness, scope violations and implementation defects. Never invent release evidence or waive a required downstream check. Do not publish or mark shipping outcomes verified. Your success approves only this critic phase; the controller must prove publication and any required deployment before task completion. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+    "returncode": 0,
+    "stdout": "I’ll inspect the repository contract, context snapshot, candidate diff, and recorded verification evidence without changing anything.\nI’m using the repository audit workflow because this is a release-readiness review; it will keep the assessment evidence-based and non-mutating.\nThe context snapshot’s integrity check passes. I’m now comparing its frozen patch, raw file evidence, and verification receipt against the live candidate, including the controller-prepared version and changelog.\nThe scoped candidate matches the frozen evidence and its task-specific verification passes. One additional project-default pytest invocation cannot initialize its temporary capture directory in this read-only review environment, so I’m separating that environment limitation from the recorded task verification while checking the repository validator directly.\nCritic phase approved: context integrity, exact `app.txt` content, prepared `1.2.0` version/changelog, scope, task verification, and `.go` validation all pass. Publication/readback remains controller-owned and unverified.\n\n`python -m pytest` could not create temporary capture files in this read-only review sandbox; it is not the task’s recorded verification.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.\"}",
+    "stderr": "Reading additional input from stdin...\n2026-09-13T18:47:27.071964Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.072065Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.144641Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.154393Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.162636Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.170871Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:47:27.578494Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:47:27.578507Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+    "timed_out": false,
+    "context_ref": {
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/context.json",
+      "sha256": "02e7844df9ffe23b8a97d4dd373b5ebfd12c68f78c0fd5704910bdffd0d0b62a",
+      "snapshot_id": "737ffbd15c5e4d508b75bc691bffc054"
+    },
+    "process_result_ref": {
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-1/campaign-1-run/critic-01-737ffbd15c5e4d508b75bc691bffc054/process-result.json",
+      "sha256": "6a5dc6f54428892d39a81d49e05c1214b418a0ef8d3233aff810d83b34a4d2b9"
+    },
+    "model_selection": {
+      "requested": {
+        "id": "gpt-5.6-terra",
+        "effort": "high"
+      },
+      "effective": null,
+      "confirmation": "unconfirmed",
+      "reason": "Runtime arguments enforced; no independent effective-model attestation",
+      "capabilities": {
+        "adapter": "codex",
+        "model_control": true,
+        "capability_source": "codex app-server model/list",
+        "reason": null
+      }
+    },
+    "usage": {
+      "source": "codex_json_stream",
+      "turns": [
+        {
+          "input_tokens": 337388,
+          "cached_input_tokens": 288512,
+          "output_tokens": 5458
+        }
+      ],
+      "elapsed_seconds": 114.7874723749701,
+      "provider_invoice_cost_usd": null
+    },
+    "verdict_text": "I’ll inspect the repository contract, context snapshot, candidate diff, and recorded verification evidence without changing anything.\nI’m using the repository audit workflow because this is a release-readiness review; it will keep the assessment evidence-based and non-mutating.\nThe context snapshot’s integrity check passes. I’m now comparing its frozen patch, raw file evidence, and verification receipt against the live candidate, including the controller-prepared version and changelog.\nThe scoped candidate matches the frozen evidence and its task-specific verification passes. One additional project-default pytest invocation cannot initialize its temporary capture directory in this read-only review environment, so I’m separating that environment limitation from the recorded task verification while checking the repository validator directly.\nCritic phase approved: context integrity, exact `app.txt` content, prepared `1.2.0` version/changelog, scope, task verification, and `.go` validation all pass. Publication/readback remains controller-owned and unverified.\n\n`python -m pytest` could not create temporary capture files in this read-only review sandbox; it is not the task’s recorded verification.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work.\"}"
+  }
+}

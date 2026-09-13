@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.repo-local.project.v1",
+  "kind": "project",
+  "id": "repo-local-spike-fixture",
+  "name": "Repo Local Spike Fixture",
+  "source_of_truth": "repo-local",
+  "contract_version": 2,
+  "required_stack_version": "0.3.25",
+  "stack_ref": "v0.3.25",
+  "default_verification": [
+    "python -m pytest"
+  ],
+  "release_profiles": {
+    "local": {
+      "provider": "git-tag",
+      "remote": "origin",
+      "branch": "main",
+      "publication": {
+        "version": {
+          "path": "VERSION",
+          "format": "text"
+        },
+        "bump": "minor",
+        "tag_prefix": "v",
+        "changelog": "CHANGELOG.md"
+      },
+      "deployment": {
+        "mode": "none",
+        "reason": "Local Git release proof; no deployment target"
+      }
+    }
+  }
+}

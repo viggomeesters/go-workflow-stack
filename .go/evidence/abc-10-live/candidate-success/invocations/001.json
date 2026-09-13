@@ -1,0 +1,59 @@
+{
+  "argv": [
+    "/Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12",
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10/cli/go.py",
+    "auto",
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "--execute",
+    "--task-id",
+    "campaign-1",
+    "--agent",
+    "campaign-owner",
+    "--executor-agent",
+    "codex",
+    "--max-commands",
+    "30",
+    "--max-minutes",
+    "8",
+    "--max-attempts",
+    "3",
+    "--command-timeout-seconds",
+    "180",
+    "--json",
+    "--workspace-path",
+    "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+    "--workspace-branch",
+    "task/campaign-1",
+    "--base-branch",
+    "main",
+    "--base-commit",
+    "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+    "--run-id",
+    "campaign-1-run",
+    "--ship-policy",
+    "push",
+    "--allow-push"
+  ],
+  "returncode": 0,
+  "stdout": "{\n  \"schema\": \"go-workflow.auto-run-result.v1\",\n  \"mode\": \"go-auto\",\n  \"repo\": \"/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project\",\n  \"completed_tasks\": [\n    \"campaign-1\"\n  ],\n  \"blocked_task\": null,\n  \"checks\": [],\n  \"commands_run\": 9,\n  \"release\": {\n    \"status\": \"published\",\n    \"task_id\": \"campaign-1\",\n    \"commit\": \"0faff9bea81ee25d36dc33de6aac46887e42e89c\",\n    \"tag\": \"v1.2.0\",\n    \"cleanup\": \"separate\"\n  },\n  \"status\": \"task_complete\"\n}\n",
+  "stderr": "",
+  "result": {
+    "schema": "go-workflow.auto-run-result.v1",
+    "mode": "go-auto",
+    "repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+    "completed_tasks": [
+      "campaign-1"
+    ],
+    "blocked_task": null,
+    "checks": [],
+    "commands_run": 9,
+    "release": {
+      "status": "published",
+      "task_id": "campaign-1",
+      "commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+      "tag": "v1.2.0",
+      "cleanup": "separate"
+    },
+    "status": "task_complete"
+  }
+}

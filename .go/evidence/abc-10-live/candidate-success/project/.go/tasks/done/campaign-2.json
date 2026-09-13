@@ -1,0 +1,162 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "campaign-2",
+  "project": "repo-local-spike-fixture",
+  "status": "done",
+  "summary": "Deliver local campaign step 2",
+  "scope": {
+    "read": [
+      ".go/**",
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ],
+    "modify": [
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "app.txt contains 'two\\n'; release 1.3.0 has verified local remote readback"
+  ],
+  "verification": [
+    "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'two\\n'; assert Path('VERSION').read_text().strip() == '1.3.0'\""
+  ],
+  "claim": {
+    "agent": "campaign-owner",
+    "claimed_at": "2026-09-13T20:49:26+02:00",
+    "base_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c"
+  },
+  "description": "Write app.txt with exactly 'two\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "order": 2,
+  "work_status": "completed",
+  "review_status": "approved",
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Write app.txt with exactly 'two\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+    "sha256": "634ef451f4aa45926002e6eee1a906d6bddc5408af157cc2657914d322ca0bf0",
+    "source_ref": "abc-10 bounded campaign"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Deliver step 2 with release proof",
+      "source": "campaign",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:51:05+02:00",
+          "agent": "campaign-owner",
+          "summary": ".go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json"
+        }
+      ]
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "local"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "repo-local-spike-fixture",
+      "task_id": "campaign-1",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/campaign-2/completion/verification-4a0527cf7a7144e587bce0e21ef5e345.json",
+      "sha256": "e960b129f433d50917d696f9c1671ce3eb2577b8601db7e2f2c1c598c068ada0"
+    },
+    "critic": {
+      "path": ".go/runs/campaign-2/completion/critic-8ac0d1fa100946b987503894907c9091.json",
+      "sha256": "40d551d0745cae090d79e924b7e35638b436852fd37b35a3e570f5ca411569b7"
+    },
+    "release": {
+      "path": ".go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json",
+      "sha256": "65560ed2b4a3301e68aaa001f9b629eea8ea544160b5bf36c60a3dc6a5b653a4"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "campaign-2",
+    "project": "repo-local-spike-fixture",
+    "commit": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+    "tag": "v1.3.0",
+    "evidence": [
+      ".go/runs/campaign-2/completion/release-e2bcae1ce5254a97827aab7ba91ece50.json"
+    ]
+  },
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T20:51:05+02:00",
+      "task_id": "campaign-2",
+      "agent": "campaign-owner",
+      "summary": "changed_files=CHANGELOG.md,VERSION,app.txt; verification_command=declared task commands; verification_result=passed; critic=passed recorded review; runtime=configured controller publisher; model=requested gpt-6-astra (effective identity unconfirmed); billing_mode=unknown; release=v1.3.0 16e6bd7044ba84e2d2b5a864b8091e66c24240c8",
+      "changed_files": [
+        "CHANGELOG.md",
+        "VERSION",
+        "app.txt"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+        "observed_head_commit": "16e6bd7044ba84e2d2b5a864b8091e66c24240c8"
+      },
+      "verification": {
+        "command": "declared task commands",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "campaign-owner",
+        "runtime": "configured controller publisher",
+        "model": "requested gpt-6-astra (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "configured controller publisher",
+        "billing_mode": "unknown",
+        "owner": "campaign-owner",
+        "model": "requested gpt-6-astra (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed recorded review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "review_history": [
+    {
+      "created_at": "2026-09-13T20:51:05+02:00",
+      "agent": "campaign-owner",
+      "status": "approved",
+      "evidence": "Recorded critic and exact release readback passed; no independent identity attestation.",
+      "transaction_id": "2917c0b7f4b14a279a7f0a70f753c270"
+    }
+  ]
+}

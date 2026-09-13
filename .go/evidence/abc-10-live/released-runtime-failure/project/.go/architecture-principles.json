@@ -1,0 +1,13 @@
+{
+  "schema": "go-workflow.repo-local.architecture-principles.v1",
+  "kind": "architecture_principles",
+  "project": "repo-local-spike-fixture",
+  "principles": [
+    {
+      "id": "json-first",
+      "statement": "Durable state is JSON/JSONL.",
+      "rationale": "Agents need deterministic contracts.",
+      "enforcement": "go validate"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "task_id": "campaign-1",
+  "owner": "campaign-owner",
+  "run_id": "campaign-1-run",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-1-worker",
+  "branch": "task/campaign-1",
+  "base_branch": "main",
+  "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.git",
+  "repository_id": "033917ef610a4b58afe5614e69bc85dd",
+  "generation": "baea9dca61934dc59cc0babcbbecc887",
+  "state": "cleaned",
+  "integration": {
+    "workspace_head": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+    "integrated_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c"
+  },
+  "recovery_action": "No action; delivered branch is retained"
+}

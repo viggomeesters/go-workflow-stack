@@ -1,0 +1,15 @@
+WARN `--no-project` was provided, but no project was found
+To /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-fixed/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+Traceback (most recent call last):
+  File "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10/fixtures/abc-campaign/campaign.py", line 107, in <module>
+    if __name__=='__main__':raise SystemExit(main())
+                                             ^^^^^^
+  File "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10/fixtures/abc-campaign/campaign.py", line 98, in main
+    result=run_task(repo,tid,runtime=runtime,env=env)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10/fixtures/abc-campaign/campaign.py", line 82, in run_task
+    if parsed is None or (result.returncode and not expected_blocked):raise RuntimeError(result.stdout+result.stderr)
+                                                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError

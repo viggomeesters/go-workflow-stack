@@ -1,0 +1,35 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "contract_digest": "686b215eb4a9d4116082a09a6d80454af53dc8224433676d50b2874250ab6c30",
+  "revision": "b5d06b4b0c1d4665848e9794ab61c7ff32055594",
+  "content_digest": "479a45d718ce8240103755a035801adb727cf69c03c710fc3eac3cf1ddc34ec5",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "campaign-1",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1"
+        ],
+        "status": "passed",
+        "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\"",
+        "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/campaign-1-worker",
+        "revision": "b5d06b4b0c1d4665848e9794ab61c7ff32055594",
+        "worktree_digest": "479a45d718ce8240103755a035801adb727cf69c03c710fc3eac3cf1ddc34ec5",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/campaign-1/completion/command-906013d551754008a631b8132964dd5d.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/campaign-1/completion/command-906013d551754008a631b8132964dd5d.json",
+        "sha256": "c8e10cf7b8bb677075bbfaf3017105bc7ce242d66f942c183f1b84835b15f7f0"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

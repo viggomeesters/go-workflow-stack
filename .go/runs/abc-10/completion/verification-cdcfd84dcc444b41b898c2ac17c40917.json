@@ -1,0 +1,102 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "abc-10",
+  "project": "go-workflow-stack",
+  "contract_digest": "2464035da26ea61b4dc430cb28580f9c97359598e1b4caa4d7f343acbc9908d5",
+  "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+  "content_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_end_to_end.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json",
+        "sha256": "8292db77da8e105d77c03172ed9b979600447b2b1f380758dad2b09d5b4413a6"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json",
+        "sha256": "e4ed7c40d5989778cd5d42ea0ef49a134cf82a189e2ca4af0904b6e3776b2238"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json",
+        "sha256": "612e32cbf042eb94ec91ad5384a245c7ae4bec2b033a48ad349f15cbc7bd4f76"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

@@ -1,0 +1,9 @@
+I’ll inspect the repository contract, context snapshot, candidate diff, and recorded verification evidence without changing anything.
+I’m using the repository audit workflow because this is a release-readiness review; it will keep the assessment evidence-based and non-mutating.
+The context snapshot’s integrity check passes. I’m now comparing its frozen patch, raw file evidence, and verification receipt against the live candidate, including the controller-prepared version and changelog.
+The scoped candidate matches the frozen evidence and its task-specific verification passes. One additional project-default pytest invocation cannot initialize its temporary capture directory in this read-only review environment, so I’m separating that environment limitation from the recorded task verification while checking the repository validator directly.
+Critic phase approved: context integrity, exact `app.txt` content, prepared `1.2.0` version/changelog, scope, task verification, and `.go` validation all pass. Publication/readback remains controller-owned and unverified.
+
+`python -m pytest` could not create temporary capture files in this read-only review sandbox; it is not the task’s recorded verification.
+
+{"schema":"go-workflow.agent-adapter-result.v1","phase":"critic","status":"success","summary":"Context snapshot verified; live candidate matches frozen evidence (app.txt=one\\n, VERSION=1.2.0, changelog entry), scoped diff is clean, task verification and repo validation pass; publication/readback remains downstream controller work."}

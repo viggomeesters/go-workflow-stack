@@ -1,0 +1,9 @@
+{
+  "schema": "go-workflow.live-runtime-binding.v1",
+  "status": "passed",
+  "candidate_revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+  "live_source_revision": "c5765e289bea6ab9fa382aac016d1d3f7d8d1065",
+  "runtime_file_count": 53,
+  "live_manifest_sha256": "1ed268dc0f45f15169b24b81ffc113bdf9e3156acc2c0cfdd62c2feac26d402c",
+  "claim": "Every archived live runtime file matches this candidate; live runs explicitly used disposable development override, not released-pin identity"
+}

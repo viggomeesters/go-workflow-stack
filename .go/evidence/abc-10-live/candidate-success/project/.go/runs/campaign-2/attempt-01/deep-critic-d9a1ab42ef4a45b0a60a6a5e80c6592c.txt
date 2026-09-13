@@ -1,0 +1,5 @@
+I’ll inspect the canonical request, verify the context snapshot, and review the scoped candidate and publication readiness without changing files.
+
+The snapshot records a passing task check and a prepared 1.3.0 release. I’m checking its hashes, raw verification evidence, and the current diff; publication readback remains the controller’s downstream responsibility. I’m using the audit skill for this review.
+
+{"schema":"go-workflow.agent-adapter-result.v1","phase":"critic","status":"success","summary":"No blocking findings. Context verification and evidence hashes passed; scoped diff contains exact two\\n content and consistent 1.3.0 version/changelog. Recorded and rerun task checks passed. Candidate respects repo-local architecture and local Git release configuration. Approval covers critic phase only; controller publication and required remote readback remain pending. No deployment target is configured."}

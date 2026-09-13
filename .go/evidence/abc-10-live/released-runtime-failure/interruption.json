@@ -1,0 +1,8 @@
+{
+  "reason": "Live critic requires post-publication receipt before publication; stop futile repair loop and retain failure evidence before bounded phase-instruction repair",
+  "controller_pid": 31923,
+  "worker_group": 41792,
+  "phase": "repair",
+  "attempt": 2,
+  "worker_group_stopped": true
+}

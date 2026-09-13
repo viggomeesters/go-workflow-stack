@@ -1,0 +1,18 @@
+{
+  "schema": "go-workflow.model-selection.v1",
+  "task_id": "campaign-2",
+  "profiles": {
+    "build": {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    },
+    "critic": {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    },
+    "repair": {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    }
+  }
+}

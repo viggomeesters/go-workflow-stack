@@ -1,0 +1,50 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/project",
+  "owner": "campaign-owner",
+  "run_id": "campaign-1-run",
+  "workspace": {
+    "task_id": "campaign-1",
+    "owner": "campaign-owner",
+    "run_id": "campaign-1-run",
+    "control_repo": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/project",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/campaign-1-worker",
+    "branch": "task/campaign-1",
+    "base_branch": "main",
+    "base_commit": "b5d06b4b0c1d4665848e9794ab61c7ff32055594",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/project/.git",
+    "repository_id": "474913d6c67649dc8912df6d9bbbaf5f",
+    "generation": "3a47dc93eb25496a8360cfc5bddc73ba",
+    "state": "ready"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Deliver step 1 with release proof",
+      "source": "campaign",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "686b215eb4a9d4116082a09a6d80454af53dc8224433676d50b2874250ab6c30",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live/project",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 31923
+  },
+  "worker_group": null,
+  "inflight": null
+}

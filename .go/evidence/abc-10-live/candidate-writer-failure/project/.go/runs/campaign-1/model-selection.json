@@ -1,0 +1,18 @@
+{
+  "schema": "go-workflow.model-selection.v1",
+  "task_id": "campaign-1",
+  "profiles": {
+    "build": {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    "critic": {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    "repair": {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    }
+  }
+}

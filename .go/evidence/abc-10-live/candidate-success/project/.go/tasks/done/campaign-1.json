@@ -1,0 +1,155 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "status": "done",
+  "summary": "Deliver local campaign step 1",
+  "scope": {
+    "read": [
+      ".go/**",
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ],
+    "modify": [
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "app.txt contains 'one\\n'; release 1.2.0 has verified local remote readback"
+  ],
+  "verification": [
+    "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\""
+  ],
+  "claim": {
+    "agent": "campaign-owner",
+    "claimed_at": "2026-09-13T20:46:10+02:00",
+    "base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4"
+  },
+  "description": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "order": 1,
+  "work_status": "completed",
+  "review_status": "approved",
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+    "sha256": "71114d93ae9b64b3c539959ea7f0442bdbe9e264b6232c2a6390b1737372f487",
+    "source_ref": "abc-10 bounded campaign"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Deliver step 1 with release proof",
+      "source": "campaign",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:49:24+02:00",
+          "agent": "campaign-owner",
+          "summary": ".go/runs/campaign-1/completion/release-b8e3f8f6cfa148779b10239d38a21281.json"
+        }
+      ]
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "local"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/campaign-1/completion/verification-f69ce19a5b384012b8100f70236b69e7.json",
+      "sha256": "26009f2890f814be179a056517d6697f6245f9a57679e587cdd80c979e548ea6"
+    },
+    "critic": {
+      "path": ".go/runs/campaign-1/completion/critic-0e88512dfb274cc18ee86a784573e6ab.json",
+      "sha256": "2c9c9f7a8ec71effe1b45ccda7c1406ec38cd514dd5cfda751ef867f449314cb"
+    },
+    "release": {
+      "path": ".go/runs/campaign-1/completion/release-b8e3f8f6cfa148779b10239d38a21281.json",
+      "sha256": "4cf213fbefc70dcfc20fd4cbef13d3540a8854df88eab1a303e6133604a97516"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "campaign-1",
+    "project": "repo-local-spike-fixture",
+    "commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+    "tag": "v1.2.0",
+    "evidence": [
+      ".go/runs/campaign-1/completion/release-b8e3f8f6cfa148779b10239d38a21281.json"
+    ]
+  },
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T20:49:25+02:00",
+      "task_id": "campaign-1",
+      "agent": "campaign-owner",
+      "summary": "changed_files=CHANGELOG.md,VERSION,app.txt; verification_command=declared task commands; verification_result=passed; critic=passed recorded review; runtime=configured controller publisher; model=requested gpt-5.6-terra (effective identity unconfirmed); billing_mode=unknown; release=v1.2.0 0faff9bea81ee25d36dc33de6aac46887e42e89c",
+      "changed_files": [
+        "CHANGELOG.md",
+        "VERSION",
+        "app.txt"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "364baef7aaacecbb5efe42fe3d9be50ebecd64b4",
+        "observed_head_commit": "0faff9bea81ee25d36dc33de6aac46887e42e89c"
+      },
+      "verification": {
+        "command": "declared task commands",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "campaign-owner",
+        "runtime": "configured controller publisher",
+        "model": "requested gpt-5.6-terra (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "configured controller publisher",
+        "billing_mode": "unknown",
+        "owner": "campaign-owner",
+        "model": "requested gpt-5.6-terra (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed recorded review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "review_history": [
+    {
+      "created_at": "2026-09-13T20:49:25+02:00",
+      "agent": "campaign-owner",
+      "status": "approved",
+      "evidence": "Recorded critic and exact release readback passed; no independent identity attestation.",
+      "transaction_id": "1caa611d03c140359b6cf3b615d7dfb9"
+    }
+  ]
+}

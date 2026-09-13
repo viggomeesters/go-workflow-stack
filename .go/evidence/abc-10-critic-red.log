@@ -1,0 +1,34 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_two_models_repair_current_feedback_and_release_in_dependency_order ____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-240/test_two_models_repair_current0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10aa91a90>
+
+    def test_two_models_repair_current_feedback_and_release_in_dependency_order(tmp_path,monkeypatch):
+        from go_workflow.completion import lifecycle_report,read_artifact
+        from go_workflow.cli import validate_repo
+        repo=campaign.setup(tmp_path/'campaign')
+        binary=tmp_path/'codex';binary.write_text('#!'+sys.executable+'\n'+(ROOT/'fixtures/abc-campaign/worker.py').read_text());binary.chmod(0o755)
+        capture=tmp_path/'workers.jsonl';env={**os.environ,'PATH':str(tmp_path)+os.pathsep+os.environ['PATH'],
+            'ABC_CAMPAIGN_CAPTURE':str(capture),'GO_STACK_ALLOW_DEV':'1','PYTHONDONTWRITEBYTECODE':'1'}
+        blocked=campaign.run_task(repo,'campaign-2',env=env,expected_blocked=True)
+        assert not blocked['completed_tasks'] and not capture.exists()
+        assert (repo/'.go/tasks/open/campaign-2.json').exists()
+        first=campaign.run_task(repo,'campaign-1',env=env)
+>       assert first['completed_tasks']==['campaign-1'],first
+E       AssertionError: {'blocked_task': 'campaign-1', 'checks': [{'completion_check': {'raw': {'path': '.go/runs/campaign-1/completion/comman...4432db636994d44506acf.json'], 'exit_code': 0, ...}}, 'returncode': 0}], 'commands_run': 12, 'completed_tasks': [], ...}
+E       assert [] == ['campaign-1']
+E         
+E         Right contains one more item: 'campaign-1'
+E         Use -v to get more diff
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10/tests/test_abc_end_to_end.py:33: AssertionError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-240/test_two_models_repair_current0/campaign/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+=========================== short test summary info ============================
+FAILED work/abc-10/tests/test_abc_end_to_end.py::test_two_models_repair_current_feedback_and_release_in_dependency_order
+1 failed, 3 deselected in 27.85s

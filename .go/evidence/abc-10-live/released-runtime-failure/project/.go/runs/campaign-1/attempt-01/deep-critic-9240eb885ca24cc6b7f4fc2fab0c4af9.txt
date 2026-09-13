@@ -1,0 +1,6 @@
+I’m reviewing the repository strictly as a blocking critic: I’ll validate the controller-provided task context and compare the permitted artifact against the task’s acceptance and evidence.
+I’m using the repository audit guidance because this is an evidence-based review of an existing task result; it will keep the check focused on scope, acceptance, and verification without modifying anything.
+The task snapshot is present and shows the requested artifact (`app.txt`) with the expected bytes. I’m now checking the snapshot’s integrity and the linked completion evidence; the first verification invocation was only a shell-expansion issue, not a task check.
+Blocked: `app.txt` is exactly `one\n`; snapshot integrity and the prescribed verification both pass. However, the acceptance criterion requires verified local-remote readback for release `1.2.0`, while the snapshot has `release_receipt: null` and no such evidence.
+
+{"schema":"go-workflow.agent-adapter-result.v1","phase":"critic","status":"blocked","summary":"app.txt bytes and prescribed verification pass; snapshot integrity verified. Blocking acceptance gap: release 1.2.0 has no local-remote readback evidence (release_receipt is null)."}

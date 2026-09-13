@@ -1,0 +1,17 @@
+diff --git a/CHANGELOG.md b/CHANGELOG.md
+index b54b193..e1c3ea0 100644
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1 +1,5 @@
++## 1.2.0
++
++- Deliver local campaign step 1
++
+ # Local campaign
+diff --git a/VERSION b/VERSION
+index 9084fa2..26aaba0 100644
+--- a/VERSION
++++ b/VERSION
+@@ -1 +1 @@
+-1.1.0
++1.2.0

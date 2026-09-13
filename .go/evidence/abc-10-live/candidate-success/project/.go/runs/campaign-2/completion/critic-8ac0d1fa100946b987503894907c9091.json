@@ -1,0 +1,67 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "campaign-2",
+  "project": "repo-local-spike-fixture",
+  "contract_digest": "faa734427b1260f3c726c9e43a7ca1eb638894702c60df5f16d6d4e77ee661f3",
+  "revision": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "content_digest": "51a65ef4f7bf525da271aaa1e3f3166d49669dfa8e90932b72cbb3ce550c7dba",
+  "status": "passed",
+  "reviewer": "campaign-owner",
+  "review_mode": "same_agent",
+  "summary": "No blocking findings. Context verification and evidence hashes passed; scoped diff contains exact two\\n content and consistent 1.3.0 version/changelog. Recorded and rerun task checks passed. Candidate respects repo-local architecture and local Git release configuration. Approval covers critic phase only; controller publication and required remote readback remain pending. No deployment target is configured.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    "CHANGELOG.md",
+    "VERSION",
+    "app.txt"
+  ],
+  "native_result": {
+    "schema": "go-workflow.agent-adapter-result.v1",
+    "phase": "critic",
+    "status": "success",
+    "summary": "No blocking findings. Context verification and evidence hashes passed; scoped diff contains exact two\\n content and consistent 1.3.0 version/changelog. Recorded and rerun task checks passed. Candidate respects repo-local architecture and local Git release configuration. Approval covers critic phase only; controller publication and required remote readback remain pending. No deployment target is configured.",
+    "hook": "critic",
+    "command": "codex exec --sandbox read-only --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"medium\"' -C /Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-2-worker 'You are the blocking critic for a repo-local .go task. Review the current repository result for task campaign-2 against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence. Do not edit files. Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings. This critic runs before controller-owned publication. Judge whether the current scoped candidate, prepared version/changelog, executed checks and release configuration are ready for publication. Task-level push, tag, release-readback and live-deployment requirements remain pending downstream controller work. Do not block solely because their post-publication receipts do not exist yet. Still block missing or failed current verification, unsafe release readiness, scope violations and implementation defects. Never invent release evidence or waive a required downstream check. Do not publish or mark shipping outcomes verified. Your success approves only this critic phase; the controller must prove publication and any required deployment before task completion. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+    "returncode": 0,
+    "stdout": "I’ll inspect the canonical request, verify the context snapshot, and review the scoped candidate and publication readiness without changing files.\n\nThe snapshot records a passing task check and a prepared 1.3.0 release. I’m checking its hashes, raw verification evidence, and the current diff; publication readback remains the controller’s downstream responsibility. I’m using the audit skill for this review.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"No blocking findings. Context verification and evidence hashes passed; scoped diff contains exact two\\\\n content and consistent 1.3.0 version/changelog. Recorded and rerun task checks passed. Candidate respects repo-local architecture and local Git release configuration. Approval covers critic phase only; controller publication and required remote readback remain pending. No deployment target is configured.\"}",
+    "stderr": "Reading additional input from stdin...\n2026-09-13T18:49:57.430367Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:49:57.430391Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:49:57.453137Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:49:57.461522Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:49:57.467652Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:49:57.474364Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-13T18:49:57.929491Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:49:57.929506Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-13T18:50:31.371439Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n",
+    "timed_out": false,
+    "context_ref": {
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/context.json",
+      "sha256": "9a86d3610cba2114ddc227294fffd76ff50c322fcea27af5139f89c497016570",
+      "snapshot_id": "654c909298d8402d8a7a9b0da95617d4"
+    },
+    "process_result_ref": {
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/project/.go/runs/campaign-2/campaign-2-run/critic-01-654c909298d8402d8a7a9b0da95617d4/process-result.json",
+      "sha256": "9fe030fdb50fb4ab02ca555c6444646f3f7b8c34b5770e745f70deefa34a89c7"
+    },
+    "model_selection": {
+      "requested": {
+        "id": "gpt-6-astra",
+        "effort": "medium"
+      },
+      "effective": null,
+      "confirmation": "unconfirmed",
+      "reason": "Runtime arguments enforced; no independent effective-model attestation",
+      "capabilities": {
+        "adapter": "codex",
+        "model_control": true,
+        "capability_source": "codex app-server model/list",
+        "reason": null
+      }
+    },
+    "usage": {
+      "source": "codex_json_stream",
+      "turns": [
+        {
+          "input_tokens": 178111,
+          "cached_input_tokens": 142976,
+          "output_tokens": 1538
+        }
+      ],
+      "elapsed_seconds": 64.95319274999201,
+      "provider_invoice_cost_usd": null
+    },
+    "verdict_text": "I’ll inspect the canonical request, verify the context snapshot, and review the scoped candidate and publication readiness without changing files.\n\nThe snapshot records a passing task check and a prepared 1.3.0 release. I’m checking its hashes, raw verification evidence, and the current diff; publication readback remains the controller’s downstream responsibility. I’m using the audit skill for this review.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"No blocking findings. Context verification and evidence hashes passed; scoped diff contains exact two\\\\n content and consistent 1.3.0 version/changelog. Recorded and rerun task checks passed. Candidate respects repo-local architecture and local Git release configuration. Approval covers critic phase only; controller publication and required remote readback remain pending. No deployment target is configured.\"}"
+  }
+}

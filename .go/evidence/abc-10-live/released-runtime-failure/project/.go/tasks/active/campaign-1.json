@@ -1,0 +1,77 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "id": "campaign-1",
+  "project": "repo-local-spike-fixture",
+  "status": "active",
+  "summary": "Deliver local campaign step 1",
+  "scope": {
+    "read": [
+      ".go/**",
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ],
+    "modify": [
+      "app.txt",
+      "VERSION",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "app.txt contains 'one\\n'; release 1.2.0 has verified local remote readback"
+  ],
+  "verification": [
+    "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'one\\n'; assert Path('VERSION').read_text().strip() == '1.2.0'\""
+  ],
+  "claim": {
+    "agent": "campaign-owner",
+    "claimed_at": "2026-09-13T20:32:30+02:00",
+    "base_commit": "b5d06b4b0c1d4665848e9794ab61c7ff32055594"
+  },
+  "description": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "order": 1,
+  "work_status": "in_progress",
+  "review_status": "none",
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Write app.txt with exactly 'one\\n'. This is a tiny local release fixture. Do not delegate or start subagents. Do not commit, push, tag, install dependencies, change VERSION/CHANGELOG, or mutate .go; the controller owns those actions. Read the supplied context and use the existing Python interpreter for verification. Critic: inspect the exact requested content, return the required protocol verdict and do not edit any file.",
+    "sha256": "71114d93ae9b64b3c539959ea7f0442bdbe9e264b6232c2a6390b1737372f487",
+    "source_ref": "abc-10 bounded campaign"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Deliver step 1 with release proof",
+      "source": "campaign",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "local"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/campaign-1/completion/verification-afb216a3634846c0beecc723da293ee8.json",
+      "sha256": "b7dbb460b7520e0a6e816bb5ad127022043205859f11cf1c25c9cbf238adc077"
+    }
+  }
+}

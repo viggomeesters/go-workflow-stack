@@ -1,0 +1,14 @@
+{
+  "task_id": "campaign-2",
+  "project": "repo-local-spike-fixture",
+  "contract_digest": "faa734427b1260f3c726c9e43a7ca1eb638894702c60df5f16d6d4e77ee661f3",
+  "revision": "0faff9bea81ee25d36dc33de6aac46887e42e89c",
+  "content_digest": "51a65ef4f7bf525da271aaa1e3f3166d49669dfa8e90932b72cbb3ce550c7dba",
+  "command": "python3 -c \"from pathlib import Path; assert Path('app.txt').read_text() == 'two\\n'; assert Path('VERSION').read_text().strip() == '1.3.0'\"",
+  "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-10-live-final/campaign-2-worker",
+  "elapsed_seconds": 0.5463420829619281,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

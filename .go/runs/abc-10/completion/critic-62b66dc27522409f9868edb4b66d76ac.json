@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "abc-10",
+  "project": "go-workflow-stack",
+  "contract_digest": "2464035da26ea61b4dc430cb28580f9c97359598e1b4caa4d7f343acbc9908d5",
+  "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+  "content_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed final code/docs/fixtures. Two ordered task profiles and actual local releases are proven by deterministic campaign and separate live native workers. Live v0.3.25 exposed circular critic receipt demand; the first candidate exposed out-of-sandbox canonical outcome writes. Both failures and red regressions are preserved. Managed publication passes explicit pre-publication critic context; task-worktree build/repair report evidence while the controller owns canonical outcomes. Legacy in-place reporting/manual critic behavior remains. Completion/publication gates are unchanged and tested. 176 broad regressions passed before final writer-instruction fix, then 20 affected model/campaign tests passed on final runtime on macOS/Linux, plus 197 smoke and distribution gates. Four real live native phases completed with local releases 1.2.0/1.3.0 and cleanup; all 53 runtime file hashes match this candidate. No independent effective identity, general model quality or hosted production access is inferred.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/autonomy-benchmark.md",
+    "docs/distribution-and-pilots.md",
+    "docs/releases/v0.3.26.md",
+    "fixtures/abc-campaign/campaign.py",
+    "fixtures/abc-campaign/coverage.json",
+    "fixtures/abc-campaign/worker.py",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/run_state.py",
+    "pyproject.toml",
+    "scripts/check-abc.sh",
+    "scripts/release-check-inner.sh",
+    "tests/test_abc_end_to_end.py"
+  ]
+}

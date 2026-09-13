@@ -1,0 +1,179 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "abc-10",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-52205ff632774d79bdfcdfd574a67f1f",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_end_to_end.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-782f576a7aaf44408918386dee2cf34f.json",
+        "sha256": "8292db77da8e105d77c03172ed9b979600447b2b1f380758dad2b09d5b4413a6"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-f5522ee66cae41d68a0c44c191db98ee.json",
+        "sha256": "e4ed7c40d5989778cd5d42ea0ef49a134cf82a189e2ca4af0904b6e3776b2238"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-10",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "0d1d1c77ac1cf7294213843ac4f3517d040b57a9",
+        "worktree_digest": "572f330a05fc5366654bb4f8b8eff3eaa2ceaa60396be053a1ef8bda60d01eb3",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-10/completion/command-d80d6b89a5f64000b799bb0b09085faa.json",
+        "sha256": "612e32cbf042eb94ec91ad5384a245c7ae4bec2b033a48ad349f15cbc7bd4f76"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Twee taken gebruiken verschillende model/effortprofielen en leveren elk een afzonderlijk geverifieerde release; de tweede begint pas na de vereiste release van de eerste.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Een afgekeurde critic veroorzaakt herstel met actuele bevindingen en nieuwe verificatie; geen taak is done vóór de laatste vereiste release/deploycheck.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Deterministische scenario’s bewijzen crashherstel op alle side-effectgrenzen, model-onbeschikbaarheid, stale context, mislukte push/deploy en niet-omzeilbare handmatige finish.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Voer bij latere uitvoering een kleine live Codex-proof uit met beschikbare Terra High/Astra Medium of expliciet gekozen alternatieven; ontbrekende toegang blijft een expliciete proof-blocker, geen gesimuleerde live claim.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Stackrelease bevat raw evidence, versie/commit/tag/publicatielink en readback; onderscheid deterministische testdekking van live modelkwaliteit en hergebruik de bestaande releasechecks.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Voeg lokale regressies toe voor ontbrekend fasebewijs/requirements, stale HEAD, gewijzigde basis na groen, mergeconflict, verlopen claim met levende worker, pushfout, onderbroken publicatie en cleanupfout. Bewijs dat ongeacht het model geen release of done aan ongeteste inhoud wordt gekoppeld.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Neem gerichte legacy propertytests voor state-roundtrip en completeness over onder het nieuwe schema; een optionele tweede taakworktree mag integratie of versie-uitgifte niet laten racen. Worktrees claimen geen beveiligings- of testomgevingisolatie.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "2464035da26ea61b4dc430cb28580f9c97359598e1b4caa4d7f343acbc9908d5",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 91793
+  },
+  "worker_group": null,
+  "inflight": null
+}

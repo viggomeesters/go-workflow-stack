@@ -1,0 +1,22 @@
+{
+  "schema": "go-workflow.repo-local.hierarchy.v1",
+  "kind": "hierarchy",
+  "project": "repo-local-spike-fixture",
+  "epics": [
+    {
+      "id": "workflow-contract",
+      "title": "Workflow Contract",
+      "features": [
+        {
+          "id": "schema-validation",
+          "title": "Schema validation",
+          "tasks": [
+            "campaign-1",
+            "campaign-2"
+          ]
+        }
+      ],
+      "tasks": []
+    }
+  ]
+}

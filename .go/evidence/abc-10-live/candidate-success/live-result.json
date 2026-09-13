@@ -1,0 +1,19 @@
+{
+  "status": "passed",
+  "tasks": [
+    "campaign-1",
+    "campaign-2"
+  ],
+  "profiles": [
+    {
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    {
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    }
+  ],
+  "effective_identity": "unconfirmed",
+  "remote": "local bare Git; annotated tags verified by controller"
+}

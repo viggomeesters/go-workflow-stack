@@ -1,0 +1,169 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "abc-09",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-60d8d94e127247ec9a63a6d079b208bd",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-09",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_topologies.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+        "worktree_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-09/completion/command-641452261ed040218f04a7496b20430f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-09/completion/command-641452261ed040218f04a7496b20430f.json",
+        "sha256": "f4becae43e44147f8e83910223243e571b2410212a285dc7489fa5a29cd13bca"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-09",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+        "worktree_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-09/completion/command-2ff022717d844223ad59080c1121d414.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-09/completion/command-2ff022717d844223ad59080c1121d414.json",
+        "sha256": "b7f1d824134e39269ce5d2f0ca5d6d447196e1bd8f5ac18beebf48b6a626d2a5"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-09",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+        "worktree_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-09/completion/command-38af6fcdd72e4f7bbb924d5eab260c4a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-09/completion/command-38af6fcdd72e4f7bbb924d5eab260c4a.json",
+        "sha256": "a2dcddae01e25e323755700733456dbb54473180fbcc07cab7d52c54c7cb1a05"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Vergelijk verse workers, per-turn model/effort override en een subagent met eigen profiel op contextbehoud, herstel, attributie en runtimeafhankelijkheid.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Gebruik het lokaal beschikbare protocol en testdoubles voor sessie-ID, ephemeral-beperkingen, contextoverdracht en modeloverrides; markeer live-bevestiging afzonderlijk.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Mid-turn hot-switching wordt niet als ondersteund gepresenteerd zonder bewijs; wissel alleen op een veilige taak/fase/beurtgrens.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Leg een expliciet besluit vast: welke alternatieve adapter wordt ondersteund of uitgesteld en waarom; uitgestelde uitbreidingen worden geen impliciete afhankelijkheid van de basisrelease.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "De contextsnapshot en lifecycle blijven eigendom van .go, ook als de bovenliggende Codex-sessie verdwijnt; geen nieuwe gebruikerstaak per worker nodig.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Bewijs voor elke gekozen adapter dat modelwisseling op een veilige grens dezelfde taakworktree/context en exclusief schrijverschap behoudt. Een nieuwe worktree per fase/model is geen default; reviewers zijn alleen-lezen tenzij expliciet overgedragen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "bcb9139c14c07f23ab9db2cbb827a30916e3aa499229550c802d3375c01930a7",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 10220
+  },
+  "worker_group": null,
+  "inflight": null
+}

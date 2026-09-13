@@ -1,0 +1,14 @@
+{
+  "task_id": "abc-09",
+  "project": "go-workflow-stack",
+  "contract_digest": "bcb9139c14c07f23ab9db2cbb827a30916e3aa499229550c802d3375c01930a7",
+  "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+  "content_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+  "command": "python3 -m pytest tests/test_abc_topologies.py -q",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 12.817920750007033,
+  "returncode": 0,
+  "stdout": ".......                                                                  [100%]\n7 passed in 12.00s\n",
+  "stderr": "",
+  "timed_out": false
+}

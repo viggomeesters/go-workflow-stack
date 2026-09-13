@@ -1,0 +1,14 @@
+{
+  "task_id": "abc-09",
+  "project": "go-workflow-stack",
+  "contract_digest": "bcb9139c14c07f23ab9db2cbb827a30916e3aa499229550c802d3375c01930a7",
+  "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+  "content_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+  "command": "git diff --check",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.2807325000176206,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

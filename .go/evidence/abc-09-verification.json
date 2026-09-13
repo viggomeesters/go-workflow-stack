@@ -1,0 +1,29 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-09",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+  "checks": [
+    "52 relevant topology/model/context/workspace tests on macOS and Linux",
+    "197 smoke tests in candidate distribution gate",
+    "ordinary macOS and Linux make check",
+    "immutable template and standalone distribution gates",
+    "declared commands captured by canonical completion collector"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-09/completion/verification-8db4eb93003a437fbfc8a16adee07fb5.json",
+    "sha256": "2199165a107f0b2131d05fe4b58cb5a5b92b3e51f7c0bdf271fed4d7d60e73c3"
+  },
+  "critic": {
+    "path": ".go/runs/abc-09/completion/critic-e80e6dac7a804e53a1b4b20a8b3e0bcc.json",
+    "sha256": "663dcd40979a988831e9c24c0d38fec138ac0a50a0d13ee3b2c834117a6d93bc"
+  },
+  "critic_method": "same-agent; no independent identity attestation",
+  "limitations": [
+    "Local protocol evidence is versioned Codex 0.153.4, not an implemented persistent-session/subagent adapter",
+    "Model/effort and ownership require separate runtime checks beyond schema validation",
+    "Fixture critic checks read-only arguments, not OS sandbox enforcement",
+    "No live model execution or effective identity confirmation; live baseline proof is abc-10"
+  ],
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Protocol assumptions were corrected against actual local schema evidence within task scope."
+}

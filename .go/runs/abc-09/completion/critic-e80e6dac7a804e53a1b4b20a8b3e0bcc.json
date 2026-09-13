@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "abc-09",
+  "project": "go-workflow-stack",
+  "contract_digest": "bcb9139c14c07f23ab9db2cbb827a30916e3aa499229550c802d3375c01930a7",
+  "revision": "1c3318c43008fdde96805258f6cde43782f45762",
+  "content_digest": "f7b31b3b8d91f12254cbbcddfe477430dfb7cc874b9056e98a6b731a10422240",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed all task changes: generated local protocol and help are version/hash bound, schemas establish exact session field requirements but not ownership or model availability, and per-turn overrides persist to subsequent turns. Real fresh controller processes use canonical snapshots and one owned workspace across build/critic/repair, frozen profile drift is rejected and a competing writer lease fails. Native critic read-only arguments are verified without claiming the double enforces an OS sandbox. Persistent-session/subagent adapters are explicitly deferred, and live model proof remains abc-10. 52 relevant tests passed on macOS and Linux, with ordinary clone make and candidate distribution gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/releases/v0.3.25.md",
+    "docs/worker-topologies.md",
+    "fixtures/abc-topologies/ThreadForkParams.json",
+    "fixtures/abc-topologies/ThreadResumeParams.json",
+    "fixtures/abc-topologies/ThreadStartParams.json",
+    "fixtures/abc-topologies/TurnStartParams.json",
+    "fixtures/abc-topologies/exec-resume-help.txt",
+    "fixtures/abc-topologies/provenance.json",
+    "fixtures/abc-topologies/worker.py",
+    "go_workflow/constants.py",
+    "pyproject.toml",
+    "scripts/release-check-inner.sh",
+    "tests/test_abc_topologies.py"
+  ]
+}

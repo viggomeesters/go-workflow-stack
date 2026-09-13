@@ -1,0 +1,81 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-models",
+  "project": "go-workflow-stack",
+  "title": "Explicit runtime model selection and truthful attribution",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Pass frozen model/effort to every native phase and fail closed before mutation on unsupported selections."
+  ],
+  "scope": {
+    "in": [
+      "Codex model discovery, frozen phase profiles, enforced runtime options and factual usage attribution"
+    ],
+    "out": [
+      "Worker topology, active-task resume, release engine and workspace manager"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Native Codex process and declarative unsupported Hermes/custom adapters"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "No global default model or automatic escalation is introduced.",
+    "Project/task selection is explicit and immutable for a started run.",
+    "Opaque Hermes/custom commands remain valid for legacy tasks; controlled model execution fails closed until their adapter supports it.",
+    "Runtime settings and authoritative model confirmation are distinct; never infer the effective model from agent prose."
+  ],
+  "quality_attributes": [
+    {
+      "id": "profile-enforcement",
+      "scenario": "Each controlled build, critic and repair phase",
+      "measure": "Phases missing selected runtime model/effort arguments",
+      "threshold": 0
+    },
+    {
+      "id": "preexecution-rejection",
+      "scenario": "Unknown model, incompatible effort, unsupported adapter or changed frozen selection",
+      "measure": "Product-writing worker launches before rejection",
+      "threshold": 0
+    },
+    {
+      "id": "truthful-attribution",
+      "scenario": "Adapter prose claims model usage without runtime confirmation",
+      "measure": "False effective confirmations or fabricated usage/cost values",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Runtime capability interfaces vary by installation; return an actionable unsupported result."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d03-model-policy"
+  ]
+}

@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-03",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Workers starten met complete contextoverdracht",
   "description": "Geef iedere verse worker een duurzaam, versiegebonden contextsnapshot met actuele code-, fase- en bewijsreferenties; behoud de bestaande projectcontext.\nAfhankelijk van: go-workflow-stack:abc-01, go-workflow-stack:abc-11. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -52,10 +52,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T14:30:58+02:00",
+    "base_commit": "16b4f663e12b9d120afc48f59d27e12e12c91346"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -74,7 +75,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "not_started",
+    "implementation_status": "in_progress",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",

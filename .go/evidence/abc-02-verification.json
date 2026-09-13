@@ -1,0 +1,38 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-02",
+  "revision": "9c8339c9abaa7730ccbc1de5d122e93aeab44575",
+  "status": "targeted_passed_final_tag_pending",
+  "candidate_baseline": {
+    "revision": "936946d05bce562580dba16708f48dab1fb5ffa0",
+    "checks": [
+      "238 tests passed",
+      "make check passed",
+      "candidate release gate passed including distribution/template pairing"
+    ],
+    "log_ref": ".go/evidence/abc-02-candidate.log",
+    "sha256": "98afe830022c50388b2f433582becbe4791b3b3d5ae28ebc0a348cccb1a0b706"
+  },
+  "current_revision_checks": [
+    "43 focused/contract/architecture tests passed",
+    "make check passed",
+    "git diff --check passed",
+    "Real local Codex model/list returned supported models without starting a worker"
+  ],
+  "critic": {
+    "status": "passed",
+    "method": "same-agent adversarial review plus process-boundary regressions",
+    "repairs": [
+      "Freeze model profiles across phases",
+      "Reject a custom review/repair lane before first build",
+      "Require completed native turn events; ignore worker prose as runtime attribution",
+      "Create the resume artifact directory on early adapter rejection"
+    ]
+  },
+  "limitations": [
+    "Effective model identity remains unconfirmed; tokens come only from native events when available",
+    "Live worker generation and model-switch topology proof are later ABC tasks",
+    "Hermes/custom controlled model execution is explicitly unsupported; legacy behavior preserved"
+  ],
+  "self_reflect": "No durable agent/process improvement needed; bounded code defects repaired. No skill/memory/config changes."
+}

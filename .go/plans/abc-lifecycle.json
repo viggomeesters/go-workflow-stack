@@ -387,8 +387,9 @@
       "id": "abc-d03-model-policy",
       "owner_task": "abc-02",
       "question": "Exact default model profiles and escalation policy; resolve against actual runtime/account capabilities.",
-      "status": "proposed",
-      "blocks": "Live execution choices, not generic contract implementation."
+      "status": "accepted",
+      "blocks": "Live execution choices, not generic contract implementation.",
+      "resolution": "Explicit frozen profiles; installed native capabilities; no global defaults or escalation; unsupported control fails closed; effective attribution remains unconfirmed without independent evidence."
     },
     {
       "id": "abc-d04-workspace-policy",
@@ -479,15 +480,15 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": null,
+    "active_task": "abc-02",
     "completed_tasks": [
       "abc-01"
     ],
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "0.3.15",
-    "verification_ref": ".go/evidence/abc-01-verification.json",
+    "candidate_version": "0.3.16",
+    "verification_ref": ".go/evidence/abc-02-verification.json",
     "next_ready": [
       "abc-02",
       "abc-11"

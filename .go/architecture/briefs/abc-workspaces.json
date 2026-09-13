@@ -1,0 +1,82 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-workspaces",
+  "project": "go-workflow-stack",
+  "title": "Explicit task workspaces with canonical workflow state",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Manage one task worktree with explicit owner/run/base and retain the canonical .go control state."
+  ],
+  "scope": {
+    "in": [
+      "Workspace create/reuse/recovery, canonical state resolution, execution/integration locks, full-diff scope checks and cleanup gates"
+    ],
+    "out": [
+      "Release publisher, autonomous active-task resume and project service/database isolation"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Canonical .go control state, Git common directory and registered task worktree"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Require explicit workspace path, branch, base branch and base commit; do not guess main/master.",
+    "Registry lives in canonical .go; per-worktree Git metadata identifies its control root. Copied workflow queues are not authoritative.",
+    "A matching active task claim owns each workspace; reuse requires the same owner/run and Git identity.",
+    "Hold execution/integration locks across the operation; retain work on conflicts, dirty state, unproven release or cleanup failures.",
+    "Expose workspace primitives now; fresh-worker and active-task orchestration follows in abc-03/04."
+  ],
+  "quality_attributes": [
+    {
+      "id": "workspace-exclusivity",
+      "scenario": "Duplicate create, changed owner/run or interrupted create",
+      "measure": "Duplicate/foreign workspaces accepted",
+      "threshold": 0
+    },
+    {
+      "id": "control-state-isolation",
+      "scenario": "CLI invoked in a registered linked worktree",
+      "measure": "Independent task queue mutations",
+      "threshold": 0
+    },
+    {
+      "id": "scope-and-cleanup-safety",
+      "scenario": "Committed out-of-scope work, canonical user dirt or unproven delivery",
+      "measure": "Unsafe staging/cleanup operations",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "A worktree isolates Git state; project ports/databases and a security sandbox require separate explicit policies."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d04-workspace-policy"
+  ]
+}

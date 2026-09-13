@@ -1,0 +1,32 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-08",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "db776f1b75dd6c194c36b43278b008482cd0bd48",
+  "checks": [
+    "368 Linux tests (197 smoke + 171 focused)",
+    "40 focused macOS intake/contract tests including 19 lifecycle migration cases",
+    "make check on ordinary macOS clone and Linux",
+    "candidate distribution gate with immutable template pairing",
+    "all declared commands executed by canonical completion collector"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json",
+    "sha256": "1577fb083071ddcca80f88a140bea2cce7c748bd471291854b314bf5b0d9cc46"
+  },
+  "critic": {
+    "path": ".go/runs/abc-08/completion/critic-32835d713a784ebbb712e60ac6fde816.json",
+    "sha256": "ffbde0092df73e5874ad4fcf6dc5a210f861880eb7271d888cf227d2f6c741ac"
+  },
+  "critic_method": "same-agent; no independent identity attestation",
+  "limitations": [
+    "Lifecycle adoption requires explicit settings and quiescent state; no run or publication/deployment authority is inferred",
+    "Existing scope and verification commands are preserved; onboarding must configure actual version files and permitted scope",
+    "Changing a named release/phase profile requires a new name",
+    "Journals bind the originating canonical path and are not active cross-host transfer",
+    "Review bundles preserve references but do not embed external evidence files Git history or active runtime contents",
+    "Only repository skill source is updated; no global skill installation or configuration",
+    "Model availability is checked at actual execution; adoption does not make live model calls"
+  ],
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Selected historical workflow lessons were implemented in the authorized product scope."
+}

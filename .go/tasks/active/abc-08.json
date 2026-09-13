@@ -153,36 +153,66 @@
       "id": "R1",
       "text": "task create, intent, execution brief, recommendation promotion, follow-up en scaffolding behouden dezelfde uitvoering/releasevelden; roundtrip export/import verliest geen provenance.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Dry-run/apply/rollback is gevalideerd en idempotent; een pin-update alleen wordt niet als schema- of beleidsmigratie gepresenteerd.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Historische done-taken worden niet opnieuw uitgevoerd en krijgen geen verzonnen release-/modelbewijs; nieuwe projecten kunnen het volledige contract als default gebruiken na configuratie.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Open taken worden gecontroleerd geconverteerd of expliciet als nog te configureren aangemerkt; migration neemt geen impliciete publicatierechten over.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Gebruikersdocumentatie en gegenereerde skills beschrijven daadwerkelijk vrijgegeven gedrag, opt-in, dependencygates en het onderscheid tussen taak-, worker- en sessievoortgang.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R6",
@@ -195,15 +225,27 @@
       "id": "R7",
       "text": "Migreer uitsluitend gekozen fase-, bewijs- en werkplekcontracten; documenteer de herkomst in agent-brain en legacy viggo-agent-skills. Geen vaultwriter, verplichte brede skillketen, automatische globale skillwijzigingen, onbeperkte scope-uitbreiding of taak-ID-versienummering terugbrengen.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     },
     {
       "id": "R8",
       "text": "Gegenereerde skills beschrijven scope, input/output, bewijs en handoff conform de vrijgegeven runtime; lint/schema-validatie blijft gescheiden van runtimebewijs. Project-/taakprofielen behouden workspace- en vereiste verificatievelden over intake, export en hervatten.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T20:06:08+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json"
+        }
+      ]
     }
   ],
   "verification_notes": [
@@ -240,5 +282,16 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json",
+      "sha256": "1577fb083071ddcca80f88a140bea2cce7c748bd471291854b314bf5b0d9cc46"
+    },
+    "critic": {
+      "path": ".go/runs/abc-08/completion/critic-32835d713a784ebbb712e60ac6fde816.json",
+      "sha256": "ffbde0092df73e5874ad4fcf6dc5a210f861880eb7271d888cf227d2f6c741ac"
+    }
   }
 }

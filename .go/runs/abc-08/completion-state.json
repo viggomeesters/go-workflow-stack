@@ -1,0 +1,179 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "abc-08",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-ef406f1a5f694b31966894284a8fb33a",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-08",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_abc_migration.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "db776f1b75dd6c194c36b43278b008482cd0bd48",
+        "worktree_digest": "484eade7c248c03a3c598427b3d4b4faefc8e8e0248418abec0a3e6521bc1e95",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-08/completion/command-537755a4e73a453297c7030d2271463a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-08/completion/command-537755a4e73a453297c7030d2271463a.json",
+        "sha256": "c560db4fce7d95eb008b5bea8a4d533512e837a04a94272cd93336c5cc6a394d"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-08",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "db776f1b75dd6c194c36b43278b008482cd0bd48",
+        "worktree_digest": "484eade7c248c03a3c598427b3d4b4faefc8e8e0248418abec0a3e6521bc1e95",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-08/completion/command-21ed718080c543ebb07653dba7d0a976.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-08/completion/command-21ed718080c543ebb07653dba7d0a976.json",
+        "sha256": "3d99e6affb1e38dde6e3d6bc643c124847637f733354fe39c0f3246d221b0cad"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "abc-08",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6",
+          "R7",
+          "R8"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "db776f1b75dd6c194c36b43278b008482cd0bd48",
+        "worktree_digest": "484eade7c248c03a3c598427b3d4b4faefc8e8e0248418abec0a3e6521bc1e95",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/abc-08/completion/command-1b042d9d485742bda238a0d9108aa107.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/abc-08/completion/command-1b042d9d485742bda238a0d9108aa107.json",
+        "sha256": "e44f8dd560d4903a06147b1f19853cac0ec6722dc7769c98eb6d311c53ccf466"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "task create, intent, execution brief, recommendation promotion, follow-up en scaffolding behouden dezelfde uitvoering/releasevelden; roundtrip export/import verliest geen provenance.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Dry-run/apply/rollback is gevalideerd en idempotent; een pin-update alleen wordt niet als schema- of beleidsmigratie gepresenteerd.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Historische done-taken worden niet opnieuw uitgevoerd en krijgen geen verzonnen release-/modelbewijs; nieuwe projecten kunnen het volledige contract als default gebruiken na configuratie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Open taken worden gecontroleerd geconverteerd of expliciet als nog te configureren aangemerkt; migration neemt geen impliciete publicatierechten over.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Gebruikersdocumentatie en gegenereerde skills beschrijven daadwerkelijk vrijgegeven gedrag, opt-in, dependencygates en het onderscheid tussen taak-, worker- en sessievoortgang.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Migreer uitsluitend gekozen fase-, bewijs- en werkplekcontracten; documenteer de herkomst in agent-brain en legacy viggo-agent-skills. Geen vaultwriter, verplichte brede skillketen, automatische globale skillwijzigingen, onbeperkte scope-uitbreiding of taak-ID-versienummering terugbrengen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Gegenereerde skills beschrijven scope, input/output, bewijs en handoff conform de vrijgegeven runtime; lint/schema-validatie blijft gescheiden van runtimebewijs. Project-/taakprofielen behouden workspace- en vereiste verificatievelden over intake, export en hervatten.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "3a6cede023b63ff8380f501a93ac0b74c9799a225575f1a18318a2626b33cd4b",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "macbook-pro-van-viggo-1.home",
+    "pid": 74237
+  },
+  "worker_group": null,
+  "inflight": null
+}

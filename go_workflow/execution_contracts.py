@@ -109,7 +109,8 @@ def dependency_findings(repo: Path, task: dict[str, Any], *, readiness: bool = F
     if 'execution_contract' not in task: return []
     errors = validate_execution_contract(task['execution_contract']) + validate_dependencies(task.get('dependencies', []))
     if errors: return errors
-    repo = repo.resolve()
+    from .worktrees import workflow_root
+    repo = workflow_root(repo.resolve()).parent
     cache: dict[tuple[Path, str], dict[str, Any]] = {}
     for item in candidates or []: cache[(repo, item['id'])] = item
     cache[(repo, task['id'])] = task
@@ -137,7 +138,7 @@ def dependency_findings(repo: Path, task: dict[str, Any], *, readiness: bool = F
                     explicit = mapping.get(dep['project']) if isinstance(mapping, dict) else None
                     if not isinstance(explicit, str) or not explicit.strip():
                         errors.append(f'dependency participant not configured: {dep["project"]}'); continue
-                    participant = (root / explicit).resolve()
+                    participant = workflow_root((root / explicit).resolve()).parent
                 participant_project = read(participant / '.go/project.json')
                 if (participant_project.get('schema') != 'go-workflow.repo-local.project.v1'
                         or participant_project.get('kind') != 'project'

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.17 — owned task workspaces
+
+- Add explicit task worktree creation, recovery and claim-following ownership.
+- Resolve worker workflow state to one canonical .go and share Git-common locks.
+- Check complete task scope before staging; expose held integration slots.
+- Preserve dirty or unproven work at cleanup, with recoverable removal failures.
+- Keep fresh-worker/resume and publisher orchestration in subsequent ABC tasks.
+
 ## 0.3.16
 
 - Enforce explicit model/effort arguments for native Codex phases after installed-runtime capability checks.

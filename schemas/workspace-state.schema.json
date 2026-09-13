@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Task workspace registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "control_repo",
+    "path",
+    "branch",
+    "base_branch",
+    "common_dir",
+    "schema",
+    "task_id",
+    "owner",
+    "run_id",
+    "base_commit",
+    "repository_id",
+    "generation",
+    "state"
+  ],
+  "properties": {
+    "control_repo": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/"
+    },
+    "path": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/"
+    },
+    "branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "base_branch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "common_dir": {
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^/"
+    },
+    "cleanup_error": {
+      "type": "string",
+      "minLength": 1
+    },
+    "recovery_action": {
+      "type": "string",
+      "minLength": 1
+    },
+    "schema": {
+      "const": "go-workflow.workspace-state.v1"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "owner": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "run_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "base_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "repository_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "generation": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "state": {
+      "enum": [
+        "creating",
+        "ready",
+        "integrated",
+        "cleanup_failed",
+        "cleaned"
+      ]
+    },
+    "integration": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "workspace_head",
+        "integrated_commit"
+      ],
+      "properties": {
+        "workspace_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "integrated_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
+    },
+    "ownership_history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "owner",
+          "run_id"
+        ],
+        "properties": {
+          "owner": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          }
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "state": {
+            "enum": [
+              "integrated",
+              "cleanup_failed",
+              "cleaned"
+            ]
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "integration"
+        ]
+      }
+    }
+  ]
+}

@@ -7,6 +7,7 @@ import hashlib
 import json
 import os
 import tempfile
+import subprocess
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -133,9 +134,16 @@ def repository_lock(root: Path, name: str, timeout_seconds: float = 10.0) -> Pro
     safe_name = "".join(character if character.isalnum() or character in "._-" else "-" for character in name)
     git_dir = root.parent / ".git"
     if git_dir.is_file():
-        marker = git_dir.read_text(encoding="utf-8", errors="ignore").strip()
-        candidate = marker.removeprefix("gitdir:").strip()
-        git_dir = (git_dir.parent / candidate).resolve() if candidate else git_dir
+        env = os.environ.copy()
+        for key in ('GIT_DIR', 'GIT_COMMON_DIR', 'GIT_WORK_TREE', 'GIT_INDEX_FILE',
+                    'GIT_OBJECT_DIRECTORY', 'GIT_ALTERNATE_OBJECT_DIRECTORIES', 'GIT_NAMESPACE'):
+            env.pop(key, None)
+        result = subprocess.run(['git', '-C', str(root.parent), 'rev-parse',
+                                 '--path-format=absolute', '--git-common-dir'],
+                                env=env, text=True, capture_output=True)
+        if result.returncode:
+            raise StateLockError('Cannot resolve Git common directory for state lock')
+        git_dir = Path(result.stdout.rstrip('\n')).resolve()
     lock_root = git_dir / "go-workflow-locks" if git_dir.is_dir() else root / "locks"
     return ProcessFileLock(lock_root / f"{safe_name}.lock", timeout_seconds=timeout_seconds)
 

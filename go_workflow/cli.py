@@ -40,6 +40,9 @@ from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result, codex_stream_payload
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
+from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
+    validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
+    WorkspaceError, create_workspace, workflow_root, is_git_checkout)
 from go_workflow.capacity_policy import plan_capacity
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, pending_review_task_ids as task_state_pending_review_task_ids, task_path
@@ -135,7 +138,7 @@ def require(condition: bool, errors: list[str], message: str) -> None:
 
 
 def go_root(repo: Path) -> Path:
-    return repo / ".go"
+    return workflow_root(repo)
 
 
 def relative(repo: Path, path: Path) -> str:
@@ -557,6 +560,13 @@ def validate_repo(repo: Path) -> list[str]:
                 errors.append(str(exc))
     for task_id in sorted(linked_task_ids - task_ids):
         errors.append(f".go/hierarchy.json: linked task {task_id!r} does not exist in any task state")
+    for path in sorted((root / 'workspaces').glob('*.json')):
+        try:
+            record = validate_record(load_json(path))
+            if record['task_id'] != path.stem or record['task_id'] not in task_ids:
+                errors.append(f'{path}: workspace task identity missing/mismatched')
+        except (WorkspaceError, RepoLocalError) as exc:
+            errors.append(f'{path}: {exc}')
     errors.extend(validate_architecture_state(root, project_id))
     recommendation_paths = list((root / "recommendations").glob("*.json"))
     recommendation_paths.extend((root / "recommendations" / "applied").glob("*.json"))
@@ -1746,6 +1756,27 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
 
 
 def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False) -> dict[str, Any]:
+    try:
+        record = registered_workspace(repo)
+        required = ((task.get("execution_contract") or {}).get("workspace") or {}).get("mode") == "task_worktree"
+        if required and record is None:
+            raise WorkspaceError("Create the explicitly configured task workspace from the control checkout before dispatch")
+        if record is not None:
+            if task.get("id") != record["task_id"] or (task.get("claim") or {}).get("agent") != record["owner"]:
+                raise WorkspaceError("Worker task/owner differs from the registered workspace")
+            with execution_lease(repo, record["task_id"], record["owner"], record["run_id"]):
+                current = active_task(Path(record["control_repo"]), record["task_id"], record["owner"])
+                if current != task:
+                    raise WorkspaceError("Worker task snapshot is stale; reload canonical task state")
+                return _run_hook_command(repo, command, current, attempt, strategy, hook, timeout_seconds, require_protocol)
+        return _run_hook_command(repo, command, task, attempt, strategy, hook, timeout_seconds, require_protocol)
+    except (WorkspaceError, StateLockError) as exc:
+        return {"schema": "go-workflow.agent-adapter-result.v1", "phase": hook, "status": "blocked",
+                "summary": str(exc), "hook": hook, "command": command, "returncode": 78,
+                "stdout": "", "stderr": str(exc), "timed_out": False}
+
+
+def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False) -> dict[str, Any]:
     rendered = format_hook_command(command, repo, task, attempt, strategy)
     try:
         model_selection = controlled_preflight(repo, task, hook, rendered, require_protocol)
@@ -3650,7 +3681,7 @@ def cmd_router(args: argparse.Namespace) -> int:
     root = go_root(repo)
     state = {
         "repo_exists": repo.exists(),
-        "is_git_repo": (repo / ".git").is_dir(),
+        "is_git_repo": is_git_checkout(repo),
         "has_go": root.is_dir(),
         "has_project": (root / "project.json").is_file(),
         "has_vision": (root / "vision.json").is_file(),
@@ -3752,7 +3783,7 @@ def cmd_status(args: argparse.Namespace) -> int:
 
 def template_check_environment(source: dict[str, str], stack_root: Path) -> dict[str, str]:
     env = source.copy()
-    if (stack_root / ".git").is_dir():
+    if is_git_checkout(stack_root):
         env["GO_STACK"] = str(stack_root)
         env["GO_STACK_ALLOW_DEV"] = "1"
     else:
@@ -3946,6 +3977,11 @@ def cmd_task_outcome(args: argparse.Namespace) -> int:
     try:
         with repository_lock(root, f"task-{args.task_id}"):
             path, task = find_task(root, args.task_id)
+            # Recheck ownership under the task lock, after the CLI routing guard.
+            record = registered_workspace(repo) or registered_workspace(Path.cwd())
+            if record is not None and (task.get('id') != record['task_id'] or task.get('status') != 'active'
+                    or (task.get('claim') or {}).get('agent') != args.agent or args.agent != record['owner']):
+                raise WorkspaceError('Owned outcome requires the matching current active claim')
             if task.get("status") == "done":
                 raise RepoLocalError("cannot change outcome disposition on a done task")
             if task.get("outcome_tracking_version") != 1:
@@ -5284,6 +5320,25 @@ def build_parser() -> argparse.ArgumentParser:
     bundle_import.add_argument("--agent", default="agent")
     bundle_import.add_argument("--task-id", default="bundle-import")
     bundle_import.set_defaults(func=cmd_bundle_import)
+    workspace = sub.add_parser("workspace", help="Manage explicit task workspaces")
+    workspace_sub = workspace.add_subparsers(dest="workspace_command", required=True)
+    workspace_create = workspace_sub.add_parser("create")
+    workspace_create.add_argument("repo")
+    for field in ("task-id", "owner", "run-id", "path", "branch", "base-branch", "base-commit"):
+        workspace_create.add_argument("--" + field, required=True)
+    workspace_create.add_argument("--json", action="store_true")
+    workspace_create.set_defaults(func=cmd_workspace_create)
+    for operation in ('status', 'stage', 'integration-check', 'record-integration', 'cleanup', 'rebind'):
+        workspace_op = workspace_sub.add_parser(operation)
+        workspace_op.add_argument('repo')
+        for field in ('task-id', 'owner', 'run-id'):
+            workspace_op.add_argument('--' + field, required=True)
+        if operation == 'record-integration': workspace_op.add_argument('--integrated-commit', required=True)
+        if operation == 'rebind':
+            workspace_op.add_argument('--new-owner', required=True)
+            workspace_op.add_argument('--new-run-id', required=True)
+        workspace_op.add_argument('--json', action='store_true')
+        workspace_op.set_defaults(func=cmd_workspace_operation, workspace_operation=operation)
     return parser
 
 
@@ -5327,7 +5382,7 @@ def cmd_stack_update(args: argparse.Namespace) -> int:
     configured_stack = args.stack_repo or os.environ.get("GO_STACK")
     if configured_stack:
         stack_repo = Path(configured_stack).expanduser().resolve()
-    elif (STACK_ROOT / ".git").is_dir():
+    elif is_git_checkout(STACK_ROOT):
         stack_repo = STACK_ROOT
     else:
         raise RepoLocalError(
@@ -5502,11 +5557,36 @@ def cmd_doctor(args: argparse.Namespace) -> int:
     return 0 if ready else 1
 
 
+def cmd_workspace_create(args: argparse.Namespace) -> int:
+    record = create_workspace(Path(args.repo), args.task_id, args.owner, args.run_id,
+                              Path(args.path), args.branch, args.base_branch, args.base_commit)
+    print(json.dumps(record, indent=2) if args.json else record["path"])
+    return 0
+
+
+def cmd_workspace_operation(args: argparse.Namespace) -> int:
+    params = (Path(args.repo), args.task_id, args.owner, args.run_id)
+    operation = args.workspace_operation
+    if operation == 'status':
+        result = owned_record(*params, active=False)
+        if result['state'] != 'cleaned': verify_workspace(result)
+    elif operation == 'stage': result = stage_workspace(*params)
+    elif operation == 'cleanup': result = cleanup_workspace(*params)
+    elif operation == 'record-integration': result = record_integration(*params, args.integrated_commit)
+    elif operation == 'rebind': result = rebind_workspace(*params, args.new_owner, args.new_run_id)
+    else:
+        with integration_slot(*params) as result:
+            result = {**result, 'preview_only': True, 'lock_held_after_return': False}
+    print(json.dumps(result, indent=2))
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

@@ -128,7 +128,8 @@ def freeze_selection(repo, task):
     if not isinstance(task_id, str) or not ID_RE.fullmatch(task_id):
         raise ValueError('Model selection requires a valid task id')
     profiles = {phase: phase_model(task, phase) for phase in ('build', 'critic', 'repair')}
-    root = repo / '.go'
+    from .worktrees import workflow_root
+    root = workflow_root(repo)
     for state in ('open', 'active', 'blocked', 'done'):
         stored = root / 'tasks' / state / (task_id + '.json')
         if stored.is_file():

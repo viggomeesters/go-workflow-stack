@@ -32,21 +32,65 @@
     "architecture": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["impact"],
+      "required": [
+        "impact"
+      ],
       "properties": {
-        "impact": {"enum": ["none", "local", "material", "foundational"]},
-        "scope_refs": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "concerns": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "decision_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
-        "conformance_required": {"type": "boolean"},
-        "human_gate": {"enum": ["none", "decision", "risk_acceptance"]},
+        "impact": {
+          "enum": [
+            "none",
+            "local",
+            "material",
+            "foundational"
+          ]
+        },
+        "scope_refs": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "concerns": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "decision_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "conformance_required": {
+          "type": "boolean"
+        },
+        "human_gate": {
+          "enum": [
+            "none",
+            "decision",
+            "risk_acceptance"
+          ]
+        },
         "classification": {
           "type": "object",
           "additionalProperties": false,
-          "required": ["reason", "actor"],
+          "required": [
+            "reason",
+            "actor"
+          ],
           "properties": {
-            "reason": {"type": "string", "minLength": 1},
-            "actor": {"type": "string", "minLength": 1}
+            "reason": {
+              "type": "string",
+              "minLength": 1
+            },
+            "actor": {
+              "type": "string",
+              "minLength": 1
+            }
           }
         }
       }
@@ -128,6 +172,367 @@
           ]
         }
       }
+    },
+    "execution_contract": {
+      "$ref": "#/$defs/executionContract"
+    },
+    "dependencies": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project",
+          "task_id",
+          "requires"
+        ],
+        "properties": {
+          "project": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "task_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "requires": {
+            "enum": [
+              "done",
+              "done_with_required_release_evidence"
+            ]
+          }
+        }
+      }
+    },
+    "verification_evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "schema",
+          "status",
+          "task_id",
+          "phase_id",
+          "requirement_ids"
+        ],
+        "properties": {
+          "schema": {
+            "const": "go-workflow.verification-evidence.v1"
+          },
+          "status": {
+            "enum": [
+              "missing",
+              "failed",
+              "not_applicable",
+              "passed"
+            ]
+          },
+          "task_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "phase_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          },
+          "requirement_ids": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "command": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "cwd": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{40}$"
+          },
+          "worktree_digest": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "exit_code": {
+            "type": "integer"
+          },
+          "evidence": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "not_applicable"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "reason"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "enum": [
+                    "passed",
+                    "failed"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "command",
+                "cwd",
+                "revision",
+                "worktree_digest",
+                "exit_code",
+                "evidence"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "passed"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "exit_code": {
+                  "const": 0
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "status": {
+                  "const": "failed"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "exit_code": {
+                  "not": {
+                    "const": 0
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "$defs": {
+    "executionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "task_kind",
+        "model",
+        "release"
+      ],
+      "properties": {
+        "schema": {
+          "const": "go-workflow.execution-contract.v1"
+        },
+        "task_kind": {
+          "enum": [
+            "product",
+            "mechanical",
+            "no_change",
+            "smoke"
+          ]
+        },
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "critic_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "release": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "required",
+                "none"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "none"
+                  }
+                },
+                "required": [
+                  "mode"
+                ]
+              },
+              "then": {
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "phase_profile": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "workspace": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "control_state"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "task_worktree",
+                "current"
+              ]
+            },
+            "base_branch": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "control_state": {
+              "const": "repo_local_single_writer"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "task_kind": {
+                "const": "product"
+              }
+            },
+            "required": [
+              "task_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "release": {
+                "properties": {
+                  "mode": {
+                    "const": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

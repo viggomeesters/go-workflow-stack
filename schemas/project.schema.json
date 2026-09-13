@@ -57,6 +57,315 @@
         "type": "string",
         "minLength": 1
       }
+    },
+    "execution_defaults": {
+      "$ref": "#/$defs/executionContract"
+    },
+    "dependency_projects": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      },
+      "additionalProperties": {
+        "type": "string",
+        "minLength": 1,
+        "pattern": "\\S"
+      }
+    },
+    "phase_profiles": {
+      "type": "object",
+      "propertyNames": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+      },
+      "additionalProperties": {
+        "type": "array",
+        "minItems": 1,
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "schema": {
+              "const": "go-workflow.phase-contract.v1"
+            },
+            "id": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+            },
+            "scope": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "read",
+                "modify"
+              ],
+              "properties": {
+                "read": {
+                  "type": "array",
+                  "minItems": 0,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  }
+                },
+                "modify": {
+                  "type": "array",
+                  "minItems": 0,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            },
+            "inputs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "outputs": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required_evidence": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "stop_conditions": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "handoff": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            },
+            "required_outcomes": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "pattern": "\\S"
+              }
+            }
+          },
+          "required": [
+            "schema",
+            "id",
+            "scope",
+            "inputs",
+            "outputs",
+            "required_evidence",
+            "stop_conditions",
+            "handoff",
+            "required_outcomes"
+          ]
+        }
+      }
+    }
+  },
+  "$defs": {
+    "executionContract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "task_kind",
+        "model",
+        "release"
+      ],
+      "properties": {
+        "schema": {
+          "const": "go-workflow.execution-contract.v1"
+        },
+        "task_kind": {
+          "enum": [
+            "product",
+            "mechanical",
+            "no_change",
+            "smoke"
+          ]
+        },
+        "model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "critic_model": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "id",
+            "effort"
+          ],
+          "properties": {
+            "id": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "effort": {
+              "enum": [
+                "none",
+                "minimal",
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max",
+                "ultra"
+              ]
+            }
+          }
+        },
+        "release": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "required",
+                "none"
+              ]
+            },
+            "profile": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "reason": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            }
+          },
+          "allOf": [
+            {
+              "if": {
+                "properties": {
+                  "mode": {
+                    "const": "none"
+                  }
+                },
+                "required": [
+                  "mode"
+                ]
+              },
+              "then": {
+                "required": [
+                  "reason"
+                ]
+              }
+            }
+          ]
+        },
+        "phase_profile": {
+          "type": "string",
+          "minLength": 1,
+          "pattern": "\\S"
+        },
+        "workspace": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "mode",
+            "control_state"
+          ],
+          "properties": {
+            "mode": {
+              "enum": [
+                "task_worktree",
+                "current"
+              ]
+            },
+            "base_branch": {
+              "type": "string",
+              "minLength": 1,
+              "pattern": "\\S"
+            },
+            "control_state": {
+              "const": "repo_local_single_writer"
+            }
+          }
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "task_kind": {
+                "const": "product"
+              }
+            },
+            "required": [
+              "task_kind"
+            ]
+          },
+          "then": {
+            "properties": {
+              "release": {
+                "properties": {
+                  "mode": {
+                    "const": "required"
+                  }
+                }
+              }
+            }
+          }
+        }
+      ]
     }
   }
 }

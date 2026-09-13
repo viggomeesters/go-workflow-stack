@@ -34,6 +34,7 @@ STACK_ROOT = SCRIPT_DIR.parent
 if str(STACK_ROOT) not in sys.path:
     sys.path.insert(0, str(STACK_ROOT))
 
+from go_workflow.execution_contracts import (dependency_findings, resolve_execution_contract, validate_dependencies, validate_execution_contract, validate_phase_profiles, validate_verification_evidence)
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result
@@ -159,6 +160,14 @@ def validate_project(data: dict[str, Any], rel: str) -> list[str]:
     stack_ref = data.get("stack_ref")
     immutable_ref = bool(re.fullmatch(r"v\d+\.\d+\.\d+|[0-9a-f]{40}", str(stack_ref or "")))
     require(immutable_ref, errors, f"{rel}: stack_ref must be an immutable version tag (vX.Y.Z) or full commit SHA")
+    if "phase_profiles" in data:
+        errors.extend(validate_phase_profiles(data["phase_profiles"]))
+    if "dependency_projects" in data:
+        registry = data["dependency_projects"]
+        if not isinstance(registry, dict) or not all(isinstance(k, str) and TASK_ID_RE.fullmatch(k) and isinstance(v, str) and v.strip() for k, v in registry.items()):
+            errors.append("dependency_projects must map project IDs to explicit paths")
+    if "execution_defaults" in data:
+        errors.extend(validate_execution_contract(data["execution_defaults"]))
     return errors
 
 
@@ -313,6 +322,18 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
     require(data.get("shareable_delivery", "auto") in {"auto", "required", "none"}, errors, f"{rel}: shareable_delivery must be auto, required, or none")
+    if "dependencies" in data:
+        errors.extend(validate_dependencies(data["dependencies"]))
+    if "execution_contract" in data:
+        errors.extend(validate_execution_contract(data["execution_contract"]))
+    if "verification_evidence" in data:
+        if not isinstance(data["verification_evidence"], list):
+            errors.append("verification_evidence must be a list")
+        else:
+            for proof in data["verification_evidence"]:
+                errors.extend(validate_verification_evidence(proof))
+                if isinstance(proof, dict) and proof.get("task_id") != task_id:
+                    errors.append("verification evidence task_id mismatch")
     if "architecture" in data:
         errors.extend(validate_task_architecture(data.get("architecture"), rel))
     if "work_status" in data:
@@ -518,6 +539,11 @@ def validate_repo(repo: Path) -> list[str]:
             try:
                 data = load_json(path)
                 errors.extend(validate_task(data, relative(repo, path), expected_status=status))
+                errors.extend(dependency_findings(repo, data))
+                contract = data.get("execution_contract")
+                if isinstance(contract, dict) and isinstance(contract.get("phase_profile"), str):
+                    if contract["phase_profile"] not in documents.get("project.json", {}).get("phase_profiles", {}):
+                        errors.append(f"{relative(repo, path)}: unknown phase_profile")
                 task_id = str(data.get("id") or "")
                 if task_id in task_ids:
                     errors.append(f"{relative(repo, path)}: duplicate task id {task_id}")
@@ -667,7 +693,8 @@ def find_task(root: Path, task_id: str) -> tuple[Path, dict[str, Any]]:
 
 
 def open_tasks(repo: Path) -> list[tuple[Path, dict[str, Any]]]:
-    return open_task_records(go_root(repo))
+    return [(path, task) for path, task in open_task_records(go_root(repo))
+            if not dependency_findings(repo, task, readiness=True)]
 
 
 def path_matches(path: str, patterns: list[str]) -> bool:
@@ -1175,6 +1202,7 @@ def cmd_spike(args: argparse.Namespace) -> int:
             "claim": {"agent": None, "claimed_at": None},
             "evidence": [],
         }
+        apply_intake_contract(repo, task)
         dump_json(task_path(root, "open", task_id), task)
         append_task_to_epic(root, target_epic, task_id)
         created_tasks.append(task_id)
@@ -1983,6 +2011,7 @@ def create_followup_task(repo: Path, task: dict[str, Any], findings: list[str], 
         "evidence": [],
         "created_from": {"task_id": task.get("id"), "agent": agent, "created_at": now_iso(), "findings": findings},
     }
+    apply_intake_contract(repo, followup, task)
     dump_json(task_path(root, "open", followup_id), followup)
     append_jsonl(root / "runs" / "events.jsonl", event(followup_id, "run.checked", agent, {"action": "critic.followup_created", "source_task": task.get("id"), "findings": findings}))
     return followup
@@ -2433,6 +2462,14 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         })
         write_latest_run_state(repo, root, result, args, mode)
         return 1, result
+    if not plan.get("next_tasks") and open_task_records(root):
+        blockers = [finding for _, candidate in open_task_records(root)
+                    for finding in dependency_findings(repo, candidate, readiness=True)]
+        if blockers:
+            result.update({"status": "dependency_blocked", "summary": "; ".join(blockers),
+                           "next_action": "complete dependency release evidence before retrying"})
+            write_latest_run_state(repo, root, result, args, mode)
+            return 1, result
     if not plan.get("next_tasks") and not (initial_unfinished.get("active") or initial_unfinished.get("blocked")):
         result.update({
             "status": "task_required",
@@ -2506,6 +2543,10 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 task = load_json(open_path)
                 if task.get("status") != "open" or task.get("claim", {}).get("agent"):
                     continue
+                dependency_errors = dependency_findings(repo, task, readiness=True)
+                if dependency_errors:
+                    result.update({"status": "blocked", "blocked_task": task["id"], "summary": "; ".join(dependency_errors)})
+                    break
                 task["status"] = "active"
                 task["work_status"] = "in_progress"
                 task.setdefault("review_status", "none")
@@ -3057,6 +3098,7 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent", sourc
         "claim": {"agent": None, "claimed_at": None},
         "evidence": [],
     }
+    apply_intake_contract(repo, task)
     target = task_path(root, "open", task_id)
     dump_json(target, task)
     hierarchy = load_json(root / "hierarchy.json")
@@ -3126,6 +3168,10 @@ def validate_execution_brief(data: dict[str, Any]) -> list[str]:
             require(isinstance(unit, dict), errors, f"{prefix} must be an object")
             if not isinstance(unit, dict):
                 continue
+            if "execution_contract" in unit:
+                errors.extend(validate_execution_contract(unit["execution_contract"], partial=True))
+            if "dependencies" in unit:
+                errors.extend(validate_dependencies(unit["dependencies"]))
             unit_id = unit.get("id")
             require(isinstance(unit_id, str) and bool(TASK_ID_RE.fullmatch(unit_id)), errors, f"{prefix}.id is invalid")
             if isinstance(unit_id, str):
@@ -3292,6 +3338,16 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
         if any(task_path(root, state, unit["id"]).exists() for state in ("open", "active", "blocked", "done")):
             raise RepoLocalError(f"execution brief task already exists: {unit['id']}")
 
+    candidates = []
+    for unit in work_units:
+        candidate = {"id": unit["id"], "project": project["id"], "status": "open"}
+        apply_intake_contract(repo, candidate, unit)
+        candidates.append(candidate)
+    for candidate in candidates:
+        dependency_errors = dependency_findings(repo, candidate, candidates=candidates)
+        if dependency_errors:
+            raise RepoLocalError("invalid dependencies: " + "; ".join(dependency_errors))
+
     compact_brief = {
         "schema": brief["schema"],
         "destination": brief["destination"],
@@ -3341,6 +3397,8 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
             "evidence": [],
             "order": position,
         }
+        task.update({key: value for key, value in candidates[position - 1].items()
+                     if key in {"execution_contract", "dependencies"}})
         target = task_path(root, "open", unit["id"])
         dump_json(target, task)
         if epics:
@@ -3734,6 +3792,28 @@ def cmd_template_check(args: argparse.Namespace) -> int:
     return 0 if ok else 1
 
 
+def apply_intake_contract(repo: Path, task: dict[str, Any], source: dict[str, Any] | None = None) -> None:
+    source = source or {}
+    try:
+        profile = resolve_execution_contract(load_json(go_root(repo) / "project.json"), source.get("execution_contract"))
+    except (ValueError, TypeError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    if profile is not None:
+        errors = validate_execution_contract(profile)
+        if errors:
+            raise RepoLocalError("invalid execution contract: " + "; ".join(errors))
+        if profile.get("phase_profile") and profile["phase_profile"] not in load_json(go_root(repo) / "project.json").get("phase_profiles", {}):
+            raise RepoLocalError("unknown phase_profile: " + profile["phase_profile"])
+        task["execution_contract"] = profile
+    if "dependencies" in source:
+        if profile is None:
+            raise RepoLocalError("explicit dependencies require an execution_contract or execution_defaults")
+        errors = validate_dependencies(source["dependencies"])
+        if errors:
+            raise RepoLocalError("invalid dependencies: " + "; ".join(errors))
+        task["dependencies"] = source["dependencies"]
+
+
 def cmd_task_create(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
@@ -3770,6 +3850,18 @@ def cmd_task_create(args: argparse.Namespace) -> int:
         "review_history": [],
         "evidence": [],
     }
+    source = {}
+    if getattr(args, "execution_contract", ""):
+        source["execution_contract"] = load_json(Path(args.execution_contract))
+    if getattr(args, "dependencies", ""):
+        try:
+            source["dependencies"] = json.loads(Path(args.dependencies).read_text())
+        except (OSError, ValueError) as exc:
+            raise RepoLocalError(f"invalid dependency file: {exc}") from exc
+    apply_intake_contract(repo, task, source)
+    dependency_errors = dependency_findings(repo, task, candidates=[task])
+    if dependency_errors:
+        raise RepoLocalError("invalid dependencies: " + "; ".join(dependency_errors))
     if args.feature and args.epic:
         raise RepoLocalError("use either --feature or --epic, not both")
     target = task_path(root, "open", task_id)
@@ -3960,7 +4052,13 @@ def cmd_next(args: argparse.Namespace) -> int:
         return 1
     tasks = open_tasks(repo)
     if not tasks:
-        print("no open tasks")
+        waiting = [(t["id"], dependency_findings(repo, t, readiness=True))
+                   for _, t in open_task_records(go_root(repo))]
+        if waiting:
+            print("no eligible tasks; dependency blockers: " + "; ".join(
+                f"{tid}: {', '.join(reasons)}" for tid, reasons in waiting))
+        else:
+            print("no open tasks")
         return 0
     _, data = tasks[0]
     print(f"{data['id']} — {data['summary']}")
@@ -3977,6 +4075,9 @@ def cmd_claim(args: argparse.Namespace) -> int:
                 raise RepoLocalError(f"task is not open: {data.get('status')}")
             if data.get("claim", {}).get("agent"):
                 raise RepoLocalError(f"task already claimed by {data['claim']['agent']}")
+            dependency_errors = dependency_findings(repo, data, readiness=True)
+            if dependency_errors:
+                raise RepoLocalError("dependency preflight blocked claim: " + "; ".join(dependency_errors))
             architecture_findings = architecture_claim_findings(root, data)
             if architecture_findings:
                 raise RepoLocalError("architecture preflight blocked claim:\n- " + "\n- ".join(architecture_findings))
@@ -4962,6 +5063,8 @@ def build_parser() -> argparse.ArgumentParser:
     task_create.add_argument("--shareable-delivery", choices=["auto", "required", "none"], default="auto")
     task_create.add_argument("--acceptance", action="append", default=[])
     task_create.add_argument("--verification", action="append", default=[])
+    task_create.add_argument("--execution-contract", default="", help="JSON file: opt-in execution contract overrides")
+    task_create.add_argument("--dependencies", default="", help="JSON array file of explicit dependency references")
     task_create.set_defaults(func=cmd_task_create)
     task_outcome = task_sub.add_parser("outcome", help="Record one requested-outcome disposition with evidence")
     task_outcome.add_argument("repo")

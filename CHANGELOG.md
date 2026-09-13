@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Add opt-in task execution contracts with frozen project/task model settings,
+  typed phase/evidence records, explicit cross-project dependencies and
+  dependency-aware selection/claim. Preserve contracts through task, intent,
+  execution-brief and follow-up intake; leave legacy task records unchanged.
+  Model dispatch, worktree execution and publication remain subsequent work.
+
 - Record the exact Git claim base and identity in task state plus its matching
   claim event; `no_diff=true` compares dirty and committed claim-to-HEAD changes,
   requires task/event agreement, and rejects unavailable or non-ancestor bases.

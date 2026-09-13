@@ -28,7 +28,7 @@
     "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
     "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
   ],
-  "planning_contract": "Task dependencies and opt-in model/workspace/context/resume contracts shipped in v0.3.15–0.3.19. Verified completion/publication, migration, live topology proof and template integration remain open in their recorded tasks.",
+  "planning_contract": "Opt-in contracts, model control, owned workspaces, durable context/resume and verified completion shipped through v0.3.21. Publication, deployment, migration, live proof and template work remain in their existing tasks.",
   "execution_boundary": {
     "authorized_now": [
       "bounded task implementation",
@@ -478,7 +478,7 @@
   "execution": {
     "status": "in_progress",
     "authority": "User GO and Ga verder met de taken: go",
-    "active_task": null,
+    "active_task": "abc-06",
     "completed_tasks": [
       "abc-01",
       "abc-02",
@@ -490,7 +490,7 @@
     "requested_model": "gpt-6-astra",
     "requested_effort": "high",
     "runtime_confirmation": "user-selected; not independently attested",
-    "candidate_version": "0.3.21",
+    "candidate_version": "resolve_after_implementation",
     "verification_ref": ".go/evidence/abc-05-v021-verification.json",
     "next_ready": [
       "abc-06",

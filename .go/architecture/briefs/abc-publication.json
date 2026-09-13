@@ -1,0 +1,92 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "abc-publication",
+  "project": "go-workflow-stack",
+  "title": "Resumable task publication",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "A configured task publishes one verified version from its owned workspace, and resumes effects through exact readback without duplicate releases."
+  ],
+  "scope": {
+    "in": [
+      "Explicit version/bump/changelog profiles, final candidate proof, scoped commit and serial integration, annotated Git tag/GitHub release publication, persisted effect intent/readback, managed release handoff and cleanup separation"
+    ],
+    "out": [
+      "Deployment/live endpoint adapters (abc-07), default migrations (abc-08), live model topology proof (abc-09/10)"
+    ],
+    "systems": [
+      "go-workflow-stack"
+    ],
+    "boundaries": [
+      "Trusted canonical controller, owned task workspace, declared Git remote and explicit GitHub repository"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Self-contained verified task releases",
+        "Explicit model choice"
+      ],
+      "decision_rights": [
+        "Authorize execution and choose model; GO on 2026-09-13"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "Backward compatibility",
+        "Verifiable state transitions"
+      ],
+      "decision_rights": [
+        "Implement bounded contract choices and document compatibility behavior"
+      ]
+    }
+  ],
+  "constraints": [
+    "Require explicit push authorization from run/task execution authority; profile or model choice alone grants no publication rights. Freeze authority and profile for resume.",
+    "Extend readback profiles with an explicit publication contract for version source, semantic bump, tag prefix and changelog. Profiles without publication settings retain the existing release_pending gate.",
+    "Reserve the concrete version against exact current remote branch/tags under repository/channel coordination. Preserve user files; scope-check all preparation and staging.",
+    "Prepare version/changelog before final executed checks and critic. Content or contract changes invalidate proof; stale or diverged bases require explicit reconciliation rather than untested rebases or forced pushes.",
+    "Persist exact expected commit, annotated object, target and effect intent before commit/integration/push/publication. Reconcile actual readback after errors or lost responses; unknown observations stay pending. Never replace an existing conflicting tag/release.",
+    "Reuse workspace integration/execution locks and durable process guards. Freeze same task/run/owner/workspace; block live orphans and concurrent publication.",
+    "A delivery manifest links task/run, candidate/integration SHA, checks, critic, tag, publication and remote observations. Finish/approval use the existing strict completion gate; cleanup is independently resumable.",
+    "Retain historical profile/evidence meaning and legacy unconfigured behavior. No GitHub Actions or inferred deployment."
+  ],
+  "quality_attributes": [
+    {
+      "id": "exact-candidate",
+      "scenario": "Version preparation or integration changes candidate content",
+      "measure": "Untested content published",
+      "threshold": 0
+    },
+    {
+      "id": "idempotent-effects",
+      "scenario": "Lost acknowledgement after commit, integration, push, tag or publication",
+      "measure": "Duplicate or overwritten successful effects",
+      "threshold": 0
+    },
+    {
+      "id": "exclusive-publication",
+      "scenario": "Concurrent controller or remote branch/tag update",
+      "measure": "Stale version/proof published",
+      "threshold": 0
+    },
+    {
+      "id": "explicit-authority",
+      "scenario": "Missing authorization or profile",
+      "measure": "Implicit remote writes",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Readback must distinguish absent from unavailable; network or authorization failures are never absence.",
+    "External Git and GitHub cannot form one database transaction; durable intent and exact readback preserve pending state at every boundary."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "abc-d08-resumable-publication"
+  ]
+}

@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "task_id",
+    "project",
+    "tag",
+    "remote_url",
+    "observed_at",
+    "commit",
+    "tag_object",
+    "branch_commit",
+    "contract_digest",
+    "content_digest",
+    "schema",
+    "status",
+    "profile",
+    "refs",
+    "publication"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "project": {
+      "type": "string",
+      "minLength": 1
+    },
+    "tag": {
+      "type": "string",
+      "minLength": 1
+    },
+    "remote_url": {
+      "type": "string",
+      "minLength": 1
+    },
+    "observed_at": {
+      "type": "string",
+      "minLength": 1
+    },
+    "commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "tag_object": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "branch_commit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "contract_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "content_digest": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "schema": {
+      "const": "go-workflow.release-evidence.v1"
+    },
+    "status": {
+      "const": "verified"
+    },
+    "profile": {
+      "type": "object"
+    },
+    "refs": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{40}$"
+      }
+    },
+    "publication": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  }
+}

@@ -283,9 +283,10 @@ def checked_scope(record):
 def require_run_idle(record):
     from .run_state import state_path, read_state, require_stopped, RunStateError
     control = Path(record['control_repo'])
-    if state_path(control, record['task_id']).exists():
-        try: require_stopped(read_state(control, record['task_id']))
-        except RunStateError as exc: raise WorkspaceError(str(exc)) from exc
+    for channel in ('managed', 'completion'):
+        if state_path(control, record['task_id'], channel).exists():
+            try: require_stopped(read_state(control, record['task_id'], channel))
+            except RunStateError as exc: raise WorkspaceError(str(exc)) from exc
 
 
 def stage_workspace(control, task_id, owner, run_id):

@@ -179,8 +179,8 @@ runtime ref without mutable checkout fallbacks. The renewed budget is appended
 to the run history; old usage and phase evidence remain available.
 
 Successful build/check/critic execution currently returns `release_pending` and
-keeps the task active. Verified finish and the idempotent publisher are subsequent
-lifecycle work. No release, deployment or task completion is inferred from green
+keeps the task active. Verified finish is available through the controller completion commands below;
+the idempotent publisher remains subsequent lifecycle work. No release, deployment or task completion is inferred from green
 worker prose. Cleanup recovery only runs after verified integration, release and
 approved completion; it never starts a new builder or publisher.
 
@@ -189,3 +189,52 @@ For an explicitly moved, stopped local pair, invoke the verified runtime with
 --old-control <old-control> --old-workspace <old-worker> --workspace <new-worker>`.
 The operation retains all code and historical context, repairs Git metadata,
 and invalidates location-dependent checks. See `state-safety.md` for boundaries.
+
+## Verified lifecycle completion (v0.3.20)
+
+For tasks with an explicit execution contract, all finish and approval paths
+require the same evidence. Green phase output alone leaves work active. Configure
+`project.release_profiles.<name>` with provider `git-tag` or `github-release`, an
+explicit remote and branch, plus `repository: owner/repo` for GitHub. Set the task's
+`execution_contract.release.profile` to that name. An unknown profile blocks
+required shipping; no default publisher or deployment target is inferred.
+
+After integrating release preparation, the controller captures the actual commands:
+
+```bash
+python3 cli/go.py completion verify . --task-id T038 --agent owner --json
+python3 cli/go.py completion critic . --task-id T038 --agent owner --review-file review.json
+# Publish through the separately authorized release procedure, then read it back.
+python3 cli/go.py completion readback . --task-id T038 --agent owner --tag v1.2.0
+python3 cli/go.py completion status . --task-id T038 --agent owner
+```
+
+Before integration, pass `--workspace /registered/worker` from the control checkout;
+the primary cannot substitute its own content for a ready owned worker. Verification
+executes every task command with its timeout, cwd, revision, content digest, exit
+code and raw output. The process guard registers each child before it starts;
+a live orphan blocks new writers and finish after controller death. Commands should
+be read-only checks, because the collector holds the task lock during execution.
+
+`review.json` uses schema `go-workflow.critic-review.v1`, the exact `task_id`,
+`project`, `contract_digest`, `revision` and `content_digest` returned as the verify
+binding, and `status: passed`. It records a nonempty `reviewer`, `summary`,
+`review_mode: same_agent` or `independent`, `blocking_findings: []`, and
+`reviewed_paths` covering every changed product path. This is an explicit review
+statement; hashes provide consistency, not independent reviewer or model identity
+attestation. A same-agent review must say so.
+
+Verification, critic and release references are stored in canonical task
+`completion_evidence`; each requirement needs a verified outcome with an exact
+validated phase reference in its evidence list. Source, version, architecture or
+contract changes invalidate affected proof. Operational task, run, evidence and
+planning updates do not change the product digest. Required shipping verifies the
+annotated remote tag, released content, branch ancestry and, for GitHub, a published
+non-draft release. Readback never publishes or rewrites refs.
+
+Status distinguishes recorded and verified done records and excludes invalid
+opted-in completion from goal success. Historical records without adoption remain
+`historical_unmigrated`; status uses saved historical readback, while finish and
+approval read the remote again. Explicit `release.mode: none` still requires its
+contract reason, actual verification and review. Older runtimes do not enforce
+these proofs; preserve them and use this version or newer for opted-in tasks.

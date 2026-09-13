@@ -39,7 +39,7 @@ def validate_state(value):
     arrays = {'checks', 'phase_evidence', 'budgets', 'history', 'requirements'}
     required = strings | objects | arrays | {'schema', 'phase', 'attempt', 'check_index', 'worker_group', 'inflight'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'cleanup', 'setup_task'}
+            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd'}
             or value['schema'] != SCHEMA
             or value['phase'] not in {'setup', 'build', 'verify', 'critic', 'repair', 'release', 'cleanup', 'complete'}
             or any(not isinstance(value[name], str) or not value[name] for name in strings)
@@ -57,15 +57,18 @@ def validate_state(value):
     if flight is not None and (not isinstance(flight, dict) or not {'phase', 'nonce', 'attempt', 'started_at'}.issubset(flight)):
         raise RunStateError('Invalid phase intent')
     if value['phase'] == 'setup' and not isinstance(value.get('setup_task'), dict): raise RunStateError('Missing setup intake')
+    if 'execution_cwd' in value and (not isinstance(value['execution_cwd'], str) or not value['execution_cwd']):
+        raise RunStateError('Invalid verification execution directory')
 
 
-def state_path(control, task_id):
+def state_path(control, task_id, channel="managed"):
     registry_path(control, task_id)  # validates the identifier before path use
-    return control / '.go/runs' / task_id / 'run-state.json'
+    if channel not in {'managed', 'completion'}: raise RunStateError('Invalid process checkpoint channel')
+    return control / '.go/runs' / task_id / ('run-state.json' if channel == 'managed' else 'completion-state.json')
 
 
-def read_state(control, task_id):
-    value = read_object(state_path(control, task_id))
+def read_state(control, task_id, channel="managed"):
+    value = read_object(state_path(control, task_id, channel))
     validate_state(value)
     if value['task_id'] != task_id or value['control_repo'] != str(control):
         raise RunStateError('Managed run control/task identity mismatch')
@@ -89,7 +92,8 @@ def require_stopped(state):
     owner = state['controller']
     if owner['host'] != socket.gethostname():
         raise RunStateError('Cross-host owner liveness is unknown; explicit recovery is required')
-    if owner['pid'] != os.getpid() and _pid_alive(owner['pid']):
+    capture_released = state['phase'] == 'complete' and 'execution_cwd' in state and state.get('inflight') is None
+    if not capture_released and owner['pid'] != os.getpid() and _pid_alive(owner['pid']):
         raise RunStateError('Previous controller is still live; ownership cannot be stolen')
     if group_alive(state.get('worker_group')):
         raise RunStateError('Previous worker process group is still live; preserve its workspace')
@@ -110,26 +114,35 @@ def run_code(workspace, record, task):
 
 def protected_task(task):
     return {key: value for key, value in task.items()
-            if key not in {'requested_outcomes', 'evidence', 'review_history', 'release_receipt'}}
+            if key not in {'requested_outcomes', 'evidence', 'review_history', 'release_receipt', 'completion_evidence'}}
 
 
-def worker_enter(control, task_id, run_id, nonce, owner):
+def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
     """Called inside the new session, before the shell may launch its payload."""
-    with repository_lock(control / '.go', 'managed-state-' + task_id):
-        state = read_state(control, task_id)
+    with repository_lock(control / '.go', channel + '-state-' + task_id):
+        state = read_state(control, task_id, channel)
         if (state['run_id'] != run_id or state['owner'] != owner
-                or state.get('inflight', {}).get('nonce') != nonce
+                or (state.get('inflight') or {}).get('nonce') != nonce
                 or state['controller']['host'] != socket.gethostname()
                 or not _pid_alive(state['controller']['pid'])):
             raise RunStateError('Stale worker bootstrap; controller/run/phase no longer owns execution')
         if state.get('worker_group') is not None:
             raise RunStateError('This phase already registered a worker')
-        record = owned_record(control, task_id, owner, run_id)
-        verify_workspace(record)
-        if Path.cwd().resolve() != Path(record['path']):
-            raise RunStateError('Worker bootstrap must run in the registered workspace')
+        if channel == 'completion':
+            active_task(control, task_id, owner)
+            if not isinstance(state.get('execution_cwd'), str) or str(Path.cwd().resolve()) != state['execution_cwd']:
+                raise RunStateError('Verification bootstrap cwd changed')
+            if Path.cwd().resolve() != control:
+                record = owned_record(control, task_id, owner, run_id)
+                verify_workspace(record)
+                if str(Path.cwd().resolve()) != record['path']: raise RunStateError('Foreign verification workspace')
+        else:
+            record = owned_record(control, task_id, owner, run_id)
+            verify_workspace(record)
+            if Path.cwd().resolve() != Path(record['path']):
+                raise RunStateError('Worker bootstrap must run in the registered workspace')
         state['worker_group'] = os.getpgrp()
-        atomic_json(state_path(control, task_id), state)
+        atomic_json(state_path(control, task_id, channel), state)
         if not _pid_alive(state['controller']['pid']):
             raise RunStateError('Controller died during worker registration')
 
@@ -138,9 +151,9 @@ def process_command(command, cli_path):
     binding = PROCESS.get()
     if binding is None: return command
     import sys
-    control, task_id, run_id, nonce, owner = binding
+    control, task_id, run_id, nonce, owner, channel = binding
     bootstrap = [sys.executable, str(cli_path), 'managed', 'worker-enter', str(control),
-                 '--task-id', task_id, '--run-id', run_id, '--nonce', nonce, '--owner', owner]
+                 '--task-id', task_id, '--run-id', run_id, '--nonce', nonce, '--owner', owner, '--channel', channel]
     return shlex.join(bootstrap) + ' >/dev/null && ' + command
 
 
@@ -220,18 +233,18 @@ def relocate_run(control, task_id, owner, run_id, old_control, old_workspace, wo
 
 
 class RunSession:
-    def __init__(self, control, task_id):
-        self.control, self.task_id = control, task_id
+    def __init__(self, control, task_id, channel="managed"):
+        self.control, self.task_id, self.channel = control, task_id, channel
 
-    def load(self): return read_state(self.control, self.task_id)
+    def load(self): return read_state(self.control, self.task_id, self.channel)
 
     def update(self, **changes):
-        with repository_lock(self.control / '.go', 'managed-state-' + self.task_id):
+        with repository_lock(self.control / '.go', self.channel + '-state-' + self.task_id):
             state = self.load()
             if state['controller'] != {'host': socket.gethostname(), 'pid': os.getpid()}:
                 raise RunStateError('Controller ownership changed')
             state.update(deepcopy(changes))
-            atomic_json(state_path(self.control, self.task_id), state)
+            atomic_json(state_path(self.control, self.task_id, self.channel), state)
         return state
 
     @contextmanager
@@ -241,7 +254,7 @@ class RunSession:
         nonce = uuid.uuid4().hex
         self.update(inflight={'phase': state['phase'], 'nonce': nonce,
                               'attempt': state['attempt'], 'started_at': time.time()}, worker_group=None)
-        token = PROCESS.set((str(self.control), self.task_id, state['run_id'], nonce, state['owner']))
+        token = PROCESS.set((str(self.control), self.task_id, state['run_id'], nonce, state['owner'], self.channel))
         try:
             yield
             latest = self.load()

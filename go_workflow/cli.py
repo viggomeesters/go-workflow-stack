@@ -42,6 +42,7 @@ from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.execution_context import ContextError, create_snapshot, verify_snapshot
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
 from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run
+from go_workflow.completion import CompletionError, require_completion, lifecycle_report
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
     validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
     WorkspaceError, create_workspace, workflow_root, is_git_checkout)
@@ -166,6 +167,9 @@ def validate_project(data: dict[str, Any], rel: str) -> list[str]:
     stack_ref = data.get("stack_ref")
     immutable_ref = bool(re.fullmatch(r"v\d+\.\d+\.\d+|[0-9a-f]{40}", str(stack_ref or "")))
     require(immutable_ref, errors, f"{rel}: stack_ref must be an immutable version tag (vX.Y.Z) or full commit SHA")
+    if "release_profiles" in data:
+        from go_workflow.shipping import validate_release_profiles
+        errors.extend(validate_release_profiles(data["release_profiles"]))
     if "phase_profiles" in data:
         errors.extend(validate_phase_profiles(data["phase_profiles"]))
     if "dependency_projects" in data:
@@ -570,7 +574,7 @@ def validate_repo(repo: Path) -> list[str]:
         except (WorkspaceError, RepoLocalError) as exc:
             errors.append(f'{path}: {exc}')
     from go_workflow.run_state import validate_state
-    for path in sorted((root / 'runs').glob('*/run-state.json')):
+    for path in sorted([* (root / 'runs').glob('*/run-state.json'), * (root / 'runs').glob('*/completion-state.json')]):
         try:
             run = load_json(path)
             validate_state(run)
@@ -1486,6 +1490,7 @@ def finish_task_record(
     with repository_lock(root, f"task-{task['id']}"):
         if not active_path.is_file():
             raise StateLockError(f"active task disappeared before finish: {task['id']}")
+        require_completion(repo, task)
         finish_evidence = build_finish_evidence(repo, task, agent, evidence_summary)
         findings = finish_evidence_findings(task, finish_evidence)
         if findings:
@@ -1571,6 +1576,7 @@ def approve_completed_task(
     record: dict[str, Any],
     delivery_lock_held: bool = False,
 ) -> dict[str, Any] | None:
+    require_completion(repo, task)
     if task.get("status") != "done" or task.get("work_status") != "completed":
         raise RepoLocalError("approval requires completed work in done state")
     if task.get("review_status") == "approved":
@@ -1596,6 +1602,7 @@ def approve_completed_task_with_plan(
     record: dict[str, Any],
     plan: dict[str, Any] | None,
 ) -> dict[str, Any] | None:
+    require_completion(repo, task)
     original = json.loads(json.dumps(task))
     transaction_id = str(record.get("transaction_id") or uuid.uuid4().hex)
     record["transaction_id"] = transaction_id
@@ -2947,7 +2954,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     break
                 ship = ship_changes(repo, ship_policy, allow_push, f"go-loop: finish {task['id']}", task)
                 result["ship"].append({"task_id": task["id"], **ship})
-                if ship.get("status") in {"blocked", "failed"}:
+                if (ship.get("status") in {"blocked", "failed"}
+                        or ('execution_contract' in task and ship.get('status') in {'push_failed', 'readback_failed'})):
                     restore_active_after_failed_ship(
                         root, active_path, done_path, active_task_before_finish, evidence_path, finish_transaction_id,
                     )
@@ -3025,6 +3033,8 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 vision = load_json(root / "vision.json")
                 done_tasks = [load_json(path) for path in sorted((root / "tasks" / "done").glob("*.json"))]
                 task_evidence_complete = bool(done_tasks) and all(bool(task.get("evidence")) for task in done_tasks)
+                lifecycle = lifecycle_report(repo)
+                task_evidence_complete = task_evidence_complete and lifecycle['evidence_valid']
                 contract_errors = validate_repo(repo)
                 goal_checks: list[dict[str, Any]] = []
                 if ensure_budget(result, max_commands, started_at, max_minutes, "goal completion verification"):
@@ -3045,6 +3055,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     "contract_valid": not contract_errors,
                     "contract_errors": contract_errors,
                     "task_evidence_complete": task_evidence_complete,
+                    "lifecycle": lifecycle,
                     "project_verification": goal_checks,
                     "project_verification_passed": project_verification_passed,
                     "open_tasks": 0,
@@ -3798,6 +3809,11 @@ def cmd_status(args: argparse.Namespace) -> int:
         for state in ("open", "active", "blocked", "done"):
             counts[state] = len(list((root / "tasks" / state).glob("*.json")))
         status["tasks"] = counts
+        status['lifecycle'] = lifecycle_report(repo)
+        if status['lifecycle']['invalid_done']:
+            counts['recorded_done'] = counts['done']
+            counts['done'] -= len(status['lifecycle']['invalid_done'])
+            counts['completion_invalid'] = len(status['lifecycle']['invalid_done'])
         status["architecture"] = summarize_architecture(root)
         tasks = open_tasks(repo)
         status["setup_required"] = project_mode == "template"
@@ -4258,6 +4274,7 @@ def cmd_finish(args: argparse.Namespace) -> int:
                 raise RepoLocalError(f"task claimed by {data.get('claim', {}).get('agent')}, not {args.agent}")
             if not args.evidence.strip():
                 raise RepoLocalError("finish requires evidence")
+            require_completion(repo, data)
             outcome_findings = outcome_completion_findings(data)
             if outcome_findings:
                 raise RepoLocalError("finish blocked by incomplete requested outcomes:\n- " + "\n- ".join(outcome_findings))
@@ -4327,6 +4344,14 @@ def collect_tasks(root: Path, include_done: bool = False) -> dict[str, Any]:
                 })
         result["counts"][state] = len(list((root / "tasks" / state).glob("*.json")))
         result["records"][state] = records
+    result['lifecycle'] = lifecycle_report(root.parent)
+    invalid = result['lifecycle']['invalid_done']
+    if invalid:
+        result['counts']['recorded_done'] = result['counts']['done']
+        result['counts']['done'] -= len(invalid)
+        result['counts']['completion_invalid'] = len(invalid)
+        for record in result['records'].get('done', []):
+            if record['id'] in invalid: record['completion_findings'] = invalid[record['id']]
     return result
 
 
@@ -5398,12 +5423,26 @@ def build_parser() -> argparse.ArgumentParser:
     enter = managed_sub.add_parser('worker-enter')
     enter.add_argument('repo')
     for field in ('task-id', 'run-id', 'nonce', 'owner'): enter.add_argument('--' + field, required=True)
+    enter.add_argument('--channel', choices=['managed', 'completion'], default='managed')
     enter.set_defaults(func=cmd_managed_worker_enter)
     relocate = managed_sub.add_parser('relocate')
     relocate.add_argument('repo')
     for field in ('task-id', 'run-id', 'owner', 'old-control', 'old-workspace', 'workspace'):
         relocate.add_argument('--' + field, required=True)
     relocate.set_defaults(func=cmd_managed_relocate)
+    completion_parser = sub.add_parser('completion', help='Capture and inspect content-bound lifecycle proof')
+    completion_sub = completion_parser.add_subparsers(dest='completion_operation', required=True)
+    for operation in ('verify', 'critic', 'readback', 'status'):
+        item = completion_sub.add_parser(operation)
+        item.add_argument('repo')
+        item.add_argument('--task-id', required=True)
+        item.add_argument('--agent', default='agent')
+        item.add_argument('--workspace', default='')
+        item.add_argument('--json', action='store_true')
+        if operation == 'verify': item.add_argument('--timeout-seconds', type=int, default=900)
+        if operation == 'critic': item.add_argument('--review-file', required=True)
+        if operation == 'readback': item.add_argument('--tag', required=True)
+        item.set_defaults(func=cmd_completion_status if operation == 'status' else cmd_completion)
     return parser
 
 
@@ -5653,7 +5692,7 @@ def cmd_context_verify(args: argparse.Namespace) -> int:
 
 
 def cmd_managed_worker_enter(args: argparse.Namespace) -> int:
-    worker_enter(Path(args.repo).resolve(), args.task_id, args.run_id, args.nonce, args.owner)
+    worker_enter(Path(args.repo).resolve(), args.task_id, args.run_id, args.nonce, args.owner, args.channel)
     return 0
 
 
@@ -5664,12 +5703,50 @@ def cmd_managed_relocate(args: argparse.Namespace) -> int:
     return 0
 
 
+def completion_target(args):
+    control = Path(args.repo).resolve()
+    if args.workspace:
+        workspace = Path(args.workspace).resolve()
+        record = registered_workspace(workspace)
+        if (not record or record['control_repo'] != str(control) or record['task_id'] != args.task_id
+                or record['owner'] != args.agent):
+            raise CompletionError('Completion workspace does not match the owned control/task binding')
+        return workspace
+    return control
+
+
+def cmd_completion(args: argparse.Namespace) -> int:
+    from go_workflow.completion import capture_verification, record_critic
+    from go_workflow.shipping import capture_release
+    repo = completion_target(args)
+    if args.completion_operation == 'verify':
+        artifact, ref = capture_verification(repo, args.task_id, args.agent, timeout_seconds=args.timeout_seconds)
+        result = {'status': artifact['status'], 'evidence': ref, 'binding': {key: artifact[key] for key in ('task_id', 'project', 'contract_digest', 'revision', 'content_digest')}}
+    elif args.completion_operation == 'critic':
+        ref = record_critic(repo, args.task_id, args.agent, load_json(Path(args.review_file)))
+        result = {'status': 'passed', 'evidence': ref}
+    else:
+        proof, ref = capture_release(repo, args.task_id, args.agent, args.tag)
+        result = {'status': proof['status'], 'evidence': ref, 'commit': proof['commit'], 'tag': proof['tag']}
+    print(json.dumps(result, indent=2))
+    return 0 if result['status'] in {'passed', 'verified'} else 1
+
+
+def cmd_completion_status(args: argparse.Namespace) -> int:
+    from go_workflow.completion import completion_findings
+    repo = completion_target(args)
+    task = active_task(go_root(repo).parent, args.task_id)
+    findings = completion_findings(repo, task, current=task['status'] != 'done')
+    print(json.dumps({'task_id': task['id'], 'eligible': not findings, 'findings': findings}, indent=2))
+    return 1 if findings else 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

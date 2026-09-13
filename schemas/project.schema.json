@@ -189,6 +189,70 @@
           ]
         }
       }
+    },
+    "release_profiles": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "remote",
+          "branch"
+        ],
+        "properties": {
+          "provider": {
+            "enum": [
+              "git-tag",
+              "github-release"
+            ]
+          },
+          "remote": {
+            "type": "string",
+            "minLength": 1
+          },
+          "branch": {
+            "type": "string",
+            "minLength": 1
+          },
+          "repository": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$"
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "provider": {
+                  "const": "github-release"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "repository"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "provider": {
+                  "const": "git-tag"
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "repository"
+                ]
+              }
+            }
+          }
+        ]
+      }
     }
   },
   "$defs": {

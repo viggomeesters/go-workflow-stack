@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.20 — verified lifecycle completion
+
+- Opted-in finish, review approval and completion reporting share content-bound
+  verification, critic and required release proof; prose cannot replace checks.
+- Capture actual declared commands with raw results and an orphan-worker guard.
+  Git-tag and GitHub release readback bind annotated tags and remote branch SHAs.
+- Failed opted-in push/readback restores active state. Legacy history remains
+  explicitly unmigrated; publication automation remains subsequent work.
+
 ## 0.3.19 — managed phase resume
 
 - Resume the same managed task from confirmed build/verification/critic checkpoints with renewed budgets.

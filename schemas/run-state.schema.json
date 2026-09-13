@@ -137,6 +137,10 @@
     },
     "setup_task": {
       "type": "object"
+    },
+    "execution_cwd": {
+      "type": "string",
+      "minLength": 1
     }
   },
   "additionalProperties": false

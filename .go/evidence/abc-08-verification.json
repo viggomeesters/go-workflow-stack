@@ -1,7 +1,7 @@
 {
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-08",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "db776f1b75dd6c194c36b43278b008482cd0bd48",
   "checks": [
     "368 Linux tests (197 smoke + 171 focused)",
@@ -28,5 +28,12 @@
     "Only repository skill source is updated; no global skill installation or configuration",
     "Model availability is checked at actual execution; adoption does not make live model calls"
   ],
-  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Selected historical workflow lessons were implemented in the authorized product scope."
+  "self_reflect": "Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Selected historical workflow lessons were implemented in the authorized product scope.",
+  "final_tag_commit": "c54c86949ff5605d91613e7645b7fa6b2c1bbf99",
+  "final_tag_checks": [
+    "197 smoke tests passed on annotated tag",
+    "368 full tests passed on matching candidate content",
+    "immutable template and standalone distribution gates passed"
+  ],
+  "publication_ref": ".go/evidence/abc-08-release.json"
 }

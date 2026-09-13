@@ -88,7 +88,7 @@
       "id": "abc-selective-legacy-reuse",
       "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
       "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
-      "enforcement": "abc-01/03/05 reuse phase contracts, selective context and legacy push-fail/finish-before-ship regressions. Broader migration and end-to-end proof remain abc-08/10.",
+      "enforcement": "abc-01/03/05 phase, context and failure proof plus abc-08 v0.3.24 explicit migration and complete intake provenance shipped. Wider property/E2E proof remains abc-10.",
       "status": "proposed",
       "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"

@@ -1,0 +1,305 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "autonomous-go-runtime-v10",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "autonomous-go-runtime",
+    "title": "Autonomous Go Runtime"
+  },
+  "release": {
+    "version": 10,
+    "status": "released",
+    "created_at": "2026-09-13T20:09:52+02:00",
+    "supersedes": "autonomous-go-runtime-v9"
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "blocked"
+  },
+  "sections": {
+    "summary": "Delivery voor Autonomous Go Runtime.",
+    "delivered_scope": [
+      "Add machine-readable go auto preflight and run envelope",
+      "Document how Hermes executes go auto beyond CLI policy",
+      "Harden router state and no-.go repair behavior",
+      "Improve go spike task scope presets for code/docs workflow repos",
+      "Add go-auto handoff emitter for Hermes/Bertus",
+      "Define go auto command-train contract",
+      "Upgrade auto --execute beyond verify-only",
+      "Patch Hermes skill so go auto starts tool execution immediately",
+      "Add continuation budget and compact progress checkpoints",
+      "Implement bare go universal router",
+      "tot bare go echt werkt",
+      "Separate bare go planning from state mutation",
+      "Implement real critic/repair loop in go-loop executor",
+      "Benchmark bare go autonomy against Ralph/Oh-My-Codex criteria",
+      "Add Ralph-style autonomous executor adapter",
+      "Promote autonomy benchmark after executor proof",
+      "Correct Ralph/OMX benchmark overclaims",
+      "Persist per-attempt Ralph artifacts",
+      "Add semantic critic and follow-up task generation",
+      "Add Codex repair adapter and real codebase fixture",
+      "Add ship policy and resume state",
+      "Enforce vision principles acceptance critic and continuation before done",
+      "Add a safe default real-agent build and deep critic path",
+      "Prove the vision-level goal before a run can report done",
+      "Prove a restartable multi-task autonomous campaign end to end",
+      "Make resume state portable and select Hermes intentionally",
+      "Add WSL doctor, repo launcher, and stack compatibility contract",
+      "Harden stack updates and prove a Linux Hermes campaign",
+      "Modularize the CLI and add schema migrations plus a stable agent adapter protocol",
+      "Extract execution domains and make built-in adapters emit the native JSON protocol",
+      "Make task claims and JSON/JSONL state crash-safe and concurrency-safe",
+      "Add standalone distribution, diverse project pilots, and a fail-closed live Hermes acceptance",
+      "Implement semantic GO task decomposition: preserve every numbered or bulleted request item as traceable task acceptance while allowing the agent to bundle coherent items or split independent work instead of blindly creating one task per number.",
+      "Release go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+      "Fix installed stack-update source resolution",
+      "Harden GO multi-item execution closure",
+      "Add default agent capacity policy contract",
+      "Separate work status from review status",
+      "Require finish evidence attribution",
+      "Track usage and billing mode by task/run",
+      "Document Agent Teams mining and rollout order",
+      "Release v0.3.8 with agent capacity, review lifecycle, and attributed finish evidence",
+      "Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+      "Taak-, model- en releasecontract valideren",
+      "Bestaande projecten en intakepaden migreren",
+      "Modelkeuze afdwingen en gebruik registreren",
+      "Workers starten met complete contextoverdracht",
+      "Actieve taken en fases veilig hervatten",
+      "Taakbranches en worktrees veilig beheren",
+      "Afronding koppelen aan geverifieerde shipping",
+      "Versies en releases hervatbaar publiceren",
+      "Deployments en draaiende versie verifiëren"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Add machine-readable go auto preflight and run envelope",
+        "summary": "Added go-auto run_envelope with preflight/budget/run-until/checkpoint/result schema; verified pytest -q and make check."
+      },
+      {
+        "label": "Document how Hermes executes go auto beyond CLI policy",
+        "summary": "Documented Hermes executor boundary for go auto: execution_policy plus run_envelope, immediate tool-call loop, verification/recheck/devil/harden, finish evidence, self-reflect, and compact handoff. Verified pytest -q and make check."
+      },
+      {
+        "label": "Harden router state and no-.go repair behavior",
+        "summary": "Router now distinguishes create_repo from repair_existing_repo and repair examples include --skip-repo-complete; direct tests cover existing git repo without .go. Verified pytest -q and make check."
+      },
+      {
+        "label": "Improve go spike task scope presets for code/docs workflow repos",
+        "summary": "Self-reflect follow-up implemented: go spike now has --task-scope code|docs; default code generates tasks with cli/go.py, tests/**, docs/** and Makefile scope, preventing manual scope repair for implementation repos. Verified pytest -q and make check."
+      },
+      {
+        "label": "Add go-auto handoff emitter for Hermes/Bertus",
+        "summary": "Implemented go auto/go-loop --emit-handoff with go-workflow.agent-handoff.v1 including repo, mode, target runtime, tasks, scope, gates, expected evidence, execution_policy, and run_envelope. Verified pytest -q, make check, and go-project-template make check."
+      },
+      {
+        "label": "Define go auto command-train contract",
+        "summary": "Documented bare-go autonomous loop contract; updated vision/principles, README, router docs, runtime skill, CLI loop contract, and tests; verification passed: python3 cli/go.py validate ., make check, pytest -q, git diff --check"
+      },
+      {
+        "label": "Upgrade auto --execute beyond verify-only",
+        "summary": "Upgraded auto --execute result model with commands_run/checkpoints/budget_exhausted, max command/minute budget enforcement, own-lifecycle dirty continuation across multiple tasks, actionable safety/blocked states, and regression test for two-task execution; verification: pytest -q 10 passed; make check passed"
+      },
+      {
+        "label": "Patch Hermes skill so go auto starts tool execution immediately",
+        "summary": "Added explicit no-command-spam rule and hard-gate-only ask policy to repo-local-agent-workflow skill; verified with python3 cli/go.py validate ., template-check JSON, git diff --check"
+      },
+      {
+        "label": "Add continuation budget and compact progress checkpoints",
+        "summary": "Added go auto/go-loop budget fields max_minutes, max_commands, checkpoint_every_tasks, quiet telegram_policy, command/checkpoint result accounting, tests for budget envelope and checkpoints; verification: pytest -q 10 passed; make check passed; git diff --check passed"
+      },
+      {
+        "label": "Implement bare go universal router",
+        "summary": "Added bare  CLI universal router that distinguishes missing repo/missing .go/invalid contract from repo-local execution, creates a scoped task from actionable intent when no open task exists, returns go-auto/go-loop plan, and has regression test; verification: pytest -q 10 passed; make check passed"
+      },
+      {
+        "label": "tot bare go echt werkt",
+        "summary": "Self-reflect follow-up resolved: bare go now has CLI subcommand, intent task creation, go-loop routing, budgeted handoff, skill no-command-spam mandate, and full green verification; checks: python3 cli/go.py validate ., make check, pytest -q 10 passed, git diff --check"
+      },
+      {
+        "label": "Separate bare go planning from state mutation",
+        "summary": "Added explicit bare go --write boundary: default go --json with intent is non-mutating and returns proposed_task/write_boundary; --write or --execute materializes intent-created tasks. Verification: pytest -q 10 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed."
+      },
+      {
+        "label": "Implement real critic/repair loop in go-loop executor",
+        "summary": "Added structured go-loop/auto execute attempts with build/verify/critic/repair/judge fields, auto.attempt events, and failing verification critic evidence before blocking. Verification: pytest -q 11 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed."
+      },
+      {
+        "label": "Benchmark bare go autonomy against Ralph/Oh-My-Codex criteria",
+        "summary": "Added docs/autonomy-benchmark.md with PASS/PARTIAL/MISS Ralph/Oh-My-Codex matrix and promotion criteria; linked from go-autonomous-loop docs; test asserts proven/partial/missing claims. Verification: pytest -q 12 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed."
+      },
+      {
+        "label": "Add Ralph-style autonomous executor adapter",
+        "summary": "Implemented pluggable Ralph-style executor adapter hooks: --build-command, --critic-command, --repair-command, --max-attempts; go-loop now runs bounded attempt ladder with build/verify/critic/repair/judge evidence and can repair a failing fixture without user intervention. Verification: pytest -q 13 passed; make check passed; validate passed; git diff --check passed."
+      },
+      {
+        "label": "Promote autonomy benchmark after executor proof",
+        "summary": "Promoted autonomy benchmark to PASS where adapter proof exists: docs/autonomy-benchmark.md now states Ralph/Oh-My-Codex-style runtime via adapter boundary; docs/go-autonomous-loop.md and repo-local skill document build/critic/repair adapter hooks and honest limits. Verification: pytest -q 13 passed; make check passed; validate passed; git diff --check passed."
+      },
+      {
+        "label": "Correct Ralph/OMX benchmark overclaims",
+        "summary": "Corrected Ralph/OMX benchmark overclaim: full autonomous runtime and equivalence are PARTIAL until default adapters/artifacts/followups/resume/ship policy are proven. Added regression test preventing blanket PASS equivalence claim. Verification: pytest -q and make check passed."
+      },
+      {
+        "label": "Persist per-attempt Ralph artifacts",
+        "summary": "Added per-attempt artifact ledger under .go/runs/<task-id>/attempt-XX/ with prompt.md, verify.log, critic.md, diff.patch, verdict.json. Attempt JSONL now links artifacts. Verification: pytest -q 13 passed; make check passed."
+      },
+      {
+        "label": "Add semantic critic and follow-up task generation",
+        "summary": "Added built-in semantic critic flag and critic follow-up generation. --semantic-critic blocks generic/default acceptance or missing verification; --followup-on-block creates scoped .go follow-up tasks from critic findings. Verification: pytest -q 14 passed; make check passed."
+      },
+      {
+        "label": "Add Codex repair adapter and real codebase fixture",
+        "summary": "Added --repair-agent codex/hermes adapter option and real mini Python package repair fixture. go-loop now proves failing pytest package repair without user intervention, beyond toy answer.txt. Verification: pytest -q 16 passed; make check passed."
+      },
+      {
+        "label": "Add ship policy and resume state",
+        "summary": "Added durable .go/runs/latest.json resume state and explicit ship policy none/local-commit/push with push gated by --allow-push. Local commit ship test proves clean git after go-loop execution. Updated benchmark and skill docs. Verification: pytest -q 17 passed; validate passed; make check passed; git diff --check passed."
+      },
+      {
+        "label": "Enforce vision principles acceptance critic and continuation before done",
+        "summary": "Contract hardening complete: cross-file project/hierarchy/task validation; pre-claim contract_gate for generic acceptance; semantic critic default-on; GO_CONTEXT_JSON carries vision/principles/hierarchy/evidence/decisions; process-group timeouts; open work after budget reports budget_exhausted; 35 pytest tests and make check pass."
+      },
+      {
+        "label": "Add a safe default real-agent build and deep critic path",
+        "summary": "38 smoke tests pass; make check passes; agent-mode tasks safely select Codex/Hermes, mechanical mode opts out, deep critic BLOCK triggers repair and PASS is required, and prompt artifacts retain vision/principles."
+      },
+      {
+        "label": "Prove the vision-level goal before a run can report done",
+        "summary": "Goal completion hardened: blocked/active tasks prevent done; task budget with open work reports budget_exhausted; final audit requires valid linked contract, done-task evidence, declared success metrics, and passing project default verification. 37 pytest tests pass."
+      },
+      {
+        "label": "Prove a restartable multi-task autonomous campaign end to end",
+        "summary": "39 smoke tests pass; deterministic two-task agent campaign builds, receives critic BLOCK, repairs to PASS, commits, stops on task budget, executes persisted absolute resume command, completes second task, and passes final goal audit; stack/template make checks and diff checks pass together."
+      },
+      {
+        "label": "Make resume state portable and select Hermes intentionally",
+        "summary": "RED proved GO_EXECUTOR_AGENT was ignored and resume embedded a Mac absolute path; GREEN proves env default with explicit override, portable relocated-stack resume, uncommitted lifecycle continuation, 41 tests, and make check."
+      },
+      {
+        "label": "Add WSL doctor, repo launcher, and stack compatibility contract",
+        "summary": "RED proved doctor and launcher absent and future stack requirements ignored; GREEN adds v0.2.0 compatibility gating, WSL/Hermes doctor, portable ./go launcher for template and generated projects, 44 tests, and paired template checks."
+      },
+      {
+        "label": "Harden stack updates and prove a Linux Hermes campaign",
+        "summary": "RED proved existing bootstrap fetched without fast-forwarding; GREEN fast-forwards clean main and blocks divergence, deterministic campaign now uses Hermes CLI protocol, opt-in live script returns NOT PROVEN without Hermes, Linux and template workflows parse, 46 tests pass on macOS and Debian Python 3.12 Docker, both make checks pass in Linux."
+      },
+      {
+        "label": "Modularize the CLI and add schema migrations plus a stable agent adapter protocol",
+        "summary": "TDD cycles: migrate command absent -> transactional dry-run/apply/idempotence and rollback green; custom adapter lacked protocol env -> versioned request/result green; invalid result validator absent -> fail-closed validator green; modular/schema artifacts absent -> importable package and JSON schemas green. Regression: 55 tests, make check, editable-package import, release-check v0.3.0, and template local WSL check all passed. Critic: version compatibility restored through go version --json plus legacy fallback; no hosted automation references remain."
+      },
+      {
+        "label": "Extract execution domains and make built-in adapters emit the native JSON protocol",
+        "summary": "60 pytest tests and make check passed; routing, task-state, and native-adapter owners are importable; Codex/Hermes build, critic, and repair require validated agent-adapter-result.v1 output; malformed or missing native protocol fails closed while custom legacy adapters remain compatible."
+      },
+      {
+        "label": "Make task claims and JSON/JSONL state crash-safe and concurrency-safe",
+        "summary": "65 pytest tests and make check passed; concurrent claim race has exactly one winner and one claim event; 90 concurrent JSONL appends remain complete and parseable; live flock cannot be stolen; killed owner is recovered with stale evidence; JSON writes and queue transitions use fsync plus atomic replace/move."
+      },
+      {
+        "label": "Add standalone distribution, diverse project pilots, and a fail-closed live Hermes acceptance",
+        "summary": "65 pytest tests, make check, check-pilots, and isolated uv tool install passed; Python/frontend/existing pilots match recorded metrics; live Hermes gate refuses unauthorized and missing-binary runs with exit 2 and creates no proof. Real proof remains NOT PROVEN on this Mac because hermes is absent and SSH host hermes is unresolved; a separate WSL evidence task follows."
+      },
+      {
+        "label": "Implement semantic GO task decomposition: preserve every numbered or bulleted request item as traceable task acceptance while allowing the agent to bundle coherent items or split independent work instead of blindly creating one task per number.",
+        "summary": "TDD RED proved numbered intents collapsed into one opaque summary and plain numbered lines were not parsed. GREEN preserves requested_outcomes/R1..Rn acceptance, semantic bundle/split policy, detected repo code paths, 91 pytest tests passed, make check passed, validate passed."
+      },
+      {
+        "label": "Release go-workflow-stack v0.3.6 so semantic GO intent decomposition and the corrected legacy contract migration are available through the installed Hermes runtime, with version alignment, regression proof, annotated tag, GitHub release readback, and local tool upgrade.",
+        "summary": "release-check v0.3.6 passed: 91 tests, .go validation, template pairing, Linux/WSL check; semantic GO outcomes, dynamic release scope, version alignment, changelog, and migration regression verified"
+      },
+      {
+        "label": "Fix installed stack-update source resolution",
+        "summary": "R1-R3 verified: GO_STACK honored, site-packages rejected as checkout, installed-style regression green. v0.3.7 release preflight passed with 92 tests and template pairing; annotated tag, GitHub release, local install, and v0.3.7 template follow-up proceed from the release commit."
+      },
+      {
+        "label": "Harden GO multi-item execution closure",
+        "summary": "RED: autonomous 7/8 regression initially failed due adapter selection; corrected no-op build boundary. GREEN: focused 2 tests passed. Regression: full 94 tests passed; make check passed; .go validate and intent SHA readback passed. R1-R4 each verified with item-specific evidence. Recheck: docs/skill require exact prior-message text plus durable source_ref; changelog updated. Ship: implementation commit 14aa498; no push/release requested."
+      },
+      {
+        "label": "Add default agent capacity policy contract",
+        "summary": "Implemented capacity policy module and exposed it in auto/go-loop handoff execution_policy.capacity. Evidence: targeted pytest capacity tests 3 passed; full uv pytest 97 passed; make check passed; python3 cli/go.py validate . passed; git diff --check passed; current handoff serializes overlapping broad tasks and allows disjoint scopes."
+      },
+      {
+        "label": "Separate work status from review status",
+        "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py,docs/agent-team-capacity-patterns.md; verification=uv run --no-project --with pytest pytest -q -> 99 passed; validation=python3 cli/go.py validate . ok; make_check=make check passed; runtime=hermes; critic=manual recheck passed: completed work remains review_status=review until task review approves, needs_fix preserves review_history"
+      },
+      {
+        "label": "Require finish evidence attribution",
+        "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py; verification=uv run --no-project --with pytest pytest -q -> 98 passed; validation=python3 cli/go.py validate . ok; diff_check=git diff --check ok and git diff --cached --check ok; runtime=hermes; critic=manual recheck passed: finish gate now rejects missing attribution and stores schema go-workflow.finish-evidence.v1"
+      },
+      {
+        "label": "Track usage and billing mode by task/run",
+        "summary": "changed_files=go_workflow/cli.py,tests/test_smoke.py,docs/agent-team-capacity-patterns.md; verification=uv run --no-project --with pytest pytest -q -> 100 passed; validation=python3 cli/go.py validate . ok; make_check=make check passed; runtime=hermes; billing_mode=subscription; owner=viggo; api_equivalent_cost_usd=unknown; critic=manual recheck passed: subscription/free costs labeled api_equivalent_not_invoice_cost not invoice cost"
+      },
+      {
+        "label": "Document Agent Teams mining and rollout order",
+        "summary": "docs=docs/agent-team-capacity-patterns.md,docs/go-autonomous-loop.md,docs/architecture.md; provenance=777genius/agent-teams-ai AGPL-3.0 pattern-mining only no source copied; validation=python3 cli/go.py validate . ok; diff_check=git diff --check ok; template=python3 cli/go.py template-check ../go-project-template --json ok"
+      },
+      {
+        "label": "Release v0.3.8 with agent capacity, review lifecycle, and attributed finish evidence",
+        "summary": "no_diff=true; pre_finish_state=git status --porcelain returned empty at pushed code HEAD 1f6aeb87301f7437b279b0be84b4cedc3f2b97be before lifecycle mutation; verification_command=/usr/local/bin/go-workflow-release-check --repo . 0.3.8 --validate-existing; verification_result=passed 106 historical tests plus standalone distribution after current 127-test gate and go validate; post_finish_lifecycle_status=0 open 0 active 0 blocked 81 done before closure commit; release_identity=annotated tag object 7c06a42a760630c532bce4d984468da8c7bb8091 resolves to commit c30e11d580167a1b088cd84a5487ae02cb904449; launcher=root:root mode 755 sha256 d041522c4e1a46c976bffffd64b102bd2c2eab5623a02d5fa566c83914d25cbe; template_pairing=immutable go-project-template commit 3956fc92f9e99520756d10f08373635182f22d67; critic=prior isolated Hermes safe-mode code review returned VERDICT B with no ship blocker and canonical integration closed its nonblocking test-depth concern; runtime=hermes; model=gpt-5.6-sol; billing_mode=subscription; owner=viggo"
+      },
+      {
+        "label": "Make completed task evidence audit-tight: bind a done task to its final commit, push target, and remote readback; make no_diff compare the claim base against the final committed tree instead of merely observing a clean worktree. Add regression tests for post-claim commits, clean-but-changed worktrees, push/readback evidence, and fail-closed missing/mismatched provenance.",
+        "summary": "verification_command=uv run --no-project --with pytest --with jsonschema pytest -q && make check; verification_result=204 passed and make check passed; changed_files=go_workflow/cli.py, tests/test_smoke.py, docs/architecture.md, CHANGELOG.md; test_coverage=missing base, forged task/event base, nonancestor equal-tree base, committed post-claim diff, remote mismatch, pushRemote precedence, exact push/readback provenance; reviewer=independent exact-index staged critic; critic=passed verdict A on 7e7e1bca70a65230720281e49a2dd02cf6cfa41de83401e288b9549d7b2adab2; architecture_conformance=passed architecture-lane-governance; requested_outcomes=R1 verified; no_diff=false"
+      },
+      {
+        "label": "Taak-, model- en releasecontract valideren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-01-candidate.log,.go/evidence/abc-01-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-01.json,.go/vision.json,CHANGELOG.md,docs/releases/v0.3.15.md,docs/task-release-contract.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/execution_contracts.py,pyproject.toml,schemas/execution-brief.schema.json,schemas/phase-contract.schema.json,schemas/project.schema.json,schemas/task.schema.json,schemas/verification-evidence.schema.json,scripts/release-check-inner.sh,tests/test_abc_contracts.py,tests/test_abc_phase_contracts.py,tests/test_smoke.py; verification_command=pytest smoke architecture ABC contracts and phases, make check, candidate and tagged release-check; verification_result=passed (225 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.15 0dbffb09766a3a1d10f769195f81638923eafba9 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.15; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change."
+      },
+      {
+        "label": "Bestaande projecten en intakepaden migreren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-08-candidate.log,.go/evidence/abc-08-focused.log,.go/evidence/abc-08-integration.json,.go/evidence/abc-08-make.log,.go/evidence/abc-08-verification.json,.go/evidence/events.jsonl,.go/project.json,.go/runs/abc-08/completion-state.json,.go/runs/abc-08/completion/command-1b042d9d485742bda238a0d9108aa107.json,.go/runs/abc-08/completion/command-21ed718080c543ebb07653dba7d0a976.json,.go/runs/abc-08/completion/command-537755a4e73a453297c7030d2271463a.json,.go/runs/abc-08/completion/critic-32835d713a784ebbb712e60ac6fde816.json,.go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json,.go/tasks/active/abc-08.json,.go/workspaces/abc-08.json,CHANGELOG.md,docs/go-command-router.md,docs/releases/v0.3.24.md,docs/stack-updates.md,docs/task-release-contract.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/migrations.py,go_workflow/run_state.py,go_workflow/stack_update.py,pyproject.toml,schemas/lifecycle-adoption.schema.json,schemas/lifecycle-migration-journal.schema.json,schemas/lifecycle-review-bundle.schema.json,schemas/lifecycle-settings.schema.json,schemas/stack-update-plan.schema.json,scripts/release-check-inner.sh,skills/repo-local-agent-workflow/SKILL.md,tests/test_abc_migration.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion release deployment migration, make check, candidate/tagged release-check and canonical completion verify; verification_result=passed (368 Linux tests; 19 lifecycle migration cases; candidate and final tag gates; distribution/template pairing); critic=passed same-agent review of all changed content; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.24 c54c86949ff5605d91613e7645b7fa6b2c1bbf99 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.24; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product proof improvements tested in scope."
+      },
+      {
+        "label": "Modelkeuze afdwingen en gebruik registreren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-02-candidate.log,.go/evidence/abc-02-catalog.json,.go/evidence/abc-02-focused.log,.go/evidence/abc-02-make.log,.go/evidence/abc-02-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-02.json,CHANGELOG.md,docs/agent-adapter-protocol.md,docs/releases/v0.3.16.md,go_workflow/adapter_protocol.py,go_workflow/adapters.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/model_profiles.py,pyproject.toml,schemas/agent-adapter-request.schema.json,schemas/agent-adapter-result.schema.json,scripts/release-check-inner.sh,tests/test_abc_models.py; verification_command=pytest smoke architecture ABC contracts and phases, make check, candidate and tagged release-check; verification_result=passed (240 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.16 b3b8bcf740c30bd5f8e6b0b5d48201c7e7168002 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.16; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change."
+      },
+      {
+        "label": "Workers starten met complete contextoverdracht",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-03-candidate.log,.go/evidence/abc-03-focused.log,.go/evidence/abc-03-integration.json,.go/evidence/abc-03-make.log,.go/evidence/abc-03-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-03.json,.go/workspaces/abc-03.json,CHANGELOG.md,docs/agent-adapter-protocol.md,docs/releases/v0.3.18.md,go_workflow/adapter_protocol.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/execution_context.py,go_workflow/worktrees.py,pyproject.toml,schemas/agent-adapter-request.schema.json,schemas/execution-context.schema.json,scripts/release-check-inner.sh,tests/test_abc_context.py; verification_command=pytest smoke architecture ABC contracts phases models workspaces contexts, make check, candidate and tagged release-check; verification_result=passed (270 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.18 ed6cd0fa145961308811a94893ee95695ff1c3ef https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.18; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change."
+      },
+      {
+        "label": "Actieve taken en fases veilig hervatten",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-04-candidate-unsynchronized.log,.go/evidence/abc-04-candidate.log,.go/evidence/abc-04-focused.log,.go/evidence/abc-04-integration.json,.go/evidence/abc-04-make.log,.go/evidence/abc-04-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-04.json,.go/workspaces/abc-04.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.19.md,docs/state-safety.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/run_state.py,go_workflow/worktrees.py,pyproject.toml,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_resume.py; verification_command=pytest smoke architecture ABC contracts phases models workspaces contexts, make check, candidate and tagged release-check; verification_result=passed (281 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.19 41c211fd6da52677ad212917e8be8085616fd0a4 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.19; Self-reflect: canonical version contract synchronized before the successful candidate rerun; failed gate retained as evidence; no skill/memory/config change."
+      },
+      {
+        "label": "Taakbranches en worktrees veilig beheren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-11-candidate.log,.go/evidence/abc-11-focused.log,.go/evidence/abc-11-make.log,.go/evidence/abc-11-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/tasks/active/abc-11.json,CHANGELOG.md,docs/releases/v0.3.17.md,docs/task-workspaces.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/execution_contracts.py,go_workflow/model_profiles.py,go_workflow/state_io.py,go_workflow/worktrees.py,pyproject.toml,schemas/workspace-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_worktrees.py; verification_command=pytest smoke architecture ABC contracts phases models worktrees, make check, candidate and tagged release-check; verification_result=passed (256 tests plus release gates, distribution and template pairing); critic=passed same-agent adversarial review with repaired regressions; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.17 778d27dc7ba89c1986ec1c5d257e5c3d315e0675 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.17; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change."
+      },
+      {
+        "label": "Afronding koppelen aan geverifieerde shipping",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-05-candidate-superseded.log,.go/evidence/abc-05-candidate.log,.go/evidence/abc-05-clone-red.log,.go/evidence/abc-05-focused.log,.go/evidence/abc-05-integration.json,.go/evidence/abc-05-make.log,.go/evidence/abc-05-outcome-interop-failure.json,.go/evidence/abc-05-outcome-red.log,.go/evidence/abc-05-prepublication-reconciliation.json,.go/evidence/abc-05-release.json,.go/evidence/abc-05-tag-superseded.log,.go/evidence/abc-05-tag.log,.go/evidence/abc-05-v021-candidate.log,.go/evidence/abc-05-v021-focused.log,.go/evidence/abc-05-v021-integration.json,.go/evidence/abc-05-v021-make.log,.go/evidence/abc-05-v021-verification.json,.go/evidence/abc-05-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/runs/abc-05/completion-state.json,.go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json,.go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json,.go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json,.go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json,.go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json,.go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json,.go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json,.go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json,.go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json,.go/runs/abc-05/completion/critic-16b75e5486a94a568b7417e947cf96cb.json,.go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json,.go/runs/abc-05/completion/critic-4936aa4aaf0a44a39241ce80ab9df912.json,.go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json,.go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json,.go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json,.go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json,.go/tasks/active/abc-05.json,.go/workspaces/abc-05.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.20.md,docs/releases/v0.3.21.md,go_workflow/cli.py,go_workflow/completion.py,go_workflow/constants.py,go_workflow/run_state.py,go_workflow/shipping.py,go_workflow/worktrees.py,pyproject.toml,schemas/project.schema.json,schemas/release-evidence.schema.json,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_completion.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion, make check, candidate/tagged release-check and actual canonical completion verify; verification_result=passed (303 Linux tests; 22 focused macOS; tagged gate; distribution/template pairing); critic=passed same-agent with all product paths reviewed; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.21 656d1a42cb8f7cec76308a876efbfaf0c6a009be https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.21; Self-reflect: process-boundary guard reused and requirement evidence loopholes closed with regressions; no global skill/memory changes."
+      },
+      {
+        "label": "Versies en releases hervatbaar publiceren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-06-candidate-final.log,.go/evidence/abc-06-focused.log,.go/evidence/abc-06-handoff.log,.go/evidence/abc-06-integration.json,.go/evidence/abc-06-make-final.log,.go/evidence/abc-06-queue-fix.log,.go/evidence/abc-06-queue-red.log,.go/evidence/abc-06-reconciliation.json,.go/evidence/abc-06-verification.json,.go/evidence/events.jsonl,.go/project.json,.go/runs/abc-06/completion-state.json,.go/runs/abc-06/completion/command-3f97c0d2a1924c67b24a7bd474de1e9b.json,.go/runs/abc-06/completion/command-4fc1d249f81943c9af56a7f791e82162.json,.go/runs/abc-06/completion/command-596722ea3ebe4af792bb14c99147dda9.json,.go/runs/abc-06/completion/command-803fb045f0cc4cb481805f419a029b04.json,.go/runs/abc-06/completion/command-96ccc8ba49fc44f4b779b3c25d23df78.json,.go/runs/abc-06/completion/command-e6af2e18c3dd484f8c0f1242e5198d6f.json,.go/runs/abc-06/completion/critic-cf94c74d62dd483194de6f9d37f77dfb.json,.go/runs/abc-06/completion/verification-58c499ba954f414d9a510a153f8658ef.json,.go/runs/abc-06/completion/verification-642050e82a1247fa922f930c0bf26145.json,.go/tasks/active/abc-06.json,.go/workspaces/abc-06.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.22.md,docs/task-release-contract.md,go_workflow/cli.py,go_workflow/completion.py,go_workflow/constants.py,go_workflow/release.py,go_workflow/run_state.py,go_workflow/shipping.py,go_workflow/worktrees.py,pyproject.toml,schemas/project.schema.json,schemas/publication-state.schema.json,schemas/release-profile.schema.json,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_release.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion release, make check, candidate/tagged release-check and canonical completion verify; verification_result=passed (331 Linux tests; 28 publication cases; candidate and final tag gates; distribution/template pairing); critic=passed same-agent review of all changed content; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.22 deb9256983b4e94527c698cfbec1324331f7329e https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.22; Self-reflect: reused locks and process guards, fixed staging/orphan/reservation and queue-done boundaries with actual regressions; no global skills or memory changes."
+      },
+      {
+        "label": "Deployments en draaiende versie verifiëren",
+        "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-07-candidate.log,.go/evidence/abc-07-focused.log,.go/evidence/abc-07-integration.json,.go/evidence/abc-07-make.log,.go/evidence/abc-07-verification.json,.go/evidence/events.jsonl,.go/project.json,.go/runs/abc-07/completion-state.json,.go/runs/abc-07/completion/command-0e926971056a4c50b4ef5652b636ef8c.json,.go/runs/abc-07/completion/command-3eb1667d91b04424908532fe946db912.json,.go/runs/abc-07/completion/command-938af935678b4c7c814c59ddf78ba826.json,.go/runs/abc-07/completion/critic-de4b342711964c499f45f935ece22778.json,.go/runs/abc-07/completion/verification-796ec90e05374f0e99221dc31330997a.json,.go/tasks/active/abc-07.json,.go/workspaces/abc-07.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.23.md,docs/task-release-contract.md,go_workflow/cli.py,go_workflow/completion.py,go_workflow/constants.py,go_workflow/deployment.py,go_workflow/release.py,go_workflow/run_state.py,go_workflow/shipping.py,pyproject.toml,schemas/deployment-evidence.schema.json,schemas/project.schema.json,schemas/publication-state.schema.json,schemas/release-evidence.schema.json,schemas/release-profile.schema.json,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_deployment.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion release deployment, make check, candidate/tagged release-check and canonical completion verify; verification_result=passed (349 Linux tests; 18 deployment cases; candidate and final tag gates; distribution/template pairing); critic=passed same-agent review of all changed content; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.23 654077aceee71c136a7c2473140b301d4385fc53 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.23; Self-reflect: no durable agent/process improvement needed; no skill/memory/config change. Product proof improvements tested in scope."
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Sessiewissels en subagents als adapteropties toetsen",
+      "A/B/C end-to-end bewijzen en vrijgeven"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "29d7f405972e5a7ff7eb6149a0f283a38b82620a3d4161d2d1b41c13240526f2",
+    "html_sha256": "8a383b208f8f3967cd797bafb9c83295a1c934488e23d9ced73535c861c07fcb"
+  }
+}

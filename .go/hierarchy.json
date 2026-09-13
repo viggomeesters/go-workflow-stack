@@ -10,7 +10,7 @@
         {
           "id": "abc-contracts",
           "title": "A/B/C-contracten en migratie",
-          "description": "abc-01 contracts published v0.3.15; migration remains abc-08. See .go/plans/abc-lifecycle.json.",
+          "description": "abc-01 v0.3.15 contracts and abc-08 v0.3.24 explicit lifecycle migration, intake and review-bundle provenance shipped. Template adoption remains template-01/02.",
           "tasks": [
             "abc-01",
             "abc-08"

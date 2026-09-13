@@ -1,0 +1,59 @@
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle main refs/tags/v0.3.24:refs/tags/v0.3.24
+From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
+ * branch                main       -> FETCH_HEAD
+ * [new tag]             v0.3.24    -> v0.3.24
+RUN: git merge --ff-only FETCH_HEAD
+Updating db776f1b7..c54c86949
+Fast-forward
+ .go/architecture/events.jsonl                      |   1 +
+ .go/evidence/abc-08-candidate.log                  | 164 +++++++++++++++++++
+ .go/evidence/abc-08-focused.log                    |   2 +
+ .go/evidence/abc-08-integration.json               |  19 +++
+ .go/evidence/abc-08-make.log                       |  65 ++++++++
+ .go/evidence/abc-08-verification.json              |  32 ++++
+ .go/evidence/events.jsonl                          |   7 +
+ .go/runs/abc-08/completion-state.json              | 179 +++++++++++++++++++++
+ .../command-1b042d9d485742bda238a0d9108aa107.json  |  14 ++
+ .../command-21ed718080c543ebb07653dba7d0a976.json  |  14 ++
+ .../command-537755a4e73a453297c7030d2271463a.json  |  14 ++
+ .../critic-32835d713a784ebbb712e60ac6fde816.json   |  35 ++++
+ ...ification-255b0f88b66249e39f6e07584c67f130.json | 102 ++++++++++++
+ .go/tasks/active/abc-08.json                       |  81 ++++++++--
+ 14 files changed, 715 insertions(+), 14 deletions(-)
+ create mode 100644 .go/evidence/abc-08-candidate.log
+ create mode 100644 .go/evidence/abc-08-focused.log
+ create mode 100644 .go/evidence/abc-08-integration.json
+ create mode 100644 .go/evidence/abc-08-make.log
+ create mode 100644 .go/evidence/abc-08-verification.json
+ create mode 100644 .go/runs/abc-08/completion-state.json
+ create mode 100644 .go/runs/abc-08/completion/command-1b042d9d485742bda238a0d9108aa107.json
+ create mode 100644 .go/runs/abc-08/completion/command-21ed718080c543ebb07653dba7d0a976.json
+ create mode 100644 .go/runs/abc-08/completion/command-537755a4e73a453297c7030d2271463a.json
+ create mode 100644 .go/runs/abc-08/completion/critic-32835d713a784ebbb712e60ac6fde816.json
+ create mode 100644 .go/runs/abc-08/completion/verification-255b0f88b66249e39f6e07584c67f130.json
+RUN: git rev-parse HEAD
+c54c86949ff5605d91613e7645b7fa6b2c1bbf99
+RUN: ./scripts/release-check.sh 0.3.24
+release preflight: v0.3.24
+tag: annotated v0.3.24 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 133.25s (0:02:13)
+ok: /tmp/tmp.xTHZwqO5W0/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.xTHZwqO5W0/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.xTHZwqO5W0/go-workflow-stack
+Prepared 1 package in 1.24s
+Installed 1 package in 21ms
+ + go-workflow-stack==0.3.24 (from file:///tmp/tmp.xTHZwqO5W0/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.zIL15EWt2G/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.zIL15EWt2G/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.zIL15EWt2G/fixture/.go
+ok: /tmp/tmp.zIL15EWt2G/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+ABC_FINAL_TAG_ALL_PASSED

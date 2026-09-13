@@ -158,7 +158,8 @@ def dependency_findings(repo: Path, task: dict[str, Any], *, readiness: bool = F
                     cache[depkey] = value
                 target = cache[depkey]
                 if readiness and key == (repo, task['id']):
-                    if target.get('status') != 'done' or target.get('review_status', 'approved') != 'approved':
+                    if (target.get('status') != 'done' or target.get('review_status', 'approved') != 'approved'
+                            or target.get('work_status', 'completed') != 'completed'):
                         errors.append(f'dependency not done/approved: {dep["task_id"]}')
                     elif dep['requires'] == 'done_with_required_release_evidence':
                         receipt = target.get('release_receipt')

@@ -76,7 +76,7 @@ declaring repository; no global vault or inferred sibling queue is consulted.
 Each referenced project must in turn declare its own external participants.
 
 `next` and automatic selection omit tasks whose dependencies are not done and,
-when a review status exists, approved. Claim rechecks this under the task lock.
+when work/review fields exist, completed and approved. Claim rechecks this under the task lock.
 No eligible tasks is reported as dependency-blocked, not completion. Existing
 legacy tasks without a review field retain their historical interpretation.
 

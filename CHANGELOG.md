@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+## 0.3.15 — 2026-09-13
+
 - Add opt-in task execution contracts with frozen project/task model settings,
   typed phase/evidence records, explicit cross-project dependencies and
   dependency-aware selection/claim. Preserve contracts through task, intent,

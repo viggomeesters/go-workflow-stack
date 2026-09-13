@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-06",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Versies en releases hervatbaar publiceren",
   "description": "Voeg de volledige generieke releasefase toe: productversie/changelog, definitieve kandidaat, integratie, push, annotated tag, publicatie en readback.\nAfhankelijk van: go-workflow-stack:abc-05. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -57,10 +57,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-13T17:21:00+02:00",
+    "base_commit": "8c891956acf81c90a37a3aafc15a45319eae0457"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],

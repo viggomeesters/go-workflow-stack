@@ -102,6 +102,29 @@
           "type": "object"
         }
       }
+    },
+    "context_ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "path",
+        "sha256",
+        "snapshot_id"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "snapshot_id": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{32}$"
+        }
+      }
     }
   },
   "additionalProperties": true

@@ -225,7 +225,7 @@ def guard_workspace_command(args):
     read_only = {'cmd_version', 'cmd_status', 'cmd_readback', 'cmd_route', 'cmd_router',
                  'cmd_validate', 'cmd_next', 'cmd_doctor', 'cmd_agent_check', 'cmd_dirty_check',
                  'cmd_architecture_validate', 'cmd_architecture_readback', 'cmd_architecture_status',
-                 'cmd_recommendation_status'}
+                 'cmd_recommendation_status', 'cmd_context_verify'}
     name = args.func.__name__
     if name in read_only or (name == 'cmd_workspace_operation' and args.workspace_operation == 'status'): return
     if name == 'cmd_task_outcome' and getattr(args, 'task_id', None) == record['task_id']:
@@ -256,7 +256,16 @@ def changed_paths(record):
     return sorted(paths)
 
 
+def require_visible_index(record):
+    workspace = Path(record['path'])
+    for option in ('-v', '-f'):
+        entries = git(workspace, 'ls-files', option, '-z').stdout.split('\0')
+        if any(entry and (entry[0].islower() or entry[0] == 'S') for entry in entries):
+            raise WorkspaceError('Workspace index flags can hide changes; preserve and inspect before staging/integration/cleanup')
+
+
 def checked_scope(record):
+    require_visible_index(record)
     import fnmatch
     task = active_task(Path(record['control_repo']), record['task_id'])
     allowed = (task.get('scope') or {}).get('modify') or []
@@ -293,6 +302,7 @@ def execution_lease(workspace, task_id, owner, run_id, *, timeout_seconds=10.0):
 
 
 def require_clean(record):
+    require_visible_index(record)
     if git_text(Path(record['path']), 'status', '--porcelain', '--untracked-files=all', '--ignored'):
         raise WorkspaceError('Workspace is dirty (including ignored files); preserve and inspect it')
 

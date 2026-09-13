@@ -1,0 +1,385 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Immutable managed worker context",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "snapshot_id",
+    "task_id",
+    "phase",
+    "attempt",
+    "strategy",
+    "workspace",
+    "git",
+    "contract_sha256",
+    "task_sha256",
+    "canonical_sources",
+    "selected_files",
+    "phase_contract",
+    "context",
+    "feedback",
+    "raw_evidence",
+    "remaining_outcomes",
+    "release_receipt",
+    "notepad_policy",
+    "feedback_refs"
+  ],
+  "properties": {
+    "schema": {
+      "const": "go-workflow.execution-context-snapshot.v1"
+    },
+    "snapshot_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{32}$"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    },
+    "phase": {
+      "enum": [
+        "build",
+        "critic",
+        "repair"
+      ]
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "strategy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspace": {
+      "type": "object"
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "head",
+        "base_commit",
+        "branch",
+        "index_sha256",
+        "files",
+        "tracked_content_sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "base_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "branch": {
+          "type": "string",
+          "minLength": 1
+        },
+        "index_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "file",
+                  "symlink",
+                  "missing"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "mode": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "file",
+                        "symlink"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "sha256",
+                    "mode",
+                    "size"
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        "tracked_content_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        }
+      }
+    },
+    "contract_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "task_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+    },
+    "canonical_sources": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "kind"
+        ],
+        "properties": {
+          "kind": {
+            "enum": [
+              "file",
+              "symlink",
+              "missing"
+            ]
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          },
+          "mode": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "minimum": 0
+          }
+        },
+        "additionalProperties": false,
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "kind": {
+                  "enum": [
+                    "file",
+                    "symlink"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "sha256",
+                "mode",
+                "size"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "selected_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "kind",
+          "path",
+          "state"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "kind": {
+            "enum": [
+              "instructions",
+              "reference",
+              "skill",
+              "supplementary_notepad"
+            ]
+          },
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "state": {
+            "type": "object",
+            "required": [
+              "kind"
+            ],
+            "properties": {
+              "kind": {
+                "enum": [
+                  "file",
+                  "symlink",
+                  "missing"
+                ]
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              },
+              "mode": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "size": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "additionalProperties": false,
+            "allOf": [
+              {
+                "if": {
+                  "properties": {
+                    "kind": {
+                      "enum": [
+                        "file",
+                        "symlink"
+                      ]
+                    }
+                  }
+                },
+                "then": {
+                  "required": [
+                    "sha256",
+                    "mode",
+                    "size"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    "phase_contract": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "context": {
+      "type": "object",
+      "required": [
+        "task",
+        "project",
+        "vision",
+        "architecture_principles",
+        "hierarchy"
+      ]
+    },
+    "feedback": {
+      "type": "object"
+    },
+    "raw_evidence": {
+      "type": "object",
+      "required": [
+        "diff",
+        "files"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "diff": {
+          "type": "object",
+          "required": [
+            "path",
+            "sha256"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "path": {
+              "type": "string",
+              "minLength": 1
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            }
+          }
+        },
+        "files": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "path",
+              "sha256"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "path": {
+                "type": "string",
+                "minLength": 1
+              },
+              "sha256": {
+                "type": "string",
+                "pattern": "^[0-9a-f]{64}$"
+              }
+            }
+          }
+        }
+      }
+    },
+    "remaining_outcomes": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "release_receipt": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "notepad_policy": {
+      "type": "string",
+      "minLength": 1
+    },
+    "feedback_refs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "path": {
+            "type": "string",
+            "minLength": 1
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[0-9a-f]{64}$"
+          }
+        }
+      }
+    }
+  }
+}

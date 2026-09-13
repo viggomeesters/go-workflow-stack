@@ -84,3 +84,78 @@ catalog readback is real; these tests do not claim a live model generation.
 End-to-end worker topology/model-switch proof remains `abc-09`/`abc-10`.
 
 Protocol reference: [Codex App Server — model/list](https://learn.chatgpt.com/docs/app-server#list-models-modellist).
+
+## Durable context for managed native workers (v0.3.18)
+
+A native protocol phase in a registered task worktree receives a durable context
+reference. Legacy/unregistered adapters keep the existing inline environment;
+a legacy phase never inherits a different worker's snapshot variables. Custom
+model control remains unsupported; this is not a new custom-adapter bypass.
+
+Before launch, the controller creates an immutable directory under canonical
+`.go/runs/<task>/<run>/<phase>-<attempt>-<uuid>/`. The UUID prevents repeated
+attempt numbers from overwriting earlier context, raw process output, or managed
+attempt/critic artifacts. Partial captures after a crash remain for inspection;
+a new dispatch creates a new identity instead of rewriting them.
+
+`context.json` contains current project/vision/principles/hierarchy, task scope,
+requirements and remaining outcomes, applicable architecture, task and execution
+contract hashes, workspace/owner/run identity, base/current Git revisions, index
+fingerprint, actual tracked-content fingerprint, changed/untracked file hashes,
+phase contract, current checks/critic/build feedback, and confirmed task release
+receipt when one exists. Code and raw evidence remain authoritative. Exact diffs
+and changed/new file bytes are retained beside the snapshot; the current
+workspace and Git history remain the code source, not a prose summary.
+
+The request's optional `context_ref` is `{path, sha256, snapshot_id}`. In this
+mode its `task` contains identity and its `context` contains the reference;
+`GO_TASK_JSON` and `GO_CONTEXT_JSON` are also small references. The complete
+context is stored once on disk rather than copied repeatedly into environment
+variables. `GO_CONTEXT_PATH`, `GO_CONTEXT_SHA256` and
+`GO_CONTEXT_VERIFY_COMMAND` expose the explicit read/verify boundary.
+
+The parent and the child bootstrap both verify the snapshot before the worker
+command executes. The bootstrap uses the current Python runtime's CLI module,
+including installed distributions. It checks hashes, exact run/phase/attempt
+path, canonical task/control sources, workspace ownership, HEAD/index/current
+tracked bytes, untracked files, selected references, raw blobs and feedback
+file references. Git index flags cannot conceal content drift; staging,
+integration and cleanup reject flags that can hide modified files. An unchanged
+HEAD alone is insufficient. Checks run under the workspace execution lease.
+
+A worker can repeat verification with the command in
+`GO_CONTEXT_VERIFY_COMMAND`, or call:
+
+```sh
+./go context verify /absolute/workspace --task-id T038 \
+  --snapshot /absolute/control/.go/runs/T038/run-1/build-01-UUID/context.json \
+  --sha256 SHA256
+```
+
+Changed code or structured state requires a fresh snapshot. Completed outcome
+updates are reloaded from canonical task state for the next phase; changing
+scope, model, claim or other protected task inputs rejects the old dispatch.
+Normal product edits intentionally make the previous snapshot historical.
+
+The controller passes current failed checks and critic findings explicitly to
+repair before starting it. The result includes `process_result_ref` with the
+hash of full raw process output. Phase feedback may carry `evidence_refs`,
+`context_ref` and `process_result_ref`; those typed references must resolve to
+canonical run/evidence files and their hashes are rechecked before launch.
+Arbitrary agent text or arbitrary `path` fields are not promoted into authority.
+
+Optional task `context_files` and `skill_files` select repo-relative files, as
+lists or maps from `build`/`critic`/`repair` to lists. Only the current phase's
+selection is loaded; global skill folders and the entire read scope are not
+implicitly copied. Repository AGENTS.md is included when present. Optional
+`notepad_path` is supplementary explanation and cannot override structured
+state or proof. Escaping/missing references are rejected. Individual selected
+files, changed-file captures and snapshot JSON have an explicit 16 MiB limit;
+reduce selected inputs before retrying instead of silently truncating evidence.
+Unchanged tracked files are fingerprinted by streaming their bytes.
+
+This release supplies durable dispatch context and fixtures proving a fresh
+process can consume it. Active-task resume, moved-checkout recovery and complete
+phase orchestration remain in abc-04; live multi-model worker proof remains in
+abc-09/10. The legacy attempt projection is kept for old adapters; managed
+attempt references point to distinct canonical artifact paths.

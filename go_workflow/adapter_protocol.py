@@ -21,10 +21,11 @@ def build_adapter_request(
     phase: str,
     attempt: int,
     strategy: str,
+    context_ref: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     if phase not in ADAPTER_PHASES:
         raise ValueError(f"unsupported adapter phase: {phase}")
-    return {
+    request = {
         "schema": ADAPTER_REQUEST_SCHEMA,
         "phase": phase,
         "repo": str(repo),
@@ -35,6 +36,10 @@ def build_adapter_request(
         "context": context,
         "result_schema": ADAPTER_RESULT_SCHEMA,
     }
+    if context_ref is not None:
+        request.update(task={'id': task['id']}, context={'snapshot': context_ref}, context_ref=context_ref)
+    return request
+
 
 
 def validate_adapter_result(data: dict[str, Any], expected_phase: str | None = None, *, worker_payload: bool = False) -> list[str]:

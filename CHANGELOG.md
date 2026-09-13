@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.18 — durable worker context
+
+- Capture immutable managed-native phase context and full raw process evidence.
+- Verify canonical state, Git/index/tracked bytes and evidence before worker launch.
+- Pass current repair feedback through bounded file references; retain legacy adapters.
+- Preserve distinct attempt/critic artifacts and select only explicit phase context.
+- Refuse staging/integration/cleanup when index flags can hide user changes.
+
 ## 0.3.17 — owned task workspaces
 
 - Add explicit task worktree creation, recovery and claim-following ownership.

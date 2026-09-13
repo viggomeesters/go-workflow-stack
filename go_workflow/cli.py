@@ -39,6 +39,7 @@ from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VER
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result, codex_stream_payload
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
+from go_workflow.execution_context import ContextError, create_snapshot, verify_snapshot
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
     validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
@@ -1755,7 +1756,7 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
     }
 
 
-def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False) -> dict[str, Any]:
+def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False, feedback: dict[str, Any] | None = None) -> dict[str, Any]:
     try:
         record = registered_workspace(repo)
         required = ((task.get("execution_contract") or {}).get("workspace") or {}).get("mode") == "task_worktree"
@@ -1766,17 +1767,19 @@ def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: in
                 raise WorkspaceError("Worker task/owner differs from the registered workspace")
             with execution_lease(repo, record["task_id"], record["owner"], record["run_id"]):
                 current = active_task(Path(record["control_repo"]), record["task_id"], record["owner"])
-                if current != task:
+                mutable_evidence = {'requested_outcomes', 'evidence', 'review_history'}
+                if ({key: value for key, value in current.items() if key not in mutable_evidence}
+                        != {key: value for key, value in task.items() if key not in mutable_evidence}):
                     raise WorkspaceError("Worker task snapshot is stale; reload canonical task state")
-                return _run_hook_command(repo, command, current, attempt, strategy, hook, timeout_seconds, require_protocol)
-        return _run_hook_command(repo, command, task, attempt, strategy, hook, timeout_seconds, require_protocol)
-    except (WorkspaceError, StateLockError) as exc:
+                return _run_hook_command(repo, command, current, attempt, strategy, hook, timeout_seconds, require_protocol, feedback)
+        return _run_hook_command(repo, command, task, attempt, strategy, hook, timeout_seconds, require_protocol, feedback)
+    except (WorkspaceError, StateLockError, ContextError) as exc:
         return {"schema": "go-workflow.agent-adapter-result.v1", "phase": hook, "status": "blocked",
                 "summary": str(exc), "hook": hook, "command": command, "returncode": 78,
                 "stdout": "", "stderr": str(exc), "timed_out": False}
 
 
-def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False) -> dict[str, Any]:
+def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False, feedback: dict[str, Any] | None = None) -> dict[str, Any]:
     rendered = format_hook_command(command, repo, task, attempt, strategy)
     try:
         model_selection = controlled_preflight(repo, task, hook, rendered, require_protocol)
@@ -1786,13 +1789,17 @@ def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: i
                 "command": rendered, "returncode": 78, "stdout": "", "stderr": str(exc),
                 "timed_out": False}
     context = build_execution_context(repo, task)
-    request = build_adapter_request(repo, task, context, hook, attempt, strategy)
+    context_ref = (create_snapshot(repo, task, hook, attempt, strategy, context, feedback=feedback)
+                   if registered_workspace(repo) is not None and require_protocol else None)
+    request = build_adapter_request(repo, task, context, hook, attempt, strategy, context_ref=context_ref)
     if model_selection is not None:
         request["model_selection"] = model_selection
         append_jsonl(go_root(repo) / "runs" / "events.jsonl", event(task["id"], "run.checked", "model-runtime", {
             "action": "model.phase_started", "phase": hook, "attempt": attempt, "model_selection": model_selection,
         }))
     env = os.environ.copy()
+    for name in ('GO_CONTEXT_PATH', 'GO_CONTEXT_SHA256', 'GO_CONTEXT_VERIFY_COMMAND'):
+        env.pop(name, None)
     env.update({
         "GO_REPO": str(repo),
         "GO_TASK_ID": str(task.get("id", "unknown")),
@@ -1803,13 +1810,31 @@ def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: i
         "GO_STRATEGY": strategy,
         "GO_HOOK": hook,
     })
+    child_command = rendered
+    if context_ref is not None:
+        verify_command = shlex.join([sys.executable, str(Path(__file__).resolve()), 'context', 'verify', str(repo),
+                                    '--task-id', task['id'], '--snapshot', context_ref['path'], '--sha256', context_ref['sha256']])
+        env.update(GO_CONTEXT_JSON=json.dumps({'snapshot': context_ref}),
+                   GO_TASK_JSON=json.dumps({'id': task['id'], 'snapshot': context_ref}),
+                   GO_CONTEXT_PATH=context_ref['path'], GO_CONTEXT_SHA256=context_ref['sha256'],
+                   GO_CONTEXT_VERIFY_COMMAND=verify_command, PYTHONDONTWRITEBYTECODE='1')
+        # The child verifies the immutable file and current Git/control state
+        # before executing any native worker command, under the parent's lease.
+        child_command = verify_command + ' >/dev/null && ' + rendered
+        verify_snapshot(repo, task['id'], context_ref['path'], context_ref['sha256'])
     started = time.monotonic()
-    completed = run_shell_with_timeout(repo, rendered, env, timeout_seconds)
+    completed = run_shell_with_timeout(repo, child_command, env, timeout_seconds)
     elapsed = time.monotonic() - started
+    if context_ref is not None:
+        result_path = Path(context_ref['path']).parent / 'process-result.json'
+        atomic_json(result_path, completed)
     turns = None
     if model_selection is not None:
         completed, turns = codex_stream_payload(completed)
     result = normalize_adapter_result(hook, rendered, completed, require_protocol=require_protocol)
+    if context_ref is not None:
+        result['context_ref'] = context_ref
+        result['process_result_ref'] = {'path': str(result_path), 'sha256': hashlib.sha256(result_path.read_bytes()).hexdigest()}
     if model_selection is not None:
         if result["returncode"] and result["status"] == "success":
             result["status"] = "failure"
@@ -2017,7 +2042,8 @@ def git_diff_text(repo: Path) -> str:
 
 def record_attempt(repo: Path, root: Path, task: dict[str, Any], agent: str, attempt: dict[str, Any], checks: list[dict[str, Any]]) -> None:
     attempt_no = int(attempt.get("attempt") or 0)
-    attempt_dir = root / "runs" / str(task.get("id", "unknown")) / f"attempt-{attempt_no:02d}"
+    suffix = '-' + uuid.uuid4().hex if registered_workspace(repo) is not None else ''
+    attempt_dir = root / "runs" / str(task.get("id", "unknown")) / f"attempt-{attempt_no:02d}{suffix}"
     attempt_dir.mkdir(parents=True, exist_ok=True)
     context = build_execution_context(repo, task)
     (attempt_dir / "prompt.md").write_text(attempt_markdown(task, attempt, context), encoding="utf-8")
@@ -2037,12 +2063,13 @@ def record_attempt(repo: Path, root: Path, task: dict[str, Any], agent: str, att
         "created_at": now_iso(),
     }
     dump_json(attempt_dir / "verdict.json", verdict)
+    artifact_root = attempt_dir if suffix else attempt_dir.relative_to(root.parent)
     attempt["artifacts"] = {
-        "prompt": str(attempt_dir.relative_to(root.parent) / "prompt.md"),
-        "verify_log": str(attempt_dir.relative_to(root.parent) / "verify.log"),
-        "critic": str(attempt_dir.relative_to(root.parent) / "critic.md"),
-        "diff": str(attempt_dir.relative_to(root.parent) / "diff.patch"),
-        "verdict": str(attempt_dir.relative_to(root.parent) / "verdict.json"),
+        "prompt": str(artifact_root / "prompt.md"),
+        "verify_log": str(artifact_root / "verify.log"),
+        "critic": str(artifact_root / "critic.md"),
+        "diff": str(artifact_root / "diff.patch"),
+        "verdict": str(artifact_root / "verdict.json"),
     }
     append_jsonl(root / "runs" / "events.jsonl", event(str(task.get("id", "unknown")), "auto.attempt", agent, attempt))
 
@@ -2128,8 +2155,8 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
     instructions = " ".join([
         "You are the repair adapter for go-workflow-stack.",
         "In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
-        "Read GO_TASK_JSON from the environment.",
-        "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
+        "Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH.",
+        "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
         "Run the task verification commands before exiting.",
         "For tasks with requested_outcomes, record every R# disposition and evidence with `go-workflow task outcome` before exiting.",
@@ -2171,7 +2198,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
     instructions = " ".join([
         "You are the build executor for a repo-local .go task.",
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
-        "Read GO_CONTEXT_JSON and obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
+        "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
         "For tasks with requested_outcomes, record every R# as verified, blocked, or rejected with concrete evidence using `go-workflow task outcome` before exiting.",
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
@@ -2192,12 +2219,15 @@ def run_default_critic_agent(
     attempt: int,
     strategy: str,
     timeout_seconds: int,
+    feedback: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     output = go_root(repo) / "runs" / str(task.get("id", "unknown")) / f"attempt-{attempt:02d}" / "deep-critic.txt"
+    if registered_workspace(repo) is not None:
+        output = output.with_name('deep-critic-' + uuid.uuid4().hex + '.txt')
     output.parent.mkdir(parents=True, exist_ok=True)
     instructions = " ".join([
         "You are the blocking critic for a repo-local .go task.",
-        "Review the current repository result for task {task_id} against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff.",
+        "Review the current repository result for task {task_id} against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence.",
         "Do not edit files.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
@@ -2213,7 +2243,7 @@ def run_default_critic_agent(
         hermes_prompt_flag=availability["prompt_flag"] or "-z",
         model_profile=phase_model(task, "critic"),
     )
-    result = run_hook_command(repo, command, task, attempt, strategy, "critic", timeout_seconds, require_protocol=True)
+    result = run_hook_command(repo, command, task, attempt, strategy, "critic", timeout_seconds, require_protocol=True, feedback=feedback)
     output.write_text(result.get("stdout") or "", encoding="utf-8")
     verdict_text = output.read_text(encoding="utf-8") if output.is_file() else ""
     result["verdict_text"] = verdict_text
@@ -2707,7 +2737,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                         if not ensure_budget(result, max_commands, started_at, max_minutes, "repair adapter"):
                             break
                         before_paths = git_dirty_snapshot(repo)
-                        repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair", command_timeout_seconds, require_protocol=bool(repair_agent) or default_executor_selected)
+                        repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair", command_timeout_seconds, require_protocol=bool(repair_agent) or default_executor_selected, feedback={"checks": final_checks, "critic": attempt["critic"], "build": attempt["build"], "remaining_steps": ["repair", "verify", "critic", "ship"]})
                         result["commands_run"] += 1
                         violations = scope_violations_after(repo, task, before_paths)
                         if violations:
@@ -2746,7 +2776,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                     if not ensure_budget(result, max_commands, started_at, max_minutes, "critic adapter"):
                         break
                     before_paths = git_dirty_snapshot(repo)
-                    critic = run_hook_command(repo, critic_command, task, attempt_number, strategy, "critic", command_timeout_seconds)
+                    critic = run_hook_command(repo, critic_command, task, attempt_number, strategy, "critic", command_timeout_seconds, feedback={"checks": checks, "remaining_steps": ["critic", "ship"]})
                     result["commands_run"] += 1
                     violations = scope_violations_after(repo, task, before_paths)
                     if violations:
@@ -2770,6 +2800,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                         attempt_number,
                         strategy,
                         command_timeout_seconds,
+                        feedback={"checks": checks, "remaining_steps": ["critic", "ship"]},
                     )
                     result["commands_run"] += 1
                     violations = scope_violations_after(repo, task, before_paths)
@@ -2795,7 +2826,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 if not ensure_budget(result, max_commands, started_at, max_minutes, "repair adapter"):
                     break
                 before_paths = git_dirty_snapshot(repo)
-                repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair", command_timeout_seconds, require_protocol=bool(repair_agent) or default_executor_selected)
+                repair = run_hook_command(repo, task_repair_command, task, attempt_number, strategy, "repair", command_timeout_seconds, require_protocol=bool(repair_agent) or default_executor_selected, feedback={"checks": final_checks, "critic": attempt["critic"], "build": attempt["build"], "remaining_steps": ["repair", "verify", "critic", "ship"]})
                 result["commands_run"] += 1
                 violations = scope_violations_after(repo, task, before_paths)
                 if violations:
@@ -5339,6 +5370,12 @@ def build_parser() -> argparse.ArgumentParser:
             workspace_op.add_argument('--new-run-id', required=True)
         workspace_op.add_argument('--json', action='store_true')
         workspace_op.set_defaults(func=cmd_workspace_operation, workspace_operation=operation)
+    context_parser = sub.add_parser('context', help='Verify durable worker context')
+    context_sub = context_parser.add_subparsers(dest='context_command', required=True)
+    context_verify = context_sub.add_parser('verify')
+    context_verify.add_argument('repo')
+    for field in ('task-id', 'snapshot', 'sha256'): context_verify.add_argument('--' + field, required=True)
+    context_verify.set_defaults(func=cmd_context_verify)
     return parser
 
 
@@ -5581,12 +5618,18 @@ def cmd_workspace_operation(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_context_verify(args: argparse.Namespace) -> int:
+    snapshot = verify_snapshot(Path(args.repo), args.task_id, args.snapshot, args.sha256)
+    print(json.dumps({'verified': True, 'task_id': snapshot['task_id'], 'snapshot_id': snapshot['snapshot_id']}))
+    return 0
+
+
 def main() -> int:
     args = build_parser().parse_args()
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError, ContextError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

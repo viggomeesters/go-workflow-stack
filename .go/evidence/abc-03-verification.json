@@ -2,7 +2,7 @@
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-03",
   "revision": "75b74f77299dc7b2f3fb624d579216b222272eb4",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "checks": [
     "270 Linux tests passed (197 smoke and 73 focused)",
     "make check passed in Linux and ordinary macOS clone",
@@ -29,5 +29,14 @@
     "Snapshot/selected/captured changed files have explicit 16 MiB limits; unchanged tracked content is streamed",
     "Managed worker command guards require controller-side test invocation; focused tests ran outside the managed cwd with explicit source PYTHONPATH. Source code was then tested in ordinary clones."
   ],
-  "self_reflect": "No durable agent/process improvement needed; in-scope review defects repaired and fixture invocation boundary recorded. No skill/memory/config changes."
+  "self_reflect": "No durable agent/process improvement needed; in-scope review defects repaired and fixture invocation boundary recorded. No skill/memory/config changes.",
+  "final_tag_commit": "ed6cd0fa145961308811a94893ee95695ff1c3ef",
+  "final_tag_checks": [
+    "73 context/workspace/model/contract/architecture tests passed",
+    "197 smoke tests passed",
+    "template pairing passed",
+    "standalone distribution passed"
+  ],
+  "publication_ref": ".go/evidence/abc-03-release.json",
+  "workspace_cleanup_ref": ".go/evidence/abc-03-cleanup.json"
 }

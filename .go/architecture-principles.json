@@ -61,9 +61,9 @@
       "id": "abc-durable-worker-context",
       "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
       "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
-      "enforcement": "Te implementeren in abc-03/04; alternatieven worden getoetst in abc-09.",
+      "enforcement": "abc-03 shipped v0.3.18: immutable managed-native context, parent/child drift checks, raw feedback and bounded references. Active resume remains abc-04 and live topology proof abc-09/10.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {

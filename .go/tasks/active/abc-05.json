@@ -36,7 +36,9 @@
       "go_workflow/run_state.py",
       "go_workflow/execution_contracts.py",
       "schemas/project.schema.json",
-      "scripts/release-check-inner.sh"
+      "scripts/release-check-inner.sh",
+      "go_workflow/worktrees.py",
+      "schemas/run-state.schema.json"
     ]
   },
   "acceptance": [
@@ -91,7 +93,8 @@
       "source": "User GO and continuation",
       "ship_policy": "push",
       "allow_push": true
-    }
+    },
+    "scope_note": "Reuse the existing durable process-boundary guard for verification collectors, including orphan refusal in workspace/finish gates; preserve old native checkpoints."
   },
   "builds_on": [
     {

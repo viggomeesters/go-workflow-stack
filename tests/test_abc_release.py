@@ -403,3 +403,20 @@ def test_managed_conflicting_remote_preserves_explicit_resume_handoff(tmp_path,m
     assert result['blocked_task']=='task-schema-smoke' and result['resume']['run_id']=='resume-run'
     assert '--allow-push' in result['resume']['args']
     assert capture.read_text().splitlines()==['build','critic'] and worker.exists()
+
+
+def test_task_completion_does_not_report_queue_done_with_blocked_work(tmp_path,monkeypatch):
+    repo,base,worker,capture=managed_fixture(tmp_path,monkeypatch)
+    managed_publish(repo,base,worker,1,initial=True)
+    task=json.loads((repo/'.go/tasks/active/task-schema-smoke.json').read_text())
+    blocked={**task,'id':'unresolved','status':'blocked','work_status':'blocked',
+             'claim':{'agent':None,'claimed_at':None},'review_status':'none'}
+    blocked.pop('completion_evidence',None)
+    (repo/'.go/tasks/blocked').mkdir(exist_ok=True)
+    (repo/'.go/tasks/blocked/unresolved.json').write_text(json.dumps(blocked))
+    hierarchy=repo/'.go/hierarchy.json';value=json.loads(hierarchy.read_text())
+    value['epics'][0]['features'][0]['tasks'].append('unresolved');hierarchy.write_text(json.dumps(value))
+    result=managed_publish(repo,base,worker,15)
+    assert result['completed_tasks']==['task-schema-smoke'] and result['status']=='task_complete'
+    assert (repo/'.go/tasks/blocked/unresolved.json').exists()
+    assert managed_publish(repo,base,worker,15)['status']=='task_complete'

@@ -8,6 +8,7 @@
   GitHub publication from durable intent and exact readback after interruption.
 - Managed tasks retain budgets and requested model settings through publication,
   finish and separate cleanup; live orphan processes prevent competing writes.
+- Distinguish a completed task from a completed queue when blocked work remains.
 - Keep unknown remote responses, conflicts and missing authority explicit.
   Existing profiles retain their pending handoff; no deployment or Actions added.
 

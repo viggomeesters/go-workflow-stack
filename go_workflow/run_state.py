@@ -324,6 +324,13 @@ def select_managed_task(control, args, api):
     return None
 
 
+def completion_status(control):
+    """Task completion does not erase dependency-blocked or explicitly blocked work."""
+    pending = any(path for state in ('open', 'active', 'blocked')
+                  for path in (control / '.go/tasks' / state).glob('*.json'))
+    return 'task_complete' if pending else 'done'
+
+
 def execute_managed(control, args, mode, task, api):
     task_id = task['id']
     result = {'schema': 'go-workflow.auto-run-result.v1', 'mode': mode, 'repo': str(control),
@@ -430,7 +437,7 @@ def _execute_managed(control, args, task_id, api, result):
         record = owned_record(control, task_id, args.agent, state['run_id'], active=False)
         if record['state'] != 'cleaned': raise RunStateError('Completed checkpoint lacks confirmed workspace cleanup')
         cleanup_proof(control, record)
-        result.update(status='task_complete' if api.open_tasks(control) else 'done', completed_tasks=[task_id]); return 0, result
+        result.update(status=completion_status(control), completed_tasks=[task_id]); return 0, result
     record = owned_record(control, task_id, args.agent, state['run_id'], active=state['phase'] not in {'release', 'cleanup'})
     binding = ('control_repo', 'path', 'owner', 'run_id', 'branch', 'base_branch', 'base_commit',
                'common_dir', 'repository_id', 'generation')
@@ -440,7 +447,7 @@ def _execute_managed(control, args, task_id, api, result):
         if task['status'] != 'done': raise RunStateError('Cleanup recovery requires a completed task')
         cleanup = cleanup_workspace(control, task_id, args.agent, state['run_id'])
         session.update(phase='complete', cleanup=cleanup, inflight=None)
-        result.update(status='task_complete' if api.open_tasks(control) else 'done', completed_tasks=[task_id]); return 0, result
+        result.update(status=completion_status(control), completed_tasks=[task_id]); return 0, result
     verify_workspace(record)
     checked_scope(record)
     workspace = Path(record['path'])
@@ -498,7 +505,7 @@ def _execute_managed(control, args, task_id, api, result):
         if phase == 'cleanup':
             cleanup = cleanup_workspace(control, task_id, args.agent, state['run_id'])
             session.update(phase='complete', cleanup=cleanup, inflight=None)
-            result.update(status='task_complete' if api.open_tasks(control) else 'done', completed_tasks=[task_id])
+            result.update(status=completion_status(control), completed_tasks=[task_id])
             return 0, result
         task = active_task(control, task_id, args.agent)
         if json_hash(protected_task(task)) != state['task_hash']: raise RunStateError('Task contract changed during execution')

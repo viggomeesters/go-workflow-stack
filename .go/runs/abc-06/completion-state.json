@@ -4,7 +4,7 @@
   "project": "go-workflow-stack",
   "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
   "owner": "codex-astra-high",
-  "run_id": "verify-0bee540b16b14192a600a34b1c8f19b2",
+  "run_id": "verify-26178f9914fa4001a58e77f696d01414",
   "workspace": {
     "path": "/Users/viggomeesters/Dev/go-workflow-stack",
     "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
@@ -31,16 +31,16 @@
         "status": "passed",
         "command": "python3 -m pytest tests/test_abc_release.py -q",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "0d398992e98b03a3f591ca1f6d72566862bd00c0",
-        "worktree_digest": "d69b3f9a19f2a63a26e2480175a5dc4a72bacd23f17b6445c30e75709ddbadb8",
+        "revision": "757fec160f3eda7bfe489e9e95bd71f92d37d3af",
+        "worktree_digest": "80b8773efa657f490b5565ce19837ca6149b138ecf69fcc96a292fab2e8b0502",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-06/completion/command-3f97c0d2a1924c67b24a7bd474de1e9b.json"
+          ".go/runs/abc-06/completion/command-e6af2e18c3dd484f8c0f1242e5198d6f.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-06/completion/command-3f97c0d2a1924c67b24a7bd474de1e9b.json",
-        "sha256": "6360d9d801ad773e02ffea547ec1e976d3f01ede8547d6f16ad488c709bd61fa"
+        "path": ".go/runs/abc-06/completion/command-e6af2e18c3dd484f8c0f1242e5198d6f.json",
+        "sha256": "76c52f4dcdf041f40b8439488190ed8f86953b7b071ffa7a67c99dbaffa4d0ab"
       }
     },
     {
@@ -61,16 +61,16 @@
         "status": "passed",
         "command": "python3 cli/go.py validate .",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "0d398992e98b03a3f591ca1f6d72566862bd00c0",
-        "worktree_digest": "d69b3f9a19f2a63a26e2480175a5dc4a72bacd23f17b6445c30e75709ddbadb8",
+        "revision": "757fec160f3eda7bfe489e9e95bd71f92d37d3af",
+        "worktree_digest": "80b8773efa657f490b5565ce19837ca6149b138ecf69fcc96a292fab2e8b0502",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-06/completion/command-96ccc8ba49fc44f4b779b3c25d23df78.json"
+          ".go/runs/abc-06/completion/command-4fc1d249f81943c9af56a7f791e82162.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-06/completion/command-96ccc8ba49fc44f4b779b3c25d23df78.json",
-        "sha256": "a0b66d3225e7e406c32a423a2bfde5997116051bda1ff39f3fa9b74726f2e5d1"
+        "path": ".go/runs/abc-06/completion/command-4fc1d249f81943c9af56a7f791e82162.json",
+        "sha256": "ea534aee44b1006d7837a2aee4fff61466450eb6a1dfc5c9da11259e1bb309de"
       }
     },
     {
@@ -91,23 +91,28 @@
         "status": "passed",
         "command": "git diff --check",
         "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
-        "revision": "0d398992e98b03a3f591ca1f6d72566862bd00c0",
-        "worktree_digest": "d69b3f9a19f2a63a26e2480175a5dc4a72bacd23f17b6445c30e75709ddbadb8",
+        "revision": "757fec160f3eda7bfe489e9e95bd71f92d37d3af",
+        "worktree_digest": "80b8773efa657f490b5565ce19837ca6149b138ecf69fcc96a292fab2e8b0502",
         "exit_code": 0,
         "evidence": [
-          ".go/runs/abc-06/completion/command-803fb045f0cc4cb481805f419a029b04.json"
+          ".go/runs/abc-06/completion/command-596722ea3ebe4af792bb14c99147dda9.json"
         ]
       },
       "raw": {
-        "path": ".go/runs/abc-06/completion/command-803fb045f0cc4cb481805f419a029b04.json",
-        "sha256": "13e6b3e66cfa714132a3b8ad9d8f53980d9a8cd2f4c2797710d84f6dc033d034"
+        "path": ".go/runs/abc-06/completion/command-596722ea3ebe4af792bb14c99147dda9.json",
+        "sha256": "a80caf1cd72f0e490e836e0aba00080ce328a620162491e2b47b9f9188dfeaad"
       }
     }
   ],
   "phase_evidence": [],
   "effects": {},
   "budgets": [],
-  "history": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
   "requirements": [
     {
       "id": "R1",
@@ -172,7 +177,7 @@
   "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
   "controller": {
     "host": "macbook-pro-van-viggo-1.home",
-    "pid": 78159
+    "pid": 96620
   },
   "worker_group": null,
   "inflight": null

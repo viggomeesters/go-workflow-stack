@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-06",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "757fec160f3eda7bfe489e9e95bd71f92d37d3af",
+  "checks": [
+    "331 Linux tests (197 smoke + 134 focused)",
+    "make check on ordinary macOS clone and Linux",
+    "candidate distribution gate with immutable template pairing",
+    "all declared commands executed by the canonical completion collector"
+  ],
+  "completion_verification": {
+    "path": ".go/runs/abc-06/completion/verification-642050e82a1247fa922f930c0bf26145.json",
+    "sha256": "8827f69b9049c57e030e21ab0e08302cbb0ae2e7a1a2e1014e62cc5d57608c48"
+  },
+  "critic": {
+    "path": ".go/runs/abc-06/completion/critic-cf94c74d62dd483194de6f9d37f77dfb.json",
+    "sha256": "157e12c3192618d7b820378cb75f330882f5f1e5ec6f0a29f720f75234abebd5"
+  },
+  "critic_method": "same-agent; no independent identity attestation",
+  "repairs": [
+    "Full raw completion checks retained across managed command budgets",
+    "Git staging uses the same registered process boundary as commit/push",
+    "Live orphan prevents publisher/staging takeover",
+    "Published checkpoint reconciles a lost reservation release",
+    "Blocked/rejected requirements gate before effects",
+    "Unknown GitHub errors cannot be mistaken for absence",
+    "Managed publication gates retain explicit resume arguments",
+    "Remaining blocked tasks prevent queue-done"
+  ],
+  "limitations": [
+    "Publication settings are explicit opt-in; existing profiles and historical state are not migrated",
+    "Version sources are explicit text or JSON, semantic X.Y.Z",
+    "Diverged bases require explicit reconciliation; no automatic rebase or force push",
+    "Deployment/live service proof is abc-07; cross-host transfer and topology proof remain later tasks",
+    "Canonical operational checkpoint replication is separate from product publication",
+    "Requested model and same-agent critic are not independently attested"
+  ],
+  "self_reflect": "Reused execution locks, process guards and shared completion producers. After a real final review found a queue-status false-done, preserved the earlier passing candidate evidence, reopened only the clean owned workspace and added a regression before publication. No global skills or memory edits."
+}

@@ -1,0 +1,36 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______ test_task_completion_does_not_report_queue_done_with_blocked_work _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-206/test_task_completion_does_not_0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10a937980>
+
+    def test_task_completion_does_not_report_queue_done_with_blocked_work(tmp_path,monkeypatch):
+        repo,base,worker,capture=managed_fixture(tmp_path,monkeypatch)
+        managed_publish(repo,base,worker,1,initial=True)
+        task=json.loads((repo/'.go/tasks/active/task-schema-smoke.json').read_text())
+        blocked={**task,'id':'unresolved','status':'blocked','work_status':'blocked',
+                 'claim':{'agent':None,'claimed_at':None},'review_status':'none'}
+        blocked.pop('completion_evidence',None)
+        (repo/'.go/tasks/blocked').mkdir(exist_ok=True)
+        (repo/'.go/tasks/blocked/unresolved.json').write_text(json.dumps(blocked))
+        hierarchy=repo/'.go/hierarchy.json';value=json.loads(hierarchy.read_text())
+        value['epics'][0]['features'][0]['tasks'].append('unresolved');hierarchy.write_text(json.dumps(value))
+        result=managed_publish(repo,base,worker,15)
+>       assert result['completed_tasks']==['task-schema-smoke'] and result['status']=='task_complete'
+E       AssertionError: assert (['task-schema-smoke'] == ['task-schema-smoke']
+E         
+E         Use -v to get more diff and 'done' == 'task_complete'
+E         
+E         - task_complete
+E         + done)
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/abc-06/tests/test_abc_release.py:420: AssertionError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-206/test_task_completion_does_not_0/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+=========================== short test summary info ============================
+FAILED work/abc-06/tests/test_abc_release.py::test_task_completion_does_not_report_queue_done_with_blocked_work
+1 failed, 27 deselected in 15.45s

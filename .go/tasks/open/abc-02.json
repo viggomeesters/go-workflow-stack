@@ -1,0 +1,156 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-02",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Modelkeuze afdwingen en gebruik registreren",
+  "description": "Laat Codex build, critic en repair het gevalideerde taakprofiel gebruiken en registreer aangevraagde en bevestigde effectieve runtime-instellingen per fase.\nAfhankelijk van: go-workflow-stack:abc-01. Controleer dependencybewijs vóór claim; de huidige runtime dwingt dit nog niet af. Scope en acceptatie beschrijven gepland gedrag. Alleen een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/adapters.py",
+      "go_workflow/adapter_protocol.py",
+      "go_workflow/model_profiles.py",
+      "schemas/agent-adapter-request.schema.json",
+      "schemas/agent-adapter-result.schema.json",
+      "tests/test_abc_models.py",
+      "docs/agent-adapter-protocol.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**"
+    ]
+  },
+  "acceptance": [
+    "Model-ID en reasoning effort worden voor iedere fase werkelijk als runtime-instellingen doorgegeven; bouw en herstel erven het taakprofiel, een reviewer kan een expliciete override krijgen.",
+    "Capabilities worden in de gekozen uitvoeromgeving gecontroleerd; onbekend model, incompatibele effort of onbeschikbare provider stopt vóór productwijzigingen zonder stille fallback.",
+    "Het effectieve profiel wordt bij runstart bevroren; globale defaults of custom-agentconfig mogen de vastgelegde keuze niet ongemerkt wijzigen.",
+    "Attributie onderscheidt requested, effective en unconfirmed; geen modelbevestiging afleiden uit alleen agentproza. Beschikbare tokens/tijd worden feitelijk geregistreerd zonder geschatte factuurkosten als echte kosten te presenteren.",
+    "Hermes/custom adapters declareren hun capabilities; unsupported modelsturing faalt eerlijk, terwijl legacy mechanical taken bruikbaar blijven.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_models.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 20,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "modular-native-adapters"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "finish-evidence-attribution-gate"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "usage-capacity-attribution-ledger"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Laat Codex build, critic en repair het gevalideerde taakprofiel gebruiken en registreer aangevraagde en bevestigde effectieve runtime-instellingen per fase.",
+    "sha256": "1aaf001323c056c97febdb5b2f7e40d07a0a5ff85ddb429f0100138af3532d17",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Model-ID en reasoning effort worden voor iedere fase werkelijk als runtime-instellingen doorgegeven; bouw en herstel erven het taakprofiel, een reviewer kan een expliciete override krijgen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Capabilities worden in de gekozen uitvoeromgeving gecontroleerd; onbekend model, incompatibele effort of onbeschikbare provider stopt vóór productwijzigingen zonder stille fallback.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Het effectieve profiel wordt bij runstart bevroren; globale defaults of custom-agentconfig mogen de vastgelegde keuze niet ongemerkt wijzigen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Attributie onderscheidt requested, effective en unconfirmed; geen modelbevestiging afleiden uit alleen agentproza. Beschikbare tokens/tijd worden feitelijk geregistreerd zonder geschatte factuurkosten als echte kosten te presenteren.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Hermes/custom adapters declareren hun capabilities; unsupported modelsturing faalt eerlijk, terwijl legacy mechanical taken bruikbaar blijven.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

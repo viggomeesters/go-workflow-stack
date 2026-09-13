@@ -1,0 +1,180 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-05",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Afronding koppelen aan geverifieerde shipping",
+  "description": "Sluit het gat waarbij een mislukte push een done-taak oplevert en laat alle finishroutes dezelfde getypeerde lifecyclebewijzen controleren.\nAfhankelijk van: go-workflow-stack:abc-01, go-workflow-stack:abc-04. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/completion.py",
+      "go_workflow/shipping.py",
+      "go_workflow/task_state.py",
+      "schemas/release-evidence.schema.json",
+      "tests/test_abc_completion.py",
+      "docs/go-autonomous-loop.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**",
+      "schemas/verification-evidence.schema.json"
+    ]
+  },
+  "acceptance": [
+    "Een mislukte of niet-bevestigde push laat releaseplichtig werk pending/active/blocked en nooit done of completed_tasks; taakstatus en runstatus blijven consistent.",
+    "Handmatige finish, automatische finish, approval en taak-/goalrapportage gebruiken dezelfde gate; alleen proza of een model-success kan bewijs niet vervangen.",
+    "Work, review en releasevoortgang zijn onderscheiden. Eén afgeronde taak vereist niet dat de hele backlog leeg is; een campagne claimt geen volledige goal-completion zolang werk resteert.",
+    "Commit, gecontroleerde inhoud en geverifieerde remote branch/SHA zijn gekoppeld; latere integratie of releasevoorbereiding invalideert verouderde relevante checks.",
+    "Een releaseprofiel waarvoor nog geen publisher bestaat wordt eerlijk geblokkeerd; legacy gedrag verandert uitsluitend volgens de gekozen migratiepolicy.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Verificatie voert de afgesproken lokale commando’s uit en registreert cwd, argv/commando, exitcode, geteste revisie/werkdiff en bewijsreferentie. Alleen een gevuld veld, test_evidence:none of een oud geslaagd resultaat kan verplichte checks niet vervangen.",
+    "Alle verplichte requirements en fasebewijzen zijn inhoudelijk geldig vóór finish; ontbrekende/failed checks, mislukte push en onbevestigde remote readback blokkeren done. Regressies dekken de agent-brain push-fail/done-route en legacy finish-before-ship, ook via handmatige bypassroutes."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_completion.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 50,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-01",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-04",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "transactional-finish-ship"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "review-state-lifecycle-contract"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "safe-ship-scoped-add"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Sluit het gat waarbij een mislukte push een done-taak oplevert en laat alle finishroutes dezelfde getypeerde lifecyclebewijzen controleren.",
+    "sha256": "db14bd00e07fd9055dd016e506fcb897d0571c81df38578e0bf3a34c0390e053",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Een mislukte of niet-bevestigde push laat releaseplichtig werk pending/active/blocked en nooit done of completed_tasks; taakstatus en runstatus blijven consistent.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Handmatige finish, automatische finish, approval en taak-/goalrapportage gebruiken dezelfde gate; alleen proza of een model-success kan bewijs niet vervangen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Work, review en releasevoortgang zijn onderscheiden. Eén afgeronde taak vereist niet dat de hele backlog leeg is; een campagne claimt geen volledige goal-completion zolang werk resteert.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Commit, gecontroleerde inhoud en geverifieerde remote branch/SHA zijn gekoppeld; latere integratie of releasevoorbereiding invalideert verouderde relevante checks.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Een releaseprofiel waarvoor nog geen publisher bestaat wordt eerlijk geblokkeerd; legacy gedrag verandert uitsluitend volgens de gekozen migratiepolicy.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Verificatie voert de afgesproken lokale commando’s uit en registreert cwd, argv/commando, exitcode, geteste revisie/werkdiff en bewijsreferentie. Alleen een gevuld veld, test_evidence:none of een oud geslaagd resultaat kan verplichte checks niet vervangen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Alle verplichte requirements en fasebewijzen zijn inhoudelijk geldig vóór finish; ontbrekende/failed checks, mislukte push en onbevestigde remote readback blokkeren done. Regressies dekken de agent-brain push-fail/done-route en legacy finish-before-ship, ook via handmatige bypassroutes.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

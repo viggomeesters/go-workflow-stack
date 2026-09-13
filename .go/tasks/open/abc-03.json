@@ -1,0 +1,176 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-03",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Workers starten met complete contextoverdracht",
+  "description": "Geef iedere verse worker een duurzaam, versiegebonden contextsnapshot met actuele code-, fase- en bewijsreferenties; behoud de bestaande projectcontext.\nAfhankelijk van: go-workflow-stack:abc-01, go-workflow-stack:abc-11. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/adapter_protocol.py",
+      "go_workflow/execution_context.py",
+      "schemas/agent-adapter-request.schema.json",
+      "schemas/execution-context.schema.json",
+      "tests/test_abc_context.py",
+      "docs/agent-adapter-protocol.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**",
+      "go_workflow/worktrees.py"
+    ]
+  },
+  "acceptance": [
+    "Een unieke run/phase/attempt-identiteit voorkomt overschrijven van eerdere artifacts; snapshot wordt vóór workerstart vastgelegd.",
+    "Context bevat doel, scope, relevante besluiten, contracthash, Git-baseline, actuele wijzigingen inclusief nieuwe bestanden, checks, concrete criticbevindingen, resterende stappen en releasebewijzen.",
+    "Het request geeft een pad/hash door; de worker verifieert taak en actuele repositorytoestand. Samenvattingen vervangen geen code of ruwe bewijsbestanden.",
+    "Repair ontvangt de actuele mislukte checks en criticbevindingen vóór start; een overdracht naar een andere worker behoudt dit zonder de oorspronkelijke chat.",
+    "Grote context wordt niet onbeperkt verdrievoudigd in environmentvariabelen; compatibiliteit met het bestaande adapterprotocol is expliciet getest.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Een nieuwe worker krijgt dezelfde taakbranch/worktree, eigenaar/lease, actuele fase, requirementsdekking, geteste inhoud en reeds bevestigde publicatiestappen. Hij controleert het snapshot tegen Git en de canonieke control state voordat hij schrijft; geen eigen queue uit een worktreekopie.",
+    "Laad alleen relevante skills/fasecontext volgens het contract; een notepad is aanvullende uitleg en kan gestructureerde status of bewijs niet overschrijven. Een andere worker kan zonder chatgeschiedenis verder in dezelfde werkplek."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_context.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 30,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-01",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-11",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "attempt-artifact-ledger"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomous-executor-adapter"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Geef iedere verse worker een duurzaam, versiegebonden contextsnapshot met actuele code-, fase- en bewijsreferenties; behoud de bestaande projectcontext.",
+    "sha256": "47adda4a3f7e5ad7ab55bc81b40461d9dd795658f45ef34b11dc7ab14823c778",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Een unieke run/phase/attempt-identiteit voorkomt overschrijven van eerdere artifacts; snapshot wordt vóór workerstart vastgelegd.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Context bevat doel, scope, relevante besluiten, contracthash, Git-baseline, actuele wijzigingen inclusief nieuwe bestanden, checks, concrete criticbevindingen, resterende stappen en releasebewijzen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Het request geeft een pad/hash door; de worker verifieert taak en actuele repositorytoestand. Samenvattingen vervangen geen code of ruwe bewijsbestanden.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Repair ontvangt de actuele mislukte checks en criticbevindingen vóór start; een overdracht naar een andere worker behoudt dit zonder de oorspronkelijke chat.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Grote context wordt niet onbeperkt verdrievoudigd in environmentvariabelen; compatibiliteit met het bestaande adapterprotocol is expliciet getest.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Een nieuwe worker krijgt dezelfde taakbranch/worktree, eigenaar/lease, actuele fase, requirementsdekking, geteste inhoud en reeds bevestigde publicatiestappen. Hij controleert het snapshot tegen Git en de canonieke control state voordat hij schrijft; geen eigen queue uit een worktreekopie.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Laad alleen relevante skills/fasecontext volgens het contract; een notepad is aanvullende uitleg en kan gestructureerde status of bewijs niet overschrijven. Een andere worker kan zonder chatgeschiedenis verder in dezelfde werkplek.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

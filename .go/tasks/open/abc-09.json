@@ -1,0 +1,160 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-09",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Sessiewissels en subagents als adapteropties toetsen",
+  "description": "Lever een begrensd capability- en overdrachtsbewijs voor dezelfde-sessie modelwissels en subagents naast de gekozen basis van verse workers. Sluit de open C-keuze met bewijs, zonder ongemerkt een tweede orchestrator te bouwen.\nAfhankelijk van: go-workflow-stack:abc-02, go-workflow-stack:abc-03, go-workflow-stack:abc-04. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "tests/test_abc_topologies.py",
+      "fixtures/abc-topologies/**",
+      "docs/worker-topologies.md",
+      ".go/decisions/events.jsonl",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**"
+    ]
+  },
+  "acceptance": [
+    "Vergelijk verse workers, per-turn model/effort override en een subagent met eigen profiel op contextbehoud, herstel, attributie en runtimeafhankelijkheid.",
+    "Gebruik het lokaal beschikbare protocol en testdoubles voor sessie-ID, ephemeral-beperkingen, contextoverdracht en modeloverrides; markeer live-bevestiging afzonderlijk.",
+    "Mid-turn hot-switching wordt niet als ondersteund gepresenteerd zonder bewijs; wissel alleen op een veilige taak/fase/beurtgrens.",
+    "Leg een expliciet besluit vast: welke alternatieve adapter wordt ondersteund of uitgesteld en waarom; uitgestelde uitbreidingen worden geen impliciete afhankelijkheid van de basisrelease.",
+    "De contextsnapshot en lifecycle blijven eigendom van .go, ook als de bovenliggende Codex-sessie verdwijnt; geen nieuwe gebruikerstaak per worker nodig.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Bewijs voor elke gekozen adapter dat modelwisseling op een veilige grens dezelfde taakworktree/context en exclusief schrijverschap behoudt. Een nieuwe worktree per fase/model is geen default; reviewers zijn alleen-lezen tenzij expliciet overgedragen."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_topologies.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 90,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-02",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-03",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-04",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Lever een begrensd capability- en overdrachtsbewijs voor dezelfde-sessie modelwissels en subagents naast de gekozen basis van verse workers. Sluit de open C-keuze met bewijs, zonder ongemerkt een tweede orchestrator te bouwen.",
+    "sha256": "01ca1f48c57122d59a28aeb72bfecb63fa3aff5f5e37cffb22f0757b048572be",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Vergelijk verse workers, per-turn model/effort override en een subagent met eigen profiel op contextbehoud, herstel, attributie en runtimeafhankelijkheid.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Gebruik het lokaal beschikbare protocol en testdoubles voor sessie-ID, ephemeral-beperkingen, contextoverdracht en modeloverrides; markeer live-bevestiging afzonderlijk.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Mid-turn hot-switching wordt niet als ondersteund gepresenteerd zonder bewijs; wissel alleen op een veilige taak/fase/beurtgrens.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Leg een expliciet besluit vast: welke alternatieve adapter wordt ondersteund of uitgesteld en waarom; uitgestelde uitbreidingen worden geen impliciete afhankelijkheid van de basisrelease.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "De contextsnapshot en lifecycle blijven eigendom van .go, ook als de bovenliggende Codex-sessie verdwijnt; geen nieuwe gebruikerstaak per worker nodig.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Bewijs voor elke gekozen adapter dat modelwisseling op een veilige grens dezelfde taakworktree/context en exclusief schrijverschap behoudt. Een nieuwe worktree per fase/model is geen default; reviewers zijn alleen-lezen tenzij expliciet overgedragen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

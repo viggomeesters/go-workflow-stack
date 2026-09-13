@@ -1,0 +1,478 @@
+{
+  "kind": "planning_artifact",
+  "format_version": 1,
+  "id": "abc-lifecycle",
+  "status": "prepared",
+  "implementation_status": "not_started",
+  "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+  "created_on": "2026-09-13",
+  "coordinator_project": "go-workflow-stack",
+  "participants": [
+    {
+      "project": "go-workflow-stack",
+      "repo_path": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "remote": "https://github.com/viggomeesters/go-workflow-stack.git",
+      "state_root": ".go"
+    },
+    {
+      "project": "go-project-template",
+      "repo_path": "/Users/viggomeesters/Dev/go-project-template",
+      "remote": "https://github.com/viggomeesters/go-project-template.git",
+      "state_root": ".go"
+    }
+  ],
+  "goals": [
+    "A: iedere nieuwe releaseplichtige taak heeft gekoppeld bewijs voor checks, review, commit/push, publicatie en eventuele livecontrole.",
+    "B: twee opeenvolgende taken gebruiken aantoonbaar verschillende gekozen model/effortprofielen zonder stille terugval.",
+    "C: een verse worker hervat een onderbroken actieve taak met actuele code-, fase- en bewijscontext zonder chatgeschiedenis.",
+    "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
+    "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
+  ],
+  "planning_contract": "This manifest and supplemental task metadata describe planned work; the current runtime does not enforce the dependency graph or implement model/release dispatch.",
+  "execution_boundary": {
+    "authorized_now": [
+      "task creation",
+      "planning updates",
+      "required preflight metadata updates",
+      "read-only validation"
+    ],
+    "not_authorized_now": [
+      "claim",
+      "implementation",
+      "task execution",
+      "commit",
+      "push",
+      "tag",
+      "release",
+      "deploy"
+    ]
+  },
+  "tasks": [
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-01",
+      "title": "Taak-, model- en releasecontract valideren",
+      "dependencies": []
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-02",
+      "title": "Modelkeuze afdwingen en gebruik registreren",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-01",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-11",
+      "title": "Taakbranches en worktrees veilig beheren",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-01",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-03",
+      "title": "Workers starten met complete contextoverdracht",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-01",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-11",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-04",
+      "title": "Actieve taken en fases veilig hervatten",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-02",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-03",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-05",
+      "title": "Afronding koppelen aan geverifieerde shipping",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-01",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-04",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-06",
+      "title": "Versies en releases hervatbaar publiceren",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-05",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-07",
+      "title": "Deployments en draaiende versie verifiëren",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-06",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-08",
+      "title": "Bestaande projecten en intakepaden migreren",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-02",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-03",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-04",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-05",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-06",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-07",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-09",
+      "title": "Sessiewissels en subagents als adapteropties toetsen",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-02",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-03",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-04",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-workflow-stack",
+      "id": "abc-10",
+      "title": "A/B/C end-to-end bewijzen en vrijgeven",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-08",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-09",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-project-template",
+      "id": "abc-template-01",
+      "title": "Release- en modelprofielen in het template opnemen",
+      "dependencies": [
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-08",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    },
+    {
+      "project": "go-project-template",
+      "id": "abc-template-02",
+      "title": "Verse clones door de volledige lifecycle bewijzen",
+      "dependencies": [
+        {
+          "project": "go-project-template",
+          "task_id": "abc-template-01",
+          "requires": "done_with_required_release_evidence"
+        },
+        {
+          "project": "go-workflow-stack",
+          "task_id": "abc-10",
+          "requires": "done_with_required_release_evidence"
+        }
+      ]
+    }
+  ],
+  "coverage": {
+    "A_independent_release": [
+      "abc-01",
+      "abc-05",
+      "abc-06",
+      "abc-07",
+      "abc-08",
+      "abc-10",
+      "abc-template-01",
+      "abc-template-02"
+    ],
+    "B_task_model_effort": [
+      "abc-01",
+      "abc-02",
+      "abc-08",
+      "abc-10",
+      "abc-template-01",
+      "abc-template-02"
+    ],
+    "C_switching_and_context": [
+      "abc-03",
+      "abc-04",
+      "abc-09",
+      "abc-10",
+      "abc-template-01",
+      "abc-template-02"
+    ],
+    "push_failure_done_regression": [
+      "abc-05"
+    ],
+    "mid_task_resume_regression": [
+      "abc-04"
+    ],
+    "dependency_ordering": [
+      "abc-01"
+    ],
+    "legacy_migration": [
+      "abc-01",
+      "abc-08"
+    ],
+    "provider_targets_and_authority": [
+      "abc-06",
+      "abc-07",
+      "abc-template-01"
+    ],
+    "phase_contracts_requirements_and_evidence": [
+      "abc-01",
+      "abc-05",
+      "abc-08",
+      "abc-10"
+    ],
+    "mechanical_verification_final_revision": [
+      "abc-05",
+      "abc-06",
+      "abc-10"
+    ],
+    "branch_worktree_ownership_scope_cleanup": [
+      "abc-11",
+      "abc-03",
+      "abc-04",
+      "abc-06",
+      "abc-10",
+      "abc-template-01",
+      "abc-template-02"
+    ],
+    "durable_context_model_switch": [
+      "abc-03",
+      "abc-04",
+      "abc-09"
+    ],
+    "selective_skill_and_validator_reuse": [
+      "abc-01",
+      "abc-08",
+      "abc-10"
+    ],
+    "legacy_push_and_finish_regressions": [
+      "abc-05",
+      "abc-10"
+    ],
+    "post_rebase_verification_and_serial_release": [
+      "abc-06",
+      "abc-10"
+    ],
+    "linked_worktree_portability": [
+      "abc-11",
+      "abc-template-01",
+      "abc-template-02"
+    ]
+  },
+  "next_ready_after_future_execution_authorization": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-01"
+    }
+  ],
+  "sequence_note": "Volg dependencies, niet ID-volgorde. abc-01 eerst; daarna zijn abc-02 en abc-11 dependency-ready, maar werk serieel wegens gedeelde scope. abc-03 volgt op abc-11. Bestaande vervolgketen blijft behouden; alle taken open/ongeclaimd.",
+  "assumptions": [
+    "A applies to every newly configured product task; historical tasks and template fixtures need an explicit compatibility policy in abc-01.",
+    "A fixed Python runner with fresh phase workers is the planned baseline; no automatic model escalation or parallel subagents are assumed.",
+    "Generic release/deploy adapters use explicit project destinations; no real production target is inferred for these tooling repositories.",
+    "Each implementation package is independently releasable with backwards-compatible opt-in until complete A/B/C activation.",
+    "Until the new release engine exists, future task releases use the existing verified local release procedure and record evidence manually.",
+    "One branch/worktree per task; same workspace across model and phase switches",
+    "One canonical repository control state and one writing owner per task",
+    "Serial integration/version/publication per release channel with final-candidate proof",
+    "Cleanup is a separate recoverable step and cannot duplicate publication",
+    "Relevant skills selected by task/risk; required lifecycle and evidence remain enforced"
+  ],
+  "unresolved_decisions": [
+    {
+      "id": "abc-d01-release-unit",
+      "owner_task": "abc-01",
+      "question": "Exact contract boundaries for historical-done, mechanical/no-diff and template-fixture work.",
+      "status": "proposed",
+      "blocks": "Finalizing the new contract semantics, not this planning intake."
+    },
+    {
+      "id": "abc-d02-worker-topology",
+      "owner_task": "abc-09",
+      "question": "Whether same-session and native subagent adapters should be supported beyond the fresh-worker baseline.",
+      "status": "proposed",
+      "blocks": "Optional topology implementation only."
+    },
+    {
+      "id": "abc-d03-model-policy",
+      "owner_task": "abc-02",
+      "question": "Exact default model profiles and escalation policy; resolve against actual runtime/account capabilities.",
+      "status": "proposed",
+      "blocks": "Live execution choices, not generic contract implementation."
+    },
+    {
+      "id": "abc-d04-workspace-policy",
+      "owner_task": "abc-11",
+      "question": "Exacte branchnaam, basisbranch en integratiestrategie per project; herstel/cleanupbeleid en isolatie van eventuele testpoorten/databases. Eén taakwerkplek is geplande baseline, geen reeds geïmplementeerde garantie.",
+      "status": "proposed",
+      "blocks": "Projectdefaults en live uitvoerconfiguratie; contract-/fixtureplanning kan doorgaan."
+    }
+  ],
+  "pre_execution_conditions": [
+    "Obtain a separate execution instruction; this intake is planning-only.",
+    "Reconcile the old source checkout with the released runtime before product edits, preserving this planning and the pre-existing untracked uv.lock. No product checkout was advanced during intake.",
+    "Run current stack freshness/doctor and inspect relevant existing review dispositions; review-state-lifecycle-contract is historically review-pending and is not silently approved by this plan.",
+    "Inspect dependencies and required release receipts explicitly until abc-01 implements enforcement.",
+    "Use Python 3.11+; general system python3 was too old during the preceding audit."
+  ],
+  "preflight": {
+    "tag": "v0.3.14",
+    "commit": "2fb25c5b447e5c0622dca2d24f4f731adeb9f097",
+    "exact_ref": true,
+    "compatible": true,
+    "ready": true,
+    "development_override": false,
+    "note": "Latest annotated tag reconfirmed; pins already current, no update applied. Exact tagged CLI used for source-stack AGENTS entrypoint; template used its own ./go with exact checkout. Source-stack working tree has no ./go; no product launcher added during planning."
+  },
+  "deduplication": {
+    "stack_open_before": 0,
+    "template_open_before": [
+      "task-schema-smoke"
+    ],
+    "policy": "Historical matching tasks retained as builds_on references; no completed task reopened or re-created. Template smoke retained unchanged.",
+    "legacy_intake": {
+      "created": [
+        "go-workflow-stack:abc-11"
+      ],
+      "updated": [
+        "go-workflow-stack:abc-01",
+        "go-workflow-stack:abc-03",
+        "go-workflow-stack:abc-04",
+        "go-workflow-stack:abc-05",
+        "go-workflow-stack:abc-06",
+        "go-workflow-stack:abc-08",
+        "go-workflow-stack:abc-09",
+        "go-workflow-stack:abc-10",
+        "go-project-template:abc-template-01",
+        "go-project-template:abc-template-02"
+      ],
+      "unchanged_abc": [
+        "abc-02",
+        "abc-07"
+      ],
+      "historical_policy": "Reused existing ABC tasks and original epic/feature; historical tasks remain untouched and referenced via builds_on."
+    }
+  },
+  "validation": {
+    "status": "passed",
+    "scope": "planning_records_only",
+    "checks": [
+      "v0.3.14 native validate and status",
+      "template repository validator",
+      "dependency reference/cycle and plan readback",
+      "open/unclaimed, pending R outcomes, intent hashes and hierarchy membership",
+      "legacy coverage mapping",
+      "git diff --check",
+      "before/after file hashes; product/historical/smoke/unrelated work unchanged"
+    ],
+    "result": {
+      "tasks": 13,
+      "stack_tasks": 11,
+      "template_tasks": 2,
+      "dependencies_acyclic": true,
+      "all_dependencies_resolve": true,
+      "all_tasks_open_unclaimed": true,
+      "coverage_complete": true,
+      "historical_tasks_preserved": true,
+      "template_smoke_unchanged": true,
+      "product_code_unchanged": true,
+      "preexisting_user_changes_preserved": true,
+      "next_ready": [
+        "go-workflow-stack:abc-01"
+      ]
+    },
+    "implementation_tests_run": false
+  },
+  "updated_on": "2026-09-13",
+  "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+  "legacy_insights_ref": ".go/plans/legacy-insights.json"
+}

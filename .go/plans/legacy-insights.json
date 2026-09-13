@@ -1,0 +1,107 @@
+{
+  "kind": "planning_artifact",
+  "format_version": 1,
+  "id": "legacy-insights",
+  "status": "prepared",
+  "implementation_status": "not_started",
+  "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+  "coordinator_project": "go-workflow-stack",
+  "sources": [
+    {
+      "repository": "https://github.com/viggomeesters/agent-brain",
+      "commit": "4690ab530a153a9bb8a516bdea72f6a02f220a2a",
+      "paths": [
+        "modules/skills/scripts/go_pipeline.py",
+        "modules/skills/skills/go/SKILL.md",
+        "modules/core/scripts/validate-skills.py",
+        "modules/skills/tests/test_go_pipeline_gates.py",
+        "modules/core/tests/test_go_pipeline_properties.py"
+      ],
+      "findings": [
+        "cmd_verify executes commands; missing test config yields none",
+        "cmd_ship proceeds to completion after push failure",
+        "R requirements, tier completion and durable pipeline state offer reusable test cases"
+      ]
+    },
+    {
+      "repository": "https://github.com/viggomeesters/viggo-agent-skills",
+      "commit": "6038c37c7b6e0a030eee5c236a156a363bc5a8ed",
+      "paths": [
+        ".go-workflow/runtime/go_workflow/__main__.py",
+        ".go-workflow/gates.yaml",
+        ".go-workflow/config.yaml"
+      ],
+      "findings": [
+        "Task worktrees, scoped staging, claims, handoff and serial integration existed",
+        "integrate_worker_branch verifies before rebase, without rechecking after rebase",
+        "cmd_finish records done with ship_required true",
+        "many gates check field presence; worktree reuse and base selection need stronger identity validation"
+      ]
+    }
+  ],
+  "evidence_limit": "Static code research; historical runtimes were not executed. Reuse concepts and bounded regression cases; no inherited vault/ship instructions are authority.",
+  "coverage": {
+    "phase_contracts_requirements_and_evidence": [
+      "abc-01",
+      "abc-05",
+      "abc-08",
+      "abc-10"
+    ],
+    "mechanical_verification_final_revision": [
+      "abc-05",
+      "abc-06",
+      "abc-10"
+    ],
+    "branch_worktree_ownership_scope_cleanup": [
+      "abc-11",
+      "abc-03",
+      "abc-04",
+      "abc-06",
+      "abc-10",
+      "abc-template-01",
+      "abc-template-02"
+    ],
+    "durable_context_model_switch": [
+      "abc-03",
+      "abc-04",
+      "abc-09"
+    ],
+    "selective_skill_and_validator_reuse": [
+      "abc-01",
+      "abc-08",
+      "abc-10"
+    ],
+    "legacy_push_and_finish_regressions": [
+      "abc-05",
+      "abc-10"
+    ],
+    "post_rebase_verification_and_serial_release": [
+      "abc-06",
+      "abc-10"
+    ],
+    "linked_worktree_portability": [
+      "abc-11",
+      "abc-template-01",
+      "abc-template-02"
+    ]
+  },
+  "planned_baseline": [
+    "One branch/worktree per task; same workspace across model and phase switches",
+    "One canonical repository control state and one writing owner per task",
+    "Serial integration/version/publication per release channel with final-candidate proof",
+    "Cleanup is a separate recoverable step and cannot duplicate publication",
+    "Relevant skills selected by task/risk; required lifecycle and evidence remain enforced"
+  ],
+  "excluded_legacy_behavior": [
+    "vault execution state",
+    "full monolithic runtime restoration",
+    "all findings become immediate unbounded work",
+    "automatic global skill mutation",
+    "automatic commit of unrelated dirty files",
+    "task ID determines product version",
+    "mandatory parallel agents",
+    "GitHub Actions"
+  ],
+  "planning_only": true,
+  "participant_project": "go-workflow-stack"
+}

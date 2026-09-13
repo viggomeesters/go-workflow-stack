@@ -6,7 +6,47 @@
     {
       "id": "autonomous-go-runtime",
       "title": "Autonomous Go Runtime",
-      "features": [],
+      "features": [
+        {
+          "id": "abc-contracts",
+          "title": "A/B/C-contracten en migratie",
+          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "tasks": [
+            "abc-01",
+            "abc-08"
+          ]
+        },
+        {
+          "id": "abc-models",
+          "title": "Modelsturing en uitvoeringsvormen",
+          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "tasks": [
+            "abc-02",
+            "abc-09"
+          ]
+        },
+        {
+          "id": "abc-context",
+          "title": "Taakwerkplekken, contextoverdracht en hervatting",
+          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "tasks": [
+            "abc-03",
+            "abc-04",
+            "abc-11"
+          ]
+        },
+        {
+          "id": "abc-release",
+          "title": "Volledige geverifieerde taakreleases",
+          "description": "Gepland A/B/C-werk, aangevuld met geselecteerde legacy fase-/bewijs- en werkplekcontracten; nog niet geïmplementeerd. Zie .go/plans/abc-lifecycle.json",
+          "tasks": [
+            "abc-05",
+            "abc-06",
+            "abc-07",
+            "abc-10"
+          ]
+        }
+      ],
       "tasks": [
         "auto-preflight-envelope",
         "repo-local-executor-docs",
@@ -51,7 +91,8 @@
         "agent-team-pattern-docs-and-migration",
         "release-v038-agent-capacity",
         "make-completed-task-evidence-audit-tight-bind-a"
-      ]
+      ],
+      "planned_direction": "Zelfstandige taakreleases met expliciete modellen, fasebewijs en veilige taakworktrees; planning in .go/plans/abc-lifecycle.json"
     },
     {
       "id": "workflow",

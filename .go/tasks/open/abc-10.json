@@ -1,0 +1,173 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-10",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "A/B/C end-to-end bewijzen en vrijgeven",
+  "description": "Bewijs de geïntegreerde garanties met twee zelfstandige release-taken, verschillende modelprofielen, review/herstel en onderbrekingen; publiceer een compatibele stackrelease met traceerbare bewijzen.\nAfhankelijk van: go-workflow-stack:abc-08, go-workflow-stack:abc-09. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "tests/test_abc_end_to_end.py",
+      "fixtures/abc-campaign/**",
+      "scripts/check-abc.sh",
+      "docs/autonomy-benchmark.md",
+      "docs/distribution-and-pilots.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**"
+    ]
+  },
+  "acceptance": [
+    "Twee taken gebruiken verschillende model/effortprofielen en leveren elk een afzonderlijk geverifieerde release; de tweede begint pas na de vereiste release van de eerste.",
+    "Een afgekeurde critic veroorzaakt herstel met actuele bevindingen en nieuwe verificatie; geen taak is done vóór de laatste vereiste release/deploycheck.",
+    "Deterministische scenario’s bewijzen crashherstel op alle side-effectgrenzen, model-onbeschikbaarheid, stale context, mislukte push/deploy en niet-omzeilbare handmatige finish.",
+    "Voer bij latere uitvoering een kleine live Codex-proof uit met beschikbare Terra High/Astra Medium of expliciet gekozen alternatieven; ontbrekende toegang blijft een expliciete proof-blocker, geen gesimuleerde live claim.",
+    "Stackrelease bevat raw evidence, versie/commit/tag/publicatielink en readback; onderscheid deterministische testdekking van live modelkwaliteit en hergebruik de bestaande releasechecks.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Voeg lokale regressies toe voor ontbrekend fasebewijs/requirements, stale HEAD, gewijzigde basis na groen, mergeconflict, verlopen claim met levende worker, pushfout, onderbroken publicatie en cleanupfout. Bewijs dat ongeacht het model geen release of done aan ongeteste inhoud wordt gekoppeld.",
+    "Neem gerichte legacy propertytests voor state-roundtrip en completeness over onder het nieuwe schema; een optionele tweede taakworktree mag integratie of versie-uitgifte niet laten racen. Worktrees claimen geen beveiligings- of testomgevingisolatie."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_end_to_end.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 100,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-08",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-09",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-benchmark-promotion"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "campaign-resume-e2e"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Bewijs de geïntegreerde garanties met twee zelfstandige release-taken, verschillende modelprofielen, review/herstel en onderbrekingen; publiceer een compatibele stackrelease met traceerbare bewijzen.",
+    "sha256": "d090d598fbe9e6bf6aca4aa5a08a82399766fb2b0db96f4c71468b238e354790",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Twee taken gebruiken verschillende model/effortprofielen en leveren elk een afzonderlijk geverifieerde release; de tweede begint pas na de vereiste release van de eerste.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Een afgekeurde critic veroorzaakt herstel met actuele bevindingen en nieuwe verificatie; geen taak is done vóór de laatste vereiste release/deploycheck.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Deterministische scenario’s bewijzen crashherstel op alle side-effectgrenzen, model-onbeschikbaarheid, stale context, mislukte push/deploy en niet-omzeilbare handmatige finish.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Voer bij latere uitvoering een kleine live Codex-proof uit met beschikbare Terra High/Astra Medium of expliciet gekozen alternatieven; ontbrekende toegang blijft een expliciete proof-blocker, geen gesimuleerde live claim.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Stackrelease bevat raw evidence, versie/commit/tag/publicatielink en readback; onderscheid deterministische testdekking van live modelkwaliteit en hergebruik de bestaande releasechecks.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Voeg lokale regressies toe voor ontbrekend fasebewijs/requirements, stale HEAD, gewijzigde basis na groen, mergeconflict, verlopen claim met levende worker, pushfout, onderbroken publicatie en cleanupfout. Bewijs dat ongeacht het model geen release of done aan ongeteste inhoud wordt gekoppeld.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Neem gerichte legacy propertytests voor state-roundtrip en completeness over onder het nieuwe schema; een optionele tweede taakworktree mag integratie of versie-uitgifte niet laten racen. Worktrees claimen geen beveiligings- of testomgevingisolatie.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

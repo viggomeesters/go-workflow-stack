@@ -31,5 +31,29 @@
     "loop continues across tasks without Viggo re-triggering each phase",
     "recheck/devil/self-reflect findings create repairs or follow-up tasks before final done",
     "final report includes commits, verification, and open/blocker state"
-  ]
+  ],
+  "planned_direction": {
+    "id": "abc-lifecycle",
+    "status": "planned",
+    "implementation_status": "not_started",
+    "target": "Zelfstandig releasbare Go-taken met expliciete model/effortkeuze en hervatbare contextoverdracht; done vereist de afgesproken geverifieerde release.",
+    "coordinator_project": "go-workflow-stack",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "success_metrics": [
+      "A: iedere nieuwe releaseplichtige taak heeft gekoppeld bewijs voor checks, review, commit/push, publicatie en eventuele livecontrole.",
+      "B: twee opeenvolgende taken gebruiken aantoonbaar verschillende gekozen model/effortprofielen zonder stille terugval.",
+      "C: een verse worker hervat een onderbroken actieve taak met actuele code-, fase- en bewijscontext zonder chatgeschiedenis.",
+      "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
+      "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
+    ],
+    "non_goals": [
+      "Implementatie in deze intake",
+      "Parallelle builders als standaard",
+      "Mid-turn hot-switching zonder bewijs",
+      "Vault als execution state",
+      "GitHub Actions",
+      "Ongekozen productieprovider of automatische privilege-uitbreiding"
+    ],
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  }
 }

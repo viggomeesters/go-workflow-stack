@@ -1,0 +1,174 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-11",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Taakbranches en worktrees veilig beheren",
+  "description": "Lever opt-in branch- en worktreebeheer voor zelfstandige Go-taken: één werkplek per taak, strikt eigenaarschap, scopecontrole, herstelbare integratiegrens en veilige cleanup. Hergebruik bestaande state/scopeprimitieven en vertaal geselecteerde legacylessen; geen volledige legacyruntime importeren.\nAfhankelijk van: go-workflow-stack:abc-01. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/worktrees.py",
+      "go_workflow/state_io.py",
+      "go_workflow/task_state.py",
+      "schemas/workspace-state.schema.json",
+      "tests/test_abc_worktrees.py",
+      "docs/task-workspaces.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**"
+    ]
+  },
+  "acceptance": [
+    "Per uitvoerbare taak wordt één branch/worktree aangemaakt of strikt herkend aan repository-identiteit, taak, run/eigenaar en expliciete basisbranch/revisie; onbekende bestaande paden, branchbotsingen en main/master-heuristiek worden geweigerd.",
+    "Create/reuse/recovery is idempotent en exclusief: gelijktijdige of onderbroken creatie levert geen dubbele schrijvers op. Een model- of fasewissel hergebruikt dezelfde werkplek; claimoverdracht verloopt via het bestaande statecontract.",
+    "Eén repositorygebonden control state heeft een expliciete schrijver; losse .go-kopieën in worktrees kunnen geen onafhankelijke queues worden. Linked-worktrees worden via Git ontdekt, inclusief .git-bestand en git-common-dir; Git-prunelocks vervangen geen claim- of integratielocks.",
+    "Scopecontrole omvat de volledige taakdiff vanaf de basis plus staged/unstaged/untracked wijzigingen; alleen toegestane paden worden gestaged. Canonieke gebruikerswijzigingen worden niet meegenomen, gereset of automatisch gecommit.",
+    "Een interface levert een exclusief integratieslot en expliciete kandidaat-/basisrevisies aan de toekomstige shipfase. Gewijzigde basis of conflict blijft herstelbaar met worktreebehoud; deze taak implementeert geen tweede publisher.",
+    "Cleanup weigert dirty, ongeïntegreerd of onbevestigd opgeleverd werk en vreemde worktrees; vereist integraal bewaard werk plus de geconfigureerde releasebewijzen. Een cleanupfout krijgt een herstelactie zonder herpublicatie of verlies van de bewezen release.",
+    "Lokale Git-fixtures bewijzen gewone clone, linked worktree, pad met spaties, crash/retry, tweede eigenaar, vreemde bestaande workspace, out-of-scope gecommitteerd werk en veilige cleanup. Tests werken zonder externe accounts of publicatie.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_worktrees.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ],
+  "order": 25,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "concurrent-atomic-state"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "scope-enforcement-integrity"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "safe-ship-scoped-add"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Lever opt-in branch- en worktreebeheer voor zelfstandige Go-taken: één werkplek per taak, strikt eigenaarschap, scopecontrole, herstelbare integratiegrens en veilige cleanup. Hergebruik bestaande state/scopeprimitieven en vertaal geselecteerde legacylessen; geen volledige legacyruntime importeren.",
+    "sha256": "2b795c76bfb6da8c8e3915b9caf1535464e8ed71bd9188648583501b85da7139",
+    "source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Per uitvoerbare taak wordt één branch/worktree aangemaakt of strikt herkend aan repository-identiteit, taak, run/eigenaar en expliciete basisbranch/revisie; onbekende bestaande paden, branchbotsingen en main/master-heuristiek worden geweigerd.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Create/reuse/recovery is idempotent en exclusief: gelijktijdige of onderbroken creatie levert geen dubbele schrijvers op. Een model- of fasewissel hergebruikt dezelfde werkplek; claimoverdracht verloopt via het bestaande statecontract.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Eén repositorygebonden control state heeft een expliciete schrijver; losse .go-kopieën in worktrees kunnen geen onafhankelijke queues worden. Linked-worktrees worden via Git ontdekt, inclusief .git-bestand en git-common-dir; Git-prunelocks vervangen geen claim- of integratielocks.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Scopecontrole omvat de volledige taakdiff vanaf de basis plus staged/unstaged/untracked wijzigingen; alleen toegestane paden worden gestaged. Canonieke gebruikerswijzigingen worden niet meegenomen, gereset of automatisch gecommit.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Een interface levert een exclusief integratieslot en expliciete kandidaat-/basisrevisies aan de toekomstige shipfase. Gewijzigde basis of conflict blijft herstelbaar met worktreebehoud; deze taak implementeert geen tweede publisher.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Cleanup weigert dirty, ongeïntegreerd of onbevestigd opgeleverd werk en vreemde worktrees; vereist integraal bewaard werk plus de geconfigureerde releasebewijzen. Een cleanupfout krijgt een herstelactie zonder herpublicatie of verlies van de bewezen release.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Lokale Git-fixtures bewijzen gewone clone, linked worktree, pad met spaties, crash/retry, tweede eigenaar, vreemde bestaande workspace, out-of-scope gecommitteerd werk en veilige cleanup. Tests werken zonder externe accounts of publicatie.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ]
+}

@@ -38,6 +38,60 @@
       "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes and a reviewer lane, while overlapping modify scopes remain serial.",
       "rationale": "More agents can increase context burn, file collisions, and false progress unless capacity and review are explicit.",
       "enforcement": "auto/go-loop handoff exposes execution_policy.capacity and regression tests cover solo, serial-review, and disjoint-parallel cases"
+    },
+    {
+      "id": "abc-release-evidence",
+      "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
+      "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
+      "enforcement": "Te implementeren in abc-05/06/07; momenteel niet afgedwongen.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
+    },
+    {
+      "id": "abc-explicit-model-contract",
+      "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
+      "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
+      "enforcement": "Te implementeren in abc-01/02/04; momenteel niet afgedwongen.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
+    },
+    {
+      "id": "abc-durable-worker-context",
+      "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
+      "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
+      "enforcement": "Te implementeren in abc-03/04; alternatieven worden getoetst in abc-09.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
+    },
+    {
+      "id": "abc-task-workspace",
+      "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
+      "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
+      "enforcement": "Te implementeren in abc-11/03/04; template-01/02; nog niet afgedwongen.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
+    },
+    {
+      "id": "abc-final-candidate-proof",
+      "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
+      "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
+      "enforcement": "Te implementeren in abc-01/05/06/10; nog niet afgedwongen.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
+    },
+    {
+      "id": "abc-selective-legacy-reuse",
+      "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
+      "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
+      "enforcement": "Te implementeren in abc-01/08/10; nog niet afgedwongen.",
+      "status": "proposed",
+      "implementation_status": "not_implemented",
+      "plan_ref": ".go/plans/abc-lifecycle.json"
     }
   ]
 }

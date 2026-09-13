@@ -1,0 +1,169 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-01",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Taak-, model- en releasecontract valideren",
+  "description": "Introduceer een achterwaarts compatibel, versiegebonden contract voor zelfstandig opleverbare taken, uitvoeringsprofielen, releaseprofielen en afhankelijkheden. Leg de implementatiekeuzes vast zonder beschikbaarheid van A/B/C te suggereren voordat de fases bestaan.\nAfhankelijk van: geen taakafhankelijkheden. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "schemas/task.schema.json",
+      "schemas/project.schema.json",
+      "schemas/execution-brief.schema.json",
+      "go_workflow/cli.py",
+      "go_workflow/task_state.py",
+      "go_workflow/execution_contracts.py",
+      "tests/test_abc_contracts.py",
+      "docs/task-release-contract.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**",
+      "schemas/phase-contract.schema.json",
+      "schemas/verification-evidence.schema.json",
+      "tests/test_abc_phase_contracts.py"
+    ]
+  },
+  "acceptance": [
+    "Alle taakintakeroutes behouden expliciete model/effort-, release- en dependencyvelden; validators weigeren ongeldige waarden vóór mutatie.",
+    "Een producttaak bevat een zelfstandig releasbaar resultaat; technische stappen blijven binnen die taak. Productversie, workflowruntimeversie en task/run-identiteit zijn verschillende begrippen.",
+    "Projectdefaults en taakoverrides hebben een gedocumenteerde prioriteit; nieuwe contracten staan achter expliciete opt-in en legacy taken blijven geldig.",
+    "Lokale en expliciete cross-repo dependencies worden gevalideerd op bestaan, cycli en vereist opleverbewijs; next/claim slaat niet-gereed werk over en faalt veilig bij een ontbrekende participant.",
+    "De grens voor historical-done, mechanical/no-diff en de template-smoke-fixture is expliciet besloten en getest; nooit fictief releasebewijs aan oude taken toevoegen.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Vertaal de legacy fasecontracten naar getypeerde input/output, bewijs, stop-/handoffvoorwaarden, scope en requirementdekking. Onderscheid skillmetadata-lint van uitvoering, en bewijsstatus missing/failed/not_applicable/passed; niet-toepasselijk vereist een concrete beleidsgrond.",
+    "Leg taakwerkplek, control-state-eigenaarschap en revisiegebonden verificatie vast zonder nu workspace-uitvoering te implementeren. Selectieve risicoafhankelijke skill/reviewprofielen behouden altijd de vereiste lifecyclegates; legacy modelmetadata is geen bewijs van werkelijke dispatch."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_contracts.py -q",
+    "python3 -m pytest tests/test_abc_phase_contracts.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 10,
+  "dependencies": [],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "execution-brief-runtime"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "modular-migrations-agent-protocol"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Introduceer een achterwaarts compatibel, versiegebonden contract voor zelfstandig opleverbare taken, uitvoeringsprofielen, releaseprofielen en afhankelijkheden. Leg de implementatiekeuzes vast zonder beschikbaarheid van A/B/C te suggereren voordat de fases bestaan.",
+    "sha256": "9caec9e2c7ff9aa3f3b958f9a0866d8afa831fff003d4301b407d2031ef80338",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Alle taakintakeroutes behouden expliciete model/effort-, release- en dependencyvelden; validators weigeren ongeldige waarden vóór mutatie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Een producttaak bevat een zelfstandig releasbaar resultaat; technische stappen blijven binnen die taak. Productversie, workflowruntimeversie en task/run-identiteit zijn verschillende begrippen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Projectdefaults en taakoverrides hebben een gedocumenteerde prioriteit; nieuwe contracten staan achter expliciete opt-in en legacy taken blijven geldig.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Lokale en expliciete cross-repo dependencies worden gevalideerd op bestaan, cycli en vereist opleverbewijs; next/claim slaat niet-gereed werk over en faalt veilig bij een ontbrekende participant.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "De grens voor historical-done, mechanical/no-diff en de template-smoke-fixture is expliciet besloten en getest; nooit fictief releasebewijs aan oude taken toevoegen.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Vertaal de legacy fasecontracten naar getypeerde input/output, bewijs, stop-/handoffvoorwaarden, scope en requirementdekking. Onderscheid skillmetadata-lint van uitvoering, en bewijsstatus missing/failed/not_applicable/passed; niet-toepasselijk vereist een concrete beleidsgrond.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Leg taakwerkplek, control-state-eigenaarschap en revisiegebonden verificatie vast zonder nu workspace-uitvoering te implementeren. Selectieve risicoafhankelijke skill/reviewprofielen behouden altijd de vereiste lifecyclegates; legacy modelmetadata is geen bewijs van werkelijke dispatch.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

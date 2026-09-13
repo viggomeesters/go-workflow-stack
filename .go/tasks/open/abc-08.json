@@ -1,0 +1,202 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-08",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Bestaande projecten en intakepaden migreren",
+  "description": "Maak A/B/C beschikbaar via alle bestaande Go-intake-, update-, export- en hervatroutes, met expliciete opt-in en behoud van historische bewijzen.\nAfhankelijk van: go-workflow-stack:abc-02, go-workflow-stack:abc-03, go-workflow-stack:abc-04, go-workflow-stack:abc-05, go-workflow-stack:abc-06, go-workflow-stack:abc-07. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/migrations.py",
+      "go_workflow/stack_update.py",
+      "go_workflow/routing.py",
+      "schemas/**",
+      "fixtures/minimal/**",
+      "tests/test_abc_migration.py",
+      "docs/stack-updates.md",
+      "docs/go-command-router.md",
+      "skills/**",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**"
+    ]
+  },
+  "acceptance": [
+    "task create, intent, execution brief, recommendation promotion, follow-up en scaffolding behouden dezelfde uitvoering/releasevelden; roundtrip export/import verliest geen provenance.",
+    "Dry-run/apply/rollback is gevalideerd en idempotent; een pin-update alleen wordt niet als schema- of beleidsmigratie gepresenteerd.",
+    "Historische done-taken worden niet opnieuw uitgevoerd en krijgen geen verzonnen release-/modelbewijs; nieuwe projecten kunnen het volledige contract als default gebruiken na configuratie.",
+    "Open taken worden gecontroleerd geconverteerd of expliciet als nog te configureren aangemerkt; migration neemt geen impliciete publicatierechten over.",
+    "Gebruikersdocumentatie en gegenereerde skills beschrijven daadwerkelijk vrijgegeven gedrag, opt-in, dependencygates en het onderscheid tussen taak-, worker- en sessievoortgang.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Migreer uitsluitend gekozen fase-, bewijs- en werkplekcontracten; documenteer de herkomst in agent-brain en legacy viggo-agent-skills. Geen vaultwriter, verplichte brede skillketen, automatische globale skillwijzigingen, onbeperkte scope-uitbreiding of taak-ID-versienummering terugbrengen.",
+    "Gegenereerde skills beschrijven scope, input/output, bewijs en handoff conform de vrijgegeven runtime; lint/schema-validatie blijft gescheiden van runtimebewijs. Project-/taakprofielen behouden workspace- en vereiste verificatievelden over intake, export en hervatten."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_migration.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 80,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-02",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-03",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-04",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-05",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-06",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-07",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "fix-v1-contract-migration"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "explicit-stack-update"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "advice-model-03-promotion"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Maak A/B/C beschikbaar via alle bestaande Go-intake-, update-, export- en hervatroutes, met expliciete opt-in en behoud van historische bewijzen.",
+    "sha256": "6aec04ec967b3fbbf029bffaff54452ee1fbf0eb4300ff874ce5723704ee0ba0",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "task create, intent, execution brief, recommendation promotion, follow-up en scaffolding behouden dezelfde uitvoering/releasevelden; roundtrip export/import verliest geen provenance.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Dry-run/apply/rollback is gevalideerd en idempotent; een pin-update alleen wordt niet als schema- of beleidsmigratie gepresenteerd.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Historische done-taken worden niet opnieuw uitgevoerd en krijgen geen verzonnen release-/modelbewijs; nieuwe projecten kunnen het volledige contract als default gebruiken na configuratie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Open taken worden gecontroleerd geconverteerd of expliciet als nog te configureren aangemerkt; migration neemt geen impliciete publicatierechten over.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Gebruikersdocumentatie en gegenereerde skills beschrijven daadwerkelijk vrijgegeven gedrag, opt-in, dependencygates en het onderscheid tussen taak-, worker- en sessievoortgang.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Migreer uitsluitend gekozen fase-, bewijs- en werkplekcontracten; documenteer de herkomst in agent-brain en legacy viggo-agent-skills. Geen vaultwriter, verplichte brede skillketen, automatische globale skillwijzigingen, onbeperkte scope-uitbreiding of taak-ID-versienummering terugbrengen.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Gegenereerde skills beschrijven scope, input/output, bewijs en handoff conform de vrijgegeven runtime; lint/schema-validatie blijft gescheiden van runtimebewijs. Project-/taakprofielen behouden workspace- en vereiste verificatievelden over intake, export en hervatten.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

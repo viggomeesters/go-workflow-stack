@@ -1,0 +1,171 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "abc-06",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Versies en releases hervatbaar publiceren",
+  "description": "Voeg de volledige generieke releasefase toe: productversie/changelog, definitieve kandidaat, integratie, push, annotated tag, publicatie en readback.\nAfhankelijk van: go-workflow-stack:abc-05. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/**",
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "scripts/**",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/release.py",
+      "go_workflow/shipping.py",
+      "schemas/release-profile.schema.json",
+      "schemas/release-evidence.schema.json",
+      "tests/test_abc_release.py",
+      "docs/task-release-contract.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      ".go/project.json",
+      "docs/releases/**",
+      "go_workflow/worktrees.py"
+    ]
+  },
+  "acceptance": [
+    "Projectprofielen benoemen versiebron, bumpbeleid, remote/branch en publisher; de concrete versie wordt tegen de actuele release bepaald onder exclusieve publicatiecoördinatie.",
+    "Checks/review hebben betrekking op de definitieve releasekandidaat; commit, remote SHA, annotated tag en gepubliceerde artifactidentiteit sluiten op elkaar aan.",
+    "Onderbrekingen na commit, push, tag en publish worden hersteld met readback; een reeds geslaagde actie wordt niet dubbel uitgevoerd of stilzwijgend overschreven.",
+    "Autorisatie komt uit een expliciet project-/runcontract, nooit uit modelkeuze; geen GitHub Actions en geen nieuwe impliciete rechten bij migratie.",
+    "Een minimale fixture doorloopt de volledige release en verifieert versie, inhoud en bewijs; tests simuleren verloren responses en conflicterende tags zonder echte externe publicatie.",
+    "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+    "Gebruik het taakworktree- en integratieslotcontract. Na rebase/merge of versievoorbereiding wordt de definitieve kandidaat opnieuw geverifieerd en waar nodig gereviewd; vóór-rebase groen bewijst de nieuwe kandidaat niet. Geen ongeteste inhoud taggen of publiceren.",
+    "Serialiseer basisupdate, versie-uitgifte en publicatie per repository/releasekanaal; detecteer een concurrerende remote update voordat oud bewijs wordt gebruikt. Het delivery manifest koppelt taak/run, integratie-SHA, checks, tag/artifact en externe terugleesresultaten; cleanup blijft een aparte herstelbare stap."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_abc_release.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "order": 60,
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "abc-05",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "planning": {
+    "status": "prepared",
+    "implementation_status": "not_started",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
+    "plan_ref": ".go/plans/abc-lifecycle.json",
+    "dependency_enforcement": "agent_preclaim_until_abc-01",
+    "coordinator_project": "go-workflow-stack",
+    "created_on": "2026-09-13",
+    "updated_on": "2026-09-13",
+    "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
+    "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  },
+  "builds_on": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "ship-policy-and-resume-state"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "coordinated-cross-repo-publish"
+    }
+  ],
+  "execution_selection": {
+    "status": "not_selected",
+    "note": "Select model/effort explicitly for the later run; this planning field is not implemented runtime dispatch."
+  },
+  "release_intent": {
+    "status": "planned",
+    "version": "resolve_against_latest_release_at_execution",
+    "policy": "independent_task_release",
+    "receipt_required": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Voeg de volledige generieke releasefase toe: productversie/changelog, definitieve kandidaat, integratie, push, annotated tag, publicatie en readback.",
+    "sha256": "13b6b57f577f960cceb3ab538c45bd978b921f5c578eb133ab601561528db51a",
+    "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Projectprofielen benoemen versiebron, bumpbeleid, remote/branch en publisher; de concrete versie wordt tegen de actuele release bepaald onder exclusieve publicatiecoördinatie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Checks/review hebben betrekking op de definitieve releasekandidaat; commit, remote SHA, annotated tag en gepubliceerde artifactidentiteit sluiten op elkaar aan.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Onderbrekingen na commit, push, tag en publish worden hersteld met readback; een reeds geslaagde actie wordt niet dubbel uitgevoerd of stilzwijgend overschreven.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Autorisatie komt uit een expliciet project-/runcontract, nooit uit modelkeuze; geen GitHub Actions en geen nieuwe impliciete rechten bij migratie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Een minimale fixture doorloopt de volledige release en verifieert versie, inhoud en bewijs; tests simuleren verloren responses en conflicterende tags zonder echte externe publicatie.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Lever deze begrensde wijziging als zelfstandig verifieerbare, achterwaarts compatibele release op: relevante checks en critic groen, documentatie/changelog en passende versie bijgewerkt, scoped commit/integratie/push, annotated tag/publicatie en remote readback bewezen. Ontbrekende publicatierechten of bewijs blijven expliciete blockers. Deze intake autoriseert nu uitsluitend planning.",
+      "source": "abc_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R7",
+      "text": "Gebruik het taakworktree- en integratieslotcontract. Na rebase/merge of versievoorbereiding wordt de definitieve kandidaat opnieuw geverifieerd en waar nodig gereviewd; vóór-rebase groen bewijst de nieuwe kandidaat niet. Geen ongeteste inhoud taggen of publiceren.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R8",
+      "text": "Serialiseer basisupdate, versie-uitgifte en publicatie per repository/releasekanaal; detecteer een concurrerende remote update voordat oud bewijs wordt gebruikt. Het delivery manifest koppelt taak/run, integratie-SHA, checks, tag/artifact en externe terugleesresultaten; cleanup blijft een aparte herstelbare stap.",
+      "source": "legacy_insights_planning",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "verification_notes": [
+    "The task-specific test file/script is an expected deliverable, not asserted to exist or pass today.",
+    "At execution, use Python 3.11+ and the freshly verified pinned runtime; preserve unrelated working-tree changes.",
+    "Run relevant regressions and the repository release checks before future publication; no GitHub Actions.",
+    "Select a supported current model at execution; illustrative Terra/Astra examples do not assign a model to this task."
+  ]
+}

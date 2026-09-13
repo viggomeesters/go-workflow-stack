@@ -109,7 +109,8 @@
     "abc-01": "v0.3.15 opt-in phase/requirement/dependency contracts",
     "abc-11": "v0.3.17 owned task workspaces and serial integration/cleanup primitives",
     "abc-03": "v0.3.18 durable native phase context and evidence",
-    "abc-04": "v0.3.19 exclusive phase resume, local relocation and effect intent/readback interfaces"
+    "abc-04": "v0.3.19 exclusive phase resume, local relocation and effect intent/readback interfaces",
+    "abc-05": "v0.3.21 executed content-bound checks, same-agent review, release readback and shared completion/approval/reporting gate"
   },
   "remaining_direction": "Verified finish/publication, migration, live topology proof and template integration remain open in their existing ABC tasks."
 }

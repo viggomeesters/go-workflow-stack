@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "abc-05",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Afronding koppelen aan geverifieerde shipping",
   "description": "Sluit het gat waarbij een mislukte push een done-taak oplevert en laat alle finishroutes dezelfde getypeerde lifecyclebewijzen controleren.\nAfhankelijk van: go-workflow-stack:abc-01, go-workflow-stack:abc-04. Controleer releasebewijs vóór claim; de huidige runtime dwingt dit nog niet af. Oude inzichten en bronverwijzingen: .go/plans/legacy-insights.json. Gepland gedrag; uitsluitend een latere uitvoeringsopdracht autoriseert uitvoering/publicatie.",
   "scope": {
@@ -61,10 +61,122 @@
     "claimed_at": "2026-09-13T15:53:54+02:00",
     "base_commit": "46e901686f2471ae2efbd49600361711da938c08"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-13T17:14:29+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Same-agent review of all changed product paths, real checks and final tagged release passed. New shared lifecycle gate performed fresh remote readback for finish and approval. No independent reviewer claimed.",
+      "transaction_id": "5f98e90828204678a65f650b98c2b67f",
+      "delivery": {
+        "delivery_id": "autonomous-go-runtime-v7",
+        "html": ".go/deliveries/autonomous-go-runtime-v7/index.html",
+        "manifest": ".go/deliveries/autonomous-go-runtime-v7/manifest.json",
+        "source_sha256": "34018946c14768309826d9e6fd699a20b091e78d9d5ebfc0bba9dafc94eebc92",
+        "html_sha256": "02ff6123927ecbbe5fa618ab736ae7524e691dcdb7e3ec60291fa8440844d570"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-13T17:14:29+02:00",
+      "task_id": "abc-05",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/abc-05-candidate-superseded.log,.go/evidence/abc-05-candidate.log,.go/evidence/abc-05-clone-red.log,.go/evidence/abc-05-focused.log,.go/evidence/abc-05-integration.json,.go/evidence/abc-05-make.log,.go/evidence/abc-05-outcome-interop-failure.json,.go/evidence/abc-05-outcome-red.log,.go/evidence/abc-05-prepublication-reconciliation.json,.go/evidence/abc-05-release.json,.go/evidence/abc-05-tag-superseded.log,.go/evidence/abc-05-tag.log,.go/evidence/abc-05-v021-candidate.log,.go/evidence/abc-05-v021-focused.log,.go/evidence/abc-05-v021-integration.json,.go/evidence/abc-05-v021-make.log,.go/evidence/abc-05-v021-verification.json,.go/evidence/abc-05-verification.json,.go/evidence/events.jsonl,.go/plans/abc-lifecycle.json,.go/project.json,.go/runs/abc-05/completion-state.json,.go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json,.go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json,.go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json,.go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json,.go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json,.go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json,.go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json,.go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json,.go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json,.go/runs/abc-05/completion/critic-16b75e5486a94a568b7417e947cf96cb.json,.go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json,.go/runs/abc-05/completion/critic-4936aa4aaf0a44a39241ce80ab9df912.json,.go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json,.go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json,.go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json,.go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json,.go/tasks/active/abc-05.json,.go/workspaces/abc-05.json,CHANGELOG.md,docs/go-autonomous-loop.md,docs/releases/v0.3.20.md,docs/releases/v0.3.21.md,go_workflow/cli.py,go_workflow/completion.py,go_workflow/constants.py,go_workflow/run_state.py,go_workflow/shipping.py,go_workflow/worktrees.py,pyproject.toml,schemas/project.schema.json,schemas/release-evidence.schema.json,schemas/run-state.schema.json,scripts/release-check-inner.sh,tests/test_abc_completion.py; verification_command=pytest smoke architecture ABC contracts models workspaces contexts resume completion, make check, candidate/tagged release-check and actual canonical completion verify; verification_result=passed (303 Linux tests; 22 focused macOS; tagged gate; distribution/template pairing); critic=passed same-agent with all product paths reviewed; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.21 656d1a42cb8f7cec76308a876efbfaf0c6a009be https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.21; Self-reflect: process-boundary guard reused and requirement evidence loopholes closed with regressions; no global skill/memory changes.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/abc-05-candidate-superseded.log",
+        ".go/evidence/abc-05-candidate.log",
+        ".go/evidence/abc-05-clone-red.log",
+        ".go/evidence/abc-05-focused.log",
+        ".go/evidence/abc-05-integration.json",
+        ".go/evidence/abc-05-make.log",
+        ".go/evidence/abc-05-outcome-interop-failure.json",
+        ".go/evidence/abc-05-outcome-red.log",
+        ".go/evidence/abc-05-prepublication-reconciliation.json",
+        ".go/evidence/abc-05-release.json",
+        ".go/evidence/abc-05-tag-superseded.log",
+        ".go/evidence/abc-05-tag.log",
+        ".go/evidence/abc-05-v021-candidate.log",
+        ".go/evidence/abc-05-v021-focused.log",
+        ".go/evidence/abc-05-v021-integration.json",
+        ".go/evidence/abc-05-v021-make.log",
+        ".go/evidence/abc-05-v021-verification.json",
+        ".go/evidence/abc-05-verification.json",
+        ".go/evidence/events.jsonl",
+        ".go/plans/abc-lifecycle.json",
+        ".go/project.json",
+        ".go/runs/abc-05/completion-state.json",
+        ".go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json",
+        ".go/runs/abc-05/completion/command-15ea7f0a773949728972a5c0ae5a22d2.json",
+        ".go/runs/abc-05/completion/command-23d10b8b67bb466d86cf714d43b2fa41.json",
+        ".go/runs/abc-05/completion/command-2534cdc9a581482facb4269b728dfc6a.json",
+        ".go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json",
+        ".go/runs/abc-05/completion/command-592da13b991b40a48619a2989e391b58.json",
+        ".go/runs/abc-05/completion/command-8da2ccb9b3c34e048e88744211423980.json",
+        ".go/runs/abc-05/completion/command-a80082df380a434b95559f3dd667b02a.json",
+        ".go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json",
+        ".go/runs/abc-05/completion/critic-16b75e5486a94a568b7417e947cf96cb.json",
+        ".go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json",
+        ".go/runs/abc-05/completion/critic-4936aa4aaf0a44a39241ce80ab9df912.json",
+        ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json",
+        ".go/runs/abc-05/completion/verification-8d2d3adf7f1c4e418ca2bb745c7ab4bb.json",
+        ".go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json",
+        ".go/runs/abc-05/completion/verification-e6cb0e09e45d4b4aa7beb05ee19b436c.json",
+        ".go/tasks/active/abc-05.json",
+        ".go/workspaces/abc-05.json",
+        "CHANGELOG.md",
+        "docs/go-autonomous-loop.md",
+        "docs/releases/v0.3.20.md",
+        "docs/releases/v0.3.21.md",
+        "go_workflow/cli.py",
+        "go_workflow/completion.py",
+        "go_workflow/constants.py",
+        "go_workflow/run_state.py",
+        "go_workflow/shipping.py",
+        "go_workflow/worktrees.py",
+        "pyproject.toml",
+        "schemas/project.schema.json",
+        "schemas/release-evidence.schema.json",
+        "schemas/run-state.schema.json",
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_completion.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "46e901686f2471ae2efbd49600361711da938c08",
+        "observed_head_commit": "656d1a42cb8f7cec76308a876efbfaf0c6a009be"
+      },
+      "verification": {
+        "command": "pytest smoke architecture ABC contracts models workspaces contexts resume completion, make check, candidate/tagged release-check and actual canonical completion verify",
+        "result": "passed (303 Linux tests"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent with all product paths reviewed",
+        "skip_reason": null
+      }
+    }
+  ],
   "order": 50,
   "dependencies": [
     {
@@ -80,7 +192,7 @@
   ],
   "planning": {
     "status": "prepared",
-    "implementation_status": "in_progress",
+    "implementation_status": "completed",
     "source_ref": "codex-task:01a09a21-cca9-7a90-84af-80c781e537ec; user Go task, planning only, 2026-09-13",
     "plan_ref": ".go/plans/abc-lifecycle.json",
     "dependency_enforcement": "agent_preclaim_until_abc-01",
@@ -118,7 +230,7 @@
   },
   "release_intent": {
     "status": "published",
-    "version": "0.3.20",
+    "version": "0.3.21",
     "policy": "independent_task_release",
     "receipt_required": true
   },
@@ -254,6 +366,11 @@
           "created_at": "2026-09-13T17:00:18+02:00",
           "agent": "codex-astra-high",
           "summary": ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json"
+        },
+        {
+          "created_at": "2026-09-13T17:14:27+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/abc-05/completion/release-14afa711bb8a438cb7550bd653026284.json"
         }
       ]
     },
@@ -350,8 +467,8 @@
       "sha256": "ef8d85730ef66063eb78f07b7c5f53609a7f8e34a42eaefb2efd2fa46f005377"
     },
     "release": {
-      "path": ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json",
-      "sha256": "ee05012361bca01eb922c91943682baf867204e6bc75df6918733682d5d6ae9e"
+      "path": ".go/runs/abc-05/completion/release-14afa711bb8a438cb7550bd653026284.json",
+      "sha256": "4a1fc67845f510ceff8d9de6b9fff95e8678153094388fb974cdeb1542854795"
     }
   },
   "release_receipt": {
@@ -359,10 +476,10 @@
     "status": "verified",
     "task_id": "abc-05",
     "project": "go-workflow-stack",
-    "commit": "ce8b923d26f07d76f22f516143d9d44ee5f009dc",
-    "tag": "v0.3.20",
+    "commit": "656d1a42cb8f7cec76308a876efbfaf0c6a009be",
+    "tag": "v0.3.21",
     "evidence": [
-      ".go/runs/abc-05/completion/release-2114248dfcd64ce2b80bbeb482383100.json"
+      ".go/runs/abc-05/completion/release-14afa711bb8a438cb7550bd653026284.json"
     ]
   }
 }

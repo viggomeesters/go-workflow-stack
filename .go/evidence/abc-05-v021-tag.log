@@ -1,0 +1,63 @@
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/candidate.bundle main refs/tags/v0.3.21:refs/tags/v0.3.21
+RUN: git merge --ff-only FETCH_HEAD
+From /tmp/go-abc-01-xjyg7dz7/candidate.bundle
+ * branch              main       -> FETCH_HEAD
+ * [new tag]           v0.3.21    -> v0.3.21
+Updating b80c47a4..656d1a42
+Fast-forward
+ .go/architecture/events.jsonl                      |   1 +
+ .go/evidence/abc-05-outcome-interop-failure.json   |  27 +++++
+ .go/evidence/abc-05-outcome-red.log                |  34 ++++++
+ .go/evidence/abc-05-v021-candidate.log             | 125 +++++++++++++++++++++
+ .go/evidence/abc-05-v021-focused.log               |   3 +
+ .go/evidence/abc-05-v021-integration.json          |  20 ++++
+ .go/evidence/abc-05-v021-make.log                  |  65 +++++++++++
+ .go/evidence/abc-05-v021-verification.json         |  41 +++++++
+ .go/evidence/events.jsonl                          |   7 ++
+ .go/plans/abc-lifecycle.json                       |   4 +-
+ .go/runs/abc-05/completion-state.json              |  83 ++++++++++----
+ .../command-01ba490e185e42f8a8d247f06e4c7f76.json  |  14 +++
+ .../command-588aa3e1626c4f97b4dd61268cc66851.json  |  14 +++
+ .../command-d4a90d57cd344e029b7e87cdd3fa067c.json  |  14 +++
+ .../critic-3777261d495847beacee62f056b1a55b.json   |  32 ++++++
+ ...ification-e2465c1e957d46f8830a3cc984ad9628.json | 102 +++++++++++++++++
+ .go/tasks/active/abc-05.json                       |  43 ++++++-
+ 17 files changed, 604 insertions(+), 25 deletions(-)
+ create mode 100644 .go/evidence/abc-05-outcome-interop-failure.json
+ create mode 100644 .go/evidence/abc-05-outcome-red.log
+ create mode 100644 .go/evidence/abc-05-v021-candidate.log
+ create mode 100644 .go/evidence/abc-05-v021-focused.log
+ create mode 100644 .go/evidence/abc-05-v021-integration.json
+ create mode 100644 .go/evidence/abc-05-v021-make.log
+ create mode 100644 .go/evidence/abc-05-v021-verification.json
+ create mode 100644 .go/runs/abc-05/completion/command-01ba490e185e42f8a8d247f06e4c7f76.json
+ create mode 100644 .go/runs/abc-05/completion/command-588aa3e1626c4f97b4dd61268cc66851.json
+ create mode 100644 .go/runs/abc-05/completion/command-d4a90d57cd344e029b7e87cdd3fa067c.json
+ create mode 100644 .go/runs/abc-05/completion/critic-3777261d495847beacee62f056b1a55b.json
+ create mode 100644 .go/runs/abc-05/completion/verification-e2465c1e957d46f8830a3cc984ad9628.json
+RUN: git rev-parse HEAD
+656d1a42cb8f7cec76308a876efbfaf0c6a009be
+RUN: ./scripts/release-check.sh 0.3.21
+release preflight: v0.3.21
+tag: annotated v0.3.21 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 125.36s (0:02:05)
+ok: /tmp/tmp.6WeChiolqP/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.6WeChiolqP/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.6WeChiolqP/go-workflow-stack
+Prepared 1 package in 1.25s
+Installed 1 package in 16ms
+ + go-workflow-stack==0.3.21 (from file:///tmp/tmp.6WeChiolqP/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.dabXoHHTv8/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.dabXoHHTv8/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.dabXoHHTv8/fixture/.go
+ok: /tmp/tmp.dabXoHHTv8/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+ABC_FINAL_TAG_ALL_PASSED

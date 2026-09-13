@@ -2,7 +2,7 @@
   "schema": "go-workflow.task-verification-report.v1",
   "task_id": "abc-05",
   "revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "candidate_revision": "b80c47a43367b1fdf370b0c426620586ac8267be",
   "checks": [
     "303 Linux tests passed (197 smoke and 106 focused)",
@@ -37,5 +37,12 @@
     "Hashes ensure consistency within a trusted controller, not independent model or reviewer identity",
     "Only Git-tag and GitHub release readback are supported; absent profile blocks required completion"
   ],
-  "self_reflect": "Reused the existing process-boundary guard instead of creating a second orphan mechanism; synchronized canonical version before candidate checks. No global skill or memory changes. Late ordinary-clone regression repaired before publication; superseded tag/check evidence preserved. v0.3.20 exposed a producer/consumer evidence-shape gap; preserve the failed gate and add actual CLI flow coverage in v0.3.21."
+  "self_reflect": "Reused the existing process-boundary guard instead of creating a second orphan mechanism; synchronized canonical version before candidate checks. No global skill or memory changes. Late ordinary-clone regression repaired before publication; superseded tag/check evidence preserved. v0.3.20 exposed a producer/consumer evidence-shape gap; preserve the failed gate and add actual CLI flow coverage in v0.3.21.",
+  "final_tag_commit": "656d1a42cb8f7cec76308a876efbfaf0c6a009be",
+  "final_tag_checks": [
+    "197 smoke tests passed on final annotated tag",
+    "106 focused regressions and full 303-test suite passed on the corrected candidate with matching product content",
+    "template pairing and standalone distribution passed"
+  ],
+  "publication_ref": ".go/evidence/abc-05-v021-release.json"
 }

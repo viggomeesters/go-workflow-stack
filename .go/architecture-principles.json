@@ -43,9 +43,9 @@
       "id": "abc-release-evidence",
       "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
       "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
-      "enforcement": "Te implementeren in abc-05/06/07; momenteel niet afgedwongen.",
+      "enforcement": "abc-05 v0.3.21 enforces content-bound checks, critic, requirements and release readback on opted-in finish/approval/reporting. Automatic publication and deployment remain abc-06/07.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
@@ -79,18 +79,18 @@
       "id": "abc-final-candidate-proof",
       "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
       "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
-      "enforcement": "Te implementeren in abc-01/05/06/10; nog niet afgedwongen.",
+      "enforcement": "abc-01 typed phase contracts and abc-05 v0.3.21 executed raw command evidence/content binding shipped. Version/integration orchestration and full end-to-end proof remain abc-06/10.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     },
     {
       "id": "abc-selective-legacy-reuse",
       "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
       "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
-      "enforcement": "Te implementeren in abc-01/08/10; nog niet afgedwongen.",
+      "enforcement": "abc-01/03/05 reuse phase contracts, selective context and legacy push-fail/finish-before-ship regressions. Broader migration and end-to-end proof remain abc-08/10.",
       "status": "proposed",
-      "implementation_status": "not_implemented",
+      "implementation_status": "partially_implemented",
       "plan_ref": ".go/plans/abc-lifecycle.json"
     }
   ]

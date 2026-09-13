@@ -372,8 +372,9 @@
       "id": "abc-d01-release-unit",
       "owner_task": "abc-01",
       "question": "Exact contract boundaries for historical-done, mechanical/no-diff and template-fixture work.",
-      "status": "proposed",
-      "blocks": "Finalizing the new contract semantics, not this planning intake."
+      "status": "accepted",
+      "blocks": "Finalizing the new contract semantics, not this planning intake.",
+      "resolution": "Opt-in product release requirement; explicit non-release reason for mechanical/no-change/smoke; historical records unchanged. Governing decision and brief accepted before implementation."
     },
     {
       "id": "abc-d02-worker-topology",
@@ -474,5 +475,16 @@
   },
   "updated_on": "2026-09-13",
   "latest_source_ref": "2026-09-13 user: Verwerk die oude inzichten; Go task; planning only",
-  "legacy_insights_ref": ".go/plans/legacy-insights.json"
+  "legacy_insights_ref": ".go/plans/legacy-insights.json",
+  "execution": {
+    "status": "in_progress",
+    "authority": "User GO and Ga verder met de taken: go",
+    "active_task": "abc-01",
+    "completed_tasks": [],
+    "requested_model": "gpt-6-astra",
+    "requested_effort": "high",
+    "runtime_confirmation": "user-selected; not independently attested",
+    "candidate_version": "0.3.15",
+    "verification_ref": ".go/evidence/abc-01-verification.json"
+  }
 }

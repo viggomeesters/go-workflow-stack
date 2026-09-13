@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.task-verification-report.v1",
+  "task_id": "abc-01",
+  "revision": "7dad63b26373f1c295349b3f9227dae38a95f90c",
+  "status": "passed",
+  "platform": "Linux/WSL temporary isolated ordinary clone",
+  "checks": [
+    "225 tests passed (smoke, architecture, ABC contracts, ABC phase contracts)",
+    "make check passed",
+    "release-check.sh 0.3.15 --allow-candidate passed, including smoke, template pairing and distribution",
+    "git diff --check passed"
+  ],
+  "log_ref": ".go/evidence/abc-01-candidate.log",
+  "log_sha256": "8793de822010d93d9d457bfd88db52dfaac561f73f8952f8cba6e26ad69b27a5",
+  "critic": {
+    "status": "passed",
+    "method": "same-agent adversarial code/schema review plus regression tests; no independent model reviewer claimed",
+    "repairs": [
+      "Reject null workspace and validate partial overrides before writes",
+      "Preserve required claim and hierarchy membership for critic followups; validate before write",
+      "Synchronize current-version test fixtures and immutable release template pairing"
+    ],
+    "remaining_limitations": [
+      "Existing linked-worktree discovery assumptions belong to abc-11 and template tasks; ordinary-clone regression is green",
+      "Model/effort is contract metadata until abc-02; finish/publication enforcement follows in abc-05/06"
+    ]
+  },
+  "self_reflect": "No durable agent/process improvement needed; routine in-scope defects repaired and the Linux verification route documented. No skill/memory/config changes.",
+  "publication": "pending final annotated-tag gate and remote readback"
+}

@@ -34,8 +34,8 @@
   ],
   "planned_direction": {
     "id": "abc-lifecycle",
-    "status": "planned",
-    "implementation_status": "not_started",
+    "status": "in_progress",
+    "implementation_status": "in_progress",
     "target": "Zelfstandig releasbare Go-taken met expliciete model/effortkeuze en hervatbare contextoverdracht; done vereist de afgesproken geverifieerde release.",
     "coordinator_project": "go-workflow-stack",
     "plan_ref": ".go/plans/abc-lifecycle.json",

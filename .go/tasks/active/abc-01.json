@@ -118,36 +118,66 @@
       "id": "R1",
       "text": "Alle taakintakeroutes behouden expliciete model/effort-, release- en dependencyvelden; validators weigeren ongeldige waarden vóór mutatie.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "CLI intake, brief batch atomicity and followup validation tests passed; invalid profiles rejected before task/hierarchy writes. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Een producttaak bevat een zelfstandig releasbaar resultaat; technische stappen blijven binnen die taak. Productversie, workflowruntimeversie en task/run-identiteit zijn verschillende begrippen.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Product mode requires release; docs/task-release-contract.md distinguishes product, runtime and task identity; compatibility tests passed. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Projectdefaults en taakoverrides hebben een gedocumenteerde prioriteit; nieuwe contracten staan achter expliciete opt-in en legacy taken blijven geldig.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Project default/task override freeze and opt-in legacy compatibility tests passed. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Lokale en expliciete cross-repo dependencies worden gevalideerd op bestaan, cycli en vereist opleverbewijs; next/claim slaat niet-gereed werk over en faalt veilig bij een ontbrekende participant.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Same/cross-project dependency, cycle, missing participant, next/claim and required receipt tests passed. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "De grens voor historical-done, mechanical/no-diff en de template-smoke-fixture is expliciet besloten en getest; nooit fictief releasebewijs aan oude taken toevoegen.",
       "source": "abc_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Accepted abc-d01-release-unit; legacy/no-change/mechanical/smoke policy tested without rewriting historical receipts. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R6",
@@ -160,15 +190,27 @@
       "id": "R7",
       "text": "Vertaal de legacy fasecontracten naar getypeerde input/output, bewijs, stop-/handoffvoorwaarden, scope en requirementdekking. Onderscheid skillmetadata-lint van uitvoering, en bewijsstatus missing/failed/not_applicable/passed; niet-toepasselijk vereist een concrete beleidsgrond.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Typed phase and verification evidence schemas; missing/failed/not_applicable/passed and policy reason tests passed. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     },
     {
       "id": "R8",
       "text": "Leg taakwerkplek, control-state-eigenaarschap en revisiegebonden verificatie vast zonder nu workspace-uitvoering te implementeren. Selectieve risicoafhankelijke skill/reviewprofielen behouden altijd de vereiste lifecyclegates; legacy modelmetadata is geen bewijs van werkelijke dispatch.",
       "source": "legacy_insights_planning",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-13T13:23:16+02:00",
+          "agent": "codex-astra-high",
+          "summary": "Workspace single-writer intent and revision-bound verification schemas tested; docs explicitly defer dispatch/workspace/finish enforcement. Proof: .go/evidence/abc-01-verification.json; revision 7dad63b26373f1c295349b3f9227dae38a95f90c"
+        }
+      ]
     }
   ],
   "verification_notes": [

@@ -5,7 +5,7 @@
   "shareable_delivery": "none",
   "id": "reliability-03",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Publish TOML version sources without rewriting unrelated content",
   "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
   "scope": {
@@ -16,14 +16,16 @@
       "go_workflow/release.py",
       "schemas/project.schema.json",
       "tests/test_toml_release.py",
-      "tests/test_abc_publication.py",
+      "tests/test_abc_release.py",
       "docs/task-release-contract.md",
       "pyproject.toml",
       "go_workflow/constants.py",
       ".go/project.json",
       "CHANGELOG.md",
       "docs/releases/**",
-      "scripts/release-check-inner.sh"
+      "scripts/release-check-inner.sh",
+      "scripts/check-compatibility.sh",
+      "schemas/lifecycle-settings.schema.json"
     ]
   },
   "acceptance": [
@@ -32,15 +34,16 @@
     "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
   ],
   "verification": [
-    "python3 -m pytest tests/test_toml_release.py tests/test_abc_publication.py -q",
+    "python3 -m pytest tests/test_toml_release.py tests/test_abc_release.py -q",
     "python3 cli/go.py validate .",
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-14T16:07:08+02:00",
+    "base_commit": "2bf98129124ffad64354d849bf8a58c3275171db"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],

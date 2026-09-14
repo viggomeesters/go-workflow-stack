@@ -1,6 +1,6 @@
 {
   "task_id": "reliability-04",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "7d48bc8b23ba6e13d6f4ff422f9153e2687860dd",
   "verification": {
     "path": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json",
@@ -13,5 +13,7 @@
   "targeted_count": 33,
   "review": "Reviewed read-only facts, explicit answer fields, version writability, shared settings/brief validators and release-file scope inclusion. No checks, models or remote effects run while planning. Malformed/authority inputs are refused; history and caller answers remain untouched. Generated settings and brief use existing intake and complete a real local Git release through a deterministic native CLI worker with verification, critic, readback and cleanup. Read-only planner access is included in the existing worker command guard; mutation restrictions remain intact. Ready denotes valid configuration, not live provider availability or execution permission.",
   "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
-  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions.",
+  "final_tag": "v0.3.31",
+  "final_tag_commit": "465b333062651ce61137b6ab06e1068e9e208b07"
 }

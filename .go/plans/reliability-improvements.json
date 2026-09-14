@@ -1,6 +1,6 @@
 {
   "id": "reliability-improvements",
-  "status": "executing",
+  "status": "completed",
   "source": "Accepted five-item advice; user Implement",
   "coordinator": "go-workflow-stack",
   "tasks": [
@@ -29,5 +29,64 @@
     "Use current selected Astra High; no provider identity attestation inferred",
     "Keep separate immutable releases for individually claimable changes",
     "Template final pin follows completed stack releases instead of an intermediate cosmetic pin-only release"
-  ]
+  ],
+  "completed_tasks": [
+    "reliability-01",
+    "reliability-02",
+    "reliability-03",
+    "reliability-04",
+    "reliability-05",
+    "go-project-template:reliability-template-01"
+  ],
+  "active_task": null,
+  "releases": [
+    {
+      "task_id": "reliability-01",
+      "release": "v0.3.28",
+      "commit": "9689a77f00a46f03e63185c12837d5ca1f94025c",
+      "evidence_ref": ".go/evidence/reliability-01-release.json"
+    },
+    {
+      "task_id": "reliability-02",
+      "release": "v0.3.29",
+      "commit": "a4e9aaba9aed1eca2334725fda510b5bcb732ee1",
+      "evidence_ref": ".go/evidence/reliability-02-release.json"
+    },
+    {
+      "task_id": "reliability-03",
+      "release": "v0.3.30",
+      "commit": "b08ecdc46219b9af69f182ae5195c0630c10d833",
+      "evidence_ref": ".go/evidence/reliability-03-release.json"
+    },
+    {
+      "task_id": "reliability-04",
+      "release": "v0.3.31",
+      "commit": "465b333062651ce61137b6ab06e1068e9e208b07",
+      "evidence_ref": ".go/evidence/reliability-04-release.json"
+    },
+    {
+      "task_id": "reliability-05",
+      "release": "v0.3.32",
+      "commit": "35f20653ea490c718264f3e63a0edb295c164790",
+      "evidence_ref": ".go/evidence/reliability-05-release.json"
+    },
+    {
+      "task_id": "go-project-template:reliability-template-01",
+      "release": "v0.3.17",
+      "commit": "9d185d2e741957d18264fb02690c932caeb45c41",
+      "evidence_ref": "https://github.com/viggomeesters/go-project-template/blob/main/.go/evidence/reliability-template-01-history/manifest.json"
+    }
+  ],
+  "verification": {
+    "status": "passed",
+    "stack_final_gate": "126 compatibility tests, 197 smoke tests, exact tagged Linux release and standalone installation",
+    "template_final_gate": "macOS/Linux guided first release, ordinary/linked two-release campaigns, 18 failure regressions, exact version/commit pairing",
+    "review": "same-agent",
+    "template_source_history_files_verified": 28
+  },
+  "corrections": [
+    "Completed verification captures release ownership after network hostname changes; active/uncertain cross-host ownership remains guarded.",
+    "Template historical live evidence is checked against its original annotated v0.3.26 runtime."
+  ],
+  "implementation_status": "All six tasks completed and released; no implementation work remains in this plan."
 }

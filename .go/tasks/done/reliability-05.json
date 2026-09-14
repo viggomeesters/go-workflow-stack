@@ -1,0 +1,284 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-05",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Centralize immutable stack and template release pairings",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "release-pairings.json",
+      "schemas/release-pairings.schema.json",
+      "go_workflow/release_pairings.py",
+      "go_workflow/cli.py",
+      "tests/test_release_pairings.py",
+      "docs/stack-updates.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh",
+      "scripts/check-compatibility.sh",
+      "tests/test_smoke.py",
+      "go_workflow/worktrees.py",
+      "scripts/check-distribution.sh",
+      "go_workflow/run_state.py",
+      "tests/test_completed_capture.py"
+    ]
+  },
+  "acceptance": [
+    "One validated manifest owns the existing historical stack-to-template release mappings, exact commits and current tested pairing; release hydration reads it without changing published historical tags.",
+    "A checker detects contradictory refs, invalid hashes, missing mappings and mismatched current template pins/docs; current version metadata can be rendered deterministically without rewriting historical evidence.",
+    "A fully completed verification capture with no in-flight operation or worker group does not block on a changed network hostname; uncertain/live processes remain blocked.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_release_pairings.py tests/test_completed_capture.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-14T16:39:17+02:00",
+    "base_commit": "6f0066f3ba577eeaeb6d9b9b243fff0d6048ed30"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-14T19:29:39+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Current candidate/tagged checks, same-agent critic and fresh remote readback passed.",
+      "transaction_id": "10f86817d4844de89fff5e20ce7f717f"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-14T19:29:39+02:00",
+      "task_id": "reliability-05",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/events.jsonl,.go/evidence/reliability-05-candidate.log,.go/evidence/reliability-05-completed-capture-before-host-fix.json,.go/evidence/reliability-05-green.log,.go/evidence/reliability-05-host-green.log,.go/evidence/reliability-05-host-red.log,.go/evidence/reliability-05-integration.json,.go/evidence/reliability-05-make.log,.go/evidence/reliability-05-reconciliation.json,.go/evidence/reliability-05-red.log,.go/evidence/reliability-05-regressions.log,.go/evidence/reliability-05-verification.json,.go/project.json,.go/runs/events.jsonl,.go/runs/reliability-05/completion-state.json,.go/runs/reliability-05/completion/command-38ddafbe15884b74b3c7a3981b6507b2.json,.go/runs/reliability-05/completion/command-5b4847b79bd64dd69a5deb3accbee1bd.json,.go/runs/reliability-05/completion/command-a95442e4eb164acb8935c8b16dfe9615.json,.go/runs/reliability-05/completion/command-ac35943ec1bc491bb2f916f55a031cc7.json,.go/runs/reliability-05/completion/command-c51eb926eaf24d9085996d85dc794541.json,.go/runs/reliability-05/completion/command-e4ec8fc6485a4e9ca8abd372a9a45ded.json,.go/runs/reliability-05/completion/critic-709589db92544581b9fe0fa056d92af8.json,.go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json,.go/runs/reliability-05/completion/verification-7b75e2ff4df14112b50da5f9d72c7ee0.json,.go/tasks/active/reliability-05.json,.go/workspaces/reliability-05.json,CHANGELOG.md,docs/releases/v0.3.32.md,docs/stack-updates.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/release_pairings.py,go_workflow/run_state.py,go_workflow/worktrees.py,pyproject.toml,release-pairings.json,schemas/release-pairings.schema.json,scripts/check-compatibility.sh,scripts/check-distribution.sh,scripts/release-check-inner.sh,tests/test_completed_capture.py,tests/test_release_pairings.py,tests/test_smoke.py; verification_command=declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates; verification_result=passed; critic=passed same-agent review; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.32 35f20653ea490c718264f3e63a0edb295c164790 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.32; Self-reflect: task regressions capture improvement, no global skill/memory/config change.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/evidence/reliability-05-candidate.log",
+        ".go/evidence/reliability-05-completed-capture-before-host-fix.json",
+        ".go/evidence/reliability-05-green.log",
+        ".go/evidence/reliability-05-host-green.log",
+        ".go/evidence/reliability-05-host-red.log",
+        ".go/evidence/reliability-05-integration.json",
+        ".go/evidence/reliability-05-make.log",
+        ".go/evidence/reliability-05-reconciliation.json",
+        ".go/evidence/reliability-05-red.log",
+        ".go/evidence/reliability-05-regressions.log",
+        ".go/evidence/reliability-05-verification.json",
+        ".go/project.json",
+        ".go/runs/events.jsonl",
+        ".go/runs/reliability-05/completion-state.json",
+        ".go/runs/reliability-05/completion/command-38ddafbe15884b74b3c7a3981b6507b2.json",
+        ".go/runs/reliability-05/completion/command-5b4847b79bd64dd69a5deb3accbee1bd.json",
+        ".go/runs/reliability-05/completion/command-a95442e4eb164acb8935c8b16dfe9615.json",
+        ".go/runs/reliability-05/completion/command-ac35943ec1bc491bb2f916f55a031cc7.json",
+        ".go/runs/reliability-05/completion/command-c51eb926eaf24d9085996d85dc794541.json",
+        ".go/runs/reliability-05/completion/command-e4ec8fc6485a4e9ca8abd372a9a45ded.json",
+        ".go/runs/reliability-05/completion/critic-709589db92544581b9fe0fa056d92af8.json",
+        ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json",
+        ".go/runs/reliability-05/completion/verification-7b75e2ff4df14112b50da5f9d72c7ee0.json",
+        ".go/tasks/active/reliability-05.json",
+        ".go/workspaces/reliability-05.json",
+        "CHANGELOG.md",
+        "docs/releases/v0.3.32.md",
+        "docs/stack-updates.md",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/release_pairings.py",
+        "go_workflow/run_state.py",
+        "go_workflow/worktrees.py",
+        "pyproject.toml",
+        "release-pairings.json",
+        "schemas/release-pairings.schema.json",
+        "scripts/check-compatibility.sh",
+        "scripts/check-distribution.sh",
+        "scripts/release-check-inner.sh",
+        "tests/test_completed_capture.py",
+        "tests/test_release_pairings.py",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "6f0066f3ba577eeaeb6d9b9b243fff0d6048ed30",
+        "observed_head_commit": "35f20653ea490c718264f3e63a0edb295c164790"
+      },
+      "verification": {
+        "command": "declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-05"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "One validated manifest owns the existing historical stack-to-template release mappings, exact commits and current tested pairing; release hydration reads it without changing published historical tags.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T19:24:39+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "A checker detects contradictory refs, invalid hashes, missing mappings and mismatched current template pins/docs; current version metadata can be rendered deterministically without rewriting historical evidence.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T19:24:39+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "A fully completed verification capture with no in-flight operation or worker group does not block on a changed network hostname; uncertain/live processes remain blocked.",
+      "source": "release_critic_repair",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T19:24:39+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T19:29:36+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-05/completion/release-7ca4517eb073489d9d97649a9a525de8.json"
+        }
+      ]
+    }
+  ],
+  "order": 5,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-adoption"
+    ],
+    "decision_ids": [
+      "abc-d10-explicit-lifecycle-adoption"
+    ],
+    "conformance_required": true,
+    "human_gate": "none",
+    "classification": {
+      "reason": "Material change under the accepted governing brief. Execution permission is recorded separately in execution_authority; this work does not change access controls.",
+      "actor": "codex-astra-high"
+    }
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json",
+      "sha256": "0248676e6972c5f1a4b8b9b83678af1f63b75db54b8bec5169670008c9bc060d"
+    },
+    "critic": {
+      "path": ".go/runs/reliability-05/completion/critic-709589db92544581b9fe0fa056d92af8.json",
+      "sha256": "612a3d223e9221b80cbdb71ec7459a3f57b61b059abe16a90e0769f2571d0fda"
+    },
+    "release": {
+      "path": ".go/runs/reliability-05/completion/release-7ca4517eb073489d9d97649a9a525de8.json",
+      "sha256": "704a7ba30a2998068784a6631c7bef1edd782817da996b2574bf477626a4f920"
+    }
+  },
+  "planning_repair": {
+    "reason": "Own completed verification was blocked after macOS network hostname changed; no process remained and the original evidence was preserved.",
+    "decision_ref": "abc-d06-managed-resume",
+    "scope": "Only release of completed process capture ownership, not active cross-host handoff."
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "reliability-05",
+    "project": "go-workflow-stack",
+    "commit": "35f20653ea490c718264f3e63a0edb295c164790",
+    "tag": "v0.3.32",
+    "evidence": [
+      ".go/runs/reliability-05/completion/release-7ca4517eb073489d9d97649a9a525de8.json"
+    ]
+  }
+}

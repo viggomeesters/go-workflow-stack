@@ -1,6 +1,6 @@
 {
   "task_id": "reliability-05",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "a406249b63d6746c044eafe6dbeaf5bbb02482e3",
   "verification": {
     "path": ".go/runs/reliability-05/completion/verification-7513511fcb354867b5adfcea7e01b152.json",
@@ -13,5 +13,7 @@
   "targeted_count": 37,
   "review": "Reviewed migration of all 23 recorded template hashes into one strict manifest, explicit historically unpaired entries and the required new current baseline. Tag refs are recorded only when known to identify the exact template commit. Current README metadata binds both project pin fields to the resolved annotated stack commit, separate from the release's historical baseline. Duplicate keys/refs, bad hashes, absent mappings, dirty baselines and stale docs fail. Full manifest Python validation is deferred to the checked payload; initial preflight reads JSON only and a Linux regression prevents dirty-module execution before cleanliness checks. Standalone installation verifies its packaged catalog. No circular future release hash or inferred authority. One transport interruption left no running worker; the unchanged clean candidate was rerun with a durable remote log and all 119 compatibility/197 smoke/distribution checks passed. Before release, completed-capture liveness was corrected after a network hostname change: only complete captures with no in-flight operation and no worker group release ownership. Real verification-to-critic proof retains the old checkpoint unchanged; active cross-host and worktree regressions still pass. Old integration/capture are archived in the explicit same-task repair reconciliation; final candidate proof is rerun after this change.",
   "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
-  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions.",
+  "final_tag": "v0.3.32",
+  "final_tag_commit": "35f20653ea490c718264f3e63a0edb295c164790"
 }

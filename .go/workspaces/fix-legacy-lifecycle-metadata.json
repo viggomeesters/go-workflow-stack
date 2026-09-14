@@ -1,0 +1,19 @@
+{
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "owner": "codex-astra-high",
+  "run_id": "legacy-fix-development",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-fix",
+  "branch": "codex/fix-legacy-lifecycle-metadata",
+  "base_branch": "main",
+  "base_commit": "159c49a025658ccaae694e0acffed6c01cf9b7f0",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+  "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+  "generation": "6fda01fed6fb4bad9c154a871b3d7fa5",
+  "state": "integrated",
+  "integration": {
+    "workspace_head": "a2e1b69f123018bed7b9a9f48d31871dd9c27898",
+    "integrated_commit": "a2e1b69f123018bed7b9a9f48d31871dd9c27898"
+  }
+}

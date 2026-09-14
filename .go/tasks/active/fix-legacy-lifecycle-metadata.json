@@ -20,13 +20,13 @@
       "tests/test_legacy_lifecycle_compatibility.py",
       "tests/test_abc_contracts.py",
       "tests/test_abc_migration.py",
-      "docs/abc-lifecycle-adoption.md",
       "docs/releases/**",
       "CHANGELOG.md",
       "pyproject.toml",
       "go_workflow/constants.py",
       ".go/project.json",
-      "scripts/release-check-inner.sh"
+      "scripts/release-check-inner.sh",
+      "docs/stack-updates.md"
     ]
   },
   "acceptance": [

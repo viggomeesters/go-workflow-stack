@@ -5,6 +5,7 @@
 - Centralize historical template baselines and require an explicit current pairing.
 - Validate template commit/tag identity and generate checked current README metadata.
 - Package the manifest with standalone installations and retain release validator isolation.
+- Release fully completed process captures after a network hostname change; keep active/uncertain owners blocked.
 
 ## 0.3.31 — guided lifecycle onboarding
 

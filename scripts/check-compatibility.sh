@@ -21,5 +21,6 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$ROOT" "${RUNNER[@]}" \
   "$ROOT/tests/test_upgrade_preview.py" \
   "$ROOT/tests/test_toml_release.py" \
   "$ROOT/tests/test_guided_onboarding.py" \
-  "$ROOT/tests/test_release_pairings.py" -q
+  "$ROOT/tests/test_release_pairings.py" \
+  "$ROOT/tests/test_completed_capture.py" -q
 echo "compatibility release gate: passed"

@@ -263,3 +263,8 @@ version preflight reads manifest JSON as data; it does not import unchecked code
 from a dirty caller. The canonical template clone still requires the recorded
 commit to exist and be reachable from an origin branch. The standalone package
 includes the same manifest and its installation gate checks the selected mapping.
+
+A fully completed process capture (no in-flight operation or worker group) does
+not retain ownership after its network hostname changes. Its recorded evidence
+is preserved. This does not permit active cross-host transfer: incomplete or
+uncertain process checkpoints still require explicit recovery.

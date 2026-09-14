@@ -98,10 +98,15 @@ def group_alive(group):
 
 
 def require_stopped(state):
+    # A terminal capture has already reaped its processes and released ownership.
+    # Network hostname changes must not turn immutable completed evidence into a
+    # live cross-host lease. Incomplete captures and groups still fail closed.
+    capture_released = state['phase'] == 'complete' and 'execution_cwd' in state and state.get('inflight') is None
+    if capture_released and state.get('worker_group') is None:
+        return
     owner = state['controller']
     if owner['host'] != socket.gethostname():
         raise RunStateError('Cross-host owner liveness is unknown; explicit recovery is required')
-    capture_released = state['phase'] == 'complete' and 'execution_cwd' in state and state.get('inflight') is None
     if not capture_released and owner['pid'] != os.getpid() and _pid_alive(owner['pid']):
         raise RunStateError('Previous controller is still live; ownership cannot be stolen')
     if group_alive(state.get('worker_group')):

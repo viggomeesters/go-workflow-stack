@@ -1,6 +1,6 @@
 {
   "task_id": "reliability-01",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
   "verification": {
     "path": ".go/runs/reliability-01/completion/verification-8a9adac084fc481586c7bb5f0457d697.json",
@@ -13,5 +13,7 @@
   "targeted_count": 37,
   "review": "Reviewed the new bounded shell phase, its insertion before smoke checks, the three-pin/four-state matrix and actual subprocess regression injection. The old dependency validator is intentionally restored only in a disposable copy and must produce failure. The phase runs from a neutral cwd, preserves source/user files, resolves Python prerequisites explicitly and avoids recursive inclusion of its outer test. No lifecycle validators or execution rights are loosened.",
   "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
-  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions.",
+  "final_tag": "v0.3.28",
+  "final_tag_commit": "9689a77f00a46f03e63185c12837d5ca1f94025c"
 }

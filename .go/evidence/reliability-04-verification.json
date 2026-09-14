@@ -1,0 +1,17 @@
+{
+  "task_id": "reliability-04",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "7d48bc8b23ba6e13d6f4ff422f9153e2687860dd",
+  "verification": {
+    "path": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json",
+    "sha256": "32b305e61878c18649080de3a1f6fc9cf3cc26a2b6d93c2ff5f9bd30577d32bd"
+  },
+  "critic": {
+    "path": ".go/runs/reliability-04/completion/critic-94f006d6b83d49c986c3c59d131d6e8d.json",
+    "sha256": "a7dd1d6430b068f50da11e4539605665c29a753cbfebb390a09ea8bce99d8a52"
+  },
+  "targeted_count": 33,
+  "review": "Reviewed read-only facts, explicit answer fields, version writability, shared settings/brief validators and release-file scope inclusion. No checks, models or remote effects run while planning. Malformed/authority inputs are refused; history and caller answers remain untouched. Generated settings and brief use existing intake and complete a real local Git release through a deterministic native CLI worker with verification, critic, readback and cleanup. Read-only planner access is included in the existing worker command guard; mutation restrictions remain intact. Ready denotes valid configuration, not live provider availability or execution permission.",
+  "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+}

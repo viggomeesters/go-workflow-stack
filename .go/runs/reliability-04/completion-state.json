@@ -1,0 +1,139 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "reliability-04",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-dee250bc96c449e5aa15218afb83bdca",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_guided_onboarding.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "7d48bc8b23ba6e13d6f4ff422f9153e2687860dd",
+        "worktree_digest": "d5ce40c0950649308b425bd3f7161d181342cd0ecb27357a72799141b433441b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-04/completion/command-098b020a8f044363adddec67d0b24205.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-04/completion/command-098b020a8f044363adddec67d0b24205.json",
+        "sha256": "c8df8c5294b927ccea12755d81f645c11db0fb098b3797e3865b375b9ce50d80"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "7d48bc8b23ba6e13d6f4ff422f9153e2687860dd",
+        "worktree_digest": "d5ce40c0950649308b425bd3f7161d181342cd0ecb27357a72799141b433441b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-04/completion/command-ffcbef501aa245e3b6a16fe116e7b0f1.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-04/completion/command-ffcbef501aa245e3b6a16fe116e7b0f1.json",
+        "sha256": "fbff7a75b142e7eac464bfe6e56252f253ac18fb4e9e5a430f6ad54d4aef2d62"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "7d48bc8b23ba6e13d6f4ff422f9153e2687860dd",
+        "worktree_digest": "d5ce40c0950649308b425bd3f7161d181342cd0ecb27357a72799141b433441b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-04/completion/command-699f0fbedeaa482e84ec8fa79e58e653.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-04/completion/command-699f0fbedeaa482e84ec8fa79e58e653.json",
+        "sha256": "b4a5727a2cb9a62340f341950dbb29c8c2f80a9c6fe248e9a1f487fd2b2aae03"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Read-only guided planning detects supported version files, base branch and candidate checks, reports unresolved choices and accepts explicit model/publisher/check selections.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Resolved settings and initial task drafts are validated and usable through existing scaffold/intake APIs with actual version/changelog scope and acceptance coverage. No model, destination or execution authority is guessed.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "A fresh project can use the resulting configuration for a complete first local release, with invalid/incomplete inputs and existing history preserved.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "1832142a932720a4f0fd874322f2036665e0a28a255a57c2bd1571b8c426d4a5",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "MacBook-Pro-van-Viggo.local",
+    "pid": 27094
+  },
+  "worker_group": null,
+  "inflight": null
+}

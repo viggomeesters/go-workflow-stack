@@ -88,22 +88,40 @@
       "id": "R1",
       "text": "Read-only guided planning detects supported version files, base branch and candidate checks, reports unresolved choices and accepts explicit model/publisher/check selections.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:33:52+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Resolved settings and initial task drafts are validated and usable through existing scaffold/intake APIs with actual version/changelog scope and acceptance coverage. No model, destination or execution authority is guessed.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:33:52+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "A fresh project can use the resulting configuration for a complete first local release, with invalid/incomplete inputs and existing history preserved.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:33:52+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json"
+        }
+      ]
     },
     {
       "id": "R4",
@@ -133,5 +151,16 @@
     "ship_policy": "push",
     "allow_push": true,
     "source": "User Implement within standing task release lifecycle"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reliability-04/completion/verification-02c87efe843745a9918a0b407353c64d.json",
+      "sha256": "32b305e61878c18649080de3a1f6fc9cf3cc26a2b6d93c2ff5f9bd30577d32bd"
+    },
+    "critic": {
+      "path": ".go/runs/reliability-04/completion/critic-94f006d6b83d49c986c3c59d131d6e8d.json",
+      "sha256": "a7dd1d6430b068f50da11e4539605665c29a753cbfebb390a09ea8bce99d8a52"
+    }
   }
 }

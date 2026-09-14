@@ -1,0 +1,163 @@
+FFFFFFFFFFF                                                              [100%]
+=================================== FAILURES ===================================
+____________ test_detect_facts_without_selecting_policy_or_writing _____________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_detect_facts_without_sele0')
+
+    def test_detect_facts_without_selecting_policy_or_writing(tmp_path):
+>       from go_workflow.onboarding import plan_onboarding
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:43: ModuleNotFoundError
+_____________ test_resolved_settings_and_task_scope_are_reviewable _____________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_resolved_settings_and_tas0')
+
+    def test_resolved_settings_and_task_scope_are_reviewable(tmp_path):
+>       from go_workflow.onboarding import plan_onboarding
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:55: ModuleNotFoundError
+___ test_invalid_or_authority_answers_fail_without_writing[allow_push-True] ____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ0')
+field = 'allow_push', value = True
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+_____ test_invalid_or_authority_answers_fail_without_writing[model-value1] _____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ1')
+field = 'model', value = {}
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+_ test_invalid_or_authority_answers_fail_without_writing[verification-value2] __
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ2')
+field = 'verification', value = []
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+____ test_invalid_or_authority_answers_fail_without_writing[version-value3] ____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ3')
+field = 'version', value = {'path': '../foreign', 'format': 'text'}
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+___ test_invalid_or_authority_answers_fail_without_writing[publisher-value4] ___
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ4')
+field = 'publisher', value = {'provider': 'github-release', 'remote': 'origin'}
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+__ test_invalid_or_authority_answers_fail_without_writing[deployment-value5] ___
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ5')
+field = 'deployment', value = {'mode': 'none'}
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+_____ test_invalid_or_authority_answers_fail_without_writing[task-value6] ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_invalid_or_authority_answ6')
+field = 'task', value = {'id': 'bad', 'summary': 'Missing scope'}
+
+    @pytest.mark.parametrize('field,value', [('allow_push',True),('model',{}),('verification',[]),
+        ('version',{'path':'../foreign','format':'text'}),('publisher',{'provider':'github-release','remote':'origin'}),
+        ('deployment',{'mode':'none'}),('task',{'id':'bad','summary':'Missing scope'})])
+    def test_invalid_or_authority_answers_fail_without_writing(tmp_path, field, value):
+>       from go_workflow.onboarding import plan_onboarding, OnboardingError
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:73: ModuleNotFoundError
+_______________________ test_cli_json_and_toml_detection _______________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_cli_json_and_toml_detecti0')
+
+    def test_cli_json_and_toml_detection(tmp_path):
+        repo=fixture(tmp_path); (repo/'pyproject.toml').write_text('[project]\nversion="2.0.0"\n')
+>       result=call(repo,'onboarding','plan',repo,'--json'); plan=json.loads(result.stdout)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_guided_onboarding.py:81: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_cli_json_and_toml_detecti0/project')
+env = None
+args = ('onboarding', 'plan', PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_cli_json_and_toml_detecti0/project'), '--json')
+
+    def call(repo, *args, env=None):
+        result = subprocess.run([sys.executable, str(CLI), *map(str,args)], cwd=repo,
+                                env=env, text=True, capture_output=True, timeout=180)
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: usage: go.py [-h]
+E                      {version,adopt,spike,go,auto,adapter,proof,stack,agent-check,doctor,loop,go-loop,router,status,template-check,recommendation,delivery,task,epic,decision,architecture,migrate,init,validate,next,claim,finish,dirty-check,readback,route,bundle,workspace,context,managed,release,completion}
+E                      ...
+E         go.py: error: argument command: invalid choice: 'onboarding' (choose from version, adopt, spike, go, auto, adapter, proof, stack, agent-check, doctor, loop, go-loop, router, status, template-check, recommendation, delivery, task, epic, decision, architecture, migrate, init, validate, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/Users/viggomeesters/.cache/uv/builds-v0/.tmpJi4psI/bin/python', '/Users/viggomeesters/Documen...idate, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)\n").returncode
+
+tests/test_guided_onboarding.py:15: AssertionError
+_____ test_guided_first_task_completes_through_existing_native_controller ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-350/test_guided_first_task_complet0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10716ad50>
+
+    def test_guided_first_task_completes_through_existing_native_controller(tmp_path, monkeypatch):
+>       from go_workflow.onboarding import plan_onboarding
+E       ModuleNotFoundError: No module named 'go_workflow.onboarding'
+
+tests/test_guided_onboarding.py:87: ModuleNotFoundError
+=========================== short test summary info ============================
+FAILED tests/test_guided_onboarding.py::test_detect_facts_without_selecting_policy_or_writing
+FAILED tests/test_guided_onboarding.py::test_resolved_settings_and_task_scope_are_reviewable
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[allow_push-True]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[model-value1]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[verification-value2]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[version-value3]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[publisher-value4]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[deployment-value5]
+FAILED tests/test_guided_onboarding.py::test_invalid_or_authority_answers_fail_without_writing[task-value6]
+FAILED tests/test_guided_onboarding.py::test_cli_json_and_toml_detection - As...
+FAILED tests/test_guided_onboarding.py::test_guided_first_task_completes_through_existing_native_controller
+11 failed in 0.32s

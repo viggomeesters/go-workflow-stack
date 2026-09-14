@@ -134,3 +134,16 @@ validation findings before writing any migration document. Resolve those fields
 with deliberate task-specific semantics before retrying; do not mass-convert
 string references into release requirements or historical output into verified
 proof. Historical done records remain byte-preserved during adoption.
+
+## Release compatibility gate
+
+`bash scripts/check-compatibility.sh` runs the bounded legacy/contract/migration
+suite in a neutral directory. `scripts/check-linux.sh` invokes it before smoke
+tests, so candidate and annotated release checks require both. The matrix uses
+synthetic v0.3.7, v0.3.14 and v0.3.26 project pins with all four task states and
+checks byte preservation through upgrade and rollback. It does not need private
+consumer data or network access to historical runtimes.
+
+`tests/test_release_compatibility_gate.py` is a separate outer test: it executes
+the real phase against good source and a disposable deliberately regressed copy.
+It must not be placed inside the phase it invokes.

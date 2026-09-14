@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.28 — mandatory compatibility release gate
+
+- Run legacy compatibility, contract and migration checks for every candidate and tagged release.
+- Cover three historical pins and all task states with byte-preserving upgrade/rollback assertions.
+- Prove an intentionally reintroduced dependency regression blocks the gate.
+
 ## 0.3.27 — preserve legacy lifecycle metadata
 
 - Restore the opt-in boundary for dependency and verification metadata in runtime

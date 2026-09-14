@@ -81,17 +81,26 @@ def test_adoption_requires_explicit_metadata_resolution_without_mutation(tmp_pat
     assert tree(repo) == before
 
 
-def test_upgrade_from_legacy_pin_preserves_tasks_and_rollback(tmp_path):
+@pytest.mark.parametrize('legacy_ref', ['v0.3.7', 'v0.3.14', 'v0.3.26'])
+def test_upgrade_from_legacy_pin_preserves_tasks_and_rollback(tmp_path, legacy_ref):
     from go_workflow.constants import STACK_VERSION
     from go_workflow.stack_update import rollback_stack_update
     repo = fixture(tmp_path)
     p = repo / '.go/project.json'; project = json.loads(p.read_text())
-    project.update(required_stack_version='0.3.7', stack_ref='v0.3.7'); write(p, project)
+    project.update(required_stack_version=legacy_ref[1:], stack_ref=legacy_ref); write(p, project)
     old_project = json.loads(p.read_text())
     task_path = repo / '.go/tasks/open/task-schema-smoke.json'
     task = json.loads(task_path.read_text())
     task.update(dependencies=['legacy-predecessor'], verification_evidence=['historical output'])
     write(task_path, task); before = task_path.read_bytes()
+    hierarchy_path = repo / '.go/hierarchy.json'
+    hierarchy = json.loads(hierarchy_path.read_text())
+    for state in ('active', 'blocked', 'done'):
+        record = {**task, 'id': f'legacy-{state}', 'status': state}
+        write(repo / f'.go/tasks/{state}/{record["id"]}.json', record)
+        hierarchy['epics'][0]['tasks'].append(record['id'])
+    write(hierarchy_path, hierarchy)
+    task_bytes = {path: path.read_bytes() for path in (repo / '.go/tasks').glob('*/*.json')}
     stack = tmp_path / 'stack'; (stack / 'go_workflow').mkdir(parents=True)
     (stack / 'go_workflow/constants.py').write_text((ROOT / 'go_workflow/constants.py').read_text())
     def git(*args):
@@ -102,13 +111,15 @@ def test_upgrade_from_legacy_pin_preserves_tasks_and_rollback(tmp_path):
     result = run(repo, 'stack', 'update', repo, '--latest', '--stack-repo', stack, '--apply', '--json')
     assert result.returncode == 0, result.stderr
     updated = json.loads(result.stdout)
-    assert updated['mode'] == 'applied' and updated['from_ref'] == 'v0.3.7'
+    assert updated['mode'] == 'applied' and updated['from_ref'] == legacy_ref
     assert json.loads(p.read_text())['stack_ref'] == f'v{STACK_VERSION}'
     assert task_path.read_bytes() == before
+    assert all(path.read_bytes() == value for path, value in task_bytes.items())
     assert run(repo, 'validate', repo).returncode == 0
     rollback_stack_update(repo, updated['rollback_record'])
     assert json.loads(p.read_text()) == old_project
     assert task_path.read_bytes() == before
+    assert all(path.read_bytes() == value for path, value in task_bytes.items())
 
 
 def test_adoption_preserves_legacy_done_metadata(tmp_path, monkeypatch):

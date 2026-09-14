@@ -1,0 +1,139 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-0bb2204ab9c340ee96e119270180604a",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "fix-legacy-lifecycle-metadata",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_legacy_lifecycle_compatibility.py tests/test_abc_contracts.py tests/test_abc_migration.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+        "worktree_digest": "1880d4b1e19885a1f345572d42a8ba3ee09710c23226e869bef3a5d11ea22a71",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/fix-legacy-lifecycle-metadata/completion/command-57a0789f16ed494c89b3bacd3cc77423.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/command-57a0789f16ed494c89b3bacd3cc77423.json",
+        "sha256": "63e6ad1dff75b5a9d9b4bde81d9a97a1d38609c5cac2a1948d9bc7345bfb0e88"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "fix-legacy-lifecycle-metadata",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+        "worktree_digest": "1880d4b1e19885a1f345572d42a8ba3ee09710c23226e869bef3a5d11ea22a71",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/fix-legacy-lifecycle-metadata/completion/command-fe774bc14e0e4188982f8a2e7526b104.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/command-fe774bc14e0e4188982f8a2e7526b104.json",
+        "sha256": "f28a08958ea94c42bef8f4fa11e38a06286b014ae7a7dacf585a914ecb27b6a5"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "fix-legacy-lifecycle-metadata",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+        "worktree_digest": "1880d4b1e19885a1f345572d42a8ba3ee09710c23226e869bef3a5d11ea22a71",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/fix-legacy-lifecycle-metadata/completion/command-28c1f6b7e3c34afc8aa170c01563f98c.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/command-28c1f6b7e3c34afc8aa170c01563f98c.json",
+        "sha256": "0536e0865c2ef73e210c3d03a11b61f8ad220a95a5c8cc0677fceca7df5d5d9b"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Legacy dependencies and evidence metadata remain valid without execution_contract across all task states; runtime and published schema agree and preserve bytes.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Opted-in lifecycle contracts, explicit intake and required proof remain strict; adoption reports ambiguous metadata before any writes instead of guessing semantics.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Synthetic legacy upgrade and rollback regressions plus read-only consumer validation prove compatibility; relevant smoke and release gates pass.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Publish an annotated patch release with scoped integration, push, release readback and documented compatibility behavior.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "9d6b887a7091bde8235855e3974eeffe4fc08f596b71c5195175767581c8f0e7",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "MacBook-Pro-van-Viggo.local",
+    "pid": 29616
+  },
+  "worker_group": null,
+  "inflight": null
+}

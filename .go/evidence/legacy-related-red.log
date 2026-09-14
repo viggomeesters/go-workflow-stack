@@ -1,0 +1,77 @@
+WARN `--no-project` was provided, but no project was found
+..........FFF.                                                           [100%]
+=================================== FAILURES ===================================
+_ test_new_dependency_can_reference_legacy_done_without_reinterpreting_history _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-281/test_new_dependency_can_refere0')
+
+    def test_new_dependency_can_reference_legacy_done_without_reinterpreting_history(tmp_path):
+        from go_workflow.execution_contracts import dependency_findings
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        old = json.loads(source.read_text())
+        old.update(status='done', dependencies=['historical-predecessor'])
+        source.unlink()
+        write(repo / '.go/tasks/done/task-schema-smoke.json', old)
+        new = {**old, 'id': 'new', 'status': 'open', 'execution_contract': profile(),
+               'dependencies': [{'project': old['project'], 'task_id': old['id'], 'requires': 'done'}]}
+>       assert not dependency_findings(repo, new, readiness=True)
+E       AssertionError: assert not ['dependency must be an object']
+E        +  where ['dependency must be an object'] = <function dependency_findings at 0x108aa5c60>(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-281/test_new_dependency_can_refere0/fixture'), {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'new', 'project': 'repo-local-spike-fixture', ...}, readiness=True)
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:58: AssertionError
+_ test_adoption_requires_explicit_metadata_resolution_without_mutation[metadata0] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-281/test_adoption_requires_explici0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a01190>
+metadata = {'dependencies': ['legacy-predecessor']}
+
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_adoption_requires_explicit_metadata_resolution_without_mutation(tmp_path, monkeypatch, metadata):
+        from go_workflow.migrations import adopt_lifecycle, MigrationError
+        from test_abc_migration import settings, tree
+        monkeypatch.chdir(tmp_path)
+        repo = fixture(tmp_path)
+        path = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(path.read_text()); task.update(metadata); write(path, task)
+        before = tree(repo)
+>       with pytest.raises(MigrationError, match=r'task-schema-smoke.*explicit.*metadata'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'task-schema-smoke.*explicit.*metadata'
+E         Actual message: 'task-schema-smoke: dependency must be an object'
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:75: AssertionError
+_ test_adoption_requires_explicit_metadata_resolution_without_mutation[metadata1] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-281/test_adoption_requires_explici1')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x108a027e0>
+metadata = {'verification_evidence': ['historical check output']}
+
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_adoption_requires_explicit_metadata_resolution_without_mutation(tmp_path, monkeypatch, metadata):
+        from go_workflow.migrations import adopt_lifecycle, MigrationError
+        from test_abc_migration import settings, tree
+        monkeypatch.chdir(tmp_path)
+        repo = fixture(tmp_path)
+        path = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(path.read_text()); task.update(metadata); write(path, task)
+        before = tree(repo)
+>       with pytest.raises(MigrationError, match=r'task-schema-smoke.*explicit.*metadata'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'task-schema-smoke.*explicit.*metadata'
+E         Actual message: 'verification evidence must be an object'
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:75: AssertionError
+=========================== short test summary info ============================
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_new_dependency_can_reference_legacy_done_without_reinterpreting_history
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_adoption_requires_explicit_metadata_resolution_without_mutation[metadata0]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_adoption_requires_explicit_metadata_resolution_without_mutation[metadata1]
+3 failed, 11 passed in 2.04s

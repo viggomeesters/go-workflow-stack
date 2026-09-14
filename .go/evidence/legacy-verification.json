@@ -1,0 +1,23 @@
+{
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "status": "candidate_passed_final_tag_pending",
+  "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+  "checks": [
+    "33 legacy compatibility regressions",
+    "88 compatibility/contracts/migration/completion checks on macOS and Linux",
+    "66 declared targeted checks captured by canonical completion verifier",
+    "make check on ordinary macOS/Linux clones",
+    "candidate Linux smoke/distribution gate and immutable template v0.3.16 pairing"
+  ],
+  "verification": {
+    "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/verification-1897c603403d4448b6911ce21af0f32a.json",
+    "sha256": "e7d191c5799a1acd8a166dc00abd6c84f13c8d081a1ba040ec20cd22bb820a85"
+  },
+  "critic": {
+    "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/critic-a3d130462391495d824dec0e8e698648.json",
+    "sha256": "12112be91db138fe5fb695ab00407bc5c140eaba1710419e917498c50ef358aa"
+  },
+  "consumer": ".go/evidence/legacy-consumer-report.json",
+  "limitations": "Private read-only snapshot; no active consumer upgrade and no unrelated application tests. Same-agent review. Effective model identity unconfirmed.",
+  "self_reflect": "Missing regression coverage for preexisting free metadata caused the upgrade failure. Product regression fixtures now preserve that compatibility boundary. No global skill, memory or configuration change needed."
+}

@@ -1,0 +1,229 @@
+WARN `--no-project` was provided, but no project was found
+FFFFFFFF..                                                               [100%]
+=================================== FAILURES ===================================
+_______ test_legacy_metadata_remains_valid_and_unchanged[metadata0-open] _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v0')
+status = 'open'
+metadata = {'dependencies': ['legacy-predecessor', 'legacy-predecessor']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['dependency must be an object', 'dependency must be an object']
+E        +  where ['dependency must be an object', 'dependency must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v0/fixture/.go/tasks/open/task-schema-smoke.json', expected_status='open')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v0/fixture/.go/tasks/open/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v0/fixture/.go/tasks/open/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+______ test_legacy_metadata_remains_valid_and_unchanged[metadata0-active] ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v1')
+status = 'active'
+metadata = {'dependencies': ['legacy-predecessor', 'legacy-predecessor']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['dependency must be an object', 'dependency must be an object']
+E        +  where ['dependency must be an object', 'dependency must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v1/fixture/.go/tasks/active/task-schema-smoke.json', expected_status='active')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v1/fixture/.go/tasks/active/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v1/fixture/.go/tasks/active/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+_____ test_legacy_metadata_remains_valid_and_unchanged[metadata0-blocked] ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v2')
+status = 'blocked'
+metadata = {'dependencies': ['legacy-predecessor', 'legacy-predecessor']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['dependency must be an object', 'dependency must be an object']
+E        +  where ['dependency must be an object', 'dependency must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v2/fixture/.go/tasks/blocked/task-schema-smoke.json', expected_status='blocked')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v2/fixture/.go/tasks/blocked/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v2/fixture/.go/tasks/blocked/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+_______ test_legacy_metadata_remains_valid_and_unchanged[metadata0-done] _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v3')
+status = 'done'
+metadata = {'dependencies': ['legacy-predecessor', 'legacy-predecessor']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['dependency must be an object', 'dependency must be an object']
+E        +  where ['dependency must be an object', 'dependency must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v3/fixture/.go/tasks/done/task-schema-smoke.json', expected_status='done')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v3/fixture/.go/tasks/done/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v3/fixture/.go/tasks/done/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+_______ test_legacy_metadata_remains_valid_and_unchanged[metadata1-open] _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v4')
+status = 'open'
+metadata = {'verification_evidence': ['historical check output']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['verification evidence must be an object']
+E        +  where ['verification evidence must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v4/fixture/.go/tasks/open/task-schema-smoke.json', expected_status='open')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v4/fixture/.go/tasks/open/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v4/fixture/.go/tasks/open/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+______ test_legacy_metadata_remains_valid_and_unchanged[metadata1-active] ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v5')
+status = 'active'
+metadata = {'verification_evidence': ['historical check output']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['verification evidence must be an object']
+E        +  where ['verification evidence must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v5/fixture/.go/tasks/active/task-schema-smoke.json', expected_status='active')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v5/fixture/.go/tasks/active/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v5/fixture/.go/tasks/active/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+_____ test_legacy_metadata_remains_valid_and_unchanged[metadata1-blocked] ______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v6')
+status = 'blocked'
+metadata = {'verification_evidence': ['historical check output']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['verification evidence must be an object']
+E        +  where ['verification evidence must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v6/fixture/.go/tasks/blocked/task-schema-smoke.json', expected_status='blocked')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v6/fixture/.go/tasks/blocked/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v6/fixture/.go/tasks/blocked/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+_______ test_legacy_metadata_remains_valid_and_unchanged[metadata1-done] _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v7')
+status = 'done'
+metadata = {'verification_evidence': ['historical check output']}
+
+    @pytest.mark.parametrize('status', ['open', 'active', 'blocked', 'done'])
+    @pytest.mark.parametrize('metadata', [
+        {'dependencies': ['legacy-predecessor', 'legacy-predecessor']},
+        {'verification_evidence': ['historical check output']},
+    ])
+    def test_legacy_metadata_remains_valid_and_unchanged(tmp_path, status, metadata):
+        from go_workflow.cli import validate_task
+        repo = fixture(tmp_path)
+        source = repo / '.go/tasks/open/task-schema-smoke.json'
+        task = json.loads(source.read_text())
+        task.update(status=status, **metadata)
+        path = repo / f'.go/tasks/{status}/task-schema-smoke.json'
+        source.unlink()
+        write(path, task)
+        before = path.read_bytes()
+>       assert not validate_task(task, str(path), expected_status=status)
+E       AssertionError: assert not ['verification evidence must be an object']
+E        +  where ['verification evidence must be an object'] = <function validate_task at 0x1070a8b80>({'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}, '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v7/fixture/.go/tasks/done/task-schema-smoke.json', expected_status='done')
+E        +    where '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v7/fixture/.go/tasks/done/task-schema-smoke.json' = str(PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-279/test_legacy_metadata_remains_v7/fixture/.go/tasks/done/task-schema-smoke.json'))
+
+work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py:25: AssertionError
+=========================== short test summary info ============================
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata0-open]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata0-active]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata0-blocked]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata0-done]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata1-open]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata1-active]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata1-blocked]
+FAILED work/legacy-fix/tests/test_legacy_lifecycle_compatibility.py::test_legacy_metadata_remains_valid_and_unchanged[metadata1-done]
+8 failed, 2 passed in 0.36s

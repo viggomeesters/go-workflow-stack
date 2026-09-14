@@ -1,0 +1,24 @@
+{
+  "schema": "go-workflow.compatibility-probe.v1",
+  "private_consumer_snapshot": true,
+  "task_count": 156,
+  "task_bytes_preserved": true,
+  "source_mutations": 0,
+  "results": {
+    "old": {
+      "returncode": 0,
+      "dependency_errors": 0,
+      "other_errors": []
+    },
+    "regression": {
+      "returncode": 1,
+      "dependency_errors": 33,
+      "other_errors": []
+    },
+    "fixed": {
+      "returncode": 0,
+      "dependency_errors": 0,
+      "other_errors": []
+    }
+  }
+}

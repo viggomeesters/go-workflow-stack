@@ -1,0 +1,27 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "project": "go-workflow-stack",
+  "contract_digest": "9d6b887a7091bde8235855e3974eeffe4fc08f596b71c5195175767581c8f0e7",
+  "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+  "content_digest": "1880d4b1e19885a1f345572d42a8ba3ee09710c23226e869bef3a5d11ea22a71",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed every changed product path. The defect is a contract opt-in mismatch: legacy free-form dependencies and verification evidence were constrained by new schema/runtime checks. Both now use execution_contract presence, including rejecting malformed explicit contracts. Dependency traversal stops at legacy nodes while the incoming done/release receipt check remains. Explicit intake remains strict; adoption errors identify task metadata before any writes. Original strict JSON subschemas are byte-equivalent as parsed objects after relocation. 33 synthetic regressions cover six legacy shapes in four states, explicit contracts, graph boundary, adoption atomicity/history and v0.3.7 pin update/rollback. 88 focused tests passed on macOS and Linux; candidate distribution and make checks passed. Private snapshot: 156 tasks, old runtime valid, v0.3.26 reports 33 errors, repaired runtime valid, all task hashes unchanged. No private task content published; live consumer untouched. Final tag and release readback remain downstream gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/releases/v0.3.27.md",
+    "docs/stack-updates.md",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/execution_contracts.py",
+    "go_workflow/migrations.py",
+    "pyproject.toml",
+    "schemas/task.schema.json",
+    "scripts/release-check-inner.sh",
+    "tests/test_legacy_lifecycle_compatibility.py"
+  ]
+}

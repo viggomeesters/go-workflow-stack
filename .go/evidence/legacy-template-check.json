@@ -1,0 +1,58 @@
+{
+  "schema": "go-workflow.template-check.v1",
+  "stack": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-candidate",
+  "template": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template",
+  "ok": true,
+  "checks": [
+    {
+      "name": "template_exists",
+      "ok": true,
+      "detail": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template"
+    },
+    {
+      "name": "template_has_go",
+      "ok": true,
+      "detail": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template/.go"
+    },
+    {
+      "name": "validate",
+      "ok": true,
+      "detail": ""
+    },
+    {
+      "name": "route_repo_local",
+      "ok": true,
+      "detail": "{\"errors\": [], \"fallback\": null, \"mode\": \"repo-local\", \"project_id\": \"go-project-template\", \"project_name\": \"Go Project Template\", \"reason\": \".go/project.json exists\", \"repo\": \"/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template\", \"state_root\": \".go\", \"valid\": true}"
+    },
+    {
+      "name": "has_claimable_example_task",
+      "ok": true,
+      "detail": "task-schema-smoke"
+    },
+    {
+      "name": "makefile_present",
+      "ok": true,
+      "detail": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template/Makefile"
+    },
+    {
+      "name": "check_script_present",
+      "ok": true,
+      "detail": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/legacy-template/scripts/check.sh"
+    },
+    {
+      "name": "makefile_uses_stack_cli",
+      "ok": true,
+      "detail": "Makefile should validate and read back via stack CLI"
+    },
+    {
+      "name": "check_script_bootstraps_stack",
+      "ok": true,
+      "detail": "check.sh should make a fresh template clone self-checkable"
+    },
+    {
+      "name": "first_auto_execute",
+      "ok": true,
+      "detail": "{\"seed_returncode\": 0, \"auto_returncode\": 0, \"status\": \"done\", \"completed_tasks\": [\"task-schema-smoke\"], \"stderr\": \"\"}"
+    }
+  ]
+}

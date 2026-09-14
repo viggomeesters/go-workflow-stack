@@ -1,0 +1,14 @@
+{
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "project": "go-workflow-stack",
+  "contract_digest": "9d6b887a7091bde8235855e3974eeffe4fc08f596b71c5195175767581c8f0e7",
+  "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
+  "content_digest": "1880d4b1e19885a1f345572d42a8ba3ee09710c23226e869bef3a5d11ea22a71",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.5351299169706181,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

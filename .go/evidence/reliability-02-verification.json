@@ -1,6 +1,6 @@
 {
   "task_id": "reliability-02",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "494db9c81c71e0056e3788b0eddf5b4b8a20bbe7",
   "verification": {
     "path": ".go/runs/reliability-02/completion/verification-cc74c3e629294ff5845d489dfb2757be.json",
@@ -13,5 +13,7 @@
   "targeted_count": 44,
   "review": "Reviewed exact-commit archive materialization, explicit participant graph remapping, isolated Python environment, unchanged source/snapshot checks and fresh-plan comparison under the existing lifecycle lock. Target-only rejection and acceptance prove the target validator controls compatibility. Task/peer edits, moved tags, forged policy and mutating validators are refused. Archive paths/links and unavailable or timed-out validation fail closed. The trusted runtime subprocess is not an OS sandbox; arbitrary editor races remain optimistic. Existing historical task bytes and rollback remain covered. No inferred policy or authority.",
   "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
-  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions.",
+  "final_tag": "v0.3.29",
+  "final_tag_commit": "a4e9aaba9aed1eca2334725fda510b5bcb732ee1"
 }

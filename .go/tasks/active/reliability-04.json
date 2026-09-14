@@ -24,7 +24,8 @@
       "CHANGELOG.md",
       "docs/releases/**",
       "scripts/release-check-inner.sh",
-      "scripts/check-compatibility.sh"
+      "scripts/check-compatibility.sh",
+      "go_workflow/worktrees.py"
     ]
   },
   "acceptance": [

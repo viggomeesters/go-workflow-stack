@@ -7,7 +7,7 @@
   "project": "go-workflow-stack",
   "status": "open",
   "summary": "Publish TOML version sources without rewriting unrelated content",
-  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
   "scope": {
     "read": [
       "**"
@@ -107,7 +107,11 @@
       "abc-d08-resumable-publication"
     ],
     "conformance_required": true,
-    "human_gate": "none"
+    "human_gate": "none",
+    "classification": {
+      "reason": "Material change under the accepted governing brief. Execution permission is recorded separately in execution_authority; this work does not change access controls.",
+      "actor": "codex-astra-high"
+    }
   },
   "execution_authority": {
     "ship_policy": "push",

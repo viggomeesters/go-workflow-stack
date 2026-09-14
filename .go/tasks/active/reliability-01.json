@@ -5,9 +5,9 @@
   "shareable_delivery": "none",
   "id": "reliability-01",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Make legacy compatibility a mandatory release gate",
-  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
   "scope": {
     "read": [
       "**"
@@ -38,10 +38,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-14T15:27:59+02:00",
+    "base_commit": "47a104bd317bbd765a595f5711090856ba637ab5"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -101,7 +102,11 @@
       "abc-d01-release-unit"
     ],
     "conformance_required": true,
-    "human_gate": "none"
+    "human_gate": "none",
+    "classification": {
+      "reason": "Material change under the accepted governing brief. Execution permission is recorded separately in execution_authority; this work does not change access controls.",
+      "actor": "codex-astra-high"
+    }
   },
   "execution_authority": {
     "ship_policy": "push",

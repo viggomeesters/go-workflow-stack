@@ -1,0 +1,87 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "reliability-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "a0c36a762ff0fa5fcb1c6809a345bc9408fa19ff22bb850cfa34a67327cca514",
+  "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+  "content_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_toml_release.py tests/test_abc_release.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json",
+        "sha256": "c32481d9cf3f58677c9344b9e9bfa05a6f96837ecda7e98b642cafeb378abb84"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json",
+        "sha256": "16ada75bd7aba8536bd7cf912f9d8ad4f6b0f162eaec5e616d67da3f42f69668"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json",
+        "sha256": "bb6a3e5426c23e21f4054dee5244ad8e77835db1fe05c5446caf1fab3ae4ab29"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

@@ -1,0 +1,27 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "reliability-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "a0c36a762ff0fa5fcb1c6809a345bc9408fa19ff22bb850cfa34a67327cca514",
+  "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+  "content_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed explicit TOML key resolution and semantic before/after selection rather than regex-only key matching. Only one unescaped semantic literal is changed; unrelated bytes including CRLF and repeated other values survive. Invalid/dynamic/missing values fail before state save or channel reservation. Both project and lifecycle-settings schemas agree. Existing text/JSON semantics and publication recovery are exercised alongside a real TOML local-remote release with lost-push acknowledgement. No new dependency or inferred execution authority. Current declared checks, candidate release gate, ordinary clone checks and exact template pairing passed. Final tag/readback are downstream gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/releases/v0.3.30.md",
+    "docs/task-release-contract.md",
+    "go_workflow/constants.py",
+    "go_workflow/release.py",
+    "pyproject.toml",
+    "schemas/lifecycle-settings.schema.json",
+    "schemas/project.schema.json",
+    "scripts/check-compatibility.sh",
+    "scripts/release-check-inner.sh",
+    "tests/test_toml_release.py"
+  ]
+}

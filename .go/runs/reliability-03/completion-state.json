@@ -1,0 +1,129 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "reliability-03",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-6c331510b7024483a28ce8c2655dc6a0",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_toml_release.py tests/test_abc_release.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json",
+        "sha256": "c32481d9cf3f58677c9344b9e9bfa05a6f96837ecda7e98b642cafeb378abb84"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json",
+        "sha256": "16ada75bd7aba8536bd7cf912f9d8ad4f6b0f162eaec5e616d67da3f42f69668"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-03",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+        "worktree_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json",
+        "sha256": "bb6a3e5426c23e21f4054dee5244ad8e77835db1fe05c5446caf1fab3ae4ab29"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Explicit TOML version paths including project.version support prepare/publish/resume with unchanged surrounding bytes and strict semantic version validation.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Missing, dynamic, ambiguous or unsupported versions fail before mutation; existing text/JSON behavior and interrupted publication recovery remain valid.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "a0c36a762ff0fa5fcb1c6809a345bc9408fa19ff22bb850cfa34a67327cca514",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "MacBook-Pro-van-Viggo.local",
+    "pid": 98952
+  },
+  "worker_group": null,
+  "inflight": null
+}

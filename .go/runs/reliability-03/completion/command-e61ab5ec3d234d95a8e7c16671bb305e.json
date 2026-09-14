@@ -1,0 +1,14 @@
+{
+  "task_id": "reliability-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "a0c36a762ff0fa5fcb1c6809a345bc9408fa19ff22bb850cfa34a67327cca514",
+  "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
+  "content_digest": "805385f840eae08aa9155f733c135134b653a97e3507666578438a29529d1ddb",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.5404862499563023,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

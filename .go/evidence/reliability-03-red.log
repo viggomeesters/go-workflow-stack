@@ -1,0 +1,219 @@
+FFFF.......F                                                             [100%]
+=================================== FAILURES ===================================
+_ test_prepare_preserves_all_other_bytes_and_resumes[# caf\xe9 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth0')
+text = '# café 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n'
+
+    @pytest.mark.parametrize('text', [
+        '# café 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n',
+        "[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n",
+        'project = {name="fixture", version="1.1.0"}\n',
+        'project.version = "1.1.0"\n',
+    ])
+    def test_prepare_preserves_all_other_bytes_and_resumes(tmp_path, text):
+        repo, worker, _, project = fixture(tmp_path, text)
+>       result = prepare(repo)
+                 ^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:43: in prepare
+    return prepare_release(repo,'task-schema-smoke','owner','run-1',ship_policy='push',allow_push=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:302: in prepare_release
+    task = active_task(control, task_id, owner); profile = publication_profile(control, task)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+control = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth0/control repo')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+
+    def publication_profile(control, task):
+        from .shipping import release_profile
+        identity = release_profile(control, task)
+        value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
+        errors = validate_publication(value)
+>       if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.release.PublicationError: Explicit publication profile required: publication version source must be an explicit text/JSON path
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:88: PublicationError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth0/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+_ test_prepare_preserves_all_other_bytes_and_resumes[[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth1')
+text = "[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n"
+
+    @pytest.mark.parametrize('text', [
+        '# café 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n',
+        "[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n",
+        'project = {name="fixture", version="1.1.0"}\n',
+        'project.version = "1.1.0"\n',
+    ])
+    def test_prepare_preserves_all_other_bytes_and_resumes(tmp_path, text):
+        repo, worker, _, project = fixture(tmp_path, text)
+>       result = prepare(repo)
+                 ^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:43: in prepare
+    return prepare_release(repo,'task-schema-smoke','owner','run-1',ship_policy='push',allow_push=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:302: in prepare_release
+    task = active_task(control, task_id, owner); profile = publication_profile(control, task)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+control = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth1/control repo')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+
+    def publication_profile(control, task):
+        from .shipping import release_profile
+        identity = release_profile(control, task)
+        value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
+        errors = validate_publication(value)
+>       if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.release.PublicationError: Explicit publication profile required: publication version source must be an explicit text/JSON path
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:88: PublicationError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth1/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+_ test_prepare_preserves_all_other_bytes_and_resumes[project = {name="fixture", version="1.1.0"}\n] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth2')
+text = 'project = {name="fixture", version="1.1.0"}\n'
+
+    @pytest.mark.parametrize('text', [
+        '# café 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n',
+        "[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n",
+        'project = {name="fixture", version="1.1.0"}\n',
+        'project.version = "1.1.0"\n',
+    ])
+    def test_prepare_preserves_all_other_bytes_and_resumes(tmp_path, text):
+        repo, worker, _, project = fixture(tmp_path, text)
+>       result = prepare(repo)
+                 ^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:43: in prepare
+    return prepare_release(repo,'task-schema-smoke','owner','run-1',ship_policy='push',allow_push=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:302: in prepare_release
+    task = active_task(control, task_id, owner); profile = publication_profile(control, task)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+control = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth2/control repo')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+
+    def publication_profile(control, task):
+        from .shipping import release_profile
+        identity = release_profile(control, task)
+        value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
+        errors = validate_publication(value)
+>       if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.release.PublicationError: Explicit publication profile required: publication version source must be an explicit text/JSON path
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:88: PublicationError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth2/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+_ test_prepare_preserves_all_other_bytes_and_resumes[project.version = "1.1.0"\n] _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth3')
+text = 'project.version = "1.1.0"\n'
+
+    @pytest.mark.parametrize('text', [
+        '# café 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n',
+        "[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n",
+        'project = {name="fixture", version="1.1.0"}\n',
+        'project.version = "1.1.0"\n',
+    ])
+    def test_prepare_preserves_all_other_bytes_and_resumes(tmp_path, text):
+        repo, worker, _, project = fixture(tmp_path, text)
+>       result = prepare(repo)
+                 ^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:50: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:43: in prepare
+    return prepare_release(repo,'task-schema-smoke','owner','run-1',ship_policy='push',allow_push=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:302: in prepare_release
+    task = active_task(control, task_id, owner); profile = publication_profile(control, task)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+control = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth3/control repo')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+
+    def publication_profile(control, task):
+        from .shipping import release_profile
+        identity = release_profile(control, task)
+        value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
+        errors = validate_publication(value)
+>       if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.release.PublicationError: Explicit publication profile required: publication version source must be an explicit text/JSON path
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:88: PublicationError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_prepare_preserves_all_oth3/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+______ test_toml_publication_recovers_lost_push_without_repeating_effect _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_toml_publication_recovers0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x105ddbd10>
+
+    def test_toml_publication_recovers_lost_push_without_repeating_effect(tmp_path, monkeypatch):
+        import go_workflow.release as publisher
+        repo, worker, source, _ = fixture(tmp_path, '[project]\nversion="1.1.0"\n')
+>       prepare(repo); proofs(worker, source)
+        ^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:43: in prepare
+    return prepare_release(repo,'task-schema-smoke','owner','run-1',ship_policy='push',allow_push=True)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:302: in prepare_release
+    task = active_task(control, task_id, owner); profile = publication_profile(control, task)
+                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+control = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_toml_publication_recovers0/control repo')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+
+    def publication_profile(control, task):
+        from .shipping import release_profile
+        identity = release_profile(control, task)
+        value = read_object(control / '.go/project.json')['release_profiles'][identity['name']].get('publication')
+        errors = validate_publication(value)
+>       if errors: raise PublicationError('Explicit publication profile required: ' + '; '.join(errors))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.release.PublicationError: Explicit publication profile required: publication version source must be an explicit text/JSON path
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/release.py:88: PublicationError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-342/test_toml_publication_recovers0/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+=========================== short test summary info ============================
+FAILED tests/test_toml_release.py::test_prepare_preserves_all_other_bytes_and_resumes[# caf\xe9 1.1.0\n[project]\nname = "fixture"\nversion = "1.1.0" # keep\n[tool.example]\nversion = "1.1.0"\n]
+FAILED tests/test_toml_release.py::test_prepare_preserves_all_other_bytes_and_resumes[[project]\r\nversion = '1.1.0' # keep CRLF\r\nname = 'fixture'\r\n]
+FAILED tests/test_toml_release.py::test_prepare_preserves_all_other_bytes_and_resumes[project = {name="fixture", version="1.1.0"}\n]
+FAILED tests/test_toml_release.py::test_prepare_preserves_all_other_bytes_and_resumes[project.version = "1.1.0"\n]
+FAILED tests/test_toml_release.py::test_toml_publication_recovers_lost_push_without_repeating_effect
+5 failed, 7 passed in 7.44s

@@ -1,0 +1,38 @@
+...........F                                                             [100%]
+=================================== FAILURES ===================================
+______ test_toml_publication_recovers_lost_push_without_repeating_effect _______
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-343/test_toml_publication_recovers0')
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x1097751f0>
+
+    def test_toml_publication_recovers_lost_push_without_repeating_effect(tmp_path, monkeypatch):
+        import go_workflow.release as publisher
+        repo, worker, source, _ = fixture(tmp_path, '[project]\nversion="1.1.0"\n')
+>       prepare(repo); proofs(worker, source)
+                       ^^^^^^^^^^^^^^^^^^^^^^
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_toml_release.py:87: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/tests/test_abc_release.py:52: in proofs
+    'blocking_findings':[],'reviewed_paths':sorted(changed_content(worker,task,content_snapshot(worker,task)))})
+                                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+repo = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-343/test_toml_publication_recovers0/worker')
+task = {'schema': 'go-workflow.repo-local.task.v1', 'kind': 'task', 'id': 'task-schema-smoke', 'project': 'repo-local-spike-fixture', ...}
+snapshot = {'digest': 'a00f8cd9f9472e0a5c7cac8d5e012bb5d95416cec45f029ec258a9068e0a4165', 'files': {'.go/architecture-principles....ee5402871a5dfeed278f23f'}, 'CHANGELOG.md': {'mode': '100644', 'oid': 'db35073acd12756dea3714b1804855ae32851afc'}, ...}}
+
+    def changed_content(repo, task, snapshot):
+        base = (task.get('claim') or {}).get('base_commit')
+>       if not base: raise CompletionError('Lifecycle proof requires exact claim base provenance')
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       go_workflow.completion.CompletionError: Lifecycle proof requires exact claim base provenance
+
+/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-03/go_workflow/completion.py:122: CompletionError
+----------------------------- Captured stderr call -----------------------------
+To /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-343/test_toml_publication_recovers0/remote.git
+ * [new branch]      main -> main
+ * [new tag]         v1.1.0 -> v1.1.0
+=========================== short test summary info ============================
+FAILED tests/test_toml_release.py::test_toml_publication_recovers_lost_push_without_repeating_effect
+1 failed, 11 passed in 12.44s

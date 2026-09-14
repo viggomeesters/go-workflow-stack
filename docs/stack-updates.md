@@ -113,3 +113,24 @@ contracts, requirement completeness, scoped workspaces, explicit handoff and fai
 regressions were translated from agent-brain and predecessor viggo-agent-skills.
 No old vault writer, mandatory broad skill chain, task-ID versioning, automatic
 global skill mutation or GitHub Actions runtime is restored.
+
+## Legacy task metadata compatibility (v0.3.27)
+
+Tasks without `execution_contract` retain their pre-lifecycle metadata semantics.
+In particular, string dependency lists and old `verification_evidence` values
+remain readable across open, active, blocked and done states. The runtime and
+published task schema apply the new strict shapes only after explicit task opt-in;
+project defaults do not retroactively opt in stored tasks. Stack updates do not
+rewrite task files or manufacture release proof.
+
+A new lifecycle dependency may require a historical task to be done. Its status
+and any explicitly required release receipt are still checked, but the runtime
+does not traverse that task's legacy dependency metadata as lifecycle edges.
+New task intake continues to require explicit structured dependency contracts.
+
+Explicit lifecycle adoption is a separate operation. If an open task's old
+metadata does not fit the selected contract, adoption reports the task path and
+validation findings before writing any migration document. Resolve those fields
+with deliberate task-specific semantics before retrying; do not mass-convert
+string references into release requirements or historical output into verified
+proof. Historical done records remain byte-preserved during adoption.

@@ -178,7 +178,11 @@ def plan_lifecycle_adoption(repo, settings=None):
                 adopted['execution_contract'] = deepcopy(candidate['execution_defaults'])
                 api.ensure_intake_outcomes(adopted)
                 errors = api.validate_task(adopted, task['id'], expected_status='open')
-                if errors: raise MigrationError('; '.join(errors))
+                if errors:
+                    raise MigrationError(
+                        f"{path.relative_to(repo)}: lifecycle adoption requires explicit resolution "
+                        "of task metadata before opt-in; no dependency or evidence semantics "
+                        "were inferred: " + '; '.join(errors))
                 documents[str(path.relative_to(repo))] = _json(adopted); disposition = 'adopted'
         tasks.append({'id': task['id'], 'status': status, 'disposition': disposition})
     changes = [{'path': name, 'before_sha256': _hash((repo / name).read_text()), 'after_sha256': _hash(text)}

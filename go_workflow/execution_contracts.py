@@ -122,12 +122,17 @@ def dependency_findings(repo: Path, task: dict[str, Any], *, readiness: bool = F
         return data
 
     def visit(root, current):
+        # A lifecycle edge may point at a historical task. Its status/receipt is
+        # checked by the caller, but its old metadata defines no lifecycle edges.
+        if 'execution_contract' not in current:
+            return
         key = (root, current['id'])
         if key in visiting:
             errors.append(f'dependency cycle: {current["id"]}'); return
         if key in seen: return
         visiting.add(key)
-        malformed = validate_dependencies(current.get('dependencies', []))
+        malformed = (validate_execution_contract(current['execution_contract'])
+                     + validate_dependencies(current.get('dependencies', [])))
         errors.extend(malformed)
         if not malformed:
             project = read(root / '.go/project.json')

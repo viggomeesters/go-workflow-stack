@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.3.27 — preserve legacy lifecycle metadata
+
+- Restore the opt-in boundary for dependency and verification metadata in runtime
+  validation and the published task schema, preserving historical task bytes.
+- Stop lifecycle graph traversal at legacy records while retaining explicit
+  predecessor status and required release-receipt checks.
+- Identify the task and required metadata resolution before lifecycle adoption
+  writes; never infer new dependency or proof semantics.
+- Cover legacy shapes across all task states, strict intake, migration and
+  v0.3.7 pin upgrade/rollback; pair distribution checks with template v0.3.16.
+
 ## 0.3.26 — ordered release campaign and phase-aware critic
 
 - Prove two different task profiles, dependent releases, rejected-critic repair,

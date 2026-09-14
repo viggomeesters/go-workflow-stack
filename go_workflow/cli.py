@@ -333,11 +333,13 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
     require(isinstance(data.get("claim"), dict), errors, f"{rel}: claim must be an object")
     require(data.get("execution_mode", "mechanical") in {"mechanical", "agent"}, errors, f"{rel}: execution_mode must be mechanical or agent")
     require(data.get("shareable_delivery", "auto") in {"auto", "required", "none"}, errors, f"{rel}: shareable_delivery must be auto, required, or none")
-    if "dependencies" in data:
-        errors.extend(validate_dependencies(data["dependencies"]))
+    # These were free-form metadata before lifecycle opt-in. Never reinterpret
+    # historical records merely because a newer runtime reads them.
+    if "execution_contract" in data and "dependencies" in data:
+        errors.extend(f"{rel}: {error}" for error in validate_dependencies(data["dependencies"]))
     if "execution_contract" in data:
         errors.extend(validate_execution_contract(data["execution_contract"]))
-    if "verification_evidence" in data:
+    if "execution_contract" in data and "verification_evidence" in data:
         if not isinstance(data["verification_evidence"], list):
             errors.append("verification_evidence must be a list")
         else:

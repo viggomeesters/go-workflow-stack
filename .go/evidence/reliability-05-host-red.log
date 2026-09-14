@@ -1,0 +1,28 @@
+F.....                                                                   [100%]
+=================================== FAILURES ===================================
+___________ test_fully_closed_capture_needs_no_host_or_pid_liveness ____________
+
+monkeypatch = <_pytest.monkeypatch.MonkeyPatch object at 0x10b4f0770>
+
+    def test_fully_closed_capture_needs_no_host_or_pid_liveness(monkeypatch):
+        import go_workflow.run_state as state
+        value=completed();before=deepcopy(value)
+        monkeypatch.setattr(state.socket,'gethostname',lambda:'current-network-name')
+        monkeypatch.setattr(state,'_pid_alive',lambda *_:pytest.fail('Closed capture queried controller liveness'))
+>       state.require_stopped(value)
+
+tests/test_completed_capture.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+state = {'controller': {'host': 'previous-network-name', 'pid': 58648}, 'phase': 'complete', 'execution_cwd': '/same/local/project', 'inflight': None, ...}
+
+    def require_stopped(state):
+        owner = state['controller']
+        if owner['host'] != socket.gethostname():
+>           raise RunStateError('Cross-host owner liveness is unknown; explicit recovery is required')
+E           go_workflow.run_state.RunStateError: Cross-host owner liveness is unknown; explicit recovery is required
+
+go_workflow/run_state.py:103: RunStateError
+=========================== short test summary info ============================
+FAILED tests/test_completed_capture.py::test_fully_closed_capture_needs_no_host_or_pid_liveness
+1 failed, 5 passed in 0.03s

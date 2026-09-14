@@ -1,0 +1,144 @@
+FFFFFFFFFFFF                                                             [100%]
+=================================== FAILURES ===================================
+_____________ test_invalid_manifest_fails_closed[missing-current] ______________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl0')
+mutation = 'missing-current'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+________________ test_invalid_manifest_fails_closed[duplicate] _________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl1')
+mutation = 'duplicate'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_________________ test_invalid_manifest_fails_closed[bad-sha] __________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl2')
+mutation = 'bad-sha'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_________________ test_invalid_manifest_fails_closed[bad-ref] __________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl3')
+mutation = 'bad-ref'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_________________ test_invalid_manifest_fails_closed[bad-repo] _________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl4')
+mutation = 'bad-repo'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_________________ test_invalid_manifest_fails_closed[unknown] __________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl5')
+mutation = 'unknown'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_____________ test_invalid_manifest_fails_closed[unpaired-current] _____________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_invalid_manifest_fails_cl6')
+mutation = 'unpaired-current'
+
+    @pytest.mark.parametrize('mutation', ['missing-current','duplicate','bad-sha','bad-ref','bad-repo','unknown','unpaired-current'])
+    def test_invalid_manifest_fails_closed(tmp_path, mutation):
+>       from go_workflow.release_pairings import load_manifest, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:37: ModuleNotFoundError
+_________ test_missing_pair_and_contradictory_current_ref_are_rejected _________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_missing_pair_and_contradi0')
+
+    def test_missing_pair_and_contradictory_current_ref_are_rejected(tmp_path):
+>       from go_workflow.release_pairings import load_manifest, pairing_for, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:51: ModuleNotFoundError
+______________ test_baseline_checks_commit_tag_and_clean_checkout ______________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_baseline_checks_commit_ta0')
+
+    def test_baseline_checks_commit_tag_and_clean_checkout(tmp_path):
+>       from go_workflow.release_pairings import verify_baseline, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:58: ModuleNotFoundError
+________ test_current_template_metadata_detects_pin_and_document_drift _________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_current_template_metadata0')
+
+    def test_current_template_metadata_detects_pin_and_document_drift(tmp_path):
+>       from go_workflow.release_pairings import current_template, render_metadata, PairingError
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:68: ModuleNotFoundError
+_______ test_historical_pairings_preserve_the_previous_immutable_commits _______
+
+    def test_historical_pairings_preserve_the_previous_immutable_commits():
+>       from go_workflow.release_pairings import load_manifest, pairing_for
+E       ModuleNotFoundError: No module named 'go_workflow.release_pairings'
+
+tests/test_release_pairings.py:81: ModuleNotFoundError
+___________________ test_cli_inspects_pairing_without_writes ___________________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-361/test_cli_inspects_pairing_with0')
+
+    def test_cli_inspects_pairing_without_writes(tmp_path):
+        from go_workflow.constants import STACK_REF
+        result=subprocess.run([sys.executable,str(CLI),'pairing','inspect','--stack-ref',STACK_REF,'--json'],cwd=tmp_path,text=True,capture_output=True)
+>       assert result.returncode==0,result.stderr
+E       AssertionError: usage: go.py [-h]
+E                      {version,adopt,spike,go,auto,adapter,proof,stack,onboarding,agent-check,doctor,loop,go-loop,router,status,template-check,recommendation,delivery,task,epic,decision,architecture,migrate,init,validate,next,claim,finish,dirty-check,readback,route,bundle,workspace,context,managed,release,completion}
+E                      ...
+E         go.py: error: argument command: invalid choice: 'pairing' (choose from version, adopt, spike, go, auto, adapter, proof, stack, onboarding, agent-check, doctor, loop, go-loop, router, status, template-check, recommendation, delivery, task, epic, decision, architecture, migrate, init, validate, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)
+E         
+E       assert 2 == 0
+E        +  where 2 = CompletedProcess(args=['/Users/viggomeesters/.cache/uv/builds-v0/.tmpSBU3Td/bin/python', '/Users/viggomeesters/Documen...idate, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)\n").returncode
+
+tests/test_release_pairings.py:101: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[missing-current]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[duplicate]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[bad-sha]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[bad-ref]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[bad-repo]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[unknown]
+FAILED tests/test_release_pairings.py::test_invalid_manifest_fails_closed[unpaired-current]
+FAILED tests/test_release_pairings.py::test_missing_pair_and_contradictory_current_ref_are_rejected
+FAILED tests/test_release_pairings.py::test_baseline_checks_commit_tag_and_clean_checkout
+FAILED tests/test_release_pairings.py::test_current_template_metadata_detects_pin_and_document_drift
+FAILED tests/test_release_pairings.py::test_historical_pairings_preserve_the_previous_immutable_commits
+FAILED tests/test_release_pairings.py::test_cli_inspects_pairing_without_writes
+12 failed in 0.16s

@@ -1,0 +1,14 @@
+{
+  "task_id": "reliability-05",
+  "project": "go-workflow-stack",
+  "contract_digest": "9a49327c8b188a7be96776377fbb39644b1f331c68ff3f30960333b9ee7bdc31",
+  "revision": "a406249b63d6746c044eafe6dbeaf5bbb02482e3",
+  "content_digest": "a9b5140dbaaae1206e99bca1a2cf09423f38eba0c8cf9edbd00ffb8a7d25ad0a",
+  "command": "python3 -m pytest tests/test_release_pairings.py tests/test_completed_capture.py -q",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 2.4384773339843377,
+  "returncode": 0,
+  "stdout": ".............s.......                                                    [100%]\n20 passed, 1 skipped in 1.66s\n",
+  "stderr": "",
+  "timed_out": false
+}

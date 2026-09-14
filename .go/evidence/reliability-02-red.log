@@ -1,0 +1,65 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+__________ test_preview_reports_target_only_failure_without_mutation ___________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-324/test_preview_reports_target_on0')
+
+    def test_preview_reports_target_only_failure_without_mutation(tmp_path):
+        repo = fixture(tmp_path); stack = target_runtime(tmp_path, reject=True)
+        before = tree(repo)
+        result = run(repo, 'stack', 'update', repo, '--to', 'v9.0.0', '--stack-repo', stack, '--json')
+>       assert result.returncode == 1, result.stdout + result.stderr
+E       AssertionError: {
+E           "schema": "go-workflow.stack-update-plan.v1",
+E           "mode": "dry_run",
+E           "repo": "/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-324/test_preview_reports_target_on0/fixture",
+E           "stack_repo": "/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-324/test_preview_reports_target_on0/target-runtime",
+E           "from_version": "0.3.14",
+E           "from_ref": "v0.3.14",
+E           "to_version": "9.0.0",
+E           "to_ref": "v9.0.0",
+E           "resolved_commit": "b1a140f3b55c8f155b7dec1c5b3597968b6c53c6",
+E           "runtime_contract_version": 2,
+E           "project_contract_version": 2,
+E           "lifecycle_policy_migrated": false,
+E           "up_to_date": false,
+E           "changes": [
+E             ".go/project.json:required_stack_version",
+E             ".go/project.json:stack_ref"
+E           ],
+E           "before_project": {
+E             "schema": "go-workflow.repo-local.project.v1",
+E             "kind": "project",
+E             "id": "repo-local-spike-fixture",
+E             "name": "Repo Local Spike Fixture",
+E             "source_of_truth": "repo-local",
+E             "contract_version": 2,
+E             "required_stack_version": "0.3.14",
+E             "stack_ref": "v0.3.14",
+E             "default_verification": [
+E               "python -m pytest"
+E             ]
+E           },
+E           "after_project": {
+E             "schema": "go-workflow.repo-local.project.v1",
+E             "kind": "project",
+E             "id": "repo-local-spike-fixture",
+E             "name": "Repo Local Spike Fixture",
+E             "source_of_truth": "repo-local",
+E             "contract_version": 2,
+E             "required_stack_version": "9.0.0",
+E             "stack_ref": "v9.0.0",
+E             "default_verification": [
+E               "python -m pytest"
+E             ]
+E           }
+E         }
+E         
+E       assert 0 == 1
+E        +  where 0 = CompletedProcess(args=['/Users/viggomeesters/.cache/uv/builds-v0/.tmpBeSNP9/bin/python', '/Users/viggomeesters/Documen....0",\n    "stack_ref": "v9.0.0",\n    "default_verification": [\n      "python -m pytest"\n    ]\n  }\n}\n', stderr='').returncode
+
+work/reliability-02/tests/test_upgrade_preview.py:43: AssertionError
+=========================== short test summary info ============================
+FAILED work/reliability-02/tests/test_upgrade_preview.py::test_preview_reports_target_only_failure_without_mutation
+1 failed in 0.45s

@@ -1,0 +1,29 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "reliability-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "10c47c441259038bef2bcd56e9e2f721898ee22f249422976a3c494ca62ce933",
+  "revision": "494db9c81c71e0056e3788b0eddf5b4b8a20bbe7",
+  "content_digest": "987622eabcda5e6df2f052e189e3d4f2714c355e044ad48456cae8914b2511ba",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed exact-commit archive materialization, explicit participant graph remapping, isolated Python environment, unchanged source/snapshot checks and fresh-plan comparison under the existing lifecycle lock. Target-only rejection and acceptance prove the target validator controls compatibility. Task/peer edits, moved tags, forged policy and mutating validators are refused. Archive paths/links and unavailable or timed-out validation fail closed. The trusted runtime subprocess is not an OS sandbox; arbitrary editor races remain optimistic. Existing historical task bytes and rollback remain covered. No inferred policy or authority. Current declared checks, candidate release gate, ordinary clone checks and exact template pairing passed. Final tag/readback are downstream gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/releases/v0.3.29.md",
+    "docs/stack-updates.md",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/stack_update.py",
+    "pyproject.toml",
+    "schemas/stack-update-plan.schema.json",
+    "scripts/check-compatibility.sh",
+    "scripts/release-check-inner.sh",
+    "tests/test_legacy_lifecycle_compatibility.py",
+    "tests/test_smoke.py",
+    "tests/test_upgrade_preview.py"
+  ]
+}

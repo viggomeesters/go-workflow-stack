@@ -1,0 +1,33 @@
+{
+  "id": "reliability-improvements",
+  "status": "executing",
+  "source": "Accepted five-item advice; user Implement",
+  "coordinator": "go-workflow-stack",
+  "tasks": [
+    "reliability-01",
+    "reliability-02",
+    "reliability-03",
+    "reliability-04",
+    "reliability-05",
+    "go-project-template:reliability-template-01"
+  ],
+  "execution_order": [
+    "reliability-01",
+    "reliability-02",
+    "reliability-03",
+    "reliability-04",
+    "reliability-05",
+    "go-project-template:reliability-template-01"
+  ],
+  "non_goals": [
+    "Model escalation/session adapters",
+    "Live consumer migrations",
+    "GitHub Actions",
+    "Global skill mutations"
+  ],
+  "assumptions": [
+    "Use current selected Astra High; no provider identity attestation inferred",
+    "Keep separate immutable releases for individually claimable changes",
+    "Template final pin follows completed stack releases instead of an intermediate cosmetic pin-only release"
+  ]
+}

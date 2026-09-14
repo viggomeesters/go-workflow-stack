@@ -1,0 +1,111 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-01",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Make legacy compatibility a mandatory release gate",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "scripts/check-linux.sh",
+      "scripts/check-compatibility.sh",
+      "tests/test_legacy_lifecycle_compatibility.py",
+      "tests/test_release_compatibility_gate.py",
+      "docs/stack-updates.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
+    ]
+  },
+  "acceptance": [
+    "Legacy compatibility, contract and migration regressions run automatically in candidate and tagged release checks.",
+    "Representative v0.3.7, v0.3.14 and v0.3.26 project pins upgrade without task-byte changes; a deliberately reintroduced legacy regression blocks the real gate.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_legacy_lifecycle_compatibility.py tests/test_release_compatibility_gate.py -q",
+    "bash scripts/check-compatibility.sh",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-01"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Legacy compatibility, contract and migration regressions run automatically in candidate and tagged release checks.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Representative v0.3.7, v0.3.14 and v0.3.26 project pins upgrade without task-byte changes; a deliberately reintroduced legacy regression blocks the real gate.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "order": 1,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-contracts"
+    ],
+    "decision_ids": [
+      "abc-d01-release-unit"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  }
+}

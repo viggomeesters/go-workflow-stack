@@ -1,0 +1,117 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-03",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Publish TOML version sources without rewriting unrelated content",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/release.py",
+      "schemas/project.schema.json",
+      "tests/test_toml_release.py",
+      "tests/test_abc_publication.py",
+      "docs/task-release-contract.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
+    ]
+  },
+  "acceptance": [
+    "Explicit TOML version paths including project.version support prepare/publish/resume with unchanged surrounding bytes and strict semantic version validation.",
+    "Missing, dynamic, ambiguous or unsupported versions fail before mutation; existing text/JSON behavior and interrupted publication recovery remain valid.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_toml_release.py tests/test_abc_publication.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-03"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Explicit TOML version paths including project.version support prepare/publish/resume with unchanged surrounding bytes and strict semantic version validation.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Missing, dynamic, ambiguous or unsupported versions fail before mutation; existing text/JSON behavior and interrupted publication recovery remain valid.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "order": 3,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-publication"
+    ],
+    "decision_ids": [
+      "abc-d08-resumable-publication"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  }
+}

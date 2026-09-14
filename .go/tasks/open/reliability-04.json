@@ -1,0 +1,130 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-04",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Guide project lifecycle configuration from detected project facts",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/onboarding.py",
+      "go_workflow/cli.py",
+      "schemas/onboarding-plan.schema.json",
+      "tests/test_guided_onboarding.py",
+      "docs/stack-updates.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
+    ]
+  },
+  "acceptance": [
+    "Read-only guided planning detects supported version files, base branch and candidate checks, reports unresolved choices and accepts explicit model/publisher/check selections.",
+    "Resolved settings and initial task drafts are validated and usable through existing scaffold/intake APIs with actual version/changelog scope and acceptance coverage. No model, destination or execution authority is guessed.",
+    "A fresh project can use the resulting configuration for a complete first local release, with invalid/incomplete inputs and existing history preserved.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_guided_onboarding.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-02",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-03",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-04"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Read-only guided planning detects supported version files, base branch and candidate checks, reports unresolved choices and accepts explicit model/publisher/check selections.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Resolved settings and initial task drafts are validated and usable through existing scaffold/intake APIs with actual version/changelog scope and acceptance coverage. No model, destination or execution authority is guessed.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "A fresh project can use the resulting configuration for a complete first local release, with invalid/incomplete inputs and existing history preserved.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "order": 4,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-adoption"
+    ],
+    "decision_ids": [
+      "abc-d10-explicit-lifecycle-adoption"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  }
+}

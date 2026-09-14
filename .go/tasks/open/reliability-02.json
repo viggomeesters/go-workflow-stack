@@ -1,0 +1,118 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-02",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Validate upgrade previews using the exact target runtime",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/stack_update.py",
+      "go_workflow/cli.py",
+      "tests/test_upgrade_preview.py",
+      "tests/test_legacy_lifecycle_compatibility.py",
+      "tests/test_smoke.py",
+      "docs/stack-updates.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
+    ]
+  },
+  "acceptance": [
+    "Preview validates an isolated complete workflow snapshot with the exact resolved target code, reports task paths and diagnostics, and does not mutate source state.",
+    "Apply rejects failed or stale previews before pin changes; existing rollback, version provenance, legacy compatibility and no-authority boundaries remain.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_upgrade_preview.py tests/test_legacy_lifecycle_compatibility.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-02"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Preview validates an isolated complete workflow snapshot with the exact resolved target code, reports task paths and diagnostics, and does not mutate source state.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Apply rejects failed or stale previews before pin changes; existing rollback, version provenance, legacy compatibility and no-authority boundaries remain.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "order": 2,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-adoption"
+    ],
+    "decision_ids": [
+      "abc-d10-explicit-lifecycle-adoption"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  }
+}

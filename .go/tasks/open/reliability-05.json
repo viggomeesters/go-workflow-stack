@@ -1,0 +1,118 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-05",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Centralize immutable stack and template release pairings",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "release-pairings.json",
+      "schemas/release-pairings.schema.json",
+      "go_workflow/release_pairings.py",
+      "go_workflow/cli.py",
+      "tests/test_release_pairings.py",
+      "docs/stack-updates.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh"
+    ]
+  },
+  "acceptance": [
+    "One validated manifest owns the existing historical stack-to-template release mappings, exact commits and current tested pairing; release hydration reads it without changing published historical tags.",
+    "A checker detects contradictory refs, invalid hashes, missing mappings and mismatched current template pins/docs; current version metadata can be rendered deterministically without rewriting historical evidence.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_release_pairings.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-05"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "One validated manifest owns the existing historical stack-to-template release mappings, exact commits and current tested pairing; release hydration reads it without changing published historical tags.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "A checker detects contradictory refs, invalid hashes, missing mappings and mismatched current template pins/docs; current version metadata can be rendered deterministically without rewriting historical evidence.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "order": 5,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-adoption"
+    ],
+    "decision_ids": [
+      "abc-d10-explicit-lifecycle-adoption"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  }
+}

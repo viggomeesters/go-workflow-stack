@@ -1,0 +1,19 @@
+{
+  "task_id": "reliability-02",
+  "owner": "codex-astra-high",
+  "run_id": "reliability-02-development",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-02",
+  "branch": "codex/reliability-02",
+  "base_branch": "main",
+  "base_commit": "ce8826d725aee7698cb9a85a673628850ea80a1e",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+  "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+  "generation": "aba7340b89e0437a8e5d561d221be095",
+  "state": "integrated",
+  "integration": {
+    "workspace_head": "c9cfe82641b4a67dea3371f628f3ed9792d5dcea",
+    "integrated_commit": "c9cfe82641b4a67dea3371f628f3ed9792d5dcea"
+  }
+}

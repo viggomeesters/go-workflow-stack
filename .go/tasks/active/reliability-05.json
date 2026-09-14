@@ -27,7 +27,8 @@
       "scripts/release-check-inner.sh",
       "scripts/check-compatibility.sh",
       "tests/test_smoke.py",
-      "go_workflow/worktrees.py"
+      "go_workflow/worktrees.py",
+      "scripts/check-distribution.sh"
     ]
   },
   "acceptance": [

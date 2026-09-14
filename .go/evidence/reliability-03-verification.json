@@ -1,6 +1,6 @@
 {
   "task_id": "reliability-03",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "f179b6217d5d8f6559d1586839153400a76c83ca",
   "verification": {
     "path": ".go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json",
@@ -13,5 +13,7 @@
   "targeted_count": 42,
   "review": "Reviewed explicit TOML key resolution and semantic before/after selection rather than regex-only key matching. Only one unescaped semantic literal is changed; unrelated bytes including CRLF and repeated other values survive. Invalid/dynamic/missing values fail before state save or channel reservation. Both project and lifecycle-settings schemas agree. Existing text/JSON semantics and publication recovery are exercised alongside a real TOML local-remote release with lost-push acknowledgement. No new dependency or inferred execution authority.",
   "self_reflect": "Regression coverage and implementation are in the authorized task. No global skill, memory or configuration mutation needed.",
-  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions."
+  "limitations": "Same-agent review; selected Astra High, effective provider identity unconfirmed. No live consumer mutation or GitHub Actions.",
+  "final_tag": "v0.3.30",
+  "final_tag_commit": "b08ecdc46219b9af69f182ae5195c0630c10d833"
 }

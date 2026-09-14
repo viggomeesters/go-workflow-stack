@@ -1,0 +1,70 @@
+WARN `--no-project` was provided, but no project was found
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/reliability-03-tagcheck.bundle main --tags
+From /tmp/go-abc-01-xjyg7dz7/reliability-03-tagcheck.bundle
+ * branch            main       -> FETCH_HEAD
+ * [new tag]         v0.3.30    -> v0.3.30
+RUN: git merge --ff-only FETCH_HEAD
+Updating f179b62..b08ecdc
+Fast-forward
+ .go/architecture/events.jsonl                      |   1 +
+ .go/evidence/events.jsonl                          |   2 +
+ .go/evidence/reliability-03-candidate.log          | 106 ++++++++++
+ .go/evidence/reliability-03-green.log              |  38 ++++
+ .go/evidence/reliability-03-integration.json       |  19 ++
+ .go/evidence/reliability-03-make.log               |  65 ++++++
+ .go/evidence/reliability-03-red.log                | 219 +++++++++++++++++++++
+ .go/evidence/reliability-03-regressions.log        |   2 +
+ .go/evidence/reliability-03-verification.json      |  17 ++
+ .go/runs/events.jsonl                              |   1 +
+ .go/runs/reliability-03/completion-state.json      | 129 ++++++++++++
+ .../command-821285c493eb48ec96e9183b9da62de7.json  |  14 ++
+ .../command-8ff576cddadc44729a4ca17aad32b5de.json  |  14 ++
+ .../command-e61ab5ec3d234d95a8e7c16671bb305e.json  |  14 ++
+ .../critic-794bb73d22ea48c7b2a4945b80a784e4.json   |  27 +++
+ ...ification-1bfc8b0c2bdd4b9daccc43210f8f3215.json |  87 ++++++++
+ .go/tasks/active/reliability-03.json               |  31 ++-
+ 17 files changed, 782 insertions(+), 4 deletions(-)
+ create mode 100644 .go/evidence/reliability-03-candidate.log
+ create mode 100644 .go/evidence/reliability-03-green.log
+ create mode 100644 .go/evidence/reliability-03-integration.json
+ create mode 100644 .go/evidence/reliability-03-make.log
+ create mode 100644 .go/evidence/reliability-03-red.log
+ create mode 100644 .go/evidence/reliability-03-regressions.log
+ create mode 100644 .go/evidence/reliability-03-verification.json
+ create mode 100644 .go/runs/reliability-03/completion-state.json
+ create mode 100644 .go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json
+ create mode 100644 .go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json
+ create mode 100644 .go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json
+ create mode 100644 .go/runs/reliability-03/completion/critic-794bb73d22ea48c7b2a4945b80a784e4.json
+ create mode 100644 .go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json
+RUN: git remote set-url origin https://github.com/viggomeesters/go-workflow-stack.git
+RUN: git rev-parse HEAD
+b08ecdc46219b9af69f182ae5195c0630c10d833
+RUN: ./scripts/release-check.sh 0.3.30
+release preflight: v0.3.30
+tag: annotated v0.3.30 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 79%]
+...................                                                      [100%]
+91 passed in 40.61s
+compatibility release gate: passed
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 147.98s (0:02:27)
+ok: /tmp/tmp.7iyALRTe0L/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.7iyALRTe0L/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.7iyALRTe0L/go-workflow-stack
+Prepared 1 package in 1.37s
+Installed 1 package in 23ms
+ + go-workflow-stack==0.3.30 (from file:///tmp/tmp.7iyALRTe0L/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.3ER0ucuCG9/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.3ER0ucuCG9/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.3ER0ucuCG9/fixture/.go
+ok: /tmp/tmp.3ER0ucuCG9/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+reliability-03-tagcheck-ALL-PASSED

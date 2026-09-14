@@ -1,0 +1,17 @@
+{
+  "task_id": "reliability-03",
+  "tag": "v0.3.30",
+  "commit": "b08ecdc46219b9af69f182ae5195c0630c10d833",
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-14T14:21:09Z",
+    "tagName": "v0.3.30",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.30"
+  },
+  "readback": {
+    "path": ".go/runs/reliability-03/completion/release-081790fc85144e3eb91374125e92bb95.json",
+    "sha256": "63d350e35b9322d38fa50d358bc5c35607d4a850c01f1a159fa8de7d03cd7fbf"
+  },
+  "tag_gate": "passed"
+}

@@ -1,0 +1,246 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "reliability-03",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Publish TOML version sources without rewriting unrelated content",
+  "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/release.py",
+      "schemas/project.schema.json",
+      "tests/test_toml_release.py",
+      "tests/test_abc_release.py",
+      "docs/task-release-contract.md",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      ".go/project.json",
+      "CHANGELOG.md",
+      "docs/releases/**",
+      "scripts/release-check-inner.sh",
+      "scripts/check-compatibility.sh",
+      "schemas/lifecycle-settings.schema.json"
+    ]
+  },
+  "acceptance": [
+    "Explicit TOML version paths including project.version support prepare/publish/resume with unchanged surrounding bytes and strict semantic version validation.",
+    "Missing, dynamic, ambiguous or unsupported versions fail before mutation; existing text/JSON behavior and interrupted publication recovery remain valid.",
+    "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_toml_release.py tests/test_abc_release.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-14T16:07:08+02:00",
+    "base_commit": "2bf98129124ffad64354d849bf8a58c3275171db"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-14T16:21:26+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Current candidate/tagged checks, same-agent critic and fresh remote readback passed.",
+      "transaction_id": "47afd97028fc42d18d365b9370064c2a"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-14T16:21:26+02:00",
+      "task_id": "reliability-03",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/events.jsonl,.go/evidence/reliability-03-candidate.log,.go/evidence/reliability-03-green.log,.go/evidence/reliability-03-integration.json,.go/evidence/reliability-03-make.log,.go/evidence/reliability-03-red.log,.go/evidence/reliability-03-regressions.log,.go/evidence/reliability-03-verification.json,.go/project.json,.go/runs/events.jsonl,.go/runs/reliability-03/completion-state.json,.go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json,.go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json,.go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json,.go/runs/reliability-03/completion/critic-794bb73d22ea48c7b2a4945b80a784e4.json,.go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json,.go/tasks/active/reliability-03.json,.go/workspaces/reliability-03.json,CHANGELOG.md,docs/releases/v0.3.30.md,docs/task-release-contract.md,go_workflow/constants.py,go_workflow/release.py,pyproject.toml,schemas/lifecycle-settings.schema.json,schemas/project.schema.json,scripts/check-compatibility.sh,scripts/release-check-inner.sh,tests/test_toml_release.py; verification_command=declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates; verification_result=passed; critic=passed same-agent review; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.30 b08ecdc46219b9af69f182ae5195c0630c10d833 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.30; Self-reflect: task regressions capture improvement, no global skill/memory/config change.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/evidence/reliability-03-candidate.log",
+        ".go/evidence/reliability-03-green.log",
+        ".go/evidence/reliability-03-integration.json",
+        ".go/evidence/reliability-03-make.log",
+        ".go/evidence/reliability-03-red.log",
+        ".go/evidence/reliability-03-regressions.log",
+        ".go/evidence/reliability-03-verification.json",
+        ".go/project.json",
+        ".go/runs/events.jsonl",
+        ".go/runs/reliability-03/completion-state.json",
+        ".go/runs/reliability-03/completion/command-821285c493eb48ec96e9183b9da62de7.json",
+        ".go/runs/reliability-03/completion/command-8ff576cddadc44729a4ca17aad32b5de.json",
+        ".go/runs/reliability-03/completion/command-e61ab5ec3d234d95a8e7c16671bb305e.json",
+        ".go/runs/reliability-03/completion/critic-794bb73d22ea48c7b2a4945b80a784e4.json",
+        ".go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json",
+        ".go/tasks/active/reliability-03.json",
+        ".go/workspaces/reliability-03.json",
+        "CHANGELOG.md",
+        "docs/releases/v0.3.30.md",
+        "docs/task-release-contract.md",
+        "go_workflow/constants.py",
+        "go_workflow/release.py",
+        "pyproject.toml",
+        "schemas/lifecycle-settings.schema.json",
+        "schemas/project.schema.json",
+        "scripts/check-compatibility.sh",
+        "scripts/release-check-inner.sh",
+        "tests/test_toml_release.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "2bf98129124ffad64354d849bf8a58c3275171db",
+        "observed_head_commit": "b08ecdc46219b9af69f182ae5195c0630c10d833"
+      },
+      "verification": {
+        "command": "declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "reliability-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement the accepted reliability improvement as a self-contained verified patch release. User authorization: Implement. No model escalation, global skills, live consumer mutation or GitHub Actions.",
+    "sha256": "9480eff43f219cc5b1bd7d870f21b46f20a78d3e3b03fdb413670c10e46a72ab",
+    "source_ref": "repo-local-intake:reliability-03"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Explicit TOML version paths including project.version support prepare/publish/resume with unchanged surrounding bytes and strict semantic version validation.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:17:12+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Missing, dynamic, ambiguous or unsupported versions fail before mutation; existing text/JSON behavior and interrupted publication recovery remain valid.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:17:13+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T16:21:24+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-03/completion/release-081790fc85144e3eb91374125e92bb95.json"
+        }
+      ]
+    }
+  ],
+  "order": 3,
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-publication"
+    ],
+    "decision_ids": [
+      "abc-d08-resumable-publication"
+    ],
+    "conformance_required": true,
+    "human_gate": "none",
+    "classification": {
+      "reason": "Material change under the accepted governing brief. Execution permission is recorded separately in execution_authority; this work does not change access controls.",
+      "actor": "codex-astra-high"
+    }
+  },
+  "execution_authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "source": "User Implement within standing task release lifecycle"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reliability-03/completion/verification-1bfc8b0c2bdd4b9daccc43210f8f3215.json",
+      "sha256": "690fb31b27c9ca708c5555e6992b7f54a8fa5b970e9fd61872e96ccb9cbfa601"
+    },
+    "critic": {
+      "path": ".go/runs/reliability-03/completion/critic-794bb73d22ea48c7b2a4945b80a784e4.json",
+      "sha256": "33c4eecdf58c6b266b85ba56e4b26cd323a1b280712a39745da87d3d6c66c525"
+    },
+    "release": {
+      "path": ".go/runs/reliability-03/completion/release-081790fc85144e3eb91374125e92bb95.json",
+      "sha256": "63d350e35b9322d38fa50d358bc5c35607d4a850c01f1a159fa8de7d03cd7fbf"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "reliability-03",
+    "project": "go-workflow-stack",
+    "commit": "b08ecdc46219b9af69f182ae5195c0630c10d833",
+    "tag": "v0.3.30",
+    "evidence": [
+      ".go/runs/reliability-03/completion/release-081790fc85144e3eb91374125e92bb95.json"
+    ]
+  }
+}

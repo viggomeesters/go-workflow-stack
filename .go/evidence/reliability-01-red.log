@@ -1,0 +1,19 @@
+WARN `--no-project` was provided, but no project was found
+F                                                                        [100%]
+=================================== FAILURES ===================================
+______________ test_compatibility_gate_accepts_supported_history _______________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-314/test_compatibility_gate_accept0')
+
+    def test_compatibility_gate_accepts_supported_history(tmp_path):
+        result = run_gate(tmp_path)
+>       assert result.returncode == 0, result.stdout + result.stderr
+E       AssertionError: bash: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-314/test_compatibility_gate_accept0/source/scripts/check-compatibility.sh: No such file or directory
+E         
+E       assert 127 == 0
+E        +  where 127 = CompletedProcess(args=['bash', '/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytes...eesters/pytest-314/test_compatibility_gate_accept0/source/scripts/check-compatibility.sh: No such file or directory\n').returncode
+
+work/reliability-01/tests/test_release_compatibility_gate.py:30: AssertionError
+=========================== short test summary info ============================
+FAILED work/reliability-01/tests/test_release_compatibility_gate.py::test_compatibility_gate_accepts_supported_history
+1 failed in 0.04s

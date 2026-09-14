@@ -74,15 +74,27 @@
       "id": "R1",
       "text": "Legacy compatibility, contract and migration regressions run automatically in candidate and tagged release checks.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T15:36:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-01/completion/verification-8a9adac084fc481586c7bb5f0457d697.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Representative v0.3.7, v0.3.14 and v0.3.26 project pins upgrade without task-byte changes; a deliberately reintroduced legacy regression blocks the real gate.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-14T15:36:48+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/reliability-01/completion/verification-8a9adac084fc481586c7bb5f0457d697.json"
+        }
+      ]
     },
     {
       "id": "R3",
@@ -112,5 +124,16 @@
     "ship_policy": "push",
     "allow_push": true,
     "source": "User Implement within standing task release lifecycle"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reliability-01/completion/verification-8a9adac084fc481586c7bb5f0457d697.json",
+      "sha256": "c38384b1dfd7462952af2dde3a74e0851eb3f76f156af112bd9a749a667fdcda"
+    },
+    "critic": {
+      "path": ".go/runs/reliability-01/completion/critic-d1352bd302fe4030bd459fd081964de4.json",
+      "sha256": "0bbcd1de1e671fbc5d7871d3906d3b45aaf12e3e65bb97e9aa06139f4fb2432c"
+    }
   }
 }

@@ -1,0 +1,112 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "reliability-01",
+  "project": "go-workflow-stack",
+  "contract_digest": "6a7b73abe8ef30346d9e697d44368f2ce9ee42430474eb9c6269e869ef2f7dc0",
+  "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+  "content_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_legacy_lifecycle_compatibility.py tests/test_release_compatibility_gate.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+        "worktree_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-01/completion/command-e9dda09705764b249d457655579c261f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-01/completion/command-e9dda09705764b249d457655579c261f.json",
+        "sha256": "ae3d7693e010a3d99ec34a3cf251a7f8d5219fb54d9fe5490e6b2d32456730e0"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "bash scripts/check-compatibility.sh",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+        "worktree_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-01/completion/command-f6877d42d3174b418d29bdd1902c11e1.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-01/completion/command-f6877d42d3174b418d29bdd1902c11e1.json",
+        "sha256": "3bd547ccadcc92b6000595d8270748797b3514981394ad98ce534607a100ecb9"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+        "worktree_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-01/completion/command-349d8f92d9014fcab2fa635116de58c9.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-01/completion/command-349d8f92d9014fcab2fa635116de58c9.json",
+        "sha256": "d2514315403916ea6eba932012861c9dfa5f894baa0a80a9b410020b09fc3633"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reliability-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+        "worktree_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reliability-01/completion/command-ff60dd01d2904dc69c522ca8c8d28f5e.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reliability-01/completion/command-ff60dd01d2904dc69c522ca8c8d28f5e.json",
+        "sha256": "9c36dae46d9ae58fffcc7728c59e907f0f4103eac9c9eff8b017e832372a8bfc"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

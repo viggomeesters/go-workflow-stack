@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "reliability-01",
+  "project": "go-workflow-stack",
+  "contract_digest": "6a7b73abe8ef30346d9e697d44368f2ce9ee42430474eb9c6269e869ef2f7dc0",
+  "revision": "c57b05eaaab3ae0b1a6993e77d2e243f9df94abc",
+  "content_digest": "4936af0576dbfa4758973aa5aab64fada98b7afc1801acb382b4a8b6846d1b5b",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed the new bounded shell phase, its insertion before smoke checks, the three-pin/four-state matrix and actual subprocess regression injection. The old dependency validator is intentionally restored only in a disposable copy and must produce failure. The phase runs from a neutral cwd, preserves source/user files, resolves Python prerequisites explicitly and avoids recursive inclusion of its outer test. No lifecycle validators or execution rights are loosened. Current declared checks, candidate release gate, ordinary clone checks and exact template pairing passed. Final tag/readback are downstream gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/releases/v0.3.28.md",
+    "docs/stack-updates.md",
+    "go_workflow/constants.py",
+    "pyproject.toml",
+    "scripts/check-compatibility.sh",
+    "scripts/check-linux.sh",
+    "scripts/release-check-inner.sh",
+    "tests/test_legacy_lifecycle_compatibility.py",
+    "tests/test_release_compatibility_gate.py"
+  ]
+}

@@ -5260,6 +5260,18 @@ def build_parser() -> argparse.ArgumentParser:
     onboarding_plan.add_argument('--answers', default='')
     onboarding_plan.add_argument('--json', action='store_true')
     onboarding_plan.set_defaults(func=cmd_onboarding_plan)
+
+    pairing = sub.add_parser('pairing', help='Internal immutable release pairing checks')
+    pairing_sub = pairing.add_subparsers(dest='pairing_operation', required=True)
+    for operation in ('inspect', 'baseline', 'template'):
+        item = pairing_sub.add_parser(operation)
+        item.add_argument('--json', action='store_true')
+        if operation in ('inspect', 'baseline'): item.add_argument('--stack-ref', default=STACK_REF)
+        if operation in ('baseline', 'template'): item.add_argument('--template', required=True)
+        if operation == 'template':
+            item.add_argument('--stack-repo', required=True)
+            item.add_argument('--render', action='store_true')
+        item.set_defaults(func=cmd_pairing)
     agent_check = sub.add_parser("agent-check", help="Report repair-agent adapter availability")
     agent_check.add_argument("--agent", action="append", choices=["codex", "hermes"], default=[])
     agent_check.add_argument("--json", action="store_true")
@@ -5635,6 +5647,23 @@ def cmd_version(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2))
     else:
         print(STACK_VERSION)
+    return 0
+
+
+def cmd_pairing(args):
+    from .release_pairings import load_manifest, pairing_for, verify_baseline, current_template, render_metadata, PairingError
+    try:
+        data = load_manifest(expected_ref=STACK_REF)
+        if args.pairing_operation == 'inspect': result = pairing_for(data, args.stack_ref)
+        elif args.pairing_operation == 'baseline': result = verify_baseline(data, args.stack_ref, Path(args.template))
+        else:
+            result = current_template(data, Path(args.template), Path(args.stack_repo), check_docs=not args.render)
+            if args.render:
+                print(render_metadata(result))
+                return 0
+    except (PairingError, OSError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    print(json.dumps(result, indent=2))
     return 0
 
 

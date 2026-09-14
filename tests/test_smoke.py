@@ -4184,19 +4184,11 @@ def test_release_launcher_bootstrap_ignores_git_replacement_for_head(tmp_path: P
 def test_existing_release_uses_immutable_canonical_template_pairing():
     inner = (ROOT / "scripts" / "release-check-inner.sh").read_text(encoding="utf-8")
     assert "https://github.com/viggomeesters/go-project-template.git" in inner
-    assert "0.3.8:https://*)" in inner
-    assert "3956fc92f9e99520756d10f08373635182f22d67" in inner
-    assert "0.3.10:https://*)" in inner
-    assert "d4a09d972451472180d45ef2a48c920ad91c496e" in inner
-    assert "0.3.11:https://*)" in inner
-    assert "6fb460a3ae15e6ed04f5abc0461c1bfade364522" in inner
-    assert "0.3.12:https://*)" in inner
-    assert "158b602ca5d4630895bacd7061b3fa8aca42398f" in inner
-    assert "0.3.13:https://*)" in inner
-    assert "ab89ae489fd88e464c052c076e4c6f48a06d5b2b" in inner
-    assert "0.3.14:https://*)" in inner
-    assert "0.3.15:https://*)" in inner
-    assert "490dd50671dd740e5902ad17ed475258bb7c939b" in inner
+    from go_workflow.release_pairings import load_manifest, pairing_for
+    data = load_manifest(expected_ref=STACK_REF)
+    assert pairing_for(data, 'v0.3.8')['template_commit'] == '3956fc92f9e99520756d10f08373635182f22d67'
+    assert pairing_for(data, 'v0.3.14')['template_commit'] == '490dd50671dd740e5902ad17ed475258bb7c939b'
+    assert 'release-pairings.json' in inner and 'pairing_for' in inner
     assert "for-each-ref --format='%(refname)' --contains \"$template_commit\" refs/remotes/origin/" in inner
     assert "PYTHONSAFEPATH=" not in inner
     assert "PYTHONPATH=" not in inner

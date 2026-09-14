@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.32 — immutable release pairing manifest
+
+- Centralize historical template baselines and require an explicit current pairing.
+- Validate template commit/tag identity and generate checked current README metadata.
+- Package the manifest with standalone installations and retain release validator isolation.
+
 ## 0.3.31 — guided lifecycle onboarding
 
 - Detect version sources, current branch and candidate checks without executing them.

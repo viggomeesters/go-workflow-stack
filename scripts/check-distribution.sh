@@ -13,11 +13,15 @@ cd "$WORK"
 "$UV_TOOL_BIN_DIR/go-workflow" version --json >version.json
 "$UV_TOOL_BIN_DIR/go-workflow" init fixture
 "$UV_TOOL_BIN_DIR/go-workflow" validate fixture
-python3 - "$WORK/version.json" "$ROOT/pyproject.toml" <<'PY'
+"$UV_TOOL_BIN_DIR/go-workflow" pairing inspect --json >pairing.json
+python3 - "$WORK/version.json" "$ROOT/pyproject.toml" "$WORK/pairing.json" <<'PY'
 import json, sys, tomllib
 result = json.load(open(sys.argv[1], encoding="utf-8"))
 project = tomllib.load(open(sys.argv[2], "rb"))
 assert result["schema"] == "go-workflow.runtime-version.v1"
 assert result["stack_version"] == project["project"]["version"]
+pairing = json.load(open(sys.argv[3], encoding="utf-8"))
+assert pairing["stack_ref"] == "v" + result["stack_version"]
+assert len(pairing["template_commit"]) == 40
 PY
 echo "standalone uv tool distribution: ok"

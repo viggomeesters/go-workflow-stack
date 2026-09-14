@@ -1,0 +1,211 @@
+{
+  "schema": "go-workflow.release-pairings.v1",
+  "current_stack_ref": "v0.3.32",
+  "template_repository": "https://github.com/viggomeesters/go-project-template.git",
+  "pairings": [
+    {
+      "stack_ref": "v0.1.0",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.0",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.1",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.2",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.3",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.4",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.5",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.6",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.7",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.8",
+      "template_commit": "3956fc92f9e99520756d10f08373635182f22d67",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.9",
+      "template_commit": null,
+      "template_ref": null,
+      "note": "Historical gate recorded no template baseline; no pairing is inferred."
+    },
+    {
+      "stack_ref": "v0.3.10",
+      "template_commit": "d4a09d972451472180d45ef2a48c920ad91c496e",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.11",
+      "template_commit": "6fb460a3ae15e6ed04f5abc0461c1bfade364522",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.12",
+      "template_commit": "158b602ca5d4630895bacd7061b3fa8aca42398f",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.13",
+      "template_commit": "ab89ae489fd88e464c052c076e4c6f48a06d5b2b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.14",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.15",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.16",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.17",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.18",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.19",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.20",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.21",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.22",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.23",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.24",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.25",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.26",
+      "template_commit": "490dd50671dd740e5902ad17ed475258bb7c939b",
+      "template_ref": null,
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.27",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.28",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.29",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.30",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.31",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.32",
+      "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
+      "template_ref": "v0.3.16",
+      "note": "Preserved immutable release-gate baseline."
+    }
+  ]
+}

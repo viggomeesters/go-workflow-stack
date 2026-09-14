@@ -226,3 +226,40 @@ projects use `migrate --lifecycle --config settings.json` instead of replacing
 the CLI equivalent is `recommendation create --brief brief.json` followed by the
 normal Go promotion under the user's chosen execution authority. Imported task
 outcomes start pending. Configuration and planning never authorize push/deploy.
+
+## Immutable release pairings (v0.3.32)
+
+`release-pairings.json` is the single catalog used by the release gate and internal
+pairing commands. Each stack ref records an immutable template baseline commit;
+a template ref is included only when that exact commit has a known release tag.
+Earlier release gates that recorded no baseline are explicitly marked with null
+commit/ref and a historical note. Unknown mappings fail; the current release
+must always have a baseline. Never replace old hashes to make a new check pass.
+
+The stack tag containing the manifest binds its own commit. Its baseline is an
+already published template snapshot, so no circular dependency on a future
+starter commit is introduced. A subsequent template release can pin this stack
+and record the resulting pair through release readback. A baseline compatibility
+check and the starter's current runtime pin are different facts.
+
+```bash
+python3 cli/go.py pairing inspect --stack-ref v0.3.32 --json
+python3 cli/go.py pairing baseline --stack-ref v0.3.32 --template /path/to/exact-baseline --json
+python3 cli/go.py pairing template --template /path/to/current-template --stack-repo /path/to/trusted-stack --json
+python3 cli/go.py pairing template --template /path/to/current-template --stack-repo /path/to/trusted-stack --render
+```
+
+`baseline` requires the recorded commit, a clean checkout and agreement with an
+annotated template tag when one is recorded. `template` requires both project pin
+fields to equal the manifest's current stack ref, resolves its annotated stack
+commit, checks the version declared at that commit and compares the generated
+README block. `--render` emits that block to stdout for a reviewed documentation
+update; it writes no file. Keep current pin documentation in this single block;
+historical release notes remain unchanged. These commands do not fetch, publish,
+mutate a repository or grant execution authority.
+
+The full manifest validator runs from the checked release payload. Initial
+version preflight reads manifest JSON as data; it does not import unchecked code
+from a dirty caller. The canonical template clone still requires the recorded
+commit to exist and be reachable from an origin branch. The standalone package
+includes the same manifest and its installation gate checks the selected mapping.

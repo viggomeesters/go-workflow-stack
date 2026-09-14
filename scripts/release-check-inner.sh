@@ -76,6 +76,9 @@ import sys
 
 root = pathlib.Path(sys.argv[1])
 expected = sys.argv[2]
+pairings = json.loads((root / 'release-pairings.json').read_text(encoding='utf-8'))
+if pairings.get('current_stack_ref') != 'v' + expected:
+    raise SystemExit('release pairing current ref differs from release version')
 constants = (root / "go_workflow" / "constants.py").read_text(encoding="utf-8")
 pyproject = (root / "pyproject.toml").read_text(encoding="utf-8")
 project = json.loads((root / ".go" / "project.json").read_text(encoding="utf-8"))
@@ -376,379 +379,37 @@ if [ "$existing_mode" = "1" ] || [ "$local_tag_present" = "1" ]; then
     exit 1
   fi
   if [ "$existing_mode" = "1" ] && [ -z "${GO_PROJECT_TEMPLATE:-}" ]; then
-    case "$VERSION:$normalized_release_remote" in
-      0.3.8:https://*)
-        template_commit="3956fc92f9e99520756d10f08373635182f22d67"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.10:https://*)
-        template_commit="d4a09d972451472180d45ef2a48c920ad91c496e"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.11:https://*)
-        template_commit="6fb460a3ae15e6ed04f5abc0461c1bfade364522"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.12:https://*)
-        template_commit="158b602ca5d4630895bacd7061b3fa8aca42398f"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.14:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.15:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.26:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.27:https://*)
-        template_commit="06678be4fdc95dc671d6adbc1a50b3f073d66b5c"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.28:https://*)
-        template_commit="06678be4fdc95dc671d6adbc1a50b3f073d66b5c"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.29:https://*)
-        template_commit="06678be4fdc95dc671d6adbc1a50b3f073d66b5c"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.30:https://*)
-        template_commit="06678be4fdc95dc671d6adbc1a50b3f073d66b5c"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.31:https://*)
-        template_commit="06678be4fdc95dc671d6adbc1a50b3f073d66b5c"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.25:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.24:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.23:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.22:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.21:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.20:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.19:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.18:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.17:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.16:https://*)
-        template_commit="490dd50671dd740e5902ad17ed475258bb7c939b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      0.3.13:https://*)
-        template_commit="ab89ae489fd88e464c052c076e4c6f48a06d5b2b"
-        template_root="$ARCHIVE_WORK/go-project-template"
-        release_git clone -q --no-checkout --no-local \
-          https://github.com/viggomeesters/go-project-template.git "$template_root"
-        if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
-          echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
-          exit 1
-        fi
-        if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
-          echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
-          exit 1
-        fi
-        sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
-        GO_PROJECT_TEMPLATE="$template_root"
-        ;;
-      *)
-        GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/no-project-template"
+    template_commit=""
+    case "$normalized_release_remote" in
+      https://*)
+        template_commit="$(python3 - "$SOURCE_ROOT" "$VERSION" <<'PYLOOKUP'
+import pathlib, sys
+root = pathlib.Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(root))
+from go_workflow.release_pairings import load_manifest, pairing_for
+print(pairing_for(load_manifest(root / 'release-pairings.json'), 'v' + sys.argv[2])['template_commit'] or '')
+PYLOOKUP
+)"
         ;;
     esac
+    if [ -n "$template_commit" ]; then
+      template_root="$ARCHIVE_WORK/go-project-template"
+      release_git clone -q --no-checkout --no-local \
+        https://github.com/viggomeesters/go-project-template.git "$template_root"
+      if ! sanitized_git -C "$template_root" cat-file -e "$template_commit^{commit}" 2>/dev/null; then
+        echo "immutable project-template commit $template_commit is absent from the canonical origin" >&2
+        exit 1
+      fi
+      if [ -z "$(sanitized_git -C "$template_root" for-each-ref --format='%(refname)' --contains "$template_commit" refs/remotes/origin/)" ]; then
+        echo "immutable project-template commit $template_commit is not reachable from an origin branch" >&2
+        exit 1
+      fi
+      sanitized_git -C "$template_root" checkout -q --detach "$template_commit"
+      GO_PROJECT_TEMPLATE="$template_root"
+    else
+      GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/no-project-template"
+    fi
   elif [ -d "$ROOT/../go-project-template/.go" ]; then
     mkdir -p "$ARCHIVE_WORK/go-project-template"
     cp -a "$ROOT/../go-project-template/." "$ARCHIVE_WORK/go-project-template/"
@@ -768,6 +429,14 @@ fi
 
 (
   cd "$SOURCE_ROOT"
+  sanitized_gate python3 - "$SOURCE_ROOT" "$VERSION" <<'PYPAIRING'
+import pathlib, sys
+root = pathlib.Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(root))
+from go_workflow.release_pairings import load_manifest
+load_manifest(root / 'release-pairings.json', expected_ref='v' + sys.argv[2])
+PYPAIRING
   sanitized_gate /usr/bin/env \
     GO_PROJECT_TEMPLATE="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}" \
     "$BASH_BIN" "$SOURCE_ROOT/scripts/check-linux.sh"

@@ -1,7 +1,7 @@
 
 [project]
 name = "go-workflow-stack"
-version = "0.3.31"
+version = "0.3.32"
 description = "Repo-local .go JSON/JSONL workflow stack spike"
 requires-python = ">=3.11"
 
@@ -18,6 +18,7 @@ testpaths = ["tests"]
 include = ["go_workflow*"]
 
 [tool.setuptools.data-files]
+"." = ["release-pairings.json"]
 "schemas" = ["schemas/*.json"]
 "fixtures/minimal/.go" = [
   "fixtures/minimal/.go/architecture-principles.json",

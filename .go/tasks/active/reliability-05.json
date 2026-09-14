@@ -5,7 +5,7 @@
   "shareable_delivery": "none",
   "id": "reliability-05",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Centralize immutable stack and template release pairings",
   "description": "Implement the accepted reliability improvement as a self-contained verified patch release. Source: accepted five-point improvement advice. No model escalation, global skills, live consumer mutation or GitHub Actions.",
   "scope": {
@@ -24,7 +24,10 @@
       ".go/project.json",
       "CHANGELOG.md",
       "docs/releases/**",
-      "scripts/release-check-inner.sh"
+      "scripts/release-check-inner.sh",
+      "scripts/check-compatibility.sh",
+      "tests/test_smoke.py",
+      "go_workflow/worktrees.py"
     ]
   },
   "acceptance": [
@@ -38,10 +41,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-14T16:39:17+02:00",
+    "base_commit": "6f0066f3ba577eeaeb6d9b9b243fff0d6048ed30"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],

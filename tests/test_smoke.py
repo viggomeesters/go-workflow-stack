@@ -38,10 +38,11 @@ def set_project_stack_ref(project: Path, ref: str, version: str) -> None:
 def make_tagged_stack_repo(path: Path) -> Path:
     subprocess.run(["git", "init", "-q", "-b", "main", str(path)], check=True)
     constants = path / "go_workflow" / "constants.py"
-    constants.parent.mkdir()
+    for folder in ('go_workflow', 'cli', 'schemas', 'fixtures'):
+        shutil.copytree(ROOT / folder, path / folder, ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
     for version in ("0.2.2", "0.2.10"):
         constants.write_text(
-            f'STACK_VERSION = "{version}"\nCURRENT_CONTRACT_VERSION = 2\n',
+            f'STACK_VERSION = "{version}"\nSTACK_REF = f"v{{STACK_VERSION}}"\nCURRENT_CONTRACT_VERSION = 2\n',
             encoding="utf-8",
         )
         subprocess.run(["git", "add", "."], cwd=path, check=True)

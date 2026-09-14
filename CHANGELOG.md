@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.29 — exact target upgrade previews
+
+- Validate isolated workflow snapshots using the immutable target runtime before changing pins.
+- Reject failed, changed or tampered previews and validators that mutate their snapshot.
+- Preserve explicit participant metadata, legacy task bytes and guarded rollback.
+
 ## 0.3.28 — mandatory compatibility release gate
 
 - Run legacy compatibility, contract and migration checks for every candidate and tagged release.

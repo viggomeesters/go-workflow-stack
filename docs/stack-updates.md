@@ -147,3 +147,25 @@ consumer data or network access to historical runtimes.
 `tests/test_release_compatibility_gate.py` is a separate outer test: it executes
 the real phase against good source and a disposable deliberately regressed copy.
 It must not be placed inside the phase it invokes.
+
+## Exact target compatibility preview (v0.3.29)
+
+The preview materializes the resolved annotated commit and invokes its own
+`cli/go.py validate` on a disposable workflow snapshot with the proposed pin.
+The full durable `.go` tree is copied; transient lock files are excluded. Explicit
+`dependency_projects` participants are also copied (up to 64, cycles deduplicated)
+and paths remapped inside the snapshot. Nothing is inferred from sibling folders.
+No product code or Git working tree is required for this contract validation.
+
+JSON output includes `compatibility.status`, the exact commit, source digest,
+exit code and original-path diagnostics. A failed preview exits nonzero. Apply
+repeats this target validation and refuses changed workflow data, moved target
+commits or caller-edited plans before writing. It never applies a newer contract
+and then tries to approve it using the older calling runtime. A validator that
+modifies its snapshot, a linked workflow input, an unavailable entrypoint or a
+validation timeout fails closed. Existing guarded update rollback is retained.
+
+Only trusted stack tags should be selected: the subprocess is not a security
+sandbox. Snapshot drift checks detect changes by arbitrary editors but cannot
+lock external programs. Preview checks contract compatibility, not consumer
+product tests or a release gate. Pin updates still adopt no lifecycle policy.

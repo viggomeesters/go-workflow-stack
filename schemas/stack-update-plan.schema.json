@@ -10,7 +10,8 @@
     "from_ref",
     "to_ref",
     "resolved_commit",
-    "changes"
+    "changes",
+    "compatibility"
   ],
   "properties": {
     "schema": {
@@ -54,6 +55,54 @@
     },
     "lifecycle_policy_migrated": {
       "const": false
+    },
+    "compatibility": {
+      "type": "object",
+      "required": [
+        "status",
+        "resolved_commit",
+        "source_digest",
+        "exit_code",
+        "errors",
+        "stdout",
+        "stderr",
+        "validation"
+      ],
+      "properties": {
+        "status": {
+          "enum": [
+            "passed",
+            "failed"
+          ]
+        },
+        "resolved_commit": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        },
+        "source_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "stderr": {
+          "type": "string"
+        },
+        "validation": {
+          "const": "exact-target-workflow-snapshot"
+        }
+      },
+      "additionalProperties": false
     }
   },
   "additionalProperties": true

@@ -101,8 +101,10 @@ def test_upgrade_from_legacy_pin_preserves_tasks_and_rollback(tmp_path, legacy_r
         hierarchy['epics'][0]['tasks'].append(record['id'])
     write(hierarchy_path, hierarchy)
     task_bytes = {path: path.read_bytes() for path in (repo / '.go/tasks').glob('*/*.json')}
-    stack = tmp_path / 'stack'; (stack / 'go_workflow').mkdir(parents=True)
-    (stack / 'go_workflow/constants.py').write_text((ROOT / 'go_workflow/constants.py').read_text())
+    import shutil
+    stack = tmp_path / 'stack'
+    for folder in ('go_workflow', 'cli', 'schemas', 'fixtures'):
+        shutil.copytree(ROOT / folder, stack / folder, ignore=shutil.ignore_patterns('__pycache__', '.pytest_cache'))
     def git(*args):
         subprocess.run(['git', '-C', str(stack), *args], check=True, capture_output=True)
     git('init', '-q'); git('add', '.')

@@ -3,8 +3,14 @@
 from __future__ import annotations
 
 import json
+import hashlib
+import os
 import re
+import shutil
 import subprocess
+import sys
+import tarfile
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -42,7 +48,117 @@ def latest_stack_ref(stack_repo: Path) -> str:
     return max(releases)[1]
 
 
+def workflow_inventory(repo: Path) -> dict[str, str]:
+    """Fingerprint durable workflow bytes; transient lock files are not state."""
+    root = repo / '.go'
+    if root.is_symlink():
+        raise StackUpdateError('Cannot isolate a linked .go root')
+    files = {}
+    for path in sorted(root.rglob('*')):
+        relative = path.relative_to(root)
+        if relative.parts[0] == 'locks':
+            continue
+        if path.is_symlink():
+            raise StackUpdateError('Cannot isolate linked workflow path: .go/' + str(relative))
+        if path.is_file():
+            files[str(relative)] = hashlib.sha256(path.read_bytes()).hexdigest()
+    return files
+
+
+def workflow_graph(repo: Path) -> dict[Path, dict[str, str]]:
+    """Only follow explicitly configured local participants; never guess siblings."""
+    graph, pending = {}, [repo.resolve()]
+    while pending:
+        current = pending.pop(0)
+        if current in graph:
+            continue
+        if len(graph) >= 64:
+            raise StackUpdateError('Upgrade preview exceeds 64 explicit participants')
+        graph[current] = workflow_inventory(current)
+        path = current / '.go/project.json'
+        if not path.is_file():
+            continue
+        project = json.loads(path.read_text())
+        mapping = project.get('dependency_projects', {})
+        if isinstance(mapping, dict):
+            pending.extend((current / value).resolve() for value in mapping.values()
+                           if isinstance(value, str) and value.strip())
+    return graph
+
+
+def _preview_compatibility(repo: Path, stack_repo: Path, commit: str,
+                          project: dict[str, Any]) -> dict[str, Any]:
+    before = workflow_graph(repo)
+    digest = hashlib.sha256(json.dumps({str(key): value for key, value in before.items()},
+                                      sort_keys=True).encode()).hexdigest()
+    with tempfile.TemporaryDirectory(prefix='go-upgrade-preview-') as directory:
+        base = Path(directory).resolve(); runtime = base / 'runtime'; snapshot = base / 'project'
+        runtime.mkdir()
+        locations = {original: snapshot if original == repo else base / f'participant-{index}'
+                     for index, original in enumerate(before)}
+        for original, files in before.items():
+            destination = locations[original]; destination.mkdir()
+            for name in files:
+                source = original / '.go' / name; target = destination / '.go' / name
+                target.parent.mkdir(parents=True, exist_ok=True); shutil.copy2(source, target)
+            project_path = destination / '.go/project.json'
+            if not project_path.is_file():
+                continue
+            candidate = dict(project) if original == repo else json.loads(project_path.read_text())
+            mapping = candidate.get('dependency_projects')
+            if isinstance(mapping, dict):
+                candidate['dependency_projects'] = {
+                    key: str(locations[(original / value).resolve()])
+                    if isinstance(value, str) and value.strip() else value for key, value in mapping.items()}
+            atomic_json(project_path, candidate)
+        archive_path = base / 'runtime.tar'
+        with archive_path.open('wb') as output:
+            result = subprocess.run(['git', '-C', str(stack_repo), 'archive', '--format=tar', commit],
+                                    stdout=output, stderr=subprocess.PIPE, timeout=30)
+        if result.returncode:
+            raise StackUpdateError('Cannot materialize exact target runtime: ' + result.stderr.decode(errors='replace'))
+        with tarfile.open(archive_path) as archive:
+            for member in archive.getmembers():
+                name = Path(member.name)
+                if name.is_absolute() or '..' in name.parts or not (member.isfile() or member.isdir()):
+                    raise StackUpdateError('Unsafe or linked target runtime archive entry: ' + member.name)
+            # Members above are restricted to relative regular files/directories.
+            archive.extractall(runtime, **({'filter': 'data'} if hasattr(tarfile, 'data_filter') else {}))
+        entry = runtime / 'cli/go.py'
+        if not entry.is_file():
+            raise StackUpdateError('Target runtime has no cli/go.py validator')
+        environment = {key: value for key, value in os.environ.items()
+                       if key not in {'GO_STACK', 'GO_STACK_ALLOW_DEV', 'PYTHONPATH'} and not key.startswith('GIT_')}
+        environment['PYTHONDONTWRITEBYTECODE'] = '1'
+        snapshot_before = {path: workflow_inventory(path) for path in locations.values()}
+        result = subprocess.run([sys.executable, '-I', str(entry), 'validate', str(snapshot)],
+                                cwd=snapshot, env=environment, capture_output=True, text=True, timeout=60)
+        if any(workflow_inventory(path) != value for path, value in snapshot_before.items()):
+            raise StackUpdateError('Target validator mutated its workflow snapshot; upgrade refused')
+        stdout, stderr = result.stdout, result.stderr
+        for original, destination in locations.items():
+            stdout = stdout.replace(str(destination), str(original))
+            stderr = stderr.replace(str(destination), str(original))
+    if workflow_graph(repo) != before:
+        raise StackUpdateError('Workflow state changed during upgrade preview; retry against current state')
+    errors = stderr.strip().splitlines() if result.returncode else []
+    if result.returncode and not errors:
+        errors = stdout.strip().splitlines() or [f'Target validator exited {result.returncode}']
+    return {'status': 'passed' if not result.returncode else 'failed', 'resolved_commit': commit,
+            'source_digest': digest, 'exit_code': result.returncode, 'errors': errors,
+            'stdout': stdout, 'stderr': stderr, 'validation': 'exact-target-workflow-snapshot'}
+
+
+def preview_compatibility(repo: Path, stack_repo: Path, commit: str,
+                          project: dict[str, Any]) -> dict[str, Any]:
+    try:
+        return _preview_compatibility(repo, stack_repo, commit, project)
+    except (OSError, json.JSONDecodeError, subprocess.TimeoutExpired, tarfile.TarError) as exc:
+        raise StackUpdateError(f'Cannot complete isolated target validation: {exc}') from exc
+
+
 def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, Any]:
+    repo, stack_repo = repo.resolve(), stack_repo.resolve()
     match = VERSION_REF_RE.fullmatch(to_ref)
     if not match:
         raise StackUpdateError("target stack ref must be an immutable vX.Y.Z tag")
@@ -55,7 +171,9 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
     resolved = _git(stack_repo, "rev-parse", "-q", "--verify", f"refs/tags/{to_ref}^{{commit}}")
     if resolved.returncode != 0 or not resolved.stdout.strip():
         raise StackUpdateError(f"stack ref {to_ref} does not exist in {stack_repo}")
-    constants = _git(stack_repo, "show", f"{to_ref}:go_workflow/constants.py")
+    if _git(stack_repo, 'cat-file', '-t', f'refs/tags/{to_ref}').stdout.strip() != 'tag':
+        raise StackUpdateError('Target stack ref must be an annotated immutable tag')
+    constants = _git(stack_repo, "show", f"{resolved.stdout.strip()}:go_workflow/constants.py")
     if constants.returncode != 0:
         raise StackUpdateError(f"stack ref {to_ref} does not contain go_workflow/constants.py")
     declared = re.search(r'^STACK_VERSION = "([^"]+)"', constants.stdout, re.M)
@@ -89,18 +207,33 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         "changes": [] if up_to_date else [".go/project.json:required_stack_version", ".go/project.json:stack_ref"],
         "before_project": project,
         "after_project": after,
+        "compatibility": preview_compatibility(repo, stack_repo, resolved.stdout.strip(), after),
     }
 
 
 def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
     from .migrations import pending_lifecycle_findings
+    repo = repo.resolve()
+    if (not isinstance(plan, dict) or not isinstance(plan.get('compatibility'), dict)
+            or not isinstance(plan.get('stack_repo'), str) or not isinstance(plan.get('to_ref'), str)):
+        raise StackUpdateError('An exact-target compatibility preview is required before applying')
     with repository_lock(repo / '.go', 'lifecycle-migration'):
         findings = pending_lifecycle_findings(repo)
         if findings: raise StackUpdateError('; '.join(findings))
         current = json.loads((repo / '.go/project.json').read_text())
         if current != plan.get('before_project'):
             raise StackUpdateError('Project changed after stack update planning; replan without overwriting lifecycle policy')
-        return _apply_stack_update(repo, plan)
+        if plan.get('compatibility', {}).get('status') != 'passed':
+            raise StackUpdateError('Target runtime compatibility failed: ' + '; '.join(plan['compatibility'].get('errors', [])))
+        # Recompute rather than trusting a persisted or caller-edited receipt.
+        fresh = plan_stack_update(repo, Path(plan['stack_repo']), plan['to_ref'])
+        fields = ('repo', 'to_ref', 'to_version', 'resolved_commit', 'before_project', 'after_project')
+        if (any(plan.get(key) != fresh[key] for key in fields)
+                or plan['compatibility'].get('source_digest') != fresh['compatibility']['source_digest']):
+            raise StackUpdateError('Workflow, target or preview changed; replan before applying')
+        if fresh['compatibility']['status'] != 'passed':
+            raise StackUpdateError('Target runtime compatibility changed; inspect a fresh preview')
+        return _apply_stack_update(repo, fresh)
 
 
 def _apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:

@@ -5650,11 +5650,6 @@ def cmd_stack_update(args: argparse.Namespace) -> int:
     result = plan
     if args.apply:
         result = apply_stack_update(repo, plan)
-        errors = validate_repo(repo)
-        if errors:
-            if result.get("rollback_record"):
-                rollback_stack_update(repo, result["rollback_record"])
-            raise RepoLocalError("stack update rolled back because the resulting contract is invalid:\n- " + "\n- ".join(errors))
         if result["mode"] != "noop":
             append_jsonl(
                 go_root(repo) / "runs" / "events.jsonl",
@@ -5671,9 +5666,11 @@ def cmd_stack_update(args: argparse.Namespace) -> int:
     else:
         print(f"stack update {result['mode']}: {result.get('from_ref')} -> {result['to_ref']}")
         print(f"commit: {result['resolved_commit']}")
+        for finding in result["compatibility"]["errors"]:
+            print(f"compatibility: {finding}", file=sys.stderr)
         if result.get("rollback_record"):
             print(f"rollback: {result['rollback_record']}")
-    return 0
+    return 0 if result['compatibility']['status'] == 'passed' else 1
 
 
 def cmd_adapter_validate_result(args: argparse.Namespace) -> int:

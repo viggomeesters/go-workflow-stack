@@ -17,5 +17,6 @@ cd "${TMPDIR:-/tmp}"
 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$ROOT" "${RUNNER[@]}" \
   "$ROOT/tests/test_legacy_lifecycle_compatibility.py" \
   "$ROOT/tests/test_abc_contracts.py" \
-  "$ROOT/tests/test_abc_migration.py" -q
+  "$ROOT/tests/test_abc_migration.py" \
+  "$ROOT/tests/test_upgrade_preview.py" -q
 echo "compatibility release gate: passed"

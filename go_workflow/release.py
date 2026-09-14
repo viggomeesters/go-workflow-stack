@@ -14,6 +14,7 @@ import shlex
 import socket
 import subprocess
 import time
+import tomllib
 from contextvars import ContextVar
 
 from .completion import (completion_findings, content_snapshot, contract_digest,
@@ -64,13 +65,13 @@ def validate_publication(value):
         return ['publication requires version, bump, tag_prefix and changelog']
     errors = []
     version = value['version']
-    if (not isinstance(version, dict) or not isinstance(version.get('format'), str) or version.get('format') not in {'text', 'json'}
-            or set(version) != ({'path', 'format', 'key'} if version.get('format') == 'json' else {'path', 'format'})
+    if (not isinstance(version, dict) or not isinstance(version.get('format'), str) or version.get('format') not in {'text', 'json', 'toml'}
+            or set(version) != ({'path', 'format', 'key'} if version.get('format') in {'json', 'toml'} else {'path', 'format'})
             or not relative_path(version.get('path'))):
-        errors.append('publication version source must be an explicit text/JSON path')
-    elif version['format'] == 'json' and (not isinstance(version['key'], str) or not version['key']
+        errors.append('publication version source must be an explicit text/JSON/TOML path')
+    elif version['format'] in {'json', 'toml'} and (not isinstance(version['key'], str) or not version['key']
                                         or any(not key for key in version['key'].split('.'))):
-        errors.append('publication JSON version key is invalid')
+        errors.append('publication structured version key is invalid')
     if not isinstance(value['bump'], str) or value['bump'] not in {'major', 'minor', 'patch'}: errors.append('publication bump is invalid')
     if not isinstance(value['tag_prefix'], str) or not re.fullmatch(r'[A-Za-z0-9._-]*', value['tag_prefix']):
         errors.append('publication tag prefix is invalid')
@@ -281,7 +282,39 @@ def _file(worker, task, path):
     return target
 
 
+def _toml_version_change(text, spec, replacement):
+    try:
+        value = tomllib.loads(text)
+        keys = spec['key'].split('.')
+        if keys == ['project', 'version'] and 'version' in value.get('project', {}).get('dynamic', []):
+            raise PublicationError('Dynamic project.version cannot be published as a literal')
+        parent = value
+        for key in keys[:-1]: parent = parent[key]
+        current = parent[keys[-1]]
+        if not isinstance(current, str) or not VERSION.fullmatch(current):
+            raise PublicationError('TOML version must be a literal semantic X.Y.Z')
+        if replacement is None: return current
+        expected = deepcopy(value); target = expected
+        for key in keys[:-1]: target = target[key]
+        target[keys[-1]] = replacement
+        candidates = []
+        # Select by parsed meaning, not the first matching name/value. This also
+        # handles dotted keys, inline tables, comments and repeated other values.
+        pattern = r"(['\"])" + re.escape(current) + r"\1"
+        for match in re.finditer(pattern, text):
+            candidate = text[:match.start()+1] + replacement + text[match.end()-1:]
+            try:
+                if tomllib.loads(candidate) == expected: candidates.append(candidate)
+            except tomllib.TOMLDecodeError: continue
+        if len(candidates) != 1:
+            raise PublicationError('TOML version must have one unambiguous unescaped literal')
+        return candidates[0]
+    except (KeyError, TypeError, AttributeError, tomllib.TOMLDecodeError) as exc:
+        raise PublicationError('Version TOML source/key is invalid') from exc
+
+
 def _version_change(text, spec, replacement=None):
+    if spec['format'] == 'toml': return _toml_version_change(text, spec, replacement)
     if spec['format'] == 'text': return text.strip() if replacement is None else replacement + '\n'
     try:
         value = json.loads(text); parent = value
@@ -315,7 +348,7 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
             if remote_base != record['base_commit'] or git_text(control, 'rev-parse', 'HEAD') != record['base_commit']:
                 raise PublicationError('Base/remote advanced; preserve workspace and reconcile before reserving a version')
             spec = profile['publication']; version_path = _file(worker, task, spec['version']['path'])
-            before = version_path.read_text(); current = _version_change(before, spec['version'])
+            before = version_path.read_bytes().decode('utf-8'); current = _version_change(before, spec['version'])
             if not isinstance(current, str) or not VERSION.fullmatch(current): raise PublicationError('Version source must contain semantic X.Y.Z')
             prefix = 'refs/tags/' + spec['tag_prefix']
             versions = [ref[len(prefix):] for ref in refs if ref.startswith(prefix) and VERSION.fullmatch(ref[len(prefix):])]
@@ -354,7 +387,7 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
         atomic_json(reservation, {'task_id': task_id, 'run_id': run_id, 'owner': owner, 'version': state['version'], 'status': 'reserved'})
         if state['phase'] == 'preparing':
             for change in state['preparation']:
-                target = _file(worker, task, change['path']); current = target.read_text() if target.exists() else ''
+                target = _file(worker, task, change['path']); current = target.read_bytes().decode('utf-8') if target.exists() else ''
                 if current == change['after']: continue
                 if _hash(current) != change['before']: raise PublicationError('Preparation file changed; preserve it and reconcile')
                 atomic_write_text(target, change['after'])

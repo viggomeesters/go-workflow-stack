@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.30 — TOML release version sources
+
+- Publish explicit TOML version keys while preserving surrounding bytes.
+- Reject dynamic, missing, invalid or ambiguous literals before release preparation writes.
+- Keep lifecycle onboarding schemas and publication recovery aligned.
+
 ## 0.3.29 — exact target upgrade previews
 
 - Validate isolated workflow snapshots using the immutable target runtime before changing pins.

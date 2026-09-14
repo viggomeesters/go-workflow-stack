@@ -63,7 +63,8 @@
                   "format": {
                     "enum": [
                       "text",
-                      "json"
+                      "json",
+                      "toml"
                     ]
                   },
                   "key": {
@@ -76,7 +77,10 @@
                     "if": {
                       "properties": {
                         "format": {
-                          "const": "json"
+                          "enum": [
+                            "json",
+                            "toml"
+                          ]
                         }
                       }
                     },

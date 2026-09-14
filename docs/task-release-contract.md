@@ -294,3 +294,26 @@ phase profiles and typed evidence references. They remain review artifacts;
 referenced files/Git objects and managed runtime state are not copied or attested.
 Historical records without strict completion adoption remain historical, not newly
 verified by migration.
+
+## TOML version sources (v0.3.30)
+
+A publication profile can select a static TOML string:
+
+```json
+{"path":"pyproject.toml","format":"toml","key":"project.version"}
+```
+
+`tool.poetry.version` and other explicit dotted table paths are supported too.
+The key must resolve to one unescaped string containing semantic `X.Y.Z`.
+Dynamic `project.version`, absent/non-string/pre-release values, duplicate keys,
+invalid TOML and ambiguous/unsupported literal representations fail before any
+release reservation or preparation write. Dots in key names are path separators;
+quoted TOML keys that themselves contain dots are not addressed by this syntax.
+
+The change replaces only the selected version literal. It preserves comments,
+whitespace, CRLF, other keys and repeated values elsewhere; it does not reserialize
+the TOML document. Parsed before/after meaning verifies the selected occurrence.
+Preparation and publication reuse the existing durable intent, scope, proof,
+version reservation and lost-response recovery. Profile configuration still
+requires separate run authority for push and any deployment. Both project and
+lifecycle-settings schemas accept this same version specification.

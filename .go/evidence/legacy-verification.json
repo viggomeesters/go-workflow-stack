@@ -1,6 +1,6 @@
 {
   "task_id": "fix-legacy-lifecycle-metadata",
-  "status": "candidate_passed_final_tag_pending",
+  "status": "passed",
   "revision": "976d8307eac1548e007b89b7c46d2f1e992f84bf",
   "checks": [
     "33 legacy compatibility regressions",
@@ -19,5 +19,12 @@
   },
   "consumer": ".go/evidence/legacy-consumer-report.json",
   "limitations": "Private read-only snapshot; no active consumer upgrade and no unrelated application tests. Same-agent review. Effective model identity unconfirmed.",
-  "self_reflect": "Missing regression coverage for preexisting free metadata caused the upgrade failure. Product regression fixtures now preserve that compatibility boundary. No global skill, memory or configuration change needed."
+  "self_reflect": "Missing regression coverage for preexisting free metadata caused the upgrade failure. Product regression fixtures now preserve that compatibility boundary. No global skill, memory or configuration change needed.",
+  "final_tag_commit": "1fbdf56c4d113dcb09ff1142ad56a6688793f08c",
+  "final_tag_checks": [
+    "197 smoke tests passed on exact annotated tag",
+    "exact immutable template v0.3.16 and standalone distribution passed",
+    "exact tagged runtime upgrades private v0.3.7 snapshot with all 156 task bytes unchanged"
+  ],
+  "publication_ref": ".go/evidence/legacy-release.json"
 }

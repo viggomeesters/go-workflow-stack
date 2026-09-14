@@ -1,0 +1,14 @@
+{
+  "schema": "go-workflow.compatibility-upgrade-proof.v1",
+  "source": "private consumer snapshot, no live mutations",
+  "from_ref": "v0.3.7",
+  "to_ref": "v0.3.27",
+  "resolved_commit": "1fbdf56c4d113dcb09ff1142ad56a6688793f08c",
+  "mode": "applied",
+  "runtime_exact_ref": true,
+  "development_override": false,
+  "task_count": 156,
+  "task_bytes_preserved": true,
+  "lifecycle_policy_migrated": false,
+  "result": "passed"
+}

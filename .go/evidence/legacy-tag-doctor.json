@@ -1,0 +1,62 @@
+{
+  "schema": "go-workflow.doctor.v1",
+  "repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "platform": {
+    "kind": "darwin",
+    "detected": true
+  },
+  "prerequisites": [
+    {
+      "name": "python",
+      "available": true,
+      "version": "3.12.13",
+      "path": "/Users/viggomeesters/.local/share/uv/python/cpython-3.12-macos-aarch64-none/bin/python3.12"
+    },
+    {
+      "name": "git",
+      "available": true,
+      "path": "/usr/bin/git"
+    },
+    {
+      "name": "bash",
+      "available": true,
+      "path": "/bin/bash"
+    },
+    {
+      "name": "make",
+      "available": true,
+      "path": "/usr/bin/make"
+    },
+    {
+      "name": "uv",
+      "available": true,
+      "path": "/opt/homebrew/bin/uv"
+    }
+  ],
+  "agent": {
+    "name": "codex",
+    "available": true,
+    "compatible": true,
+    "path": "/Applications/ChatGPT.app/Contents/Resources/codex",
+    "prompt_flag": null
+  },
+  "stack": {
+    "version": "0.3.27",
+    "ref": "v0.3.27",
+    "git_head": "1fbdf56c4d113dcb09ff1142ad56a6688793f08c",
+    "pinned_commit": "1fbdf56c4d113dcb09ff1142ad56a6688793f08c",
+    "identity_source": "git-checkout",
+    "provenance_requested_ref": "v0.3.27",
+    "required_version": "0.3.27",
+    "required_ref": "v0.3.27",
+    "exact_ref": true,
+    "development_override": false,
+    "compatible": true
+  },
+  "contract": {
+    "valid": true,
+    "errors": []
+  },
+  "ready": true,
+  "actions": []
+}

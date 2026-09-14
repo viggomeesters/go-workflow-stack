@@ -1,0 +1,22 @@
+{
+  "task_id": "fix-legacy-lifecycle-metadata",
+  "tag": "v0.3.27",
+  "commit": "1fbdf56c4d113dcb09ff1142ad56a6688793f08c",
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-14T09:22:38Z",
+    "tagName": "v0.3.27",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.27"
+  },
+  "readback": {
+    "path": ".go/runs/fix-legacy-lifecycle-metadata/completion/release-4e6df633c7d541cd978675adda62458d.json",
+    "sha256": "38376e17e04517148d05d0b002e0e7d8b37ce1ef60970fdc979a927243ac902d"
+  },
+  "tag_gate": {
+    "status": "passed",
+    "log_ref": ".go/evidence/legacy-tag.log",
+    "sha256": "888763f5cb132164d8e6e63282c0683c76f023ca437a2b2b70302044b7d8daa3"
+  },
+  "consumer_upgrade": ".go/evidence/legacy-upgrade-proof.json"
+}

@@ -1,0 +1,90 @@
+Note: switching to '06678be4fdc95dc671d6adbc1a50b3f073d66b5c'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/legacy-tag.bundle main refs/tags/v0.3.27:refs/tags/v0.3.27
+From /tmp/go-abc-01-xjyg7dz7/legacy-tag.bundle
+ * branch            main       -> FETCH_HEAD
+ * [new tag]         v0.3.27    -> v0.3.27
+RUN: git merge --ff-only FETCH_HEAD
+Updating 976d830..1fbdf56
+Fast-forward
+ .go/architecture/events.jsonl                      |   1 +
+ .go/evidence/legacy-candidate.log                  | 102 +++++++++
+ .go/evidence/legacy-consumer-report.json           |  24 +++
+ .go/evidence/legacy-final-targeted.log             |   3 +
+ .go/evidence/legacy-green.log                      |   3 +
+ .go/evidence/legacy-integration.json               |  19 ++
+ .go/evidence/legacy-make.log                       |  65 ++++++
+ .go/evidence/legacy-red.log                        | 229 +++++++++++++++++++++
+ .go/evidence/legacy-regressions.log                |   4 +
+ .go/evidence/legacy-related-green.log              |   3 +
+ .go/evidence/legacy-related-red.log                |  77 +++++++
+ .go/evidence/legacy-template-check.json            |  58 ++++++
+ .go/evidence/legacy-verification.json              |  23 +++
+ .go/runs/events.jsonl                              |   1 +
+ .../completion-state.json                          | 139 +++++++++++++
+ .../command-28c1f6b7e3c34afc8aa170c01563f98c.json  |  14 ++
+ .../command-57a0789f16ed494c89b3bacd3cc77423.json  |  14 ++
+ .../command-fe774bc14e0e4188982f8a2e7526b104.json  |  14 ++
+ .../critic-a3d130462391495d824dec0e8e698648.json   |  27 +++
+ ...ification-1897c603403d4448b6911ce21af0f32a.json |  90 ++++++++
+ .../active/fix-legacy-lifecycle-metadata.json      |  41 +++-
+ 21 files changed, 945 insertions(+), 6 deletions(-)
+ create mode 100644 .go/evidence/legacy-candidate.log
+ create mode 100644 .go/evidence/legacy-consumer-report.json
+ create mode 100644 .go/evidence/legacy-final-targeted.log
+ create mode 100644 .go/evidence/legacy-green.log
+ create mode 100644 .go/evidence/legacy-integration.json
+ create mode 100644 .go/evidence/legacy-make.log
+ create mode 100644 .go/evidence/legacy-red.log
+ create mode 100644 .go/evidence/legacy-regressions.log
+ create mode 100644 .go/evidence/legacy-related-green.log
+ create mode 100644 .go/evidence/legacy-related-red.log
+ create mode 100644 .go/evidence/legacy-template-check.json
+ create mode 100644 .go/evidence/legacy-verification.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion-state.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion/command-28c1f6b7e3c34afc8aa170c01563f98c.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion/command-57a0789f16ed494c89b3bacd3cc77423.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion/command-fe774bc14e0e4188982f8a2e7526b104.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion/critic-a3d130462391495d824dec0e8e698648.json
+ create mode 100644 .go/runs/fix-legacy-lifecycle-metadata/completion/verification-1897c603403d4448b6911ce21af0f32a.json
+RUN: git rev-parse HEAD
+1fbdf56c4d113dcb09ff1142ad56a6688793f08c
+RUN: ./scripts/release-check.sh 0.3.27
+release preflight: v0.3.27
+tag: annotated v0.3.27 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 137.61s (0:02:17)
+ok: /tmp/tmp.YRoHDMZ9x7/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.YRoHDMZ9x7/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.YRoHDMZ9x7/go-workflow-stack
+Prepared 1 package in 1.30s
+Installed 1 package in 19ms
+ + go-workflow-stack==0.3.27 (from file:///tmp/tmp.YRoHDMZ9x7/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.kKtdoNFw1c/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.kKtdoNFw1c/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.kKtdoNFw1c/fixture/.go
+ok: /tmp/tmp.kKtdoNFw1c/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+LEGACY_FINAL_TAG_ALL_PASSED

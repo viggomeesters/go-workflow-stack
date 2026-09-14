@@ -11,9 +11,10 @@
   "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
   "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
   "generation": "6fda01fed6fb4bad9c154a871b3d7fa5",
-  "state": "integrated",
+  "state": "cleaned",
   "integration": {
     "workspace_head": "a2e1b69f123018bed7b9a9f48d31871dd9c27898",
     "integrated_commit": "a2e1b69f123018bed7b9a9f48d31871dd9c27898"
-  }
+  },
+  "recovery_action": "No action; delivered branch is retained"
 }

@@ -28,16 +28,19 @@
       "scripts/check-compatibility.sh",
       "tests/test_smoke.py",
       "go_workflow/worktrees.py",
-      "scripts/check-distribution.sh"
+      "scripts/check-distribution.sh",
+      "go_workflow/run_state.py",
+      "tests/test_completed_capture.py"
     ]
   },
   "acceptance": [
     "One validated manifest owns the existing historical stack-to-template release mappings, exact commits and current tested pairing; release hydration reads it without changing published historical tags.",
     "A checker detects contradictory refs, invalid hashes, missing mappings and mismatched current template pins/docs; current version metadata can be rendered deterministically without rewriting historical evidence.",
+    "A fully completed verification capture with no in-flight operation or worker group does not block on a changed network hostname; uncertain/live processes remain blocked.",
     "Ship the scoped change with current verification, critic, integration, immutable release and remote readback."
   ],
   "verification": [
-    "python3 -m pytest tests/test_release_pairings.py -q",
+    "python3 -m pytest tests/test_release_pairings.py tests/test_completed_capture.py -q",
     "python3 cli/go.py validate .",
     "git diff --check"
   ],
@@ -96,6 +99,13 @@
       "evidence": []
     },
     {
+      "id": "R4",
+      "text": "A fully completed verification capture with no in-flight operation or worker group does not block on a changed network hostname; uncertain/live processes remain blocked.",
+      "source": "release_critic_repair",
+      "status": "pending",
+      "evidence": []
+    },
+    {
       "id": "R3",
       "text": "Ship the scoped change with current verification, critic, integration, immutable release and remote readback.",
       "source": "intake_acceptance",
@@ -123,5 +133,17 @@
     "ship_policy": "push",
     "allow_push": true,
     "source": "User Implement within standing task release lifecycle"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reliability-05/completion/verification-7b75e2ff4df14112b50da5f9d72c7ee0.json",
+      "sha256": "56a398087691834a627218ee2efe4782c373a8f5872964caa0a855d00adccd0a"
+    }
+  },
+  "planning_repair": {
+    "reason": "Own completed verification was blocked after macOS network hostname changed; no process remained and the original evidence was preserved.",
+    "decision_ref": "abc-d06-managed-resume",
+    "scope": "Only release of completed process capture ownership, not active cross-host handoff."
   }
 }

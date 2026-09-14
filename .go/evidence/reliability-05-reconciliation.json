@@ -1,0 +1,25 @@
+{
+  "task_id": "reliability-05",
+  "reason": "Repair false liveness block for own fully closed capture after local network hostname change before publication. Original proof and integration preserved.",
+  "prior": {
+    "task_id": "reliability-05",
+    "owner": "codex-astra-high",
+    "run_id": "reliability-05-development",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/reliability-05",
+    "branch": "codex/reliability-05",
+    "base_branch": "main",
+    "base_commit": "96ff736a84e833e51a7376dd867c3f5bc1f83b6c",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+    "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+    "generation": "e5f8a0993e61479abf31ac12c43571fc",
+    "state": "integrated",
+    "integration": {
+      "workspace_head": "0b826863103436734d596657608691acec449601",
+      "integrated_commit": "0b826863103436734d596657608691acec449601"
+    }
+  },
+  "new_base": "f50567c6cfcabf1c30fa4f848e3d0362d7502024",
+  "tests": "37 passed, 1 platform-specific skip; active cross-host and worktree guards remain enforced."
+}

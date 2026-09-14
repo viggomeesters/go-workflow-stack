@@ -169,3 +169,60 @@ Only trusted stack tags should be selected: the subprocess is not a security
 sandbox. Snapshot drift checks detect changes by arbitrary editors but cannot
 lock external programs. Preview checks contract compatibility, not consumer
 product tests or a release gate. Pin updates still adopt no lifecycle policy.
+
+## Guided configuration (v0.3.31)
+
+`Go` remains the public entrypoint. Its internal onboarding planner can inspect a
+new project or copied starter without writing `.go`, running checks, choosing a
+model or contacting a remote:
+
+```bash
+./go onboarding plan . --json
+./go onboarding plan . --answers onboarding-answers.json --json
+```
+
+It detects `VERSION`, JSON `package.json:version`, TOML `project.version` and
+`tool.poetry.version`, the current branch, remote names and candidate `make check`
+or `npm test` commands. Detection is a suggestion, not execution or a passing
+check. No credentials or remote URLs are included. Missing choices are returned
+as `questions`; there is no automatic model, destination or deployment selection.
+Agents should reuse already explicit project/user choices and ask only for what
+remains unknown. The answers document has this shape (all values are examples):
+
+```json
+{
+  "model":{"id":"gpt-6-astra","effort":"high"},
+  "base_branch":"main",
+  "verification":["make check"],
+  "publisher":{"provider":"github-release","remote":"origin","repository":"example/app"},
+  "version":{"path":"pyproject.toml","format":"toml","key":"project.version"},
+  "bump":"minor", "tag_prefix":"v", "changelog":"CHANGELOG.md",
+  "deployment":{"mode":"none","reason":"This project publishes source releases only"},
+  "task":{"id":"first-release","summary":"Deliver the agreed first product improvement",
+          "scope":{"read":["src/**","tests/**"],"modify":["src/**","tests/**"]},
+          "acceptance":["The agreed behavior is covered by the project checks and its required release is verified"]}
+}
+```
+
+Choose an existing static version file; initialize it deliberately first if none
+exists. `critic_model` is an optional explicit model/effort override. A `git-tag`
+publisher has provider and remote only. Deployment can instead use the existing
+fully explicit required adapter profile. Unknown keys, including execution
+permission flags, are rejected. `ready` means the configuration and task draft
+are valid; model availability, remote setup and actual checks remain execution
+preflight responsibilities.
+
+A ready result contains `settings` (`go-workflow.lifecycle-settings.v1`) and
+`execution_brief`. Review and save those two JSON objects separately. The draft
+includes the selected version/changelog paths in both read and modify scope and
+uses the explicit checks and acceptance criteria. It does not claim or run a task.
+
+For a new project, use `adopt --lifecycle-settings settings.json`, then the existing
+recommendation/intake path with `execution_brief`. For a copied template, use
+`spike --lifecycle-settings settings.json` to replace inherited source state and
+then reconcile its tasks with the reviewed brief before execution. Existing
+projects use `migrate --lifecycle --config settings.json` instead of replacing
+`.go`. The supported Python intake API is `create_tasks_from_execution_brief`;
+the CLI equivalent is `recommendation create --brief brief.json` followed by the
+normal Go promotion under the user's chosen execution authority. Imported task
+outcomes start pending. Configuration and planning never authorize push/deploy.

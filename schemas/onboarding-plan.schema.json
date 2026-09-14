@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Guided Go onboarding plan",
+  "type": "object",
+  "required": [
+    "schema",
+    "repo",
+    "status",
+    "facts",
+    "questions",
+    "settings",
+    "execution_brief"
+  ],
+  "properties": {
+    "schema": {
+      "const": "go-workflow.onboarding-plan.v1"
+    },
+    "repo": {
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "needs_configuration",
+        "ready"
+      ]
+    },
+    "facts": {
+      "type": "object"
+    },
+    "questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "field",
+          "prompt",
+          "candidates"
+        ],
+        "properties": {
+          "field": {
+            "type": "string"
+          },
+          "prompt": {
+            "type": "string"
+          },
+          "candidates": {
+            "type": "array"
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "settings": {
+      "type": [
+        "object",
+        "null"
+      ]
+    },
+    "execution_brief": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "ready"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "questions": {
+            "maxItems": 0
+          },
+          "settings": {
+            "type": "object"
+          },
+          "execution_brief": {
+            "type": "object"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "questions": {
+            "minItems": 1
+          },
+          "settings": {
+            "type": "null"
+          },
+          "execution_brief": {
+            "type": "null"
+          }
+        }
+      }
+    }
+  ]
+}

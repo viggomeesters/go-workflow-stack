@@ -225,7 +225,7 @@ def guard_workspace_command(args):
     read_only = {'cmd_version', 'cmd_status', 'cmd_readback', 'cmd_route', 'cmd_router',
                  'cmd_validate', 'cmd_next', 'cmd_doctor', 'cmd_agent_check', 'cmd_dirty_check',
                  'cmd_architecture_validate', 'cmd_architecture_readback', 'cmd_architecture_status',
-                 'cmd_recommendation_status', 'cmd_context_verify'}
+                 'cmd_recommendation_status', 'cmd_context_verify', 'cmd_onboarding_plan'}
     name = args.func.__name__
     if name in read_only or (name == 'cmd_workspace_operation' and args.workspace_operation == 'status'): return
     if name == 'cmd_managed_worker_enter' and getattr(args, 'task_id', None) == record['task_id']:

@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.31 — guided lifecycle onboarding
+
+- Detect version sources, current branch and candidate checks without executing them.
+- Collect explicit settings and emit a validated first task with release paths in scope.
+- Prove generated intake completes a first local release through the existing controller.
+
 ## 0.3.30 — TOML release version sources
 
 - Publish explicit TOML version keys while preserving surrounding bytes.

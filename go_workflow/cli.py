@@ -5252,6 +5252,14 @@ def build_parser() -> argparse.ArgumentParser:
     stack_update.add_argument("--agent", default="agent")
     stack_update.add_argument("--json", action="store_true")
     stack_update.set_defaults(func=cmd_stack_update)
+
+    onboarding = sub.add_parser('onboarding', help='Internal read-only guided configuration')
+    onboarding_sub = onboarding.add_subparsers(dest='onboarding_command', required=True)
+    onboarding_plan = onboarding_sub.add_parser('plan')
+    onboarding_plan.add_argument('repo', nargs='?', default='.')
+    onboarding_plan.add_argument('--answers', default='')
+    onboarding_plan.add_argument('--json', action='store_true')
+    onboarding_plan.set_defaults(func=cmd_onboarding_plan)
     agent_check = sub.add_parser("agent-check", help="Report repair-agent adapter availability")
     agent_check.add_argument("--agent", action="append", choices=["codex", "hermes"], default=[])
     agent_check.add_argument("--json", action="store_true")
@@ -5627,6 +5635,16 @@ def cmd_version(args: argparse.Namespace) -> int:
         print(json.dumps(payload, indent=2))
     else:
         print(STACK_VERSION)
+    return 0
+
+
+def cmd_onboarding_plan(args):
+    from .onboarding import plan_onboarding, OnboardingError
+    try:
+        plan = plan_onboarding(Path(args.repo), load_json(Path(args.answers)) if args.answers else None)
+    except (OnboardingError, OSError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    print(json.dumps(plan, indent=2, ensure_ascii=False))
     return 0
 
 

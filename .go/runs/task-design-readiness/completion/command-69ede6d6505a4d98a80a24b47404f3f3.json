@@ -1,0 +1,14 @@
+{
+  "task_id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "contract_digest": "720465d12dbff14dac412496b214a1c814340dd5b455cd5bc5b47f3f578c07e3",
+  "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+  "content_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.5348170839715749,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

@@ -1,0 +1,120 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "contract_digest": "720465d12dbff14dac412496b214a1c814340dd5b455cd5bc5b47f3f578c07e3",
+  "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+  "content_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json",
+        "sha256": "16e7586fab5ede642d0fcd9fd07fd201bc731ec5254ce2d34705cb7d4acfae89"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json",
+        "sha256": "bdde7e53d8a40a021bcdf591f55b08feb3833a8873e9263959514ffdba502c8d"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json",
+        "sha256": "373eccbed1b6aab1cc593a70df70aaefefdb9cb8f1d096813105f2f3633f1954"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json",
+        "sha256": "18f3c02e75af74f04766fbb6c46a7ebff35775dd6a29829c67d965b604018dd6"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

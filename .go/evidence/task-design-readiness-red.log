@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_local_task_cannot_claim_an_unresolved_explicit_rule ___________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-423/test_local_task_cannot_claim_a0')
+
+    def test_local_task_cannot_claim_an_unresolved_explicit_rule(tmp_path):
+        repo, task = seed(tmp_path)
+        path = repo / '.go/tasks/open/task-schema-smoke.json'
+        before = path.read_bytes()
+        assert call(repo, 'validate', repo).returncode == 0
+        result = call(repo, 'claim', task['id'], '--repo', repo, '--agent', 'fixture')
+>       assert result.returncode != 0, 'A structurally valid task claimed an unresolved governing rule'
+E       AssertionError: A structurally valid task claimed an unresolved governing rule
+E       assert 0 != 0
+E        +  where 0 = CompletedProcess(args=['/Users/viggomeesters/.cache/uv/builds-v0/.tmpkb5wNI/bin/python', '/Users/viggomeesters/Documen..._claim_a0/project', '--agent', 'fixture'], returncode=0, stdout='.go/tasks/active/task-schema-smoke.json\n', stderr='').returncode
+
+tests/test_task_design_readiness.py:53: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_task_design_readiness.py::test_local_task_cannot_claim_an_unresolved_explicit_rule
+1 failed in 0.38s

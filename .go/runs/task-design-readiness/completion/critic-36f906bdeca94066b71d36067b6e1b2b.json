@@ -1,0 +1,31 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "contract_digest": "720465d12dbff14dac412496b214a1c814340dd5b455cd5bc5b47f3f578c07e3",
+  "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+  "content_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed the minimal placement against existing architecture, opted-in dependencies and R# completion gates. No schema, readiness boolean or second approval system. Explicit missing/draft/non-accepted governing references block none/local tasks; unreferenced trivial, research, delegated and legacy cases remain compatible. Manual claim, autonomous preflight and under-lock claim share the gate, while finish rechecks invalidated decisions. Two actual defects have red/green proof. Shared native/handoff/context guidance requests grounded content review and original-outcome evidence; eight paired examples have inspected reasons and references in .go/evidence/task-design-readiness/content-review.json. Schema validity is explicitly not semantic readiness; a native CLI double proves blocked unproven-bug review transport, not model intelligence. Pending bug outcomes and research dependencies retain existing refusal behavior. No global skill mutation, live model benchmark or template product edit. A task-control evidence file was initially committed in the worker and correctly refused by integration. Its bytes were moved to canonical evidence, the worker path removed before integration, and the helper now runs owned checked_scope before committing. No gate was bypassed. Current declared checks, candidate release gate, ordinary clone checks and exact template pairing passed. Final tag/readback are downstream gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/architecture-lane.md",
+    "docs/releases/v0.3.33.md",
+    "docs/task-design-readiness.md",
+    "go_workflow/architecture.py",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/task_design.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "scripts/check-compatibility.sh",
+    "skills/repo-local-agent-workflow/SKILL.md",
+    "tests/fixtures/task-design-readiness.json",
+    "tests/test_task_design_readiness.py"
+  ]
+}

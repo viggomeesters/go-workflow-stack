@@ -1,0 +1,176 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-adae6c45c7b14fadb16ece0e1f2e8dd6",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 -m pytest tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json",
+        "sha256": "16e7586fab5ede642d0fcd9fd07fd201bc731ec5254ce2d34705cb7d4acfae89"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json",
+        "sha256": "bdde7e53d8a40a021bcdf591f55b08feb3833a8873e9263959514ffdba502c8d"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json",
+        "sha256": "373eccbed1b6aab1cc593a70df70aaefefdb9cb8f1d096813105f2f3633f1954"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "task-design-readiness",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "1cb433d2d053c8df84b1ec4234a7cdb4fdc49361",
+        "worktree_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json",
+        "sha256": "18f3c02e75af74f04766fbb6c46a7ebff35775dd6a29829c67d965b604018dd6"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Audit and reuse existing material-decision and outcome-evidence safeguards; document where semantic task readiness belongs and why. No duplicate gating system or mandatory ADR/approval per trivial task.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Deliver the chosen minimal change with local regression tests, grounded same-agent semantic review of paired examples, critic and a verified immutable stack release. Preserve the intake history and record which decisions were implemented.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "720465d12dbff14dac412496b214a1c814340dd5b455cd5bc5b47f3f578c07e3",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "mac-1.home",
+    "pid": 26058
+  },
+  "worker_group": null,
+  "inflight": null
+}

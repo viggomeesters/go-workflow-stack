@@ -25,7 +25,8 @@
       "CHANGELOG.md",
       "pyproject.toml",
       "release-pairings.json",
-      "scripts/check-compatibility.sh"
+      "scripts/check-compatibility.sh",
+      ".go/project.json"
     ]
   },
   "acceptance": [
@@ -126,5 +127,9 @@
       "status": "pending",
       "evidence": []
     }
-  ]
+  ],
+  "planning_repair": {
+    "reason": "Immutable stack release requires runtime/package/project pins and manifest to advance together. Add project pin to the declared source release scope.",
+    "source": "Authorized execution and existing release contract"
+  }
 }

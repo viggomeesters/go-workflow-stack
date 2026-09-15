@@ -1,0 +1,21 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___ test_auto_cannot_build_before_an_explicit_design_dependency_is_resolved ____
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-431/test_auto_cannot_build_before_0')
+
+    def test_auto_cannot_build_before_an_explicit_design_dependency_is_resolved(tmp_path):
+        repo, task = seed(tmp_path)
+        command = shlex.join([sys.executable, '-c', "from pathlib import Path; Path('app.txt').write_text('built')"])
+        result = call(repo, 'auto', repo, '--execute', '--agent', 'fixture', '--max-attempts', '1',
+                      '--build-command', command, '--critic-command', 'true', '--executor-agent', 'none', '--json')
+>       assert not (repo / 'app.txt').exists(), 'Autonomous execution built before checking its governing decision'
+E       AssertionError: Autonomous execution built before checking its governing decision
+E       assert not True
+E        +  where True = exists()
+E        +    where exists = (PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-431/test_auto_cannot_build_before_0/project') / 'app.txt').exists
+
+tests/test_task_design_readiness.py:165: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_task_design_readiness.py::test_auto_cannot_build_before_an_explicit_design_dependency_is_resolved
+1 failed in 0.35s

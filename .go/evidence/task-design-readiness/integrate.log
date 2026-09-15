@@ -1,0 +1,22 @@
+WARN `--no-project` was provided, but no project was found
+[codex/task-design-readiness cf2c71b] Strengthen task design readiness without procedural overhead
+ 17 files changed, 1040 insertions(+), 13 deletions(-)
+ create mode 100644 .go/evidence/task-design-readiness/content-review.json
+ create mode 100644 docs/releases/v0.3.33.md
+ create mode 100644 docs/task-design-readiness.md
+ create mode 100644 go_workflow/task_design.py
+ create mode 100644 tests/fixtures/task-design-readiness.json
+ create mode 100644 tests/test_task_design_readiness.py
+Traceback (most recent call last):
+  File "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/improvement_lifecycle.py", line 26, in <module>
+    with integration_slot(R,TID,OWNER,TID+'-development') as slot:run(['git','merge','--ff-only',slot['workspace_head']])
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/Users/viggomeesters/Dev/go-workflow-stack/go_workflow/worktrees.py", line 337, in integration_slot
+    checked_scope(record)
+  File "/Users/viggomeesters/Dev/go-workflow-stack/go_workflow/worktrees.py", line 279, in checked_scope
+    if violations: raise WorkspaceError('Workspace scope violations: ' + ', '.join(violations))
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+go_workflow.worktrees.WorkspaceError: Workspace scope violations: .go/evidence/task-design-readiness/content-review.json

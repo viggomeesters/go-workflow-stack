@@ -1,0 +1,19 @@
+{
+  "task_id": "task-design-readiness",
+  "owner": "codex-astra-high",
+  "run_id": "task-design-readiness-development",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-13/vr/work/task-design-readiness",
+  "branch": "codex/task-design-readiness",
+  "base_branch": "main",
+  "base_commit": "191be794f979530a2114e993211e6b62b7899d35",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+  "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+  "generation": "e3d1fa22ad9f40b1b4218f9401629d45",
+  "state": "integrated",
+  "integration": {
+    "workspace_head": "239ccacc6916d17ff4211befe16abd4752055e46",
+    "integrated_commit": "239ccacc6916d17ff4211befe16abd4752055e46"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "task_id": "task-design-readiness",
+  "finding": "Controller-owned review evidence was placed in an owned worker and correctly refused at integration.",
+  "correction": "Moved the exact evidence bytes to canonical control state; removed the worker copy with an explicit commit. The bounded lifecycle helper now invokes owned checked_scope before stage/commit, so task scope text cannot authorize worker runtime-state edits.",
+  "helper": "work/improvement_lifecycle.py",
+  "proof": "Integration passed with canonical evidence and no worker runtime-state diff.",
+  "global_mutations": false
+}

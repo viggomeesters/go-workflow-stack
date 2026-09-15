@@ -1,0 +1,20 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_ test_valid_auto_plan_requests_content_review_without_claiming_semantic_readiness _
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-428/test_valid_auto_plan_requests_0')
+
+    def test_valid_auto_plan_requests_content_review_without_claiming_semantic_readiness(tmp_path):
+        repo, task = seed(tmp_path, decision_status='accepted')
+        result = call(repo, 'auto', repo, '--json')
+        assert result.returncode == 0, result.stderr
+        plan = json.loads(result.stdout)
+        review = plan['agent_contract'].get('task_design_review')
+>       assert review is not None, 'An execution handoff needs the author/reviewer assessment contract'
+E       AssertionError: An execution handoff needs the author/reviewer assessment contract
+E       assert None is not None
+
+tests/test_task_design_readiness.py:152: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_task_design_readiness.py::test_valid_auto_plan_requests_content_review_without_claiming_semantic_readiness
+1 failed in 0.26s

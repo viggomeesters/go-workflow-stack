@@ -24,3 +24,13 @@ User authorized this existing task. The earlier intake-only restriction is histo
 Chosen placement: repo-local authoring skill and shared native build/repair/critic instructions for semantic assessment; the existing architecture gate for explicitly declared design dependencies, including none/local impact. No task-schema redesign or semantic score. Existing outcome/lifecycle checks remain authoritative.
 
 Accepted delta: `explicit-task-decisions-govern-readiness-v1`; keep the existing material-decision policy. Paired fixtures separate reviewer assessment from deterministic contract checks. Tests cover unchanged trivial/research/legacy behavior, unresolved/delegated rules, invalidated decisions at finish and pending bug outcomes.
+
+## Completed — 2026-09-15
+
+Implemented and released as v0.3.33 (c72c7339f66861fc1c69a80e22514829a46cef09). The task is done and review-approved; all five requested outcomes are verified.
+
+Explicit governing references now gate none/local tasks and legacy autonomous execution before build; the existing finish gate rechecks invalidated decisions. Shared author/critic guidance and eight reasoned examples distinguish structural validity from content readiness. No new schema or approval system.
+
+Verification: 66 focused regressions; macOS and Linux make checks; final tagged Linux gate with 156 compatibility tests, 197 smoke tests, template v0.3.17 pairing and standalone installation. Annotated remote tag and published GitHub Release were read back. Raw results and same-agent critic are in `.go/evidence/task-design-readiness-*` and `.go/runs/task-design-readiness/completion/`. Native transport uses a deterministic CLI double; no live model quality claim is made.
+
+The owned worktree was cleaned up. The automatic workflow-v1 HTML/manifest were validated and their hash checked. Their restricted disclosure classification and blocked publication scan are preserved: these generated files remain local and are not added to the public Git remote. The associated delivery event retains their provenance. The template required no product change for this task.

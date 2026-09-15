@@ -1,0 +1,19 @@
+# Proportionate task design readiness
+
+Research/intake request, 2026-09-15:
+
+> Moeten wij nog iets aanpassen aan de go-workflow-stack zodat jij taken niet te vrijblijvend oplevert denk je?
+
+Problem: a task may have structurally valid acceptance/verification fields yet leave material behavior, design boundaries and completion proof open to arbitrary interpretation. A recent game-task review required a second pass to specify retargeting, state transitions, visual review and the fact that an unreproduced bug is not fixed. This is an agent authoring problem as well as a potential workflow gap; validation must never be presented as semantic proof.
+
+Existing safeguards already cover material architecture decisions and tracked outcome evidence (completed require-material-architecture-decisions and advice-model-04-outcomes). Extend or reuse them; do not add parallel approval systems or require an ADR for every UI change.
+
+Proposed contract: each substantial task distinguishes accepted decisions, implementation proposals, bounded delegated tuning choices and unresolved material decisions with owner and resolution gate. Describe observable before/after behavior, relevant states/transitions and edge cases, concrete verification matched to outcome, dependencies and explicit non-goals. UI/motion/audio work needs appropriate scale/runtime/listening evidence and references when useful. Research tasks may intentionally leave decisions open; they must not be mistaken for implementation-ready work.
+
+Separate structurally verifiable rules from a content-aware author/reviewer assessment. Do not try to prove semantic quality by word count, a keyword list or another ungrounded boolean. Use a compact review disposition (ready, design/research first, blocked on material decision), reasons and source links in the existing lifecycle if possible. Routine reversible styling/timing choices remain delegated and documented; this is not mandatory user confirmation per detail.
+
+Unknown root cause and an unverified requested outcome cannot count as a fixed bug or product completion. Completion evidence must be linked to the original requested outcomes, not merely the preparatory documents produced along the way. Dependency gates cannot rely on prose alone when execution would silently ignore them; choose a compatible enforcement approach.
+
+Evaluate with paired examples: vague vs actionable visual behavior task; unresolved material rule vs delegated numeric tuning; unreproduced bug; small typo fix; research-only exploration; legacy compatible task. A fresh agent should know what is fixed, what can be decided locally, what must be researched first, and what proves done. Preserve lightweight operation, existing repositories, explicit research boundaries and no GitHub Actions.
+
+This intake does not implement or publish a stack change and does not weaken current safeguards. Placement (skill authoring guidance, review stage, schema/runtime support or combination) is an explicit design decision within the future task, justified by the audit. No global skill changes in this conversation.

@@ -1,0 +1,52 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Strengthen task design readiness without procedural overhead",
+  "description": "Research intake from .go/plans/task-design-readiness.md. Audit existing structural, decision and outcome gates; define the smallest compatible authoring/review/runtime improvement that prevents vague tasks being represented as implementation-ready. Separate required design decisions from delegated tuning and research scope. No implementation, claim, push or release in this conversation. Future execution must justify placement rather than assuming a schema redesign.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/plans/task-design-readiness.md",
+      "schemas",
+      "docs",
+      "cli",
+      "go_workflow"
+    ],
+    "modify": [
+      ".go/plans/task-design-readiness.md",
+      "docs/**",
+      "schemas/**",
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "skills/**",
+      ".go/evidence/task-design-readiness/**"
+    ]
+  },
+  "acceptance": [
+    "Audit and reuse existing material-decision and outcome-evidence safeguards; document where semantic task readiness belongs and why. No duplicate gating system or mandatory ADR/approval per trivial task.",
+    "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
+    "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
+    "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
+    "When later execution is authorized, deliver only the chosen minimal change with local tests, critic evidence and existing release rules; this intake leaves the task open/unclaimed and makes no runtime edits."
+  ],
+  "verification": [
+    "make check",
+    "go-workflow validate .",
+    "git diff --check",
+    "Paired readiness fixtures and reviewer evidence; preserve research-only and legacy behavior"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

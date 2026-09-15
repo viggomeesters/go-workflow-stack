@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "task-design-readiness",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Strengthen task design readiness without procedural overhead",
   "description": "Execute the authorized research/intake in .go/plans/task-design-readiness.md. Reuse architecture decision/dependency/outcome gates. Strengthen author and critic content review; fix explicitly referenced non-accepted decision dependencies being ignored on none/local tasks. No semantic keyword classifier or mandatory extra approval. Preserve unreferenced trivial/research/legacy tasks. Historical intake-only authority is superseded by the user execution request on 2026-09-15.",
   "scope": {
@@ -42,10 +42,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-15T15:21:27+02:00",
+    "base_commit": "9ea956881f39d08c559c1ace3f16001124017138"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],

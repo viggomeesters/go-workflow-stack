@@ -1,0 +1,72 @@
+WARN `--no-project` was provided, but no project was found
+RUN: git fetch /tmp/go-abc-01-xjyg7dz7/task-design-readiness-tagcheck.bundle main --tags
+RUN: git merge --ff-only FETCH_HEAD
+From /tmp/go-abc-01-xjyg7dz7/task-design-readiness-tagcheck.bundle
+ * branch            main       -> FETCH_HEAD
+ * [new tag]         v0.3.33    -> v0.3.33
+Updating 1cb433d..c72c733
+Fast-forward
+ .go/architecture/events.jsonl                      |   1 +
+ .go/evidence/events.jsonl                          |   4 +
+ .go/evidence/task-design-readiness-candidate.log   | 110 +++++++++++++
+ .go/evidence/task-design-readiness-green.log       |   2 +
+ .../task-design-readiness-integration.json         |  19 +++
+ .go/evidence/task-design-readiness-make.log        |  65 ++++++++
+ .go/evidence/task-design-readiness-red.log         |  21 +++
+ .go/evidence/task-design-readiness-regressions.log |   2 +
+ .../task-design-readiness-verification.json        |  17 ++
+ .../task-design-readiness/completion-state.json    | 176 +++++++++++++++++++++
+ .../command-29b01a7db28f4f61a4f1d47830951a3c.json  |  14 ++
+ .../command-39d5f16667934ced98eae2db1577244f.json  |  14 ++
+ .../command-4a7955a0412443aa86d108b808a167f5.json  |  14 ++
+ .../command-69ede6d6505a4d98a80a24b47404f3f3.json  |  14 ++
+ .../critic-36f906bdeca94066b71d36067b6e1b2b.json   |  31 ++++
+ ...ification-4946dc7a14574ec2b54aefa0698da617.json | 120 ++++++++++++++
+ .go/tasks/active/task-design-readiness.json        |  51 +++++-
+ 17 files changed, 667 insertions(+), 8 deletions(-)
+ create mode 100644 .go/evidence/task-design-readiness-candidate.log
+ create mode 100644 .go/evidence/task-design-readiness-green.log
+ create mode 100644 .go/evidence/task-design-readiness-integration.json
+ create mode 100644 .go/evidence/task-design-readiness-make.log
+ create mode 100644 .go/evidence/task-design-readiness-red.log
+ create mode 100644 .go/evidence/task-design-readiness-regressions.log
+ create mode 100644 .go/evidence/task-design-readiness-verification.json
+ create mode 100644 .go/runs/task-design-readiness/completion-state.json
+ create mode 100644 .go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json
+ create mode 100644 .go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json
+ create mode 100644 .go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json
+ create mode 100644 .go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json
+ create mode 100644 .go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json
+ create mode 100644 .go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json
+RUN: git remote set-url origin https://github.com/viggomeesters/go-workflow-stack.git
+RUN: git rev-parse HEAD
+c72c7339f66861fc1c69a80e22514829a46cef09
+RUN: ./scripts/release-check.sh 0.3.33
+release preflight: v0.3.33
+tag: annotated v0.3.33 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.11.15
+........................................................................ [ 46%]
+........................................................................ [ 92%]
+............                                                             [100%]
+156 passed in 63.52s (0:01:03)
+compatibility release gate: passed
+........................................................................ [ 36%]
+........................................................................ [ 73%]
+.....................................................                    [100%]
+197 passed in 151.63s (0:02:31)
+ok: /tmp/tmp.aMqETOzc0D/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 2ms
+   Building go-workflow-stack @ file:///tmp/tmp.aMqETOzc0D/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.aMqETOzc0D/go-workflow-stack
+Prepared 1 package in 1.33s
+Installed 1 package in 20ms
+ + go-workflow-stack==0.3.33 (from file:///tmp/tmp.aMqETOzc0D/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.cp2tgh16lu/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.cp2tgh16lu/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.cp2tgh16lu/fixture/.go
+ok: /tmp/tmp.cp2tgh16lu/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed
+task-design-readiness-tagcheck-ALL-PASSED

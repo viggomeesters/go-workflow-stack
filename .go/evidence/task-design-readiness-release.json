@@ -1,0 +1,17 @@
+{
+  "task_id": "task-design-readiness",
+  "tag": "v0.3.33",
+  "commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-15T13:47:30Z",
+    "tagName": "v0.3.33",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.33"
+  },
+  "readback": {
+    "path": ".go/runs/task-design-readiness/completion/release-af8f3cbf58e5446498505dcce087f257.json",
+    "sha256": "132a760c78a239d004035b5eea1035e1befb14b27b2cb08631bdacfe33d56e20"
+  },
+  "tag_gate": "passed"
+}

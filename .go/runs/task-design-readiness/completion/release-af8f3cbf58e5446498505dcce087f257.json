@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.release-evidence.v1",
+  "status": "verified",
+  "task_id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "contract_digest": "720465d12dbff14dac412496b214a1c814340dd5b455cd5bc5b47f3f578c07e3",
+  "content_digest": "ad92e8de761454224b704488798ddc69dbbc063dfd6687cc807687069b6fa038",
+  "profile": {
+    "name": "github-release",
+    "provider": "github-release",
+    "remote": "origin",
+    "branch": "main",
+    "repository": "viggomeesters/go-workflow-stack"
+  },
+  "remote_url": "https://github.com/viggomeesters/go-workflow-stack.git",
+  "tag": "v0.3.33",
+  "commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+  "tag_object": "067de8c41e048ed7ef5a0060e68e7c34092f5839",
+  "branch_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+  "refs": {
+    "refs/heads/main": "c72c7339f66861fc1c69a80e22514829a46cef09",
+    "refs/tags/v0.3.33": "067de8c41e048ed7ef5a0060e68e7c34092f5839",
+    "refs/tags/v0.3.33^{}": "c72c7339f66861fc1c69a80e22514829a46cef09"
+  },
+  "publication": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-15T13:47:30Z",
+    "tagName": "v0.3.33",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.33"
+  },
+  "observed_at": "2026-09-15T13:47:37.502389+00:00"
+}

@@ -1,0 +1,292 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "task-design-readiness",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Strengthen task design readiness without procedural overhead",
+  "description": "Execute the authorized research/intake in .go/plans/task-design-readiness.md. Reuse architecture decision/dependency/outcome gates. Strengthen author and critic content review; fix explicitly referenced non-accepted decision dependencies being ignored on none/local tasks. No semantic keyword classifier or mandatory extra approval. Preserve unreferenced trivial/research/legacy tasks. Historical intake-only authority is superseded by the user execution request on 2026-09-15.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      ".go/plans/task-design-readiness.md",
+      "docs/**",
+      "schemas/**",
+      "cli/**",
+      "go_workflow/**",
+      "tests/**",
+      "skills/**",
+      ".go/evidence/task-design-readiness/**",
+      "README.md",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "release-pairings.json",
+      "scripts/check-compatibility.sh",
+      ".go/project.json"
+    ]
+  },
+  "acceptance": [
+    "Audit and reuse existing material-decision and outcome-evidence safeguards; document where semantic task readiness belongs and why. No duplicate gating system or mandatory ADR/approval per trivial task.",
+    "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
+    "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
+    "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
+    "Deliver the chosen minimal change with local regression tests, grounded same-agent semantic review of paired examples, critic and a verified immutable stack release. Preserve the intake history and record which decisions were implemented."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-15T15:21:27+02:00",
+    "base_commit": "9ea956881f39d08c559c1ace3f16001124017138"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-15T15:47:40+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Current candidate/tagged checks, same-agent critic and fresh remote readback passed.",
+      "transaction_id": "87dfd6adae8142719cbb5392a2559a15",
+      "delivery": {
+        "delivery_id": "workflow-v1",
+        "html": ".go/deliveries/workflow-v1/index.html",
+        "manifest": ".go/deliveries/workflow-v1/manifest.json",
+        "source_sha256": "0d6f18b68e3ab50128d83cfd0ce976b2c7374c13140cfcfa1c80b0faa22740d9",
+        "html_sha256": "b93c931cfb5f891a2ef3d8ec7486c1dd2938649fe9a38aeee869c67f66a709db"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-15T15:47:40+02:00",
+      "task_id": "task-design-readiness",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/events.jsonl,.go/evidence/task-design-readiness-candidate.log,.go/evidence/task-design-readiness-green.log,.go/evidence/task-design-readiness-integration.json,.go/evidence/task-design-readiness-make.log,.go/evidence/task-design-readiness-red.log,.go/evidence/task-design-readiness-regressions.log,.go/evidence/task-design-readiness-verification.json,.go/evidence/task-design-readiness/auto-green.log,.go/evidence/task-design-readiness/auto-red.log,.go/evidence/task-design-readiness/content-review.json,.go/evidence/task-design-readiness/green.log,.go/evidence/task-design-readiness/integrate.log,.go/evidence/task-design-readiness/preflight.json,.go/evidence/task-design-readiness/red.log,.go/evidence/task-design-readiness/regressions.log,.go/evidence/task-design-readiness/review-green.log,.go/evidence/task-design-readiness/review-red.log,.go/evidence/task-design-readiness/self-reflect.json,.go/project.json,.go/runs/events.jsonl,.go/runs/task-design-readiness/completion-state.json,.go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json,.go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json,.go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json,.go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json,.go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json,.go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json,.go/tasks/active/task-design-readiness.json,.go/workspaces/task-design-readiness.json,CHANGELOG.md,README.md,docs/architecture-lane.md,docs/releases/v0.3.33.md,docs/task-design-readiness.md,go_workflow/architecture.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/task_design.py,pyproject.toml,release-pairings.json,scripts/check-compatibility.sh,skills/repo-local-agent-workflow/SKILL.md,tests/fixtures/task-design-readiness.json,tests/test_task_design_readiness.py; verification_command=declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates; verification_result=passed; critic=passed same-agent review; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.33 c72c7339f66861fc1c69a80e22514829a46cef09 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.33; Self-reflect: task regressions capture improvement, no global skill/memory/config change.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/evidence/task-design-readiness-candidate.log",
+        ".go/evidence/task-design-readiness-green.log",
+        ".go/evidence/task-design-readiness-integration.json",
+        ".go/evidence/task-design-readiness-make.log",
+        ".go/evidence/task-design-readiness-red.log",
+        ".go/evidence/task-design-readiness-regressions.log",
+        ".go/evidence/task-design-readiness-verification.json",
+        ".go/evidence/task-design-readiness/auto-green.log",
+        ".go/evidence/task-design-readiness/auto-red.log",
+        ".go/evidence/task-design-readiness/content-review.json",
+        ".go/evidence/task-design-readiness/green.log",
+        ".go/evidence/task-design-readiness/integrate.log",
+        ".go/evidence/task-design-readiness/preflight.json",
+        ".go/evidence/task-design-readiness/red.log",
+        ".go/evidence/task-design-readiness/regressions.log",
+        ".go/evidence/task-design-readiness/review-green.log",
+        ".go/evidence/task-design-readiness/review-red.log",
+        ".go/evidence/task-design-readiness/self-reflect.json",
+        ".go/project.json",
+        ".go/runs/events.jsonl",
+        ".go/runs/task-design-readiness/completion-state.json",
+        ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json",
+        ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json",
+        ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json",
+        ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json",
+        ".go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json",
+        ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json",
+        ".go/tasks/active/task-design-readiness.json",
+        ".go/workspaces/task-design-readiness.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/architecture-lane.md",
+        "docs/releases/v0.3.33.md",
+        "docs/task-design-readiness.md",
+        "go_workflow/architecture.py",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/task_design.py",
+        "pyproject.toml",
+        "release-pairings.json",
+        "scripts/check-compatibility.sh",
+        "skills/repo-local-agent-workflow/SKILL.md",
+        "tests/fixtures/task-design-readiness.json",
+        "tests/test_task_design_readiness.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "9ea956881f39d08c559c1ace3f16001124017138",
+        "observed_head_commit": "c72c7339f66861fc1c69a80e22514829a46cef09"
+      },
+      "verification": {
+        "command": "declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "unknown",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "decision_ids": [
+      "material-work-requires-governing-decision-v1",
+      "explicit-task-decisions-govern-readiness-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "execution_authority": {
+    "source": "User: er staat een nieuwe taak klaar als het goed is - uitvoeren",
+    "ship_policy": "push",
+    "allow_push": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Execute the authorized research/intake in .go/plans/task-design-readiness.md. Reuse architecture decision/dependency/outcome gates. Strengthen author and critic content review; fix explicitly referenced non-accepted decision dependencies being ignored on none/local tasks. No semantic keyword classifier or mandatory extra approval. Preserve unreferenced trivial/research/legacy tasks. Historical intake-only authority is superseded by the user execution request on 2026-09-15.",
+    "sha256": "1eaee20942bb92e60390894b11787e5d5dc1945189fb12e3613b4e8bce35e294",
+    "source_ref": "repo-local-intake:task-design-readiness"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Audit and reuse existing material-decision and outcome-evidence safeguards; document where semantic task readiness belongs and why. No duplicate gating system or mandatory ADR/approval per trivial task.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-15T15:43:12+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-15T15:43:12+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-15T15:43:12+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-15T15:43:12+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Deliver the chosen minimal change with local regression tests, grounded same-agent semantic review of paired examples, critic and a verified immutable stack release. Preserve the intake history and record which decisions were implemented.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-15T15:47:38+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/task-design-readiness/completion/release-af8f3cbf58e5446498505dcce087f257.json"
+        }
+      ]
+    }
+  ],
+  "planning_repair": {
+    "reason": "Immutable stack release requires runtime/package/project pins and manifest to advance together. Add project pin to the declared source release scope.",
+    "source": "Authorized execution and existing release contract"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json",
+      "sha256": "49f6cb19158c377e8b846f4d10dcb771e7578d3241f06ed969800b6d356ee5d7"
+    },
+    "critic": {
+      "path": ".go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json",
+      "sha256": "a72020b1c4bbac728435bf1edac260586209dec06c8b7055e3490a29f9776d29"
+    },
+    "release": {
+      "path": ".go/runs/task-design-readiness/completion/release-af8f3cbf58e5446498505dcce087f257.json",
+      "sha256": "132a760c78a239d004035b5eea1035e1befb14b27b2cb08631bdacfe33d56e20"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "task-design-readiness",
+    "project": "go-workflow-stack",
+    "commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+    "tag": "v0.3.33",
+    "evidence": [
+      ".go/runs/task-design-readiness/completion/release-af8f3cbf58e5446498505dcce087f257.json"
+    ]
+  }
+}

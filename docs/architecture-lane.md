@@ -153,3 +153,15 @@ No bulk migration is required.
 6. Add human gates only where decision authority or risk acceptance actually requires them.
 
 Do not backfill architecture theater across historical tasks. Start at the next consequential change.
+
+
+## Explicit design prerequisites at low impact
+
+From v0.3.33, a task that explicitly lists `architecture.decision_ids` or
+`scope_refs` must resolve those references to accepted records even at none/local
+impact. Missing, proposed, rejected, superseded or draft dependencies cannot be
+ignored simply because the implementation is small. The same checks run before
+manual claim, autonomous build and at finish. Material/foundational obligations
+remain unchanged; unreferenced simple tasks and historical records need no new
+fields or approvals. Read `task-design-readiness.md` for the author/reviewer
+contract, bounded research and delegated tuning examples.

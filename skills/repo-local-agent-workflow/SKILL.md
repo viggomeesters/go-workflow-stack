@@ -102,6 +102,35 @@ Canonical split:
 
 Run `architecture classify` before claim for consequential tasks. A deterministic minimum may raise impact but never lower a hard signal. Material and foundational tasks require at least one exact accepted governing decision resolved from the task or an applicable brief, plus passing conformance for every scope; reuse an existing accepted decision when it already governs the change instead of manufacturing a duplicate ADR. Foundational tasks additionally require named human approval with evidence. Automation identities cannot claim human authority. Waivers require an actor, reason, accepted risk, and future timezone-aware expiry. Do not backfill historical architecture ceremony: activate incrementally at the next consequential change. Full operator commands and migration rules live in `docs/architecture-lane.md`.
 
+## Proportionate task design review
+
+Before calling a substantial task implementation-ready, read its actual sources
+and assess observable before/after behavior, states/transitions and edge cases,
+boundaries, dependencies and matching proof. Distinguish accepted rules, proposals,
+bounded delegated tuning and unresolved material decisions with owner and gate.
+A structurally valid task or successful check is not a semantic readiness verdict.
+
+Record `ready`, `design_research_first` or `blocked_on_material_decision` with
+specific reasons, inspected references and next action in existing task/run review
+evidence or the phase result. A label, keywords or self-attestation is insufficient.
+Do not add a parallel approval system. Small reversible fixes need only their
+concrete change and proportionate verification; delegated tuning remains autonomous.
+
+Use existing architecture decision/scope references for governing prerequisites:
+explicit references must resolve to accepted records even for none/local impact.
+Use opted-in lifecycle dependencies for research-before-implementation ordering;
+legacy prose or arbitrary dependency metadata does not enforce execution order.
+Research tasks may intentionally explore open choices within research-only scope.
+Their completion cannot stand in for the original requested implementation/fix.
+
+Critics inspect evidence for each original outcome. An unknown root cause or
+unreproduced bug is not fixed; keep that R# pending/blocked until correction proof
+exists. Use runtime, visual, motion, audio and reference evidence only when relevant.
+Pre-publication critics still leave future shipping receipts to the controller.
+The runtime carries the same rubric in `task_design_review`; it is instructions,
+not an automatically granted readiness verdict. See `docs/task-design-readiness.md`
+for the audit, compatibility boundary and paired examples.
+
 ## Starting or retrofitting a project
 
 Default route when a repo needs repo-local workflow state:

@@ -12,6 +12,11 @@ are internal primitives used by agents, scripts, and tests.
 
 Projects may combine `required_stack_version` with an immutable `stack_ref` (`vX.Y.Z` or a full commit SHA). The minimum version protects compatibility; the ref makes bootstrap and cross-machine continuation reproducible.
 
+Task authoring and review follow [proportionate design readiness](docs/task-design-readiness.md):
+structural validity is separate from a grounded content assessment. Explicit
+unresolved design prerequisites block execution, while routine tuning and bounded
+research keep their existing lightweight paths.
+
 ## Why this exists
 
 Agent work should be clone-readable. A future agent should be able to inspect a repository and understand its project state without needing a central vault task database.

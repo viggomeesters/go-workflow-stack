@@ -373,14 +373,17 @@ def architecture_claim_findings(root: Path, task: dict[str, Any]) -> list[str]:
     if not has_metadata and not (root / "architecture").exists():
         return []
     effective, minimum, signals = effective_architecture_impact(task)
-    if effective in {"none", "local"}:
-        return []
     metadata = task.get("architecture") if isinstance(task.get("architecture"), dict) else {}
+    material = effective in {"material", "foundational"}
+    # Explicit governing references are prerequisites even when the change is
+    # small. Absence of metadata remains lightweight; no semantic score is inferred.
+    if not material and not (metadata.get("scope_refs") or metadata.get("decision_ids")):
+        return []
     findings: list[str] = []
     if IMPACT_ORDER.get(str(metadata.get("impact") or "none"), 0) < IMPACT_ORDER[minimum]:
         findings.append(f"architecture impact must be raised to deterministic minimum {minimum}: {', '.join(signals)}")
     applicable = resolve_applicable_architecture(root, task)
-    if not metadata.get("scope_refs"):
+    if material and not metadata.get("scope_refs"):
         findings.append("material/foundational task requires architecture.scope_refs")
     if applicable["missing_scope_refs"]:
         findings.append("missing architecture briefs: " + ", ".join(applicable["missing_scope_refs"]))
@@ -396,7 +399,7 @@ def architecture_claim_findings(root: Path, task: dict[str, Any]) -> list[str]:
         for brief in applicable["briefs"]
         for item in brief.get("decision_ids", [])
     )
-    if not governing_decision_ids:
+    if material and not governing_decision_ids:
         findings.append("material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief")
     if applicable["missing_decision_ids"]:
         findings.append("missing architecture decisions: " + ", ".join(applicable["missing_decision_ids"]))
@@ -407,7 +410,7 @@ def architecture_claim_findings(root: Path, task: dict[str, Any]) -> list[str]:
     ]
     if unresolved:
         findings.append("architecture decisions must be accepted: " + ", ".join(unresolved))
-    if effective in {"material", "foundational"} and not applicable["quality_attributes"]:
+    if material and not applicable["quality_attributes"]:
         findings.append("material/foundational task requires measurable quality attributes in an applicable brief")
     return findings
 

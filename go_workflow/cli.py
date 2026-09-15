@@ -36,6 +36,7 @@ if str(STACK_ROOT) not in sys.path:
 
 from go_workflow.execution_contracts import (dependency_findings, resolve_execution_contract, validate_dependencies, validate_execution_contract, validate_phase_profiles, validate_verification_evidence)
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
+from go_workflow.task_design import review_contract
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result, codex_stream_payload
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
@@ -1370,6 +1371,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         "agent_contract": {
             "execute": "The invoking coding agent does not hand commands back to Viggo. It starts tool calls now: repair or confirm .go contract, create/claim one task, execute inside scope, verify, critic/recheck, repair if needed, finish with evidence, then continue until done, a repository gate, or budget.",
             "contract_preflight": "Before implementation, ensure vision/end goal, architecture principles, hierarchy, executable task, acceptance, and verification are present or create/repair them.",
+            "task_design_review": review_contract(),
             "control": "Viggo has handed off control with go/go-auto: do not stop after one phase and wait for another go; keep executing until done, blocker, budget, or safety gate.",
             "loop_escalation": "go-auto may invoke go-loop when self-reflect creates follow-up work, verification/review fails, first green is not trustworthy, or the project needs continued autonomous repair beyond the initial batch.",
             "feedback": "New Viggo input is converted into .go tasks/decisions before another go auto/go loop pass.",
@@ -1433,7 +1435,7 @@ def build_auto_preflight(repo: Path, selected_tasks: list[dict[str, Any]], max_t
     contract_findings = [
         {"task_id": task.get("id"), "findings": findings}
         for task in selected_tasks
-        if (findings := task_contract_findings(task))
+        if (findings := task_contract_findings(task) + architecture_claim_findings(root, task))
     ]
     unfinished = unfinished_task_ids(repo)
     return {
@@ -1807,6 +1809,7 @@ def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
         "recent_evidence": load_jsonl_events(root / "evidence" / "events.jsonl", limit=10),
         "recent_decisions": load_jsonl_events(root / "decisions" / "events.jsonl", limit=10),
         "applicable_architecture": resolve_applicable_architecture(root, task),
+        "task_design_review": review_contract(),
     }
 
 
@@ -2221,6 +2224,7 @@ def default_repair_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH.",
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope.",
         "Edit only paths allowed by the task scope.",
+        "Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result.",
         "Run the task verification commands before exiting.",
         worker_outcome_instructions(task),
         "Exit non-zero if you cannot safely repair within scope.",
@@ -2263,6 +2267,7 @@ def default_executor_agent_command(agent: str, task: dict[str, Any]) -> str:
         "Work in the repository named by GO_REPO on the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context.",
         "If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and modify scope.",
         "Implement the task, run focused verification, and leave only scoped changes.",
+        "Apply task_design_review.author from the verified context before product edits; report its grounded disposition in your phase result.",
         worker_outcome_instructions(task),
         "Do not merely describe commands; perform the work and exit non-zero when the task cannot be completed safely.",
     ])
@@ -2293,6 +2298,7 @@ def run_default_critic_agent(
         "You are the blocking critic for a repo-local .go task.",
         "Review the current repository result for task {task_id} against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence.",
         "Do not edit files.",
+        "Apply task_design_review.critic from the verified context and cite actual inspected evidence for your verdict.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
     if publication_pending:
@@ -2627,7 +2633,7 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
         result.update({
             "status": "contract_gate",
             "summary": "Task contract is not executable enough for autonomous completion.",
-            "next_action": "repair acceptance, verification, or scope using preflight.contract_findings, then rerun",
+            "next_action": "resolve preflight.contract_findings (task scope/proof or governing decisions), then rerun",
         })
         return 1, result
 
@@ -2739,6 +2745,11 @@ def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[
                 dependency_errors = dependency_findings(repo, task, readiness=True)
                 if dependency_errors:
                     result.update({"status": "blocked", "blocked_task": task["id"], "summary": "; ".join(dependency_errors)})
+                    break
+                architecture_findings = architecture_claim_findings(root, task)
+                if architecture_findings:
+                    result.update({"status": "contract_gate", "blocked_task": task["id"],
+                                   "summary": "; ".join(architecture_findings)})
                     break
                 task["status"] = "active"
                 task["work_status"] = "in_progress"

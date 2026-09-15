@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.33 — proportionate task design readiness
+
+- Honor explicit design prerequisites at none/local impact and before autonomous builds.
+- Share grounded author/critic review guidance through existing Go context and handoff.
+- Separate semantic review from schema validity, with paired examples and pending bug-outcome proof.
+- Preserve trivial, delegated, research-only and unreferenced legacy behavior without new task fields.
+
 ## 0.3.32 — immutable release pairing manifest
 
 - Centralize historical template baselines and require an explicit current pairing.

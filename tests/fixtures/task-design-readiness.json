@@ -1,0 +1,402 @@
+{
+  "purpose": "Paired authoring examples with grounded reviewer dispositions. Application paths/commands are illustrative; structural tests are not semantic judgment or application execution.",
+  "cases": [
+    {
+      "id": "vague-motion",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "vague-motion",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Make marker motion feel smooth",
+        "description": "Improve the marker interaction. Choose what looks best.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "src/motion.py"
+          ]
+        },
+        "acceptance": [
+          "Movement looks right."
+        ],
+        "verification": [
+          "git diff --check"
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        }
+      },
+      "review": {
+        "disposition": "design_research_first",
+        "reasons": [
+          "Neither target replacement nor interruption behavior is selected. Two incompatible implementations could satisfy this wording.",
+          "Whitespace checks provide no observable motion evidence."
+        ],
+        "sources": [
+          "task.description",
+          "task.acceptance[0]",
+          "task.verification[0]"
+        ],
+        "next": "Specify behavior for retargeting, cancellation and reduced motion, then choose matching runtime proof."
+      }
+    },
+    {
+      "id": "actionable-motion",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "actionable-motion",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Retarget from the current displayed position",
+        "description": "Accepted: a new target replaces the old target immediately and starts at the currently displayed position. Idle/travelling/cancelled states: cancellation freezes the current position; the next target resumes from there. Reduced motion jumps directly to the latest target. Delegated: choose 120–180 ms duration and record it. No changes to input bindings or persistence.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "src/motion.py",
+            "tests/test_motion.py"
+          ]
+        },
+        "acceptance": [
+          "Retargeting halfway through travel neither returns to the start nor visits the old target.",
+          "Cancellation freezes position; repeated identical targets do not restart travel.",
+          "Reduced motion reaches the latest target without animation."
+        ],
+        "verification": [
+          "python3 -m pytest tests/test_motion.py",
+          "Run the demo at normal and reduced-motion settings; retain before/after capture and inspected frame timestamps."
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        }
+      },
+      "review": {
+        "disposition": "ready",
+        "reasons": [
+          "Target replacement, cancellation and reduced motion have observable outcomes; tuning has a bounded delegated range.",
+          "Unit checks and relevant runtime/frame evidence match the state behavior. Readiness is an authoring assessment, not proof that the application works."
+        ],
+        "sources": [
+          "task.description",
+          "task.acceptance",
+          "task.verification"
+        ],
+        "next": "Execute within scope; implementation outcomes remain pending until actual runtime checks and critic evidence exist."
+      }
+    },
+    {
+      "id": "unresolved-rule",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "unresolved-rule",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Implement retargeting after rule selection",
+        "description": "Unresolved: replace the old target immediately or queue the new target. Owner: product owner. Gate: accept retarget-rule before dependent implementation. No actor has accepted this rule yet.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "src/motion.py"
+          ]
+        },
+        "acceptance": [
+          "Movement follows the selected retarget rule."
+        ],
+        "verification": [
+          "python3 -m pytest tests/test_motion.py"
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        },
+        "architecture": {
+          "impact": "local",
+          "decision_ids": [
+            "retarget-rule"
+          ]
+        }
+      },
+      "decision_status": "proposed",
+      "review": {
+        "disposition": "blocked_on_material_decision",
+        "reasons": [
+          "The unresolved choice changes user-visible behavior; it is not a numeric tuning parameter.",
+          "The explicit retarget-rule reference connects the dependency to the existing claim/finish gate even for local impact."
+        ],
+        "sources": [
+          "task.description",
+          "task.architecture.decision_ids",
+          "decision_status"
+        ],
+        "next": "Research alternatives if necessary and obtain the authorized decision; dependent implementation remains open."
+      }
+    },
+    {
+      "id": "delegated-tuning",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "delegated-tuning",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Tune travel duration within the accepted behavior",
+        "description": "Accepted behavior: latest target replaces the previous target from the current position. Delegated to implementer: choose one duration in 120–180 ms and record the measured result; do not change retargeting behavior.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "src/motion.py",
+            "tests/test_motion.py"
+          ]
+        },
+        "acceptance": [
+          "The chosen duration lies in 120–180 ms and retargeting behavior remains unchanged."
+        ],
+        "verification": [
+          "python3 -m pytest tests/test_motion.py",
+          "Inspect a runtime capture with frame timestamps."
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        },
+        "architecture": {
+          "impact": "local"
+        }
+      },
+      "review": {
+        "disposition": "ready",
+        "reasons": [
+          "The semantic rule is fixed; the remaining choice is bounded, reversible timing delegated to the implementer.",
+          "Runtime evidence measures the timing and tests preserve the behavior. No separate user approval or new decision record is required."
+        ],
+        "sources": [
+          "task.description",
+          "task.acceptance",
+          "task.verification"
+        ],
+        "next": "Choose, measure and record the duration during execution."
+      }
+    },
+    {
+      "id": "unreproduced-bug",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "unreproduced-bug",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Fix the occasional marker jump",
+        "description": "Reported: marker sometimes snaps during rapid clicking. No reproduction has been obtained; root cause is unknown. A timing hypothesis is recorded but unverified.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "src/motion.py",
+            "tests/test_motion.py"
+          ]
+        },
+        "acceptance": [
+          "The reported jump is reproduced and a regression demonstrates that the cause is corrected."
+        ],
+        "verification": [
+          "python3 -m pytest tests/test_motion.py",
+          "Replay the captured failing input sequence before and after the correction."
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        }
+      },
+      "review": {
+        "disposition": "design_research_first",
+        "reasons": [
+          "The requested outcome is a verified correction; no failing sequence or causal evidence exists yet.",
+          "A hypothesis document, successful process or unrelated passing test cannot prove this fix."
+        ],
+        "sources": [
+          "task.description",
+          "task.acceptance[0]",
+          "task.verification"
+        ],
+        "next": "Reproduce and investigate in a bounded research scope. Keep the original fix outcome pending/blocked until correction evidence exists."
+      }
+    },
+    {
+      "id": "research-only",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "research-only",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Compare two retargeting rules",
+        "description": "Research-only scope. Compare immediate replacement and queued movement using disposable observations. Produce a recommendation with trade-offs and unresolved choices for the product owner; do not select a production rule or edit app code.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "docs/retarget-research.md"
+          ]
+        },
+        "acceptance": [
+          "A comparison states observed trade-offs, source references, unresolved choices and the next decision owner."
+        ],
+        "verification": [
+          "Review docs/retarget-research.md against the experiment notes and both alternatives."
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        },
+        "architecture": {
+          "impact": "local"
+        }
+      },
+      "review": {
+        "disposition": "ready",
+        "reasons": [
+          "Open choices are the subject of the research deliverable, not implementation authority.",
+          "The modify scope contains only the research report. Readiness applies only to the research task; it does not unblock a dependent implementation task."
+        ],
+        "sources": [
+          "task.description",
+          "task.scope.modify",
+          "task.acceptance[0]"
+        ],
+        "next": "Complete research evidence; dependent implementation must use a real execution dependency and/or the explicit governing decision."
+      }
+    },
+    {
+      "id": "trivial-typo",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "trivial-typo",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Correct one documentation typo",
+        "description": "Change “teh marker” to “the marker” in the README; preserve meaning and all other content.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "README.md"
+          ]
+        },
+        "acceptance": [
+          "README contains “the marker” where “teh marker” appeared."
+        ],
+        "verification": [
+          "Inspect the one-line diff and run git diff --check."
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        }
+      },
+      "review": {
+        "disposition": "ready",
+        "reasons": [
+          "One concrete before/after change and a proportionate diff check are sufficient.",
+          "No runtime, video, audio, architecture brief or new approval is relevant."
+        ],
+        "sources": [
+          "task.description",
+          "task.acceptance[0]",
+          "task.scope.modify"
+        ],
+        "next": "Make the one-line fix and inspect it."
+      }
+    },
+    {
+      "id": "legacy-task",
+      "task": {
+        "schema": "go-workflow.repo-local.task.v1",
+        "kind": "task",
+        "id": "legacy-task",
+        "project": "motion-demo",
+        "status": "open",
+        "execution_mode": "agent",
+        "shareable_delivery": "none",
+        "summary": "Retain a historical task",
+        "description": "Existing task without execution_contract or architecture metadata. Its historical dependency note is not an enforced lifecycle edge.",
+        "scope": {
+          "read": [
+            "src/motion.py",
+            "tests/test_motion.py",
+            "docs/motion.md"
+          ],
+          "modify": [
+            "README.md"
+          ]
+        },
+        "acceptance": [
+          "The task retains its existing workflow semantics."
+        ],
+        "verification": [
+          "git diff --check"
+        ],
+        "claim": {
+          "agent": null,
+          "claimed_at": null
+        }
+      },
+      "review": {
+        "disposition": "ready",
+        "reasons": [
+          "Compatibility concerns structural loading and unchanged legacy claim behavior. It is not a blanket semantic readiness certificate for every old task.",
+          "A new consequential use needs content review and explicit lifecycle adoption before relying on executable dependency fields."
+        ],
+        "sources": [
+          "task.description",
+          "task.architecture (absent)",
+          "task.execution_contract (absent)"
+        ],
+        "next": "Preserve history. Review and explicitly adopt policy when new consequential execution requires it."
+      }
+    }
+  ]
+}

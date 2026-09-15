@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.32",
+  "current_stack_ref": "v0.3.33",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -206,6 +206,12 @@
       "template_commit": "06678be4fdc95dc671d6adbc1a50b3f073d66b5c",
       "template_ref": "v0.3.16",
       "note": "Preserved immutable release-gate baseline."
+    },
+    {
+      "stack_ref": "v0.3.33",
+      "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
+      "template_ref": "v0.3.17",
+      "note": "Immutable guided-onboarding starter baseline. Its current v0.3.32 runtime pin is independent of this compatibility baseline."
     }
   ]
 }

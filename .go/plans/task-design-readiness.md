@@ -17,3 +17,10 @@ Unknown root cause and an unverified requested outcome cannot count as a fixed b
 Evaluate with paired examples: vague vs actionable visual behavior task; unresolved material rule vs delegated numeric tuning; unreproduced bug; small typo fix; research-only exploration; legacy compatible task. A fresh agent should know what is fixed, what can be decided locally, what must be researched first, and what proves done. Preserve lightweight operation, existing repositories, explicit research boundaries and no GitHub Actions.
 
 This intake does not implement or publish a stack change and does not weaken current safeguards. Placement (skill authoring guidance, review stage, schema/runtime support or combination) is an explicit design decision within the future task, justified by the audit. No global skill changes in this conversation.
+
+## Authorized execution — 2026-09-15
+
+User authorized this existing task. The earlier intake-only restriction is historical.
+Chosen placement: repo-local authoring skill and shared native build/repair/critic instructions for semantic assessment; the existing architecture gate for explicitly declared design dependencies, including none/local impact. No task-schema redesign or semantic score. Existing outcome/lifecycle checks remain authoritative.
+
+Accepted delta: `explicit-task-decisions-govern-readiness-v1`; keep the existing material-decision policy. Paired fixtures separate reviewer assessment from deterministic contract checks. Tests cover unchanged trivial/research/legacy behavior, unresolved/delegated rules, invalidated decisions at finish and pending bug outcomes.

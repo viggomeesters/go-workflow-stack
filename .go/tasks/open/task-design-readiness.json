@@ -7,15 +7,10 @@
   "project": "go-workflow-stack",
   "status": "open",
   "summary": "Strengthen task design readiness without procedural overhead",
-  "description": "Research intake from .go/plans/task-design-readiness.md. Audit existing structural, decision and outcome gates; define the smallest compatible authoring/review/runtime improvement that prevents vague tasks being represented as implementation-ready. Separate required design decisions from delegated tuning and research scope. No implementation, claim, push or release in this conversation. Future execution must justify placement rather than assuming a schema redesign.",
+  "description": "Execute the authorized research/intake in .go/plans/task-design-readiness.md. Reuse architecture decision/dependency/outcome gates. Strengthen author and critic content review; fix explicitly referenced non-accepted decision dependencies being ignored on none/local tasks. No semantic keyword classifier or mandatory extra approval. Preserve unreferenced trivial/research/legacy tasks. Historical intake-only authority is superseded by the user execution request on 2026-09-15.",
   "scope": {
     "read": [
-      "AGENTS.md",
-      ".go/plans/task-design-readiness.md",
-      "schemas",
-      "docs",
-      "cli",
-      "go_workflow"
+      "**"
     ],
     "modify": [
       ".go/plans/task-design-readiness.md",
@@ -25,7 +20,12 @@
       "go_workflow/**",
       "tests/**",
       "skills/**",
-      ".go/evidence/task-design-readiness/**"
+      ".go/evidence/task-design-readiness/**",
+      "README.md",
+      "CHANGELOG.md",
+      "pyproject.toml",
+      "release-pairings.json",
+      "scripts/check-compatibility.sh"
     ]
   },
   "acceptance": [
@@ -33,13 +33,13 @@
     "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
     "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
     "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
-    "When later execution is authorized, deliver only the chosen minimal change with local tests, critic evidence and existing release rules; this intake leaves the task open/unclaimed and makes no runtime edits."
+    "Deliver the chosen minimal change with local regression tests, grounded same-agent semantic review of paired examples, critic and a verified immutable stack release. Preserve the intake history and record which decisions were implemented."
   ],
   "verification": [
+    "python3 -m pytest tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
     "make check",
-    "go-workflow validate .",
-    "git diff --check",
-    "Paired readiness fixtures and reviewer evidence; preserve research-only and legacy behavior"
+    "python3 cli/go.py validate .",
+    "git diff --check"
   ],
   "claim": {
     "agent": null,
@@ -48,5 +48,82 @@
   "work_status": "pending",
   "review_status": "none",
   "review_history": [],
-  "evidence": []
+  "evidence": [],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "decision_ids": [
+      "material-work-requires-governing-decision-v1",
+      "explicit-task-decisions-govern-readiness-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "execution_authority": {
+    "source": "User: er staat een nieuwe taak klaar als het goed is - uitvoeren",
+    "ship_policy": "push",
+    "allow_push": true
+  },
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Execute the authorized research/intake in .go/plans/task-design-readiness.md. Reuse architecture decision/dependency/outcome gates. Strengthen author and critic content review; fix explicitly referenced non-accepted decision dependencies being ignored on none/local tasks. No semantic keyword classifier or mandatory extra approval. Preserve unreferenced trivial/research/legacy tasks. Historical intake-only authority is superseded by the user execution request on 2026-09-15.",
+    "sha256": "1eaee20942bb92e60390894b11787e5d5dc1945189fb12e3613b4e8bce35e294",
+    "source_ref": "repo-local-intake:task-design-readiness"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Audit and reuse existing material-decision and outcome-evidence safeguards; document where semantic task readiness belongs and why. No duplicate gating system or mandatory ADR/approval per trivial task.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "A substantial task captures observable behavior, accepted/proposed/delegated/unresolved decisions, state/edge cases, boundaries, dependencies and matching evidence. Open material decisions route to research/design or block dependent implementation; routine tuning remains autonomous.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Content review distinguishes semantic readiness from schema validity; cannot pass solely via keywords, length or an unverified self-attestation. Unknown/unreproduced bugs and unresolved requested outcomes cannot be closed as fixed.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Prove paired vague/actionable examples, unresolved vs delegated choices, a research-only task, trivial fix and legacy task; document proportionate behavior and migration compatibility. References and runtime/visual/audio evidence are conditional on relevance.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Deliver the chosen minimal change with local regression tests, grounded same-agent semantic review of paired examples, critic and a verified immutable stack release. Preserve the intake history and record which decisions were implemented.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ]
 }

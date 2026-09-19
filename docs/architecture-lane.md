@@ -165,3 +165,13 @@ manual claim, autonomous build and at finish. Material/foundational obligations
 remain unchanged; unreferenced simple tasks and historical records need no new
 fields or approvals. Read `task-design-readiness.md` for the author/reviewer
 contract, bounded research and delegated tuning examples.
+
+## Bounded campaign context
+
+The opt-in [serial campaign contract](autonomous-campaign.md) binds original
+intent, goal outcomes and an authority envelope to existing tasks and accepted
+decisions. Its validator distinguishes accepted, delegated, proposed and
+unresolved choices; it neither replaces this lane nor creates a new approval
+system. Canonical brief/decision adoption belongs to the controller. Contract
+validity does not waive task readiness, conformance, named-human gates or
+content-bound completion evidence.

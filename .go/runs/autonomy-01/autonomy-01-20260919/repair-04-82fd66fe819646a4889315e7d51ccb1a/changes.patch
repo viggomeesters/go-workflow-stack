@@ -1,0 +1,54 @@
+diff --git a/docs/architecture-lane.md b/docs/architecture-lane.md
+index e576a6c..2ce18ec 100644
+--- a/docs/architecture-lane.md
++++ b/docs/architecture-lane.md
+@@ -165,3 +165,13 @@ manual claim, autonomous build and at finish. Material/foundational obligations
+ remain unchanged; unreferenced simple tasks and historical records need no new
+ fields or approvals. Read `task-design-readiness.md` for the author/reviewer
+ contract, bounded research and delegated tuning examples.
++
++## Bounded campaign context
++
++The opt-in [serial campaign contract](autonomous-campaign.md) binds original
++intent, goal outcomes and an authority envelope to existing tasks and accepted
++decisions. Its validator distinguishes accepted, delegated, proposed and
++unresolved choices; it neither replaces this lane nor creates a new approval
++system. Canonical brief/decision adoption belongs to the controller. Contract
++validity does not waive task readiness, conformance, named-human gates or
++content-bound completion evidence.
+diff --git a/go_workflow/cli.py b/go_workflow/cli.py
+index 604923a..1dbaac4 100644
+--- a/go_workflow/cli.py
++++ b/go_workflow/cli.py
+@@ -4294,6 +4294,21 @@ def cmd_migrate(args: argparse.Namespace) -> int:
+ def cmd_validate(args: argparse.Namespace) -> int:
+     repo = Path(args.repo).resolve()
+     errors = validate_repo(repo)
++    campaign_path = getattr(args, 'campaign', None)
++    previous_path = getattr(args, 'previous_campaign', None)
++    if previous_path and not campaign_path:
++        errors.append('--previous-campaign requires --campaign')
++    if campaign_path:
++        from go_workflow.campaign_contracts import campaign_findings
++        try:
++            contract = load_json(Path(campaign_path))
++            previous = load_json(Path(previous_path)) if previous_path else None
++            errors.extend(campaign_findings(repo, contract, previous=previous))
++        except RepoLocalError as exc:
++            errors.append(str(exc))
++    if getattr(args, 'json', False):
++        print(json.dumps({'valid': not errors, 'errors': errors}, indent=2))
++        return int(bool(errors))
+     if errors:
+         for error in errors:
+             print(f"error: {error}", file=sys.stderr)
+@@ -5513,6 +5528,9 @@ def build_parser() -> argparse.ArgumentParser:
+     init.set_defaults(func=cmd_init)
+     validate = sub.add_parser("validate", help="Validate repo-local .go state")
+     validate.add_argument("repo", nargs="?", default=".")
++    validate.add_argument('--campaign', help='Also validate an explicit bounded campaign contract (read-only)')
++    validate.add_argument('--previous-campaign', help='Previous immutable revision required for campaign revision > 1')
++    validate.add_argument('--json', action='store_true')
+     validate.set_defaults(func=cmd_validate)
+     nxt = sub.add_parser("next", help="Print the first claimable open task")
+     nxt.add_argument("repo", nargs="?", default=".")

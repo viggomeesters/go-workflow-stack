@@ -1,0 +1,1654 @@
+{
+  "schema": "go-workflow.execution-context-snapshot.v1",
+  "snapshot_id": "eef634a7d2f6494881bb17570b7aaca1",
+  "task_id": "autonomy-01",
+  "phase": "repair",
+  "attempt": 6,
+  "strategy": "direct_fix",
+  "workspace": {
+    "task_id": "autonomy-01",
+    "owner": "codex-astra-high",
+    "run_id": "autonomy-01-20260919",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01",
+    "branch": "codex/autonomy-01",
+    "base_branch": "main",
+    "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+    "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+    "generation": "902a4a79d55e4b0a80b826495d4321ac",
+    "state": "ready"
+  },
+  "git": {
+    "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+    "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+    "branch": "codex/autonomy-01",
+    "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+    "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+    "files": {
+      "docs/architecture-lane.md": {
+        "kind": "file",
+        "mode": 420,
+        "size": 7602,
+        "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+      },
+      "docs/autonomous-campaign.md": {
+        "kind": "file",
+        "mode": 420,
+        "size": 13223,
+        "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+      },
+      "go_workflow/campaign_contracts.py": {
+        "kind": "file",
+        "mode": 420,
+        "size": 19218,
+        "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+      },
+      "go_workflow/cli.py": {
+        "kind": "file",
+        "mode": 420,
+        "size": 322591,
+        "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+      },
+      "schemas/campaign-contract.schema.json": {
+        "kind": "file",
+        "mode": 420,
+        "size": 13309,
+        "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+      },
+      "tests/test_autonomy_contracts.py": {
+        "kind": "file",
+        "mode": 420,
+        "size": 17680,
+        "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+      }
+    }
+  },
+  "contract_sha256": "1754f0a5b83113bb5feb10a0f143e5f2828692795221fb3f84444aeabd8c0e3c",
+  "task_sha256": "720802638906fa9d898aff975c05b4367cf72c889aef0ba7b6df97d833ede2c2",
+  "canonical_sources": {
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/project.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 619,
+      "sha256": "a554a32052ccf3065579ee85e19afa1fa0d57b15e2725af766f71a5134ad518f"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/vision.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 6023,
+      "sha256": "700af6b7aafc398324fe35f1237f97c8c999be1cb8e4244d2fb847ad88c3efb7"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/architecture-principles.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 6699,
+      "sha256": "08e9fcbfd962412269f9d49e7929e0857e4a047ce728325b57f06b63d05d4a0b"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/hierarchy.json": {
+      "kind": "file",
+      "mode": 384,
+      "size": 10063,
+      "sha256": "964007df77a6399f1e40b9f062f8bcab0302cc6438eace522143093c540827c7"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/tasks/active/autonomy-01.json": {
+      "kind": "file",
+      "mode": 384,
+      "size": 6279,
+      "sha256": "b26536a8077fa4eebccaade2aa5e429c0bb8eb9d9eb39b067256d390ae757bb4"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/decisions/events.jsonl": {
+      "kind": "file",
+      "mode": 420,
+      "size": 25995,
+      "sha256": "da3a4f880dda486b45a51577c13410d2a91636c4fd125c0ea70132cf8a8f4d5a"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/model-selection.json": {
+      "kind": "file",
+      "mode": 384,
+      "size": 315,
+      "sha256": "a20670dac5f8959697a3796661676e29825b69dfa5876e075d3981eea4ed3e8c"
+    },
+    "/Users/viggomeesters/Dev/go-workflow-stack/.go/architecture/briefs/architecture-lane-governance.json": {
+      "kind": "file",
+      "mode": 420,
+      "size": 2258,
+      "sha256": "5222278f1c539e3782433d231a67a4dd7deec3068bff60f8e602c5beb8c5664c"
+    }
+  },
+  "selected_files": [
+    {
+      "kind": "instructions",
+      "path": "/Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01/AGENTS.md",
+      "state": {
+        "kind": "file",
+        "mode": 420,
+        "size": 2808,
+        "sha256": "819ec98ef940ffb9885aa9a302d6971ddff571b38c02a34691036a6d1081891c"
+      }
+    }
+  ],
+  "phase_contract": null,
+  "context": {
+    "schema": "go-workflow.execution-context.v1",
+    "project": {
+      "schema": "go-workflow.repo-local.project.v1",
+      "kind": "project",
+      "id": "go-workflow-stack",
+      "name": "Go Workflow Stack",
+      "source_of_truth": "repo-local",
+      "project_mode": "project",
+      "required_stack_version": "0.3.33",
+      "stack_ref": "v0.3.33",
+      "default_verification": [
+        "uv run --no-project --with pytest pytest -q",
+        "make check"
+      ],
+      "links": {
+        "repo": ""
+      },
+      "contract_version": 2,
+      "release_profiles": {
+        "github-release": {
+          "provider": "github-release",
+          "remote": "origin",
+          "branch": "main",
+          "repository": "viggomeesters/go-workflow-stack"
+        }
+      }
+    },
+    "vision": {
+      "schema": "go-workflow.repo-local.vision.v1",
+      "kind": "vision",
+      "project": "go-workflow-stack",
+      "status": "active",
+      "north_star": "Viggo can say only `go`; the agent resolves loose vs repo-local work, repairs the .go contract if needed, then autonomously works toward the defined goal until done, blocked, or budget-exhausted.",
+      "wedge": "A repo-local autonomous workflow stack: .go holds vision, principles, hierarchy, tasks, evidence, decisions, and loop state; Hermes/Bertus uses it to run a Ralph/old-go-workflow-style build→verify→critic→repair→ship loop without Viggo spamming micro-commands.",
+      "target_user": "Viggo and future autonomous agents continuing this project.",
+      "core_promise": "One `go` can turn rough intent into a valid .go contract, split the goal into tasks, claim/execute/recheck/devil/repair/commit/finish each task, self-reflect, capture lessons, and report compactly.",
+      "product_principles": [
+        "repo-local",
+        "goal-first",
+        "autonomous-command-train",
+        "bounded-loop-persistence",
+        "proof-first",
+        "feedback-turns-into-tasks",
+        "quiet-telegram"
+      ],
+      "non_goals": [
+        "no hidden central execution state",
+        "no random feature invention from autonomy",
+        "no broad scope expansion without explicit goal fit",
+        "no unbounded public/destructive/payment actions",
+        "no command-spam handoff back to Viggo",
+        "no technical fluff handoff"
+      ],
+      "success_metrics": [
+        "a bare `go` routes correctly between loose work and repo-local .go work",
+        "valid .go contract is repaired before execution",
+        "open work is split into executable tasks with acceptance and verification",
+        "loop continues across tasks without Viggo re-triggering each phase",
+        "recheck/devil/self-reflect findings create repairs or follow-up tasks before final done",
+        "final report includes commits, verification, and open/blocker state"
+      ],
+      "planned_direction": {
+        "id": "abc-lifecycle",
+        "status": "completed",
+        "implementation_status": "released_and_verified",
+        "target": "Zelfstandig releasbare Go-taken met expliciete model/effortkeuze en hervatbare contextoverdracht; done vereist de afgesproken geverifieerde release.",
+        "coordinator_project": "go-workflow-stack",
+        "plan_ref": ".go/plans/abc-lifecycle.json",
+        "success_metrics": [
+          "A: iedere nieuwe releaseplichtige taak heeft gekoppeld bewijs voor checks, review, commit/push, publicatie en eventuele livecontrole.",
+          "B: twee opeenvolgende taken gebruiken aantoonbaar verschillende gekozen model/effortprofielen zonder stille terugval.",
+          "C: een verse worker hervat een onderbroken actieve taak met actuele code-, fase- en bewijscontext zonder chatgeschiedenis.",
+          "Verse templateclones erven de gevalideerde contracten zonder onderhoudsbacklog of fictieve historische releasebewijzen.",
+          "Een taak behoudt één gecontroleerde branch/worktree bij modelwissels en herstel; alleen de definitieve geïntegreerde revisie met geldig fase- en releasebewijs kan done worden."
+        ],
+        "non_goals": [
+          "Parallelle builders als standaard",
+          "Mid-turn hot-switching zonder bewijs",
+          "Vault als execution state",
+          "GitHub Actions",
+          "Ongekozen productieprovider of automatische privilege-uitbreiding"
+        ],
+        "legacy_insights_ref": ".go/plans/legacy-insights.json",
+        "stack_release": "v0.3.26",
+        "template_release": "v0.3.16",
+        "completion_note": "Thirteen ABC tasks completed. Opt-in product lifecycle, explicit task/critic models, durable context, primary controller with owned worktrees and serial verified release. Fresh phase workers supported; persistent-session/subagent adapters remain deferred."
+      },
+      "proposed_directions": [
+        {
+          "id": "project-orchestration",
+          "status": "deferred",
+          "implementation_status": "not_started",
+          "plan_ref": ".go/plans/project-orchestration.md",
+          "target": "Go bestuurt één projectrun met parallelle geïsoleerde workers, duurzame coördinatie en een volledige geverifieerde lifecycle per taak.",
+          "success_metrics": [
+            "Twee onafhankelijke builds overlappen aantoonbaar; scope/resourceconflicten worden tegengehouden.",
+            "Na een gewijzigde main krijgt de volgende kandidaat nieuw definitief bewijs en een eigen release.",
+            "Controlleruitval veroorzaakt geen dubbele writers, verloren taakvoortgang of dubbele publicatie."
+          ],
+          "non_goals": [
+            "Parallelisme als impliciete standaard",
+            "Multi-host of nested teams in v1",
+            "Vervangen van bestaande taak- en releasebewijzen door chats",
+            "GitHub Actions"
+          ],
+          "note": "Ontwerp op verzoek van 2026-09-18; eerdere completed ABC-direction en actuele runtimecontracten blijven ongewijzigd.",
+          "priority": "after_verified_serial_autonomy",
+          "superseded_priority_by": "autonomy-first"
+        },
+        {
+          "id": "autonomy-first",
+          "status": "planned",
+          "implementation_status": "not_started",
+          "plan_ref": ".go/plans/autonomy-first.json",
+          "target": "Eén begrensde seriële Go-run onderzoekt de opdracht, toetst visie/architectuur, maakt uitvoerbare taken, bouwt/herstelt en levert elke zelfstandige taak geverifieerd op zonder herhaalde gebruikersstarts.",
+          "success_metrics": [
+            "Iedere oorspronkelijke uitkomst heeft taak-, besluit-, bewijs- en releaseherkomst; geen betekenisverlies tussen verkenning en oplevering.",
+            "Meerdere taken worden autonoom afgehandeld, met begrensd herstel en cumulatief budget na onderbreking.",
+            "Lege taakvoorraad of aanwezige succescriteria worden niet gelijkgesteld aan bereikt productdoel.",
+            "Een echte nachtrun rapporteert gemeten duur, menselijke interventies, actuele Git-state en geverifieerde live uitkomsten."
+          ],
+          "non_goals": [
+            "Parallelle builders",
+            "Onbegrensde uitvoering vanuit brede visie",
+            "Nieuwe productkeuzes buiten mandaat",
+            "GitHub Actions"
+          ]
+        }
+      ]
+    },
+    "architecture_principles": {
+      "schema": "go-workflow.repo-local.architecture-principles.v1",
+      "kind": "architecture_principles",
+      "project": "go-workflow-stack",
+      "principles": [
+        {
+          "id": "repo-local-state",
+          "statement": "Project workflow state lives in .go/ next to code.",
+          "rationale": "A fresh clone should explain current direction and next work.",
+          "enforcement": "go-workflow-stack validate/readback"
+        },
+        {
+          "id": "json-first",
+          "statement": "Current state is JSON and append-only history is JSONL.",
+          "rationale": "Agents need deterministic, diffable contracts.",
+          "enforcement": "schema validation and CLI checks"
+        },
+        {
+          "id": "goal-contract-before-execution",
+          "statement": "Every autonomous go run must define or repair the end goal, acceptance, verification, and task boundary before implementation.",
+          "rationale": "Autonomy without an explicit goal becomes random feature generation.",
+          "enforcement": "router/preflight blocks or repairs missing vision, principles, hierarchy, and executable task state"
+        },
+        {
+          "id": "command-train-not-command-spam",
+          "statement": "A bare go on a valid .go repo starts the agent command train instead of returning micro-commands for Viggo to run.",
+          "rationale": "Viggo should provide direction, not repeatedly trigger next/claim/recheck/devil/finish phases.",
+          "enforcement": "Hermes skill and CLI handoff require immediate tool execution until done, blocker, or budget"
+        },
+        {
+          "id": "first-green-is-not-done",
+          "statement": "A task is not done at first passing verification; recheck/devil/critic and repair/self-reflect must run for non-trivial work.",
+          "rationale": "Viggo consistently finds gaps after recheck/selfimprove, so the loop must internalize that review stack.",
+          "enforcement": "loop conductor requires critic verdict before finish for code/docs/contracts/public behavior"
+        },
+        {
+          "id": "capacity-before-parallelism",
+          "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes and a reviewer lane, while overlapping modify scopes remain serial.",
+          "rationale": "More agents can increase context burn, file collisions, and false progress unless capacity and review are explicit.",
+          "enforcement": "auto/go-loop handoff exposes execution_policy.capacity and regression tests cover solo, serial-review, and disjoint-parallel cases"
+        },
+        {
+          "id": "abc-release-evidence",
+          "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
+          "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-explicit-model-contract",
+          "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
+          "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-durable-worker-context",
+          "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
+          "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-task-workspace",
+          "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
+          "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-final-candidate-proof",
+          "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
+          "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-selective-legacy-reuse",
+          "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
+          "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        }
+      ]
+    },
+    "hierarchy": {
+      "schema": "go-workflow.repo-local.hierarchy.v1",
+      "kind": "hierarchy",
+      "project": "go-workflow-stack",
+      "epics": [
+        {
+          "id": "autonomous-go-runtime",
+          "title": "Autonomous Go Runtime",
+          "features": [
+            {
+              "id": "abc-contracts",
+              "title": "A/B/C-contracten en migratie",
+              "description": "abc-01 v0.3.15 contracts and abc-08 v0.3.24 explicit lifecycle migration, intake and review-bundle provenance shipped. Template adoption remains template-01/02.",
+              "tasks": [
+                "abc-01",
+                "abc-08",
+                "fix-legacy-lifecycle-metadata"
+              ]
+            },
+            {
+              "id": "abc-models",
+              "title": "Modelsturing en uitvoeringsvormen",
+              "description": "abc-02 model control v0.3.16, abc-09 topology proof v0.3.25 and abc-10 real Terra High/Astra Medium worker releases v0.3.26 shipped. Session/subagent adapters remain explicitly deferred.",
+              "tasks": [
+                "abc-02",
+                "abc-09"
+              ]
+            },
+            {
+              "id": "abc-context",
+              "title": "Taakwerkplekken, contextoverdracht en hervatting",
+              "description": "abc-11 owned workspaces v0.3.17, abc-03 durable context v0.3.18 and abc-04 exclusive phase resume/local relocation v0.3.19 shipped.",
+              "tasks": [
+                "abc-03",
+                "abc-04",
+                "abc-11"
+              ]
+            },
+            {
+              "id": "abc-release",
+              "title": "Volledige geverifieerde taakreleases",
+              "description": "abc-05 completion, abc-06 publication, abc-07 deployment, abc-08 adoption and abc-10 deterministic/live ordered task releases shipped through v0.3.26. Template integration remains in its own two tasks.",
+              "tasks": [
+                "abc-05",
+                "abc-06",
+                "abc-07",
+                "abc-10",
+                "reliability-01",
+                "reliability-02",
+                "reliability-03",
+                "reliability-04",
+                "reliability-05"
+              ]
+            },
+            {
+              "id": "project-orchestration",
+              "title": "Parallelle projectuitvoering en duurzame coördinatie",
+              "description": "Parallel implementation deferred. Durable serial controller/recovery/delivery work is now owned by autonomy-first; original design retained as history.",
+              "status": "deferred",
+              "implementation_status": "not_started",
+              "plan_ref": ".go/plans/project-orchestration.md",
+              "tasks": []
+            }
+          ],
+          "tasks": [
+            "auto-preflight-envelope",
+            "repo-local-executor-docs",
+            "router-state-hardening",
+            "spike-task-scope-presets",
+            "auto-emit-handoff",
+            "auto-command-train-contract",
+            "auto-execute-repair-loop",
+            "hermes-go-auto-skill-execution-rule",
+            "auto-continuation-budget-and-summary",
+            "bare-go-universal-router",
+            "tot-bare-go-echt-werkt",
+            "bare-go-dry-run-write-boundary",
+            "go-loop-critic-repair-executor",
+            "benchmark-autonomy-against-ralph-omx",
+            "autonomous-executor-adapter",
+            "autonomy-benchmark-promotion",
+            "correct-ralph-benchmark-claims",
+            "attempt-artifact-ledger",
+            "semantic-critic-followups",
+            "codex-agent-adapter-and-real-fixture",
+            "ship-policy-and-resume-state",
+            "autonomous-contract-gates",
+            "default-agent-executor-critic",
+            "vision-goal-completion-audit",
+            "campaign-resume-e2e",
+            "portable-runtime-hermes-selection",
+            "wsl-doctor-launcher-version",
+            "bootstrap-linux-hermes-campaign",
+            "modular-migrations-agent-protocol",
+            "modular-native-adapters",
+            "concurrent-atomic-state",
+            "distribution-pilots-live-hermes",
+            "implement-semantic-go-task-decomposition-preserv",
+            "release-go-workflow-stack-v0.3.6-so-semantic-go",
+            "fix-installed-stack-update-source-resolution",
+            "harden-go-multi-item-execution-closure",
+            "agent-capacity-policy-contract",
+            "review-state-lifecycle-contract",
+            "finish-evidence-attribution-gate",
+            "usage-capacity-attribution-ledger",
+            "agent-team-pattern-docs-and-migration",
+            "release-v038-agent-capacity",
+            "make-completed-task-evidence-audit-tight-bind-a"
+          ],
+          "planned_direction": "Zelfstandige taakreleases met expliciete modellen, fasebewijs en veilige taakworktrees; planning in .go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "workflow",
+          "title": "Workflow",
+          "features": [
+            {
+              "id": "repo-local-workflow",
+              "title": "Repo-local workflow",
+              "tasks": [
+                "retire-aw-lite-fallback",
+                "fix-template-check-packaged-runtime",
+                "enforce-go-intent-task-first",
+                "release-v035-task-first"
+              ]
+            }
+          ],
+          "tasks": [
+            "template-pairing-smoke",
+            "document-template-check-skill",
+            "runtime-adapter-proof",
+            "diff-scope-enforcement",
+            "safe-ship-scoped-add",
+            "hard-budget-enforcement",
+            "exact-resume-command",
+            "benchmark-claim-downgrade",
+            "scope-enforcement-integrity",
+            "transactional-finish-ship",
+            "template-executable-pairing",
+            "coordinated-cross-repo-publish",
+            "local-only-wsl-foundation",
+            "deterministic-runtime-template-mode",
+            "template-mode-pairing-audit",
+            "pin-release-integrity-v031",
+            "explicit-stack-update",
+            "capture-live-hermes-wsl-proof",
+            "linux-pytest-fallback",
+            "hermetic-annotated-tag-tests",
+            "quiet-linux-pytest-probe",
+            "hermetic-doctor-prerequisites",
+            "live-hermes-proof-contract",
+            "proof-copy-requires-raw-evidence",
+            "quote-native-adapter-repo-paths",
+            "quote-router-command-examples",
+            "reject-template-stack-ref-override",
+            "normalize-data-file-modes",
+            "hermetic-doctor-ref-fixture",
+            "release-v032-hotfix",
+            "hermes-prompt-capability-detection",
+            "release-v033-native-hermes",
+            "publish-github-release-v033",
+            "package-runtime-provenance-v034",
+            "fix-v1-contract-migration",
+            "GW-STACKPRE001",
+            "release-v0312-stack-freshness",
+            "register-v0312-template-pairing",
+            "task-design-readiness"
+          ]
+        },
+        {
+          "id": "advice-to-outcome-continuity",
+          "title": "Advice-to-outcome continuity",
+          "description": "Compile an approved compact recommendation into durable work units and continue execution in one Go run.",
+          "features": [],
+          "tasks": [
+            "execution-brief-runtime"
+          ]
+        },
+        {
+          "id": "complete-advice-to-outcome-model",
+          "title": "Complete advice-to-outcome model",
+          "description": "Make advice durable, authorization explicit, bare Go resumable, outcomes provable, and the contract portable across skills and template.",
+          "features": [],
+          "tasks": [
+            "advice-model-01-authority",
+            "advice-model-02-inbox",
+            "advice-model-03-promotion",
+            "advice-model-04-outcomes",
+            "advice-model-05-e2e-proof",
+            "advice-model-08-authority-handoff",
+            "advice-model-11-release-v038"
+          ]
+        },
+        {
+          "id": "shareable-output",
+          "title": "Shareable .go output",
+          "description": "Turn substantial .go work into a standard human-readable HTML delivery package that can be shared with stakeholders without GitHub access while preserving machine-verifiable provenance and privacy boundaries.",
+          "features": [],
+          "tasks": [
+            "shareable-output-contract",
+            "shareable-output-publication",
+            "shareable-output-privacy",
+            "shareable-output-lifecycle",
+            "shareable-output-prototype",
+            "delivery-schema-contract",
+            "delivery-build-cli",
+            "delivery-disclosure-lifecycle",
+            "delivery-docs-packaging",
+            "delivery-runtime-browser-proof",
+            "automatic-shareable-delivery-policy",
+            "release-v0311-automatic-delivery",
+            "register-v0311-template-release-pairing"
+          ]
+        },
+        {
+          "id": "delivery-release-operations",
+          "title": "Delivery release operations",
+          "description": "Operational finalization tasks kept outside stakeholder delivery epics to avoid circular provenance.",
+          "features": [],
+          "tasks": [
+            "delivery-final-release",
+            "delivery-schema-parity-repair",
+            "delivery-v2-correction",
+            "delivery-executive-redesign",
+            "release-v0310-shareable-delivery",
+            "release-v0310-shallow-provenance-test-repair",
+            "register-v0310-template-release-pairing"
+          ]
+        },
+        {
+          "id": "architecture-lane",
+          "title": "Conditional Architecture Lane",
+          "description": "Task-local architecture impact, exact context, conformance, human gates, and portable template defaults without creating a parallel source of truth.",
+          "features": [],
+          "tasks": [
+            "plan-architecture-lane",
+            "architecture-contracts",
+            "architecture-context-cli",
+            "architecture-conformance-gates",
+            "release-v0313-architecture-lane",
+            "register-v0313-template-pairing",
+            "require-material-architecture-decisions",
+            "release-v0314-decision-gate",
+            "pair-v0314-template-commit"
+          ]
+        },
+        {
+          "id": "autonomy-first",
+          "title": "Betrouwbare autonomie van opdracht tot geleverde uitkomst",
+          "description": "Planning only: bounded serial campaigns with vision/architecture traceability, recovery, truthful outcome proof and complete per-task delivery. Parallel work deferred.",
+          "features": [],
+          "tasks": [
+            "autonomy-01",
+            "autonomy-02",
+            "autonomy-03",
+            "autonomy-04",
+            "autonomy-05",
+            "autonomy-06",
+            "autonomy-07",
+            "autonomy-08",
+            "autonomy-09",
+            "autonomy-managed-verification-isolation"
+          ]
+        }
+      ]
+    },
+    "task": {
+      "schema": "go-workflow.repo-local.task.v1",
+      "kind": "task",
+      "execution_mode": "agent",
+      "shareable_delivery": "auto",
+      "id": "autonomy-01",
+      "project": "go-workflow-stack",
+      "status": "active",
+      "summary": "Define bounded run authority and outcome traceability",
+      "description": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+      "scope": {
+        "read": [
+          "**"
+        ],
+        "modify": [
+          "go_workflow/campaign_contracts.py",
+          "go_workflow/execution_contracts.py",
+          "go_workflow/cli.py",
+          "schemas/**",
+          "tests/test_autonomy_contracts.py",
+          "tests/test_abc_contracts.py",
+          "docs/autonomous-campaign.md",
+          "docs/architecture-lane.md",
+          ".go/architecture/briefs/autonomous-campaign.json",
+          ".go/decisions/events.jsonl",
+          ".go/plans/autonomy-first.json",
+          "go_workflow/constants.py",
+          "pyproject.toml",
+          "CHANGELOG.md",
+          "README.md",
+          "release-pairings.json",
+          "docs/releases/**",
+          ".go/project.json",
+          ".go/evidence/autonomy-01/**"
+        ]
+      },
+      "acceptance": [
+        "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+        "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+        "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+        "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+      ],
+      "verification": [
+        "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+        "make check",
+        "python3 cli/go.py validate .",
+        "git diff --check"
+      ],
+      "claim": {
+        "agent": "codex-astra-high",
+        "claimed_at": "2026-09-19T07:27:43+02:00",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
+      },
+      "work_status": "in_progress",
+      "review_status": "none",
+      "review_history": [
+        {
+          "created_at": "2026-09-19T08:15:40+02:00",
+          "agent": "codex",
+          "status": "needs_fix",
+          "evidence": "Verification-isolation repair aa5cef1 is complete and independently verified; resume the preserved managed candidate.",
+          "owner": "codex-astra-high"
+        }
+      ],
+      "evidence": [],
+      "execution_contract": {
+        "schema": "go-workflow.execution-contract.v1",
+        "task_kind": "product",
+        "model": {
+          "id": "gpt-6-astra",
+          "effort": "high"
+        },
+        "release": {
+          "mode": "required",
+          "profile": "github-release"
+        },
+        "workspace": {
+          "mode": "task_worktree",
+          "base_branch": "main",
+          "control_state": "repo_local_single_writer"
+        }
+      },
+      "dependencies": [],
+      "outcome_tracking_version": 1,
+      "intent_source": {
+        "text": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+        "sha256": "98d51d0abbdcb8771caafe28cf86323bb7810920cd7ab42f76576173332df74c",
+        "source_ref": "repo-local-intake:autonomy-01"
+      },
+      "requested_outcomes": [
+        {
+          "id": "R1",
+          "text": "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+          "source": "intake_acceptance",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "R2",
+          "text": "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+          "source": "intake_acceptance",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "R3",
+          "text": "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+          "source": "intake_acceptance",
+          "status": "pending",
+          "evidence": []
+        },
+        {
+          "id": "R4",
+          "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+          "source": "intake_acceptance",
+          "status": "pending",
+          "evidence": []
+        }
+      ],
+      "architecture": {
+        "impact": "material",
+        "scope_refs": [
+          "architecture-lane-governance"
+        ],
+        "concerns": [],
+        "decision_ids": [],
+        "conformance_required": true,
+        "human_gate": "none"
+      }
+    },
+    "recent_evidence": [
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "evidence.appended",
+        "created_at": "2026-09-15T15:43:12+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "action": "outcome.disposition_recorded",
+          "outcome_id": "R2",
+          "status": "verified",
+          "evidence": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "evidence.appended",
+        "created_at": "2026-09-15T15:43:12+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "action": "outcome.disposition_recorded",
+          "outcome_id": "R3",
+          "status": "verified",
+          "evidence": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "evidence.appended",
+        "created_at": "2026-09-15T15:43:12+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "action": "outcome.disposition_recorded",
+          "outcome_id": "R4",
+          "status": "verified",
+          "evidence": ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "evidence.appended",
+        "created_at": "2026-09-15T15:47:38+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "action": "outcome.disposition_recorded",
+          "outcome_id": "R5",
+          "status": "verified",
+          "evidence": ".go/runs/task-design-readiness/completion/release-af8f3cbf58e5446498505dcce087f257.json"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.finished",
+        "created_at": "2026-09-15T15:47:40+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "evidence": {
+            "schema": "go-workflow.finish-evidence.v1",
+            "created_at": "2026-09-15T15:47:40+02:00",
+            "task_id": "task-design-readiness",
+            "agent": "codex-astra-high",
+            "summary": "changed_files=.go/architecture/events.jsonl,.go/evidence/events.jsonl,.go/evidence/task-design-readiness-candidate.log,.go/evidence/task-design-readiness-green.log,.go/evidence/task-design-readiness-integration.json,.go/evidence/task-design-readiness-make.log,.go/evidence/task-design-readiness-red.log,.go/evidence/task-design-readiness-regressions.log,.go/evidence/task-design-readiness-verification.json,.go/evidence/task-design-readiness/auto-green.log,.go/evidence/task-design-readiness/auto-red.log,.go/evidence/task-design-readiness/content-review.json,.go/evidence/task-design-readiness/green.log,.go/evidence/task-design-readiness/integrate.log,.go/evidence/task-design-readiness/preflight.json,.go/evidence/task-design-readiness/red.log,.go/evidence/task-design-readiness/regressions.log,.go/evidence/task-design-readiness/review-green.log,.go/evidence/task-design-readiness/review-red.log,.go/evidence/task-design-readiness/self-reflect.json,.go/project.json,.go/runs/events.jsonl,.go/runs/task-design-readiness/completion-state.json,.go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json,.go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json,.go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json,.go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json,.go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json,.go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json,.go/tasks/active/task-design-readiness.json,.go/workspaces/task-design-readiness.json,CHANGELOG.md,README.md,docs/architecture-lane.md,docs/releases/v0.3.33.md,docs/task-design-readiness.md,go_workflow/architecture.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/task_design.py,pyproject.toml,release-pairings.json,scripts/check-compatibility.sh,skills/repo-local-agent-workflow/SKILL.md,tests/fixtures/task-design-readiness.json,tests/test_task_design_readiness.py; verification_command=declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates; verification_result=passed; critic=passed same-agent review; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=unknown; release=v0.3.33 c72c7339f66861fc1c69a80e22514829a46cef09 https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.33; Self-reflect: task regressions capture improvement, no global skill/memory/config change.",
+            "changed_files": [
+              ".go/architecture/events.jsonl",
+              ".go/evidence/events.jsonl",
+              ".go/evidence/task-design-readiness-candidate.log",
+              ".go/evidence/task-design-readiness-green.log",
+              ".go/evidence/task-design-readiness-integration.json",
+              ".go/evidence/task-design-readiness-make.log",
+              ".go/evidence/task-design-readiness-red.log",
+              ".go/evidence/task-design-readiness-regressions.log",
+              ".go/evidence/task-design-readiness-verification.json",
+              ".go/evidence/task-design-readiness/auto-green.log",
+              ".go/evidence/task-design-readiness/auto-red.log",
+              ".go/evidence/task-design-readiness/content-review.json",
+              ".go/evidence/task-design-readiness/green.log",
+              ".go/evidence/task-design-readiness/integrate.log",
+              ".go/evidence/task-design-readiness/preflight.json",
+              ".go/evidence/task-design-readiness/red.log",
+              ".go/evidence/task-design-readiness/regressions.log",
+              ".go/evidence/task-design-readiness/review-green.log",
+              ".go/evidence/task-design-readiness/review-red.log",
+              ".go/evidence/task-design-readiness/self-reflect.json",
+              ".go/project.json",
+              ".go/runs/events.jsonl",
+              ".go/runs/task-design-readiness/completion-state.json",
+              ".go/runs/task-design-readiness/completion/command-29b01a7db28f4f61a4f1d47830951a3c.json",
+              ".go/runs/task-design-readiness/completion/command-39d5f16667934ced98eae2db1577244f.json",
+              ".go/runs/task-design-readiness/completion/command-4a7955a0412443aa86d108b808a167f5.json",
+              ".go/runs/task-design-readiness/completion/command-69ede6d6505a4d98a80a24b47404f3f3.json",
+              ".go/runs/task-design-readiness/completion/critic-36f906bdeca94066b71d36067b6e1b2b.json",
+              ".go/runs/task-design-readiness/completion/verification-4946dc7a14574ec2b54aefa0698da617.json",
+              ".go/tasks/active/task-design-readiness.json",
+              ".go/workspaces/task-design-readiness.json",
+              "CHANGELOG.md",
+              "README.md",
+              "docs/architecture-lane.md",
+              "docs/releases/v0.3.33.md",
+              "docs/task-design-readiness.md",
+              "go_workflow/architecture.py",
+              "go_workflow/cli.py",
+              "go_workflow/constants.py",
+              "go_workflow/task_design.py",
+              "pyproject.toml",
+              "release-pairings.json",
+              "scripts/check-compatibility.sh",
+              "skills/repo-local-agent-workflow/SKILL.md",
+              "tests/fixtures/task-design-readiness.json",
+              "tests/test_task_design_readiness.py"
+            ],
+            "no_diff": false,
+            "git": {
+              "claim_base_commit": "9ea956881f39d08c559c1ace3f16001124017138",
+              "observed_head_commit": "c72c7339f66861fc1c69a80e22514829a46cef09"
+            },
+            "verification": {
+              "command": "declared task checks, make check, candidate/tagged Linux compatibility/smoke/distribution gates",
+              "result": "passed"
+            },
+            "runtime": {
+              "agent": "codex-astra-high",
+              "runtime": "Codex desktop",
+              "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+              "billing_mode": "unknown"
+            },
+            "usage": {
+              "schema": "go-workflow.usage-attribution.v1",
+              "runtime_kind": "Codex desktop",
+              "billing_mode": "unknown",
+              "owner": "codex-astra-high",
+              "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+              "token_estimate": null,
+              "api_equivalent_cost_usd": null,
+              "provider_invoice_cost_usd": null,
+              "cost_label": "api_equivalent_not_invoice_cost"
+            },
+            "review": {
+              "outcome": "passed same-agent review",
+              "skip_reason": null
+            }
+          }
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.reviewed",
+        "created_at": "2026-09-15T15:47:42+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "created_at": "2026-09-15T15:47:40+02:00",
+          "agent": "codex-astra-high",
+          "status": "approved",
+          "evidence": "Current candidate/tagged checks, same-agent critic and fresh remote readback passed.",
+          "transaction_id": "87dfd6adae8142719cbb5392a2559a15",
+          "delivery": {
+            "delivery_id": "workflow-v1",
+            "html": ".go/deliveries/workflow-v1/index.html",
+            "manifest": ".go/deliveries/workflow-v1/manifest.json",
+            "source_sha256": "0d6f18b68e3ab50128d83cfd0ce976b2c7374c13140cfcfa1c80b0faa22740d9",
+            "html_sha256": "b93c931cfb5f891a2ef3d8ec7486c1dd2938649fe9a38aeee869c67f66a709db"
+          }
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.reviewed",
+        "created_at": "2026-09-19T08:10:57+02:00",
+        "task_id": "autonomy-managed-verification-isolation",
+        "agent": "codex",
+        "data": {
+          "created_at": "2026-09-19T08:10:57+02:00",
+          "agent": "codex",
+          "status": "needs_fix",
+          "evidence": "Implementation is retained; rerun exact checks in an evidence-identical isolated checkout because the dirty sibling template contains its own cross-repo follow-up task.",
+          "owner": "codex-astra-high"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.finished",
+        "created_at": "2026-09-19T08:14:39+02:00",
+        "task_id": "autonomy-managed-verification-isolation",
+        "agent": "codex-astra-high",
+        "data": {
+          "evidence": {
+            "schema": "go-workflow.finish-evidence.v1",
+            "created_at": "2026-09-19T08:14:39+02:00",
+            "task_id": "autonomy-managed-verification-isolation",
+            "agent": "codex-astra-high",
+            "summary": "changed_files=docs/task-workspaces.md,go_workflow/execution_context.py,go_workflow/run_state.py,tests/test_abc_resume.py; verification_command=50 focused managed-workspace tests plus make check in evidence-identical isolated clone, repo validate, git diff --check; verification_result=passed; critic=passed root recheck confirmed candidate-byte binding and unchanged registered-workspace guard; runtime=Codex desktop; model=Codex executor with effective identity unconfirmed; billing_mode=unknown",
+            "changed_files": [
+              "docs/task-workspaces.md",
+              "go_workflow/execution_context.py",
+              "go_workflow/run_state.py",
+              "tests/test_abc_resume.py"
+            ],
+            "no_diff": false,
+            "git": {
+              "claim_base_commit": "073ef7cd763b2caa4ac0d63cbda3889220870917",
+              "observed_head_commit": "073ef7cd763b2caa4ac0d63cbda3889220870917"
+            },
+            "verification": {
+              "command": "50 focused managed-workspace tests plus make check in evidence-identical isolated clone, repo validate, git diff --check",
+              "result": "passed"
+            },
+            "runtime": {
+              "agent": "codex-astra-high",
+              "runtime": "Codex desktop",
+              "model": "Codex executor with effective identity unconfirmed",
+              "billing_mode": "unknown"
+            },
+            "usage": {
+              "schema": "go-workflow.usage-attribution.v1",
+              "runtime_kind": "Codex desktop",
+              "billing_mode": "unknown",
+              "owner": "codex-astra-high",
+              "model": "Codex executor with effective identity unconfirmed",
+              "token_estimate": null,
+              "api_equivalent_cost_usd": null,
+              "provider_invoice_cost_usd": null,
+              "cost_label": "api_equivalent_not_invoice_cost"
+            },
+            "review": {
+              "outcome": "passed root recheck confirmed candidate-byte binding and unchanged registered-workspace guard",
+              "skip_reason": null
+            }
+          }
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.reviewed",
+        "created_at": "2026-09-19T08:14:53+02:00",
+        "task_id": "autonomy-managed-verification-isolation",
+        "agent": "codex-astra-high",
+        "data": {
+          "created_at": "2026-09-19T08:14:53+02:00",
+          "agent": "codex-astra-high",
+          "status": "approved",
+          "evidence": "Independent recheck passed: 50 focused tests, isolated make check, repo validation and diff check; workspace mutation guard unchanged.",
+          "transaction_id": "e590a817a7014cd0a037dc46125c094d"
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "task.reviewed",
+        "created_at": "2026-09-19T08:15:40+02:00",
+        "task_id": "autonomy-01",
+        "agent": "codex",
+        "data": {
+          "created_at": "2026-09-19T08:15:40+02:00",
+          "agent": "codex",
+          "status": "needs_fix",
+          "evidence": "Verification-isolation repair aa5cef1 is complete and independently verified; resume the preserved managed candidate.",
+          "owner": "codex-astra-high"
+        }
+      }
+    ],
+    "recent_decisions": [
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T13:30:13+02:00",
+        "task_id": "abc-02",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d03-model-policy",
+          "title": "Expliciete modelkeuze zonder stille fallback",
+          "status": "accepted",
+          "context": "User selected Astra High and authorized the ABC execution sequence; installed Codex model/list capabilities inspected.",
+          "decision": "Freeze explicit task and optional critic selections at first execution. Query the installed Codex catalog before any worker writes; force runtime model and reasoning options. Introduce no implicit global model or automatic escalation. Keep effective identity unconfirmed unless authoritative runtime evidence exists. Hermes/custom controlled selection is unsupported until its adapter explicitly implements it; legacy commands remain usable.",
+          "consequences": [
+            "No model quality/cost rankings or provider guarantees are inferred from a catalog response."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T13:58:28+02:00",
+        "task_id": "abc-11",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d04-workspace-policy",
+          "title": "Eén expliciete taakwerkplek met canonieke control state",
+          "status": "accepted",
+          "context": "User authorized the prepared ABC/legacy execution sequence; one worktree per task and serial integration were the planned baseline.",
+          "decision": "Require explicit workspace path, branch and base branch/commit. Bind registry and Git worktree marker to task/owner/run; resolve registered-worktree Go commands to canonical .go. Use existing process locks for creation, writing and serial integration. Refuse foreign paths, scope violations and unproven cleanup. No implicit branch heuristic, publisher, service-port or database policy.",
+          "consequences": [
+            "Active-task orchestration and handoff consume these primitives in abc-03/04; cleanup never republishes."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T14:30:45+02:00",
+        "task_id": "abc-03",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d05-durable-context",
+          "title": "Durable worker context verified against current state",
+          "status": "accepted",
+          "context": "abc-03 follows shipped task/model/workspace contracts; workers must continue without chat history.",
+          "decision": "Create immutable per-dispatch snapshots in canonical .go with file/hash references and explicit phase feedback. Verify task, workspace, Git/index/worktree content and raw evidence before launch. Keep legacy inline environment behavior; opted-in tasks use bounded references and explicitly selected repo-local context.",
+          "consequences": [
+            "Active resume and model topology remain abc-04/09; raw evidence and code remain authoritative."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T15:07:44+02:00",
+        "task_id": "abc-04",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d06-managed-resume",
+          "title": "Exclusive managed phase resume with explicit initial workspace",
+          "status": "accepted",
+          "context": "abc-04 follows verified model selection, owned workspaces and durable phase context; current loop cannot resume after a build exhausts its budget.",
+          "decision": "Add an opt-in managed native phase runner with explicit initial workspace bindings, persisted phase/effect intent and completion, preserved model/context/requirements, and process-aware exclusive recovery. Resume from proven phase; invalidate affected proof after drift. Support explicit stopped-owner local relocation; do not infer cross-host quiescence or old checkpoint phases.",
+          "consequences": [
+            "Release/deployment publishers remain abc-05/06/07; the managed runner exposes their intent/readback and cleanup recovery boundaries."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T15:53:54+02:00",
+        "task_id": "abc-05",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d07-verified-completion",
+          "title": "Require content-bound proof before opted-in completion",
+          "status": "accepted",
+          "context": "User GO authorizes abc-05 after v0.3.19; old finish-before-ship and prose-only evidence remain insufficient for self-contained product tasks.",
+          "decision": "Apply one strict completion gate to current opted-in finish, approval and reporting. Capture declared local checks plus review and content identity, verify explicit Git-tag/GitHub-release readback, and keep unknown or failed shipping pending. Preserve historical done records/unconfigured legacy semantics under abc-d01; publisher/deploy automation follows in abc-06/07.",
+          "consequences": [
+            "Read-only release verification is distinct from publication authority; no model-success or populated field can replace command and remote proof."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T17:20:31+02:00",
+        "task_id": "abc-06",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d08-resumable-publication",
+          "title": "Publish configured task releases through durable intent and exact readback",
+          "status": "accepted",
+          "context": "User GO continues after abc-05 v0.3.21. Completion proof is enforced; the managed runner still stops at release_pending.",
+          "decision": "Add an explicitly configured controller publisher for version preparation, final proof, scoped commit/integration, annotated tag and GitHub release. Bind task/run/owner, frozen profile and explicit push authority. Serialize publication, reconcile every interrupted effect by exact readback, reject stale bases/conflicting tags, and finish through the shared gate. Keep deployment and default migration in their existing later tasks.",
+          "consequences": [
+            "Unconfigured profiles do not gain publication rights. Inconclusive remote results remain pending; owned workspaces and evidence survive retries. No GitHub Actions or silent force operations."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T18:43:40+02:00",
+        "task_id": "abc-07",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d09-explicit-deployment-proof",
+          "title": "Require explicit target authority and authoritative live deployment proof",
+          "status": "accepted",
+          "context": "User GO continues after abc-06 v0.3.22 publication. Package/deployment providers remain project-specific onboarding inputs.",
+          "decision": "Extend explicit release profiles with no-deployment policy or controlled package/deploy/readback argv adapters. Freeze target and separate deployment authorization; bind released commit/version and optional artifact hash. Require stable idempotency identity and authoritative absent/accepted/live/unknown observations. Retain pending state on inconclusive results and finish only through verified live proof. Use local fixtures and no real production target in this implementation.",
+          "consequences": [
+            "Existing profiles remain release-only. New required deployments cannot use Git push permission as deployment authority. No automatic rollback, production data changes, GitHub Actions or provider selection."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T19:33:21+02:00",
+        "task_id": "abc-08",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d10-explicit-lifecycle-adoption",
+          "title": "Adopt lifecycle policy explicitly with recoverable state and preserved provenance",
+          "status": "accepted",
+          "context": "User GO continues after abc-07 v0.3.23. Existing project history and user-selected policies must remain distinguishable from new opt-in defaults.",
+          "decision": "Add an explicit lifecycle configuration path to repository migration, separate from stack-pin/schema updates. Preview before apply, journal exact state for recovery/rollback, convert only eligible open records and preserve existing overrides/history. Reuse intake resolution and preserve full task/project contract provenance in non-executable review bundles.",
+          "consequences": [
+            "No inferred model or shipping/deployment authority, no historic proof fabrication, no active-run transfer, no mandatory broad skill chain and no global skill mutations."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-13T20:16:14+02:00",
+        "task_id": "abc-09",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "abc-d02-worker-topology",
+          "title": "Verse workers met repositorygebonden context als basis",
+          "status": "accepted",
+          "context": "User GO; shipped owned workspace/context/resume baseline and locally inspected Codex 0.153.4 protocol. abc-09 will capture reproducible fixture proof; live baseline proof remains abc-10.",
+          "decision": "Support fresh ephemeral native CLI workers at task/phase boundaries with frozen per-phase profiles, canonical context snapshots and one owned worktree. Defer persistent app-server turn/session adapters and subagent adapters: protocol capability exists but Go-specific ownership, recovery and attribution integration is not implemented. No mid-turn switch or implicit new worktree per model.",
+          "consequences": [
+            "Deferred alternatives do not block the baseline. Any later adapter must prove exact session identity, explicit per-phase overrides, canonical recovery, exclusive writer and read-only critic. No chat transcript is the lifecycle source of truth."
+          ]
+        }
+      },
+      {
+        "schema": "go-workflow.repo-local.event.v1",
+        "kind": "event",
+        "event": "decision.recorded",
+        "created_at": "2026-09-15T15:21:27+02:00",
+        "task_id": "task-design-readiness",
+        "agent": "codex-astra-high",
+        "data": {
+          "decision_id": "explicit-task-decisions-govern-readiness-v1",
+          "title": "Reuse explicit decision dependencies and content review for task readiness",
+          "status": "accepted",
+          "context": "Authorized task asks for minimum compatible readiness improvement. Audit found architecture claim returns early for none/local tasks before inspecting explicit governing references. Structural checks and process success do not judge semantic adequacy.",
+          "decision": "Honor explicitly declared architecture scope/decision dependencies even at none/local impact, without requiring new metadata or conformance on unreferenced simple tasks. Retain existing material/foundational requirements. Strengthen repo-local authoring and native build/critic guidance with a source-grounded review disposition and matching requirement evidence. No new readiness boolean, keyword classifier, global skill change or approval system.",
+          "consequences": [
+            "Unreferenced none/local tasks and legacy history remain unchanged; explicitly missing, draft or non-accepted governing dependencies prevent dependent claim and finish.",
+            "Research may examine unresolved choices within research-only scope; it must not declare the unresolved proposed rule as an accepted implementation prerequisite.",
+            "Routine delegated tuning stays autonomous. Unsupported bug-fix or requested-outcome claims remain pending/blocked through existing outcome and critic paths."
+          ]
+        }
+      }
+    ],
+    "applicable_architecture": {
+      "enabled": true,
+      "classification": {
+        "impact": "material",
+        "concerns": [],
+        "conformance_required": true,
+        "human_gate": "none"
+      },
+      "briefs": [
+        {
+          "schema": "go-workflow.architecture-brief.v1",
+          "kind": "architecture_brief",
+          "id": "architecture-lane-governance",
+          "project": "go-workflow-stack",
+          "title": "Architecture lane governance contract",
+          "status": "accepted",
+          "owner": "go-workflow-stack maintainers",
+          "outcomes": [
+            "Consequential work cannot complete without traceability to an accepted governing architecture decision."
+          ],
+          "scope": {
+            "in": [
+              "Architecture classification, claim preflight and finish conformance behavior"
+            ],
+            "out": [
+              "Mandating a newly authored ADR for every implementation task"
+            ],
+            "systems": [
+              "go-workflow architecture lane"
+            ],
+            "boundaries": [
+              "Task metadata, scoped briefs, decision ledger and architecture event stream"
+            ]
+          },
+          "stakeholders": [
+            {
+              "role": "workflow-user",
+              "concerns": [
+                "low ceremony",
+                "decision traceability",
+                "clear human authority"
+              ],
+              "decision_rights": [
+                "accept or revise governing architecture decisions and risks"
+              ]
+            },
+            {
+              "role": "executing-agent",
+              "concerns": [
+                "deterministic preflight",
+                "exact relevant context",
+                "actionable failure messages"
+              ],
+              "decision_rights": [
+                "propose options and verify conformance without claiming human authority"
+              ]
+            }
+          ],
+          "constraints": [
+            "The existing .go/decisions/events.jsonl ledger remains the only decision source of truth.",
+            "Legacy repositories and none/local tasks remain backward compatible.",
+            "A task may reuse an existing accepted governing decision; the gate must not force duplicate ADRs."
+          ],
+          "quality_attributes": [
+            {
+              "id": "governing-decision-traceability",
+              "scenario": "A task is effectively classified as material or foundational and reaches claim or finish preflight.",
+              "measure": "Material or foundational tasks with zero exact accepted governing decision references",
+              "threshold": 0
+            }
+          ],
+          "risks": [
+            "An overly literal gate could incentivize meaningless ADR creation instead of reuse of a real governing decision."
+          ],
+          "open_questions": [],
+          "decision_ids": [
+            "material-work-requires-governing-decision-v1"
+          ]
+        }
+      ],
+      "principles": [
+        {
+          "id": "repo-local-state",
+          "statement": "Project workflow state lives in .go/ next to code.",
+          "rationale": "A fresh clone should explain current direction and next work.",
+          "enforcement": "go-workflow-stack validate/readback"
+        },
+        {
+          "id": "json-first",
+          "statement": "Current state is JSON and append-only history is JSONL.",
+          "rationale": "Agents need deterministic, diffable contracts.",
+          "enforcement": "schema validation and CLI checks"
+        },
+        {
+          "id": "goal-contract-before-execution",
+          "statement": "Every autonomous go run must define or repair the end goal, acceptance, verification, and task boundary before implementation.",
+          "rationale": "Autonomy without an explicit goal becomes random feature generation.",
+          "enforcement": "router/preflight blocks or repairs missing vision, principles, hierarchy, and executable task state"
+        },
+        {
+          "id": "command-train-not-command-spam",
+          "statement": "A bare go on a valid .go repo starts the agent command train instead of returning micro-commands for Viggo to run.",
+          "rationale": "Viggo should provide direction, not repeatedly trigger next/claim/recheck/devil/finish phases.",
+          "enforcement": "Hermes skill and CLI handoff require immediate tool execution until done, blocker, or budget"
+        },
+        {
+          "id": "first-green-is-not-done",
+          "statement": "A task is not done at first passing verification; recheck/devil/critic and repair/self-reflect must run for non-trivial work.",
+          "rationale": "Viggo consistently finds gaps after recheck/selfimprove, so the loop must internalize that review stack.",
+          "enforcement": "loop conductor requires critic verdict before finish for code/docs/contracts/public behavior"
+        },
+        {
+          "id": "capacity-before-parallelism",
+          "statement": "The go loop defaults to solo or lead-plus-one-worker; parallel builders require disjoint modify scopes and a reviewer lane, while overlapping modify scopes remain serial.",
+          "rationale": "More agents can increase context burn, file collisions, and false progress unless capacity and review are explicit.",
+          "enforcement": "auto/go-loop handoff exposes execution_policy.capacity and regression tests cover solo, serial-review, and disjoint-parallel cases"
+        },
+        {
+          "id": "abc-release-evidence",
+          "statement": "Planned: de runner beheert de volledige release en sluit de taak pas na het vereiste bewijs.",
+          "rationale": "Model-success en lokaal afgerond werk bewijzen geen gepubliceerde versie.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-explicit-model-contract",
+          "statement": "Planned: model, effort en effectieve runtime-instellingen zijn expliciet en blijven behouden bij hervatten.",
+          "rationale": "Voorkomt metadata zonder effect en stille modelwissels.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-durable-worker-context",
+          "statement": "Planned: voortgang en verifieerbare contextsnapshots leven in .go; workers kunnen op veilige grenzen worden vervangen.",
+          "rationale": "Overdracht en herstel mogen niet afhankelijk zijn van één levende chat.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-task-workspace",
+          "statement": "Planned: één branch/worktree per taak met gevalideerde identiteit, scope en exclusief schrijverschap; modelwissels behouden de werkplek.",
+          "rationale": "Voorkomt gebruikerswerkverlies, dubbele workers en losse worktreequeues.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-final-candidate-proof",
+          "statement": "Planned: fasebewijs is getypeerd en aan geteste inhoud gebonden; integratie of versievoorbereiding invalideert getroffen checks.",
+          "rationale": "Veld-aanwezigheid en groen vóór rebase bewijzen geen correcte release.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        },
+        {
+          "id": "abc-selective-legacy-reuse",
+          "statement": "Planned: vertaal relevante fasecontracten en regressies; laad skills naar taak/risico en behoud de verplichte lifecycle.",
+          "rationale": "Behoud oude garanties zonder de monolithische runtime of ongewenste automatisering terug te brengen.",
+          "enforcement": "Released stack v0.3.26 and template v0.3.16 prove the opt-in model/lifecycle contract, owned task workspace and final evidence gates. New projects must explicitly choose profiles and destinations; no implicit model, publication or deployment authority.",
+          "status": "accepted",
+          "implementation_status": "released_and_verified",
+          "plan_ref": ".go/plans/abc-lifecycle.json"
+        }
+      ],
+      "decisions": [
+        {
+          "schema": "go-workflow.repo-local.event.v1",
+          "kind": "event",
+          "event": "decision.recorded",
+          "created_at": "2026-08-27T08:47:30+02:00",
+          "task_id": "require-material-architecture-decisions",
+          "agent": "hermes",
+          "data": {
+            "decision_id": "material-work-requires-governing-decision-v1",
+            "title": "Require accepted governing decisions for consequential tasks",
+            "status": "accepted",
+            "context": "The released architecture lane can currently claim and finish material work when a brief defines quality attributes but neither the task nor its applicable briefs reference any decision. Viggo explicitly authorized closing this gap with Go after reviewing the trade-off.",
+            "decision": "Every effectively material or foundational task must resolve at least one exact accepted governing decision from its task metadata or applicable accepted briefs. Reusing an existing governing decision is preferred; a new per-task ADR is not required when an accepted decision already governs the work.",
+            "consequences": [
+              "Claim fails with an actionable missing-governing-decision finding when the combined reference set is empty.",
+              "Existing missing or non-accepted referenced decisions continue to fail closed.",
+              "None/local tasks and legacy repositories remain unaffected."
+            ]
+          }
+        }
+      ],
+      "quality_attributes": [
+        {
+          "id": "governing-decision-traceability",
+          "scenario": "A task is effectively classified as material or foundational and reaches claim or finish preflight.",
+          "measure": "Material or foundational tasks with zero exact accepted governing decision references",
+          "threshold": 0
+        }
+      ],
+      "open_deviations": [],
+      "active_waivers": [],
+      "missing_scope_refs": [],
+      "missing_decision_ids": []
+    },
+    "task_design_review": {
+      "kind": "review_instructions_not_verdict",
+      "dispositions": [
+        "ready",
+        "design_research_first",
+        "blocked_on_material_decision"
+      ],
+      "evidence_required": "Concrete reasons and inspected source/evidence references in existing task/run review evidence.",
+      "author": "Before implementation, assess task design from the actual task, referenced decisions and evidence. For substantial work, identify observable before/after behavior, relevant states/transitions and edge cases, boundaries/non-goals, dependencies and matching proof. Distinguish accepted rules, proposals, bounded delegated tuning and unresolved material choices with their owner and resolution gate. Record ready, design_research_first or blocked_on_material_decision with concrete reasons and source/evidence references in the existing task/run review evidence; the label alone proves nothing. A schema-valid task, keyword match or long description does not establish semantic readiness. Use existing architecture decision references and opted-in execution dependencies for real prerequisites; do not hide blocking dependencies in prose. Research-only work can resolve open choices within its own scope; do not implement the dependent behavior or silently change a fix request into research completion. Routine reversible tuning remains delegated within stated bounds; a trivial fix needs only proportionate behavior and verification, not a new ADR or user approval. If a material implementation choice is unresolved, report the blocker and research/decision needed before product edits; do not invent the answer.",
+      "critic": "Review semantic adequacy against the original requested outcomes, not just schema validity or successful processes. Inspect the behavior, relevant state/edge cases, accepted rules, delegated bounds and actual evidence. Explain blocking gaps with source references and name which R# remains unproven. An unknown root cause or unreproduced reported bug is not a verified fix; a hypothesis or preparation document does not satisfy a requested behavior correction. Leave those outcomes pending/blocked through the existing result protocol rather than declaring success. Research can succeed on research evidence only when that is the authorized task outcome. Use relevant runtime, visual, motion or listening evidence and references when the change needs them; do not demand irrelevant media or a new approval for bounded tuning. Content judgment belongs to the reviewer and must include reasons and inspected evidence; a readiness label or unverified self-attestation is insufficient."
+    }
+  },
+  "feedback": {
+    "checks": [
+      {
+        "task_id": "autonomy-01",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+        "returncode": 0,
+        "stdout": "........................................................................ [100%]\n72 passed in 4.42s\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      {
+        "task_id": "autonomy-01",
+        "command": "make check",
+        "returncode": 0,
+        "stdout": "rgv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\n.go/tasks/open/smoke-task.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\nsmoke-task — Smoke task\n/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke-bundle.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\n.go/imports/adopt-smoke-20260919T061914200102Z.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\nspike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke\nproject: spike-smoke\ncreated_tasks: first, second\nnext: first\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      {
+        "task_id": "autonomy-01",
+        "command": "python3 cli/go.py validate .",
+        "returncode": 0,
+        "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-60c4qs7a/candidate/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      {
+        "task_id": "autonomy-01",
+        "command": "git diff --check",
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      }
+    ],
+    "result": {
+      "schema": "go-workflow.agent-adapter-result.v1",
+      "phase": "repair",
+      "status": "blocked",
+      "summary": "Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload exists in docs/autonomous-campaign.md:163. Worker cannot write canonical .go state. No edits made. Existing R1/R2 schema, validator and fixtures retain snapshot-bound evidence of 72 passing tests. Verification rerun: diff check and validation with modern Python passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.",
+      "hook": "repair",
+      "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the repair adapter for go-workflow-stack. In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope. Edit only paths allowed by the task scope. Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result. Run the task verification commands before exiting. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Exit non-zero if you cannot safely repair within scope. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+      "returncode": 1,
+      "stdout": "I’ll read and verify the adapter context, repair only within the task’s scope, and run its verification commands.\n\nThe critic’s blocker is R3: the governing campaign architecture is still draft, with no adoption decision recorded. This worker is explicitly barred from writing canonical `.go` state, so the controller must resolve that gap. I’ll check the existing implementation and rerun verification to give the controller current evidence.\n\nR3 remains blocked on the controller’s adoption step. `git diff --check` and repository validation pass with the available modern Python. The prescribed pytest command cannot access its uv cache, and `make check` hits the managed-worker mutation guard in its temporary smoke fixtures. I’ll report those limits alongside the earlier snapshot-bound passing checks; no product or canonical state changes are needed from this worker.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"blocked\",\"summary\":\"Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload exists in docs/autonomous-campaign.md:163. Worker cannot write canonical .go state. No edits made. Existing R1/R2 schema, validator and fixtures retain snapshot-bound evidence of 72 passing tests. Verification rerun: diff check and validation with modern Python passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.\"}",
+      "stderr": "2026-09-19T06:21:20.363629Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.363648Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.379403Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.384489Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.387881Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.391016Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.394168Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.397363Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.400623Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.403977Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.410803Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.413922Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.417054Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.420176Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.860928Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.860941Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:22:08.953848Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n2026-09-19T06:22:09.050649Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:22:09.050660Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+      "timed_out": false,
+      "context_ref": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/context.json",
+        "sha256": "38ffaf35022a5a97951540ec75c59a5c4273ccd0f9fa19fa68ab815d067a4d48",
+        "snapshot_id": "1ecf9936f40a482ab62177d2fdeb45b0"
+      },
+      "process_result_ref": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/process-result.json",
+        "sha256": "abd8f3035e35cf3e62cfa9ed6936079d8cad64ea51ff46bbca0abe1a240d0d73"
+      },
+      "model_selection": {
+        "requested": {
+          "id": "gpt-6-astra",
+          "effort": "high"
+        },
+        "effective": null,
+        "confirmation": "unconfirmed",
+        "reason": "Runtime arguments enforced; no independent effective-model attestation",
+        "capabilities": {
+          "adapter": "codex",
+          "model_control": true,
+          "capability_source": "codex app-server model/list",
+          "reason": null
+        }
+      },
+      "usage": {
+        "source": "codex_json_stream",
+        "turns": [
+          {
+            "input_tokens": 620357,
+            "cached_input_tokens": 549504,
+            "output_tokens": 2468
+          }
+        ],
+        "elapsed_seconds": 99.89409845799673,
+        "provider_invoice_cost_usd": null
+      }
+    }
+  },
+  "feedback_refs": [
+    {
+      "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/context.json",
+      "sha256": "38ffaf35022a5a97951540ec75c59a5c4273ccd0f9fa19fa68ab815d067a4d48"
+    },
+    {
+      "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/process-result.json",
+      "sha256": "abd8f3035e35cf3e62cfa9ed6936079d8cad64ea51ff46bbca0abe1a240d0d73"
+    }
+  ],
+  "raw_evidence": {
+    "diff": {
+      "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/changes.patch",
+      "sha256": "eb24d10040b93f0f9296b83c951566d2d1ba1a6294f1592985f67ec5ff376786"
+    },
+    "files": {
+      "docs/architecture-lane.md": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da",
+        "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+      },
+      "docs/autonomous-campaign.md": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11",
+        "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+      },
+      "go_workflow/campaign_contracts.py": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932",
+        "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+      },
+      "go_workflow/cli.py": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6",
+        "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+      },
+      "schemas/campaign-contract.schema.json": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f",
+        "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+      },
+      "tests/test_autonomy_contracts.py": {
+        "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/blob-2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b",
+        "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+      }
+    }
+  },
+  "remaining_outcomes": [
+    {
+      "id": "R1",
+      "text": "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "release_receipt": null,
+  "notepad_policy": "Supplementary explanation; cannot override task, code, phase or raw evidence"
+}

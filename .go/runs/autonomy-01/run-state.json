@@ -20,25 +20,105 @@
     "generation": "902a4a79d55e4b0a80b826495d4321ac",
     "state": "ready"
   },
-  "phase": "repair",
-  "attempt": 4,
-  "check_index": 2,
+  "phase": "release",
+  "attempt": 7,
+  "check_index": 4,
   "checks": [
     {
       "task_id": "autonomy-01",
       "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
       "returncode": 0,
-      "stdout": "........................................................................ [100%]\n72 passed in 4.68s\n",
+      "stdout": "........................................................................ [100%]\n72 passed in 4.35s\n",
       "stderr": "",
-      "timed_out": false
+      "timed_out": false,
+      "verification_source": {
+        "schema": "go-workflow.verification-source.v1",
+        "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+        "changed_files": [
+          "docs/architecture-lane.md",
+          "docs/autonomous-campaign.md",
+          "go_workflow/campaign_contracts.py",
+          "go_workflow/cli.py",
+          "schemas/campaign-contract.schema.json",
+          "tests/test_autonomy_contracts.py"
+        ],
+        "isolation": "unregistered_disposable_checkout"
+      },
+      "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
     },
     {
       "task_id": "autonomy-01",
       "command": "make check",
-      "returncode": 2,
-      "stdout": "\"mode\"] == \"go-loop\" and p[\"continues_beyond_initial_tasks\"]' /tmp/go-loop-smoke.json; \\\n\t  python3 cli/go.py go-loop $TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-alias-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"mode\"] == \"go-loop\" and p[\"next_tasks\"] == [\"first\", \"second\"]' /tmp/go-loop-alias-smoke.json; \\\n\t  git -C $TMP/spike-smoke add .go README.md .gitignore LICENSE SECURITY.md CONTRIBUTING.md CHANGELOG.md Makefile go scripts/check.sh; \\\n\t  git -C $TMP/spike-smoke -c user.name=Make -c user.email=make@example.com commit -m \"seed spike smoke\" -q; \\\n\t  python3 cli/go.py auto $TMP/spike-smoke --max-tasks 1 --execute --agent make-check --json >/tmp/go-auto-execute-smoke.json; \\\n\t  python3 -c 'import json,sys,pathlib; p=json.load(open(sys.argv[1])); r=pathlib.Path(sys.argv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\n",
-      "stderr": "  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nerror: Use the control checkout for workflow mutations; a worker may only record its owned task outcomes\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 338, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nmake: *** [check] Error 1\n",
-      "timed_out": false
+      "returncode": 0,
+      "stdout": "rgv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke/.go\n.go/tasks/open/smoke-task.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke/.go\nsmoke-task — Smoke task\n/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke-bundle.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/import-target/.go\n.go/imports/adopt-smoke-20260919T062823737625Z.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/import-target/.go\nspike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/spike-smoke\nproject: spike-smoke\ncreated_tasks: first, second\nnext: first\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/spike-smoke/.go\n",
+      "stderr": "",
+      "timed_out": false,
+      "verification_source": {
+        "schema": "go-workflow.verification-source.v1",
+        "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+        "changed_files": [
+          "docs/architecture-lane.md",
+          "docs/autonomous-campaign.md",
+          "go_workflow/campaign_contracts.py",
+          "go_workflow/cli.py",
+          "schemas/campaign-contract.schema.json",
+          "tests/test_autonomy_contracts.py"
+        ],
+        "isolation": "unregistered_disposable_checkout"
+      },
+      "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+    },
+    {
+      "task_id": "autonomy-01",
+      "command": "python3 cli/go.py validate .",
+      "returncode": 0,
+      "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-05j_6bty/candidate/.go\n",
+      "stderr": "",
+      "timed_out": false,
+      "verification_source": {
+        "schema": "go-workflow.verification-source.v1",
+        "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+        "changed_files": [
+          "docs/architecture-lane.md",
+          "docs/autonomous-campaign.md",
+          "go_workflow/campaign_contracts.py",
+          "go_workflow/cli.py",
+          "schemas/campaign-contract.schema.json",
+          "tests/test_autonomy_contracts.py"
+        ],
+        "isolation": "unregistered_disposable_checkout"
+      },
+      "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+    },
+    {
+      "task_id": "autonomy-01",
+      "command": "git diff --check",
+      "returncode": 0,
+      "stdout": "",
+      "stderr": "",
+      "timed_out": false,
+      "verification_source": {
+        "schema": "go-workflow.verification-source.v1",
+        "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+        "changed_files": [
+          "docs/architecture-lane.md",
+          "docs/autonomous-campaign.md",
+          "go_workflow/campaign_contracts.py",
+          "go_workflow/cli.py",
+          "schemas/campaign-contract.schema.json",
+          "tests/test_autonomy_contracts.py"
+        ],
+        "isolation": "unregistered_disposable_checkout"
+      },
+      "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
     }
   ],
   "phase_evidence": [
@@ -654,6 +734,1860 @@
         "contract_context_sha256": "166a80dbb9bd759c249f18a25d18afd8e17d95bfdf10f0a7d97a74bc664fde58",
         "control_base_head": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
       }
+    },
+    {
+      "phase": "repair",
+      "attempt": 4,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "repair",
+        "status": "success",
+        "summary": "Attempt 4: verified context; preserved candidate without edits. Design disposition ready under accepted architecture/ABC decisions for read-only contract validation. The repaired verification-isolation helper resolved the prior workspace-guard failure: byte-verified candidate passed make check, validation and diff checks. R1/R2 and R3 positive/negative/legacy coverage passed all 72 tests using Python 3.12.13, pytest 8.4.2 and jsonschema 4.26.0; uv bootstrap lacked offline cache metadata. Evidence: /tmp/autonomy-01-repair-04-source-proof.json, /tmp/autonomy-01-repair-04-checks.json and /tmp/autonomy-01-repair-04-local-pytest.log. R3 canonical adoption and R4 critic/shipping remain pending for the controller. Context reverified unchanged.",
+        "hook": "repair",
+        "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the repair adapter for go-workflow-stack. In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope. Edit only paths allowed by the task scope. Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result. Run the task verification commands before exiting. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Exit non-zero if you cannot safely repair within scope. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 0,
+        "stdout": "I’ll read and verify the repair context, apply the task’s design review, then make scoped changes and run the required verification.\n\nI’m using the debug skill to check the verification failure. The context records a separate repair for running checks in isolated copies, but this worker is still on the older base. I’ll inspect that repair and check whether it provides a safe verification path for this candidate.\n\nDesign disposition: `ready` for the contract-only change, grounded in the accepted architecture and ABC decisions. The existing code and tests cover intent/R# traceability, bounded authority, decision states and legacy behavior. I’ll use the repaired verification helper to test a byte-verified disposable copy; canonical adoption and shipping remain with the controller.\n\n`make check` now passes in the byte-verified copy, resolving the earlier workspace-guard failure without changing product code. Validation and whitespace checks pass too. The `uv` run could not resolve packages from its writable offline cache; I found a local Python 3.12 environment with pytest 8.4.2 and jsonschema and will run the same tests there.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"Attempt 4: verified context; preserved candidate without edits. Design disposition ready under accepted architecture/ABC decisions for read-only contract validation. The repaired verification-isolation helper resolved the prior workspace-guard failure: byte-verified candidate passed make check, validation and diff checks. R1/R2 and R3 positive/negative/legacy coverage passed all 72 tests using Python 3.12.13, pytest 8.4.2 and jsonschema 4.26.0; uv bootstrap lacked offline cache metadata. Evidence: /tmp/autonomy-01-repair-04-source-proof.json, /tmp/autonomy-01-repair-04-checks.json and /tmp/autonomy-01-repair-04-local-pytest.log. R3 canonical adoption and R4 critic/shipping remain pending for the controller. Context reverified unchanged.\"}",
+        "stderr": "2026-09-19T06:16:23.948734Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:16:23.948753Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:16:23.980814Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:23.984316Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:23.987845Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:23.991465Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:23.994914Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:23.998424Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.001619Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.004658Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.007711Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.010757Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.014061Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.017190Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:16:24.452270Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:16:24.452279Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-04-82fd66fe819646a4889315e7d51ccb1a/context.json",
+          "sha256": "e010da159c8c076d920b7661e75043d12a1bf308b38f41c7640d4f5b3db8efd8",
+          "snapshot_id": "82fd66fe819646a4889315e7d51ccb1a"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-04-82fd66fe819646a4889315e7d51ccb1a/process-result.json",
+          "sha256": "2cb11b8bc3900bd34f77212eeda324fc05fa85536b5cfc90feb46fa308bbdd49"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 943338,
+              "cached_input_tokens": 867328,
+              "output_tokens": 3935
+            }
+          ],
+          "elapsed_seconds": 161.7487462500576,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 4,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+        "returncode": 0,
+        "stdout": "........................................................................ [100%]\n72 passed in 4.42s\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 4,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "make check",
+        "returncode": 0,
+        "stdout": "rgv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\n.go/tasks/open/smoke-task.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\nsmoke-task — Smoke task\n/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke-bundle.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\n.go/imports/adopt-smoke-20260919T061914200102Z.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\nspike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke\nproject: spike-smoke\ncreated_tasks: first, second\nnext: first\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 4,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "python3 cli/go.py validate .",
+        "returncode": 0,
+        "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-60c4qs7a/candidate/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 4,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "git diff --check",
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "critic",
+      "attempt": 4,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "critic",
+        "status": "blocked",
+        "summary": "R3 unproven: canonical .go/architecture/briefs/autonomous-campaign.json remains draft with empty decision_ids; decision ledger lacks campaign adoption. docs/autonomous-campaign.md:163-200 supplies only a deferred adoption payload. Verified snapshot/raw hashes and scoped diff; recorded checks passed (72 tests). Controller adoption and refreshed evidence required; R4 release receipt remains absent.",
+        "hook": "critic",
+        "command": "codex exec --sandbox read-only --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the blocking critic for a repo-local .go task. Review the current repository result for task autonomy-01 against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence. Do not edit files. Apply task_design_review.critic from the verified context and cite actual inspected evidence for your verdict. Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 1,
+        "stdout": "I’ll verify the task context, inspect the diff and verification evidence, and apply the required critic checks without editing files.\nThe context snapshot verifies, and its recorded checks passed against this candidate. The documentation says architecture adoption is still pending, which leaves R3 unproven. I’m checking the canonical records and the validator’s edge cases before finalizing the verdict.\n**Blocked — R3 remains unfulfilled.** The canonical [architecture brief](/Users/viggomeesters/Dev/go-workflow-stack/.go/architecture/briefs/autonomous-campaign.json:7) is still `draft`, with no decision IDs. The decision ledger contains no campaign adoption decision. [The implementation documentation](/Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01/docs/autonomous-campaign.md:163) explicitly provides an adoption payload for later recording; that does not satisfy R3’s requirement to adopt the governing architecture.\n\nSnapshot verification and all raw-evidence hashes passed. All six changed files are within scope. Recorded candidate-bound verification shows 72 passing tests and successful remaining checks. Read-only behavioral probes passed; an independent pytest rerun could not collect because this interpreter lacks `jsonschema`.\n\nThe controller must complete canonical adoption and refresh review evidence. R4 delivery remains pending (`release_receipt: null`); this review establishes no release completion.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"blocked\",\"summary\":\"R3 unproven: canonical .go/architecture/briefs/autonomous-campaign.json remains draft with empty decision_ids; decision ledger lacks campaign adoption. docs/autonomous-campaign.md:163-200 supplies only a deferred adoption payload. Verified snapshot/raw hashes and scoped diff; recorded checks passed (72 tests). Controller adoption and refreshed evidence required; R4 release receipt remains absent.\"}",
+        "stderr": "2026-09-19T06:19:21.403527Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:19:21.403546Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:19:21.419496Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.424282Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.427607Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.430749Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.433870Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.436954Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.440317Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.443359Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.450067Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.453171Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.456259Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.459364Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:19:21.922698Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:19:21.922708Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:19:32.575366Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/critic-04-80ab603af24648c1a4114353834f2e3e/context.json",
+          "sha256": "ddb980b8bbb80211c39f14754f7a46d28fffb7389e05537a46f8703459eee267",
+          "snapshot_id": "80ab603af24648c1a4114353834f2e3e"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/critic-04-80ab603af24648c1a4114353834f2e3e/process-result.json",
+          "sha256": "618245bad1f250bab07d4ce52712766bf1a2e4cdf821e13c9fa85be0ae48ad86"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 478919,
+              "cached_input_tokens": 404096,
+              "output_tokens": 3062
+            }
+          ],
+          "elapsed_seconds": 117.14366483304184,
+          "provider_invoice_cost_usd": null
+        },
+        "verdict_text": "I’ll verify the task context, inspect the diff and verification evidence, and apply the required critic checks without editing files.\nThe context snapshot verifies, and its recorded checks passed against this candidate. The documentation says architecture adoption is still pending, which leaves R3 unproven. I’m checking the canonical records and the validator’s edge cases before finalizing the verdict.\n**Blocked — R3 remains unfulfilled.** The canonical [architecture brief](/Users/viggomeesters/Dev/go-workflow-stack/.go/architecture/briefs/autonomous-campaign.json:7) is still `draft`, with no decision IDs. The decision ledger contains no campaign adoption decision. [The implementation documentation](/Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01/docs/autonomous-campaign.md:163) explicitly provides an adoption payload for later recording; that does not satisfy R3’s requirement to adopt the governing architecture.\n\nSnapshot verification and all raw-evidence hashes passed. All six changed files are within scope. Recorded candidate-bound verification shows 72 passing tests and successful remaining checks. Read-only behavioral probes passed; an independent pytest rerun could not collect because this interpreter lacks `jsonschema`.\n\nThe controller must complete canonical adoption and refresh review evidence. R4 delivery remains pending (`release_receipt: null`); this review establishes no release completion.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"blocked\",\"summary\":\"R3 unproven: canonical .go/architecture/briefs/autonomous-campaign.json remains draft with empty decision_ids; decision ledger lacks campaign adoption. docs/autonomous-campaign.md:163-200 supplies only a deferred adoption payload. Verified snapshot/raw hashes and scoped diff; recorded checks passed (72 tests). Controller adoption and refreshed evidence required; R4 release receipt remains absent.\"}"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "repair",
+      "attempt": 5,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "repair",
+        "status": "blocked",
+        "summary": "Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload exists in docs/autonomous-campaign.md:163. Worker cannot write canonical .go state. No edits made. Existing R1/R2 schema, validator and fixtures retain snapshot-bound evidence of 72 passing tests. Verification rerun: diff check and validation with modern Python passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.",
+        "hook": "repair",
+        "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the repair adapter for go-workflow-stack. In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope. Edit only paths allowed by the task scope. Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result. Run the task verification commands before exiting. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Exit non-zero if you cannot safely repair within scope. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 1,
+        "stdout": "I’ll read and verify the adapter context, repair only within the task’s scope, and run its verification commands.\n\nThe critic’s blocker is R3: the governing campaign architecture is still draft, with no adoption decision recorded. This worker is explicitly barred from writing canonical `.go` state, so the controller must resolve that gap. I’ll check the existing implementation and rerun verification to give the controller current evidence.\n\nR3 remains blocked on the controller’s adoption step. `git diff --check` and repository validation pass with the available modern Python. The prescribed pytest command cannot access its uv cache, and `make check` hits the managed-worker mutation guard in its temporary smoke fixtures. I’ll report those limits alongside the earlier snapshot-bound passing checks; no product or canonical state changes are needed from this worker.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"blocked\",\"summary\":\"Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload exists in docs/autonomous-campaign.md:163. Worker cannot write canonical .go state. No edits made. Existing R1/R2 schema, validator and fixtures retain snapshot-bound evidence of 72 passing tests. Verification rerun: diff check and validation with modern Python passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.\"}",
+        "stderr": "2026-09-19T06:21:20.363629Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.363648Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.379403Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.384489Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.387881Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.391016Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.394168Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.397363Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.400623Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.403977Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.410803Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.413922Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.417054Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.420176Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:21:20.860928Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:21:20.860941Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:22:08.953848Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n2026-09-19T06:22:09.050649Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:22:09.050660Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/context.json",
+          "sha256": "38ffaf35022a5a97951540ec75c59a5c4273ccd0f9fa19fa68ab815d067a4d48",
+          "snapshot_id": "1ecf9936f40a482ab62177d2fdeb45b0"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-05-1ecf9936f40a482ab62177d2fdeb45b0/process-result.json",
+          "sha256": "abd8f3035e35cf3e62cfa9ed6936079d8cad64ea51ff46bbca0abe1a240d0d73"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 620357,
+              "cached_input_tokens": 549504,
+              "output_tokens": 2468
+            }
+          ],
+          "elapsed_seconds": 99.89409845799673,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "repair",
+      "attempt": 6,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "repair",
+        "status": "blocked",
+        "summary": "Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload is in docs/autonomous-campaign.md. No product edits; context reverified unchanged. Existing R1/R2 schema, validator and fixtures have snapshot-bound evidence of 72 passing tests. Required checks attempted: diff check and validation under Python 3.12 passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.",
+        "hook": "repair",
+        "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the repair adapter for go-workflow-stack. In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope. Edit only paths allowed by the task scope. Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result. Run the task verification commands before exiting. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Exit non-zero if you cannot safely repair within scope. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 1,
+        "stdout": "I’ll verify the adapter request and context, repair within the task’s allowed scope, then run its verification commands.\nThe verified context still leaves R3 blocked: the campaign architecture brief is draft, and its adoption decision is unrecorded. The adoption payload is ready in `docs/autonomous-campaign.md`, but your worker instructions reserve canonical `.go` changes for the controller. I’ll rerun the required checks and report that blocker without changing product behavior.\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"blocked\",\"summary\":\"Design disposition: blocked_on_material_decision. R3 requires controller adoption: canonical autonomous-campaign brief remains draft with no decision IDs; adoption payload is in docs/autonomous-campaign.md. No product edits; context reverified unchanged. Existing R1/R2 schema, validator and fixtures have snapshot-bound evidence of 72 passing tests. Required checks attempted: diff check and validation under Python 3.12 passed; pytest blocked by uv cache permissions; make check blocked by managed-worker mutation guard. Controller must adopt architecture and refresh verification/critic evidence. R4 shipping remains pending for publisher.\"}",
+        "stderr": "2026-09-19T06:23:02.159712Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:23:02.159732Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:23:02.175835Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.180334Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.183977Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.187145Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.190237Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.193381Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.197009Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.204861Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.208161Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.211286Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.214420Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.217483Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:23:02.630794Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:23:02.630806Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/context.json",
+          "sha256": "903a339cf21539f111868c606007292fcaeba964ae8237d317627d2adb032d2b",
+          "snapshot_id": "eef634a7d2f6494881bb17570b7aaca1"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-06-eef634a7d2f6494881bb17570b7aaca1/process-result.json",
+          "sha256": "1ee0315bfce9f2f7725fb411d5c1f3eef554d437ae8d405b22a9d5dc522bc22c"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 579056,
+              "cached_input_tokens": 526336,
+              "output_tokens": 1680
+            }
+          ],
+          "elapsed_seconds": 91.21490783290938,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "repair",
+      "attempt": 7,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "repair",
+        "status": "success",
+        "summary": "Design disposition: ready; accepted bounded-serial-campaign-contract-v1 and canonical brief resolve the prior blocker. Corrected stale adoption text in docs/autonomous-campaign.md. R1/R2 schema, validator and authority/traceability fixtures preserved; R3 adoption confirmed with positive/negative/legacy coverage. All 72 focused tests passed using cached Python 3.12 dependencies after uv cache denial; make check passed in a SHA-256-matched temporary copy after the worker guard blocked smoke fixtures. Repository validation and diff check passed; recheck found no further gaps. Canonical state and release files unchanged. R4 final critic, publication and readback remain pending for the controller.",
+        "hook": "repair",
+        "command": "codex exec --sandbox workspace-write --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the repair adapter for go-workflow-stack. In the repository named by GO_REPO, fix the task named by GO_TASK_ID using the GO_ATTEMPT and GO_STRATEGY context. Read GO_TASK_JSON from the environment; if it contains a snapshot reference, use GO_CONTEXT_PATH. If GO_CONTEXT_PATH exists, run GO_CONTEXT_VERIFY_COMMAND before writing and read the complete context and raw feedback from that file. Otherwise read GO_CONTEXT_JSON. Obey its vision, architecture principles, hierarchy, acceptance, verification, and task scope. Edit only paths allowed by the task scope. Apply task_design_review.author from the verified context before changing product behavior; report its grounded disposition in your phase result. Run the task verification commands before exiting. Report implemented R# evidence in your phase result; the controller owns canonical outcome updates. Do not run task outcome commands or write canonical .go state from this worker. Reading and verifying the canonical context is permitted. Leave deferred shipping requirements pending for the controller publisher. Report blockers explicitly. Do not publish or change a configured release version/changelog; the controller prepares these before final verification. Exit non-zero if you cannot safely repair within scope. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 0,
+        "stdout": "I’ll verify the adapter context, check the task scope and design review requirements, then repair and run the required checks without changing canonical workflow state.\nThe new snapshot includes the accepted campaign decision, so the previous blocker may be resolved. I’ll check the canonical brief and rerun verification against this candidate; the worktree’s `.go` copy may be stale.\nThe canonical brief is accepted and references `bounded-serial-campaign-contract-v1`. Design disposition is **ready** for this contract-only change: the authority, revision, unresolved-decision and legacy boundaries have matching fixtures, and all 72 focused tests pass. I’ll update the stale adoption text and run `make check` in a byte-matched temporary copy, since the worker guard blocks its disposable smoke fixtures here.\nThe adoption text is corrected, and `make check` passed in the byte-matched temporary copy. Recheck found no further contract-only gaps: all 72 focused tests, Python 3.12 repository validation and `git diff --check` pass. Canonical state and release files are unchanged; final critic and shipping remain with the controller.\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"repair\",\"status\":\"success\",\"summary\":\"Design disposition: ready; accepted bounded-serial-campaign-contract-v1 and canonical brief resolve the prior blocker. Corrected stale adoption text in docs/autonomous-campaign.md. R1/R2 schema, validator and authority/traceability fixtures preserved; R3 adoption confirmed with positive/negative/legacy coverage. All 72 focused tests passed using cached Python 3.12 dependencies after uv cache denial; make check passed in a SHA-256-matched temporary copy after the worker guard blocked smoke fixtures. Repository validation and diff check passed; recheck found no further gaps. Canonical state and release files unchanged. R4 final critic, publication and readback remain pending for the controller.\"}",
+        "stderr": "2026-09-19T06:25:23.937239Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:25:23.937257Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:25:23.953531Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.958087Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.961235Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.964337Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.967448Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.970615Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.973862Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.976962Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.984048Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.987297Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.990519Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:23.993765Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:25:24.409559Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:25:24.409571Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:26:21.083747Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n2026-09-19T06:26:21.109671Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-07-b0ff1e8cb843448aa92f715873a3ee49/context.json",
+          "sha256": "12d31cac66fabcbb1047d44e15d0e080db88f8e70000a5c868e9b5dc6a2d0251",
+          "snapshot_id": "b0ff1e8cb843448aa92f715873a3ee49"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/repair-07-b0ff1e8cb843448aa92f715873a3ee49/process-result.json",
+          "sha256": "c5c978b683042873bf04ebfa4871ec59ab594226ef45684d88fa051151816a90"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 1091312,
+              "cached_input_tokens": 1012736,
+              "output_tokens": 4319
+            }
+          ],
+          "elapsed_seconds": 171.39460083306767,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 7,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+        "returncode": 0,
+        "stdout": "........................................................................ [100%]\n72 passed in 4.35s\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 7,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "make check",
+        "returncode": 0,
+        "stdout": "rgv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke/.go\n.go/tasks/open/smoke-task.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke/.go\nsmoke-task — Smoke task\n/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/adopt-smoke-bundle.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/import-target/.go\n.go/imports/adopt-smoke-20260919T062823737625Z.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/import-target/.go\nspike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/spike-smoke\nproject: spike-smoke\ncreated_tasks: first, second\nnext: first\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.BqQBRLwIvY/spike-smoke/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 7,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "python3 cli/go.py validate .",
+        "returncode": 0,
+        "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-05j_6bty/candidate/.go\n",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "verify",
+      "attempt": 7,
+      "result": {
+        "task_id": "autonomy-01",
+        "command": "git diff --check",
+        "returncode": 0,
+        "stdout": "",
+        "stderr": "",
+        "timed_out": false,
+        "verification_source": {
+          "schema": "go-workflow.verification-source.v1",
+          "candidate_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c",
+          "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+          "changed_files_sha256": "3b697419465f7f7c566363593e50e771e8bf9fe7f2e232b8a1abb13ae061cf07",
+          "changed_files": [
+            "docs/architecture-lane.md",
+            "docs/autonomous-campaign.md",
+            "go_workflow/campaign_contracts.py",
+            "go_workflow/cli.py",
+            "schemas/campaign-contract.schema.json",
+            "tests/test_autonomy_contracts.py"
+          ],
+          "isolation": "unregistered_disposable_checkout"
+        },
+        "code_digest": "7822141b0d27de45a9da12398d7977a8ff2ca0a4f9bd3bd70b0fe3c0fa1e465c"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
+    },
+    {
+      "phase": "critic",
+      "attempt": 7,
+      "result": {
+        "schema": "go-workflow.agent-adapter-result.v1",
+        "phase": "critic",
+        "status": "success",
+        "summary": "No blocking critic findings. Snapshot a60d85cdc6de42ccb8deabd889d5f1da verified before and after review; all six raw file blobs match the scoped candidate. R1/R2 are supported by campaign_contracts.py:29-346, the schema, inspected tests and passing read-only probes for revisions, outcome drift and authority boundaries. R3 is supported by canonical decisions/events.jsonl:27 and the accepted autonomous-campaign brief. Content-bound evidence records 72 passing tests and all four verification commands passing; independent validation and diff checks also passed. The contract-only change preserves existing runtime and historical contracts. R4 commit/push, immutable release and remote readback remain pending controller gates; this verdict approves the critic phase, not task completion.",
+        "hook": "critic",
+        "command": "codex exec --sandbox read-only --ephemeral --json --model gpt-6-astra --config 'model_reasoning_effort=\"high\"' -C /Users/viggomeesters/Documents/Codex/2026-09-19/autonomy/work/autonomy-01 'You are the blocking critic for a repo-local .go task. Review the current repository result for task autonomy-01 against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence. Do not edit files. Apply task_design_review.critic from the verified context and cite actual inspected evidence for your verdict. Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings. Read GO_ADAPTER_REQUEST_JSON as the canonical versioned request. Your final non-empty line must be exactly one compact JSON object matching this shape: {\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"concise evidence-backed result\"} Use status failure or blocked instead of success when the requested phase is not safely complete. Do not put the final JSON object in a Markdown code fence.'",
+        "returncode": 0,
+        "stdout": "I’ll verify the task context and evidence, inspect the diff, and apply the configured critic criteria without editing files.\n\nI’m using the quality-audit skill for code, contract, and architecture review. The snapshot reports passing checks for this candidate; I’ll verify the snapshot and inspect whether those checks cover the requested behavior.\n\nThe snapshot verification passed. The code provides an opt-in validator and leaves execution to later tasks, consistent with this task’s scope. I’m checking revision continuity, authority boundaries, and the documentation’s claim that the governing decision was adopted.\n\nThe read-only probes passed for canonical task binding, revision continuity, evidence preservation, planning restrictions, unresolved decisions, and unlisted tasks. The governing decision and brief are also adopted in canonical state. I found no blocking issue in this contract-only change; R4’s commit, release, and remote readback remain for the controller after this review.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"No blocking critic findings. Snapshot a60d85cdc6de42ccb8deabd889d5f1da verified before and after review; all six raw file blobs match the scoped candidate. R1/R2 are supported by campaign_contracts.py:29-346, the schema, inspected tests and passing read-only probes for revisions, outcome drift and authority boundaries. R3 is supported by canonical decisions/events.jsonl:27 and the accepted autonomous-campaign brief. Content-bound evidence records 72 passing tests and all four verification commands passing; independent validation and diff checks also passed. The contract-only change preserves existing runtime and historical contracts. R4 commit/push, immutable release and remote readback remain pending controller gates; this verdict approves the critic phase, not task completion.\"}",
+        "stderr": "2026-09-19T06:28:31.351922Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:28:31.351940Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:28:31.366816Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.371202Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.374927Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.378541Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.381639Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.384773Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.388464Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.395045Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.398297Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.401414Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.404571Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:31.407758Z  WARN codex_rollout::list: state db discrepancy during find_thread_path_by_id_str_in_subdir: falling_back\n2026-09-19T06:28:32.065759Z  WARN codex_skills::interface: ignoring interface.icon_small: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:28:32.065770Z  WARN codex_skills::interface: ignoring interface.icon_large: icon path with '..' must resolve under plugin assets/\n2026-09-19T06:28:44.576029Z  WARN codex_sandboxing::violation: recorded sandbox violation: resource=filesystem backend=seatbelt reason=operation_not_permitted path=unknown\n",
+        "timed_out": false,
+        "context_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/critic-07-a60d85cdc6de42ccb8deabd889d5f1da/context.json",
+          "sha256": "e06c3de17cb30498b08a0bcf6710049e3cc1a5562a3dbbe07a80fc72c9aa11a9",
+          "snapshot_id": "a60d85cdc6de42ccb8deabd889d5f1da"
+        },
+        "process_result_ref": {
+          "path": "/Users/viggomeesters/Dev/go-workflow-stack/.go/runs/autonomy-01/autonomy-01-20260919/critic-07-a60d85cdc6de42ccb8deabd889d5f1da/process-result.json",
+          "sha256": "24dd8960c36fe5f53bd282d7615b393197865ed2cf8818724d4441d44da0d8c2"
+        },
+        "model_selection": {
+          "requested": {
+            "id": "gpt-6-astra",
+            "effort": "high"
+          },
+          "effective": null,
+          "confirmation": "unconfirmed",
+          "reason": "Runtime arguments enforced; no independent effective-model attestation",
+          "capabilities": {
+            "adapter": "codex",
+            "model_control": true,
+            "capability_source": "codex app-server model/list",
+            "reason": null
+          }
+        },
+        "usage": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 687895,
+              "cached_input_tokens": 614400,
+              "output_tokens": 3919
+            }
+          ],
+          "elapsed_seconds": 156.9264420409454,
+          "provider_invoice_cost_usd": null
+        },
+        "verdict_text": "I’ll verify the task context and evidence, inspect the diff, and apply the configured critic criteria without editing files.\n\nI’m using the quality-audit skill for code, contract, and architecture review. The snapshot reports passing checks for this candidate; I’ll verify the snapshot and inspect whether those checks cover the requested behavior.\n\nThe snapshot verification passed. The code provides an opt-in validator and leaves execution to later tasks, consistent with this task’s scope. I’m checking revision continuity, authority boundaries, and the documentation’s claim that the governing decision was adopted.\n\nThe read-only probes passed for canonical task binding, revision continuity, evidence preservation, planning restrictions, unresolved decisions, and unlisted tasks. The governing decision and brief are also adopted in canonical state. I found no blocking issue in this contract-only change; R4’s commit, release, and remote readback remain for the controller after this review.\n\n{\"schema\":\"go-workflow.agent-adapter-result.v1\",\"phase\":\"critic\",\"status\":\"success\",\"summary\":\"No blocking critic findings. Snapshot a60d85cdc6de42ccb8deabd889d5f1da verified before and after review; all six raw file blobs match the scoped candidate. R1/R2 are supported by campaign_contracts.py:29-346, the schema, inspected tests and passing read-only probes for revisions, outcome drift and authority boundaries. R3 is supported by canonical decisions/events.jsonl:27 and the accepted autonomous-campaign brief. Content-bound evidence records 72 passing tests and all four verification commands passing; independent validation and diff checks also passed. The contract-only change preserves existing runtime and historical contracts. R4 commit/push, immutable release and remote readback remain pending controller gates; this verdict approves the critic phase, not task completion.\"}"
+      },
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_after": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13193,
+            "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      }
     }
   ],
   "effects": {},
@@ -663,9 +2597,336 @@
       "max_minutes": 180,
       "commands_used": 5,
       "started_at": 1789795664.406327
+    },
+    {
+      "max_commands": 80,
+      "max_minutes": 180,
+      "commands_used": 8,
+      "started_at": 1789798581.871302
+    },
+    {
+      "max_commands": 80,
+      "max_minutes": 180,
+      "commands_used": 6,
+      "started_at": 1789799121.657396
     }
   ],
-  "history": [],
+  "history": [
+    {
+      "event": "reconciled_interruption_or_drift",
+      "previous_phase": "repair",
+      "inflight": null,
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "166a80dbb9bd759c249f18a25d18afd8e17d95bfdf10f0a7d97a74bc664fde58",
+        "control_base_head": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
+      },
+      "code_now": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "invalidated_checks": [
+        {
+          "task_id": "autonomy-01",
+          "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+          "returncode": 0,
+          "stdout": "........................................................................ [100%]\n72 passed in 4.68s\n",
+          "stderr": "",
+          "timed_out": false
+        },
+        {
+          "task_id": "autonomy-01",
+          "command": "make check",
+          "returncode": 2,
+          "stdout": "\"mode\"] == \"go-loop\" and p[\"continues_beyond_initial_tasks\"]' /tmp/go-loop-smoke.json; \\\n\t  python3 cli/go.py go-loop $TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-alias-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"mode\"] == \"go-loop\" and p[\"next_tasks\"] == [\"first\", \"second\"]' /tmp/go-loop-alias-smoke.json; \\\n\t  git -C $TMP/spike-smoke add .go README.md .gitignore LICENSE SECURITY.md CONTRIBUTING.md CHANGELOG.md Makefile go scripts/check.sh; \\\n\t  git -C $TMP/spike-smoke -c user.name=Make -c user.email=make@example.com commit -m \"seed spike smoke\" -q; \\\n\t  python3 cli/go.py auto $TMP/spike-smoke --max-tasks 1 --execute --agent make-check --json >/tmp/go-auto-execute-smoke.json; \\\n\t  python3 -c 'import json,sys,pathlib; p=json.load(open(sys.argv[1])); r=pathlib.Path(sys.argv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\n",
+          "stderr": "  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nerror: Use the control checkout for workflow mutations; a worker may only record its owned task outcomes\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 338, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nmake: *** [check] Error 1\n",
+          "timed_out": false
+        }
+      ]
+    },
+    {
+      "event": "reconciled_interruption_or_drift",
+      "previous_phase": "repair",
+      "inflight": null,
+      "code_before": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "ffabcca2461a5692178c760c30c74fdaa454416f50d8dfdb7a573da26ca3c717",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "code_now": {
+        "head": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "branch": "codex/autonomy-01",
+        "index_sha256": "bbff15b5f73500f6397bf366bf6f1f2ccb81ac82d0b6bd9d457fba1c94a419f1",
+        "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+        "files": {
+          "docs/architecture-lane.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 7602,
+            "sha256": "ae82370ccf2f07f7c0a4eb7c481880ded81ba02465f83fe26ed0d56dbcc998da"
+          },
+          "docs/autonomous-campaign.md": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13223,
+            "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+          },
+          "go_workflow/campaign_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 19218,
+            "sha256": "2f2a2dbac62be0dea7ff9ce8b4001886d66cb76e73557018322a1f2239a66932"
+          },
+          "go_workflow/cli.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 322591,
+            "sha256": "fed144b2517eeee5f462f32ed41c7311f757d9edde667e8c1760ea31d18a3cd6"
+          },
+          "schemas/campaign-contract.schema.json": {
+            "kind": "file",
+            "mode": 420,
+            "size": 13309,
+            "sha256": "84505e73ab0c438553b65764e9e300a5da6983635fab14b86a6424430f07381f"
+          },
+          "tests/test_autonomy_contracts.py": {
+            "kind": "file",
+            "mode": 420,
+            "size": 17680,
+            "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
+          }
+        },
+        "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+        "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
+      },
+      "invalidated_checks": [
+        {
+          "task_id": "autonomy-01",
+          "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+          "returncode": 0,
+          "stdout": "........................................................................ [100%]\n72 passed in 4.42s\n",
+          "stderr": "",
+          "timed_out": false,
+          "verification_source": {
+            "schema": "go-workflow.verification-source.v1",
+            "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+            "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+            "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+            "changed_files": [
+              "docs/architecture-lane.md",
+              "docs/autonomous-campaign.md",
+              "go_workflow/campaign_contracts.py",
+              "go_workflow/cli.py",
+              "schemas/campaign-contract.schema.json",
+              "tests/test_autonomy_contracts.py"
+            ],
+            "isolation": "unregistered_disposable_checkout"
+          },
+          "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+        },
+        {
+          "task_id": "autonomy-01",
+          "command": "make check",
+          "returncode": 0,
+          "stdout": "rgv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\n.go/tasks/open/smoke-task.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke/.go\nsmoke-task — Smoke task\n/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/adopt-smoke-bundle.json\nadopted: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\n.go/imports/adopt-smoke-20260919T061914200102Z.json\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/import-target/.go\nspike: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke\nproject: spike-smoke\ncreated_tasks: first, second\nnext: first\nok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LngpkXZVLU/spike-smoke/.go\n",
+          "stderr": "",
+          "timed_out": false,
+          "verification_source": {
+            "schema": "go-workflow.verification-source.v1",
+            "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+            "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+            "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+            "changed_files": [
+              "docs/architecture-lane.md",
+              "docs/autonomous-campaign.md",
+              "go_workflow/campaign_contracts.py",
+              "go_workflow/cli.py",
+              "schemas/campaign-contract.schema.json",
+              "tests/test_autonomy_contracts.py"
+            ],
+            "isolation": "unregistered_disposable_checkout"
+          },
+          "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+        },
+        {
+          "task_id": "autonomy-01",
+          "command": "python3 cli/go.py validate .",
+          "returncode": 0,
+          "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-60c4qs7a/candidate/.go\n",
+          "stderr": "",
+          "timed_out": false,
+          "verification_source": {
+            "schema": "go-workflow.verification-source.v1",
+            "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+            "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+            "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+            "changed_files": [
+              "docs/architecture-lane.md",
+              "docs/autonomous-campaign.md",
+              "go_workflow/campaign_contracts.py",
+              "go_workflow/cli.py",
+              "schemas/campaign-contract.schema.json",
+              "tests/test_autonomy_contracts.py"
+            ],
+            "isolation": "unregistered_disposable_checkout"
+          },
+          "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+        },
+        {
+          "task_id": "autonomy-01",
+          "command": "git diff --check",
+          "returncode": 0,
+          "stdout": "",
+          "stderr": "",
+          "timed_out": false,
+          "verification_source": {
+            "schema": "go-workflow.verification-source.v1",
+            "candidate_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1",
+            "tracked_content_sha256": "c1ef6fb73e81b9ce928d61b49906e4a07633a23bac09d11a53201bcae67bbcb3",
+            "changed_files_sha256": "387386530ab30bedadd5aff273d96dd311e657db22738f806fb76e088be23aee",
+            "changed_files": [
+              "docs/architecture-lane.md",
+              "docs/autonomous-campaign.md",
+              "go_workflow/campaign_contracts.py",
+              "go_workflow/cli.py",
+              "schemas/campaign-contract.schema.json",
+              "tests/test_autonomy_contracts.py"
+            ],
+            "isolation": "unregistered_disposable_checkout"
+          },
+          "code_digest": "85beb3c47c3bc83bdba27c35dba7fe33b80c6794157994ca0b50eb6c38c718e1"
+        }
+      ]
+    }
+  ],
   "requirements": [
     {
       "id": "R1",
@@ -731,8 +2992,8 @@
       "docs/autonomous-campaign.md": {
         "kind": "file",
         "mode": 420,
-        "size": 13223,
-        "sha256": "8984156307ef05e6f19cb20bed92a0091a1987838521fb56060c23b8a6545e11"
+        "size": 13193,
+        "sha256": "22bd9acae618ab9a3b1432d7b041a69c0bcfbd686407ac5cb69ccd8fd5bf0d1d"
       },
       "go_workflow/campaign_contracts.py": {
         "kind": "file",
@@ -759,8 +3020,8 @@
         "sha256": "2749827078addbfff33c9a0848e7056b29b3e7e196c2d3ace91b447d7787af8b"
       }
     },
-    "contract_context_sha256": "166a80dbb9bd759c249f18a25d18afd8e17d95bfdf10f0a7d97a74bc664fde58",
-    "control_base_head": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
+    "contract_context_sha256": "5bacbef11261940cf638fff0fcb34d98f3fb6bb8a3792fd1272896b6efac82ee",
+    "control_base_head": "aa5cef15c99a5f762e9586a52fa60048ba852bf9"
   },
   "publication": {
     "profile": null,
@@ -770,7 +3031,7 @@
   },
   "controller": {
     "host": "mac.home",
-    "pid": 42981
+    "pid": 69911
   },
   "worker_group": null,
   "inflight": null,
@@ -894,5 +3155,6 @@
       "conformance_required": true,
       "human_gate": "none"
     }
-  }
+  },
+  "execution_cwd": "/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-mnogeyi2/candidate"
 }

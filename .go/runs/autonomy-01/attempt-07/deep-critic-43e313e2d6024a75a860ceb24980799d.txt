@@ -1,0 +1,9 @@
+I’ll verify the task context and evidence, inspect the diff, and apply the configured critic criteria without editing files.
+
+I’m using the quality-audit skill for code, contract, and architecture review. The snapshot reports passing checks for this candidate; I’ll verify the snapshot and inspect whether those checks cover the requested behavior.
+
+The snapshot verification passed. The code provides an opt-in validator and leaves execution to later tasks, consistent with this task’s scope. I’m checking revision continuity, authority boundaries, and the documentation’s claim that the governing decision was adopted.
+
+The read-only probes passed for canonical task binding, revision continuity, evidence preservation, planning restrictions, unresolved decisions, and unlisted tasks. The governing decision and brief are also adopted in canonical state. I found no blocking issue in this contract-only change; R4’s commit, release, and remote readback remain for the controller after this review.
+
+{"schema":"go-workflow.agent-adapter-result.v1","phase":"critic","status":"success","summary":"No blocking critic findings. Snapshot a60d85cdc6de42ccb8deabd889d5f1da verified before and after review; all six raw file blobs match the scoped candidate. R1/R2 are supported by campaign_contracts.py:29-346, the schema, inspected tests and passing read-only probes for revisions, outcome drift and authority boundaries. R3 is supported by canonical decisions/events.jsonl:27 and the accepted autonomous-campaign brief. Content-bound evidence records 72 passing tests and all four verification commands passing; independent validation and diff checks also passed. The contract-only change preserves existing runtime and historical contracts. R4 commit/push, immutable release and remote readback remain pending controller gates; this verdict approves the critic phase, not task completion."}

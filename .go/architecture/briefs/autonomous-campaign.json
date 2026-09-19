@@ -4,7 +4,7 @@
   "id": "autonomous-campaign",
   "project": "go-workflow-stack",
   "title": "Bounded serial autonomy from intent to verified delivery",
-  "status": "draft",
+  "status": "accepted",
   "owner": "go-workflow-stack maintainers",
   "outcomes": [
     "Turn authorized intent into grounded executable tasks connected to vision, architecture and original outcomes.",
@@ -54,7 +54,7 @@
     "Make authority explicit and preserve prior user delegation; conditional architecture gates apply only where relevant.",
     "Keep final proof tied to the tested candidate and observed release; preparation is not product completion.",
     "One worker, durable task/project binding and cumulative budget; resume checks actual process and external-effect state.",
-    "Planning only now. autonomy-01 owns the architecture decision and accepted brief before dependent implementation."
+    "The versioned campaign contract bounds execution authority; dependent runtime tasks must preserve its explicit allowlist, cumulative budget, unresolved decisions and separate delivery grants."
   ],
   "quality_attributes": [
     {
@@ -94,8 +94,9 @@
     "Pilot setup, runtime availability and live provider limits can block live proof even with green deterministic tests."
   ],
   "open_questions": [
-    "autonomy-01 must fix the versioned campaign/traceability contract and governing decisions before adoption.",
     "autonomy-09 requires a concrete authorized pilot project, profiles, budget and delivery destination; Hearthhold is not implicitly authorized."
   ],
-  "decision_ids": []
+  "decision_ids": [
+    "bounded-serial-campaign-contract-v1"
+  ]
 }

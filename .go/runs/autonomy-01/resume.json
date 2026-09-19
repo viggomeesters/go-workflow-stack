@@ -18,7 +18,7 @@
     "--max-minutes",
     "180",
     "--max-attempts",
-    "3",
+    "8",
     "--command-timeout-seconds",
     "7200",
     "--json",

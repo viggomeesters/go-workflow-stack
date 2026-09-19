@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "autonomy-01",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "blocked",
   "summary": "Define bounded run authority and outcome traceability",
   "description": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
   "scope": {
@@ -47,10 +47,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-19T07:27:43+02:00",
+    "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -117,5 +118,10 @@
     "decision_ids": [],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "blocked": {
+    "created_at": "2026-09-19T07:50:30+02:00",
+    "agent": "codex",
+    "reason": "managed verification command cannot safely run repository-mutating fixtures from a registered worker checkout; bounded repair task required"
   }
 }

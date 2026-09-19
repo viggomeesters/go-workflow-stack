@@ -1,0 +1,42 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "autonomy-managed-verification-isolation",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Isolate managed verification without weakening worker guards",
+  "description": "Run repository-wide verification for a managed task against an evidence-identical disposable checkout so fixture mutations do not inherit the registered worker boundary. Preserve the worker guard and bind proof to the exact candidate content.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/run_state.py",
+      "go_workflow/execution_context.py",
+      "tests/test_abc_resume.py",
+      "tests/test_abc_completion.py",
+      "docs/task-workspaces.md"
+    ]
+  },
+  "acceptance": [
+    "Managed verification of make check can execute temporary fixture repositories without treating them as the registered task worker.",
+    "The verification source is byte-identical for every scoped candidate change and proof remains bound to the managed candidate digest.",
+    "The registered workspace mutation guard remains unchanged and still rejects direct control-state mutation."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_abc_resume.py tests/test_abc_completion.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

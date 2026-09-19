@@ -257,7 +257,8 @@
         "autonomy-06",
         "autonomy-07",
         "autonomy-08",
-        "autonomy-09"
+        "autonomy-09",
+        "autonomy-managed-verification-isolation"
       ]
     }
   ]

@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.managed-resume.v1",
+  "task_id": "autonomy-01",
+  "run_id": "autonomy-01-20260919",
+  "runtime_required_ref": "v0.3.33",
+  "args": [
+    "auto",
+    "/Users/viggomeesters/Dev/go-workflow-stack",
+    "--execute",
+    "--task-id",
+    "autonomy-01",
+    "--agent",
+    "codex-astra-high",
+    "--executor-agent",
+    "codex",
+    "--max-commands",
+    "80",
+    "--max-minutes",
+    "180",
+    "--max-attempts",
+    "3",
+    "--command-timeout-seconds",
+    "7200",
+    "--json",
+    "--ship-policy",
+    "push",
+    "--allow-push"
+  ],
+  "resolution": "Resolve and preflight the immutable project runtime before invoking these CLI arguments."
+}

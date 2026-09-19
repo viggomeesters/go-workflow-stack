@@ -1,0 +1,140 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-05",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Review actual product behavior against original outcomes",
+  "description": "Strengthen author/critic proof selection and result review so tests, runtime/browser/visual/audio evidence establish the requested behavior; build on v0.3.33 readiness and existing R# completion. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/task_design.py",
+      "go_workflow/completion.py",
+      "go_workflow/cli.py",
+      "go_workflow/adapter_protocol.py",
+      "schemas/**",
+      "tests/test_autonomy_outcomes.py",
+      "tests/test_abc_completion.py",
+      "fixtures/autonomy-outcomes/**",
+      "docs/task-design-readiness.md",
+      "docs/autonomy-evidence.md",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-05/**"
+    ]
+  },
+  "acceptance": [
+    "Carry exact applicable product goals, architecture references and original R# to a fresh read-only critic context. Explain applicability; do not require architecture ceremony or visual evidence for unrelated tiny changes.",
+    "Reject preparation documents substituted for delivered behavior, stale screenshots/results, unreproduced fixes and unsupported completion claims even when structural validation and unrelated tests pass.",
+    "Each relevant check/result binds task, requirement, candidate/context and inspected source/artifact. Changed relevant content invalidates proof. Pair good/bad realistic examples and record grounded review, not a semantic pass boolean inferred from keywords.",
+    "Failed behavioral review returns bounded actionable repair within original scope. Do not rewrite acceptance to manufacture green or require downstream publication receipts in the pre-publication critic.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_outcomes.py tests/test_abc_completion.py tests/test_task_design_readiness.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-01",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-02",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Strengthen author/critic proof selection and result review so tests, runtime/browser/visual/audio evidence establish the requested behavior; build on v0.3.33 readiness and existing R# completion. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "3ead43be63e53d6288026d42adbeadf04ef0549a30a08a69e81e663767cf7720",
+    "source_ref": "repo-local-intake:autonomy-05"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Carry exact applicable product goals, architecture references and original R# to a fresh read-only critic context. Explain applicability; do not require architecture ceremony or visual evidence for unrelated tiny changes.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Reject preparation documents substituted for delivered behavior, stale screenshots/results, unreproduced fixes and unsupported completion claims even when structural validation and unrelated tests pass.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Each relevant check/result binds task, requirement, candidate/context and inspected source/artifact. Changed relevant content invalidates proof. Pair good/bad realistic examples and record grounded review, not a semantic pass boolean inferred from keywords.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Failed behavioral review returns bounded actionable repair within original scope. Do not rewrite acceptance to manufacture green or require downstream publication receipts in the pre-publication critic.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

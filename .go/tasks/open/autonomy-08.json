@@ -1,0 +1,145 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-08",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Exercise the full autonomous journey with injected failures",
+  "description": "Build a reproducible campaign fixture from rough request through exploration, decisions, tasks, build, repair, goal review, separate releases and recovery. Reuse existing ABC campaign and regression primitives. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "fixtures/autonomy-campaign/**",
+      "tests/test_autonomy_end_to_end.py",
+      "scripts/check-autonomy.sh",
+      "scripts/check-compatibility.sh",
+      "docs/autonomy-benchmark.md",
+      "docs/autonomous-campaign.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-08/**"
+    ]
+  },
+  "acceptance": [
+    "Run real controller/worker processes, Git worktrees and local bare remotes with deterministic adapter doubles; prove more than one serial task progresses and publishes without manually dispatching each task.",
+    "Failure matrix covers unresolved material decision with independent eligible work, omitted requirement, failed behavioral critic, repair/no-progress limit, shared budget, controller/orphan failure, dirty Git, changed remote base, lost publication acknowledgement, failed live-readback and cleanup retry.",
+    "Preserve raw command output and immutable evidence links; test that false-green mutations are rejected. Tests must exercise behavior, not compare metadata labels or fake provider-model identity.",
+    "Gate experimental autonomy claims on this suite and document remaining live-model/runtime limits. No GitHub Actions or real consumer mutations.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_end_to_end.py tests/test_abc_end_to_end.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-02",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-04",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-06",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-07",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Build a reproducible campaign fixture from rough request through exploration, decisions, tasks, build, repair, goal review, separate releases and recovery. Reuse existing ABC campaign and regression primitives. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "cb7d9c46d03e711e8db0d44ccc1dcdecd27781aa6dbbec8e636a76f258edae20",
+    "source_ref": "repo-local-intake:autonomy-08"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Run real controller/worker processes, Git worktrees and local bare remotes with deterministic adapter doubles; prove more than one serial task progresses and publishes without manually dispatching each task.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Failure matrix covers unresolved material decision with independent eligible work, omitted requirement, failed behavioral critic, repair/no-progress limit, shared budget, controller/orphan failure, dirty Git, changed remote base, lost publication acknowledgement, failed live-readback and cleanup retry.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Preserve raw command output and immutable evidence links; test that false-green mutations are rejected. Tests must exercise behavior, not compare metadata labels or fake provider-model identity.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Gate experimental autonomy claims on this suite and document remaining live-model/runtime limits. No GitHub Actions or real consumer mutations.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  }
+}

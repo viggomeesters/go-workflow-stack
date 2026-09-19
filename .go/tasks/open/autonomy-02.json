@@ -1,0 +1,135 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Turn rough requests into evidence-backed executable work",
+  "description": "Add bounded task exploration before execution: inspect existing code, tasks, decisions and relevant vision; reproduce reported defects or create scoped research, then reuse/update/materialize the smallest independently deliverable tasks. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/intake*.py",
+      "go_workflow/cli.py",
+      "go_workflow/routing.py",
+      "go_workflow/task_design.py",
+      "go_workflow/execution_contracts.py",
+      "schemas/**",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      "tests/test_autonomy_intake.py",
+      "tests/test_task_design_readiness.py",
+      "fixtures/autonomy-intake/**",
+      "docs/autonomous-intake.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-02/**"
+    ]
+  },
+  "acceptance": [
+    "Preserve every original requested outcome and source; detect matching existing work and superseded decisions. Repeated intake does not duplicate tasks or lose feedback.",
+    "Substantial tasks have observable before/after behavior, relevant states/edges, non-goals, enforceable dependencies, delegated choices and outcome-appropriate proof. Unknown bug root cause cannot become fixed; research completion remains distinct from implementation.",
+    "Use actual bounded model exploration/assessment through existing adapters; deterministic tests prove transport, authority and persistence rather than pretending keywords/schema prove semantic quality. Legacy tiny tasks stay lightweight.",
+    "Planning-only requests stop before execution; advice is not execution authority. Persist questions needing the user while continuing only independent authorized research/work; no automatic vision/decision rewriting.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_intake.py tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Add bounded task exploration before execution: inspect existing code, tasks, decisions and relevant vision; reproduce reported defects or create scoped research, then reuse/update/materialize the smallest independently deliverable tasks. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "6c533419c1bc1a8ddd6e39b3d94cec0536296a4bc1a3b643a05d04f5aa1060b2",
+    "source_ref": "repo-local-intake:autonomy-02"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Preserve every original requested outcome and source; detect matching existing work and superseded decisions. Repeated intake does not duplicate tasks or lose feedback.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Substantial tasks have observable before/after behavior, relevant states/edges, non-goals, enforceable dependencies, delegated choices and outcome-appropriate proof. Unknown bug root cause cannot become fixed; research completion remains distinct from implementation.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Use actual bounded model exploration/assessment through existing adapters; deterministic tests prove transport, authority and persistence rather than pretending keywords/schema prove semantic quality. Legacy tiny tasks stay lightweight.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Planning-only requests stop before execution; advice is not execution authority. Persist questions needing the user while continuing only independent authorized research/work; no automatic vision/decision rewriting.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

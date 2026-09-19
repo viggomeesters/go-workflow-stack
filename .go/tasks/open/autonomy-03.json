@@ -1,0 +1,135 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-03",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Continue a bounded serial campaign across task releases",
+  "description": "Implement a durable single-host project controller around the existing managed task executor. On a fresh goal or resume it selects and completes eligible authorized tasks without an extra user command after each task. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/campaign*.py",
+      "go_workflow/run_state.py",
+      "go_workflow/cli.py",
+      "go_workflow/task_state.py",
+      "go_workflow/routing.py",
+      "schemas/**",
+      "tests/test_autonomy_campaign.py",
+      "tests/test_abc_resume.py",
+      "docs/autonomous-campaign.md",
+      "AGENTS.md",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-03/**"
+    ]
+  },
+  "acceptance": [
+    "One task builder is active at a time; existing managed task/worktree state remains authoritative. A successful task automatically advances to the next eligible task within the same frozen run mandate.",
+    "Resume active work and required cleanup before claiming new work. Task-local research/decision blockers do not stop unrelated eligible work; unknown publication effects and repository-wide unsafe state do stop dependent writes.",
+    "Goal/task selection is deterministic and auditable; no global queue, hidden reliance on chat history, duplicated claims or task-exhaustion claim that the entire vision is achieved.",
+    "Existing single-task CLI behavior remains compatible. Explicit foreground invocation and resume are sufficient; no daemon, timer installation, unattended publication authority or parallel dispatch introduced.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_campaign.py tests/test_abc_resume.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-01",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Implement a durable single-host project controller around the existing managed task executor. On a fresh goal or resume it selects and completes eligible authorized tasks without an extra user command after each task. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "114ea6634f58423886bed68a88bdb0bc1bf779a596b9469c436e3f334c80e923",
+    "source_ref": "repo-local-intake:autonomy-03"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "One task builder is active at a time; existing managed task/worktree state remains authoritative. A successful task automatically advances to the next eligible task within the same frozen run mandate.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Resume active work and required cleanup before claiming new work. Task-local research/decision blockers do not stop unrelated eligible work; unknown publication effects and repository-wide unsafe state do stop dependent writes.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Goal/task selection is deterministic and auditable; no global queue, hidden reliance on chat history, duplicated claims or task-exhaustion claim that the entire vision is achieved.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Existing single-task CLI behavior remains compatible. Explicit foreground invocation and resume are sufficient; no daemon, timer installation, unattended publication authority or parallel dispatch introduced.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

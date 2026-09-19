@@ -51,6 +51,15 @@
             "reliability-04",
             "reliability-05"
           ]
+        },
+        {
+          "id": "project-orchestration",
+          "title": "Parallelle projectuitvoering en duurzame coördinatie",
+          "description": "Parallel implementation deferred. Durable serial controller/recovery/delivery work is now owned by autonomy-first; original design retained as history.",
+          "status": "deferred",
+          "implementation_status": "not_started",
+          "plan_ref": ".go/plans/project-orchestration.md",
+          "tasks": []
         }
       ],
       "tasks": [
@@ -232,6 +241,23 @@
         "require-material-architecture-decisions",
         "release-v0314-decision-gate",
         "pair-v0314-template-commit"
+      ]
+    },
+    {
+      "id": "autonomy-first",
+      "title": "Betrouwbare autonomie van opdracht tot geleverde uitkomst",
+      "description": "Planning only: bounded serial campaigns with vision/architecture traceability, recovery, truthful outcome proof and complete per-task delivery. Parallel work deferred.",
+      "features": [],
+      "tasks": [
+        "autonomy-01",
+        "autonomy-02",
+        "autonomy-03",
+        "autonomy-04",
+        "autonomy-05",
+        "autonomy-06",
+        "autonomy-07",
+        "autonomy-08",
+        "autonomy-09"
       ]
     }
   ]

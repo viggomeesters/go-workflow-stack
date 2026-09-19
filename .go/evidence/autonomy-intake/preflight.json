@@ -1,0 +1,428 @@
+{
+  "go-workflow-stack": {
+    "preview": {
+      "schema": "go-workflow.stack-update-plan.v1",
+      "mode": "dry_run",
+      "repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "stack_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "from_version": "0.3.33",
+      "from_ref": "v0.3.33",
+      "to_version": "0.3.33",
+      "to_ref": "v0.3.33",
+      "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+      "runtime_contract_version": 2,
+      "project_contract_version": 2,
+      "lifecycle_policy_migrated": false,
+      "up_to_date": true,
+      "changes": [],
+      "before_project": {
+        "schema": "go-workflow.repo-local.project.v1",
+        "kind": "project",
+        "id": "go-workflow-stack",
+        "name": "Go Workflow Stack",
+        "source_of_truth": "repo-local",
+        "project_mode": "project",
+        "required_stack_version": "0.3.33",
+        "stack_ref": "v0.3.33",
+        "default_verification": [
+          "uv run --no-project --with pytest pytest -q",
+          "make check"
+        ],
+        "links": {
+          "repo": ""
+        },
+        "contract_version": 2,
+        "release_profiles": {
+          "github-release": {
+            "provider": "github-release",
+            "remote": "origin",
+            "branch": "main",
+            "repository": "viggomeesters/go-workflow-stack"
+          }
+        }
+      },
+      "after_project": {
+        "schema": "go-workflow.repo-local.project.v1",
+        "kind": "project",
+        "id": "go-workflow-stack",
+        "name": "Go Workflow Stack",
+        "source_of_truth": "repo-local",
+        "project_mode": "project",
+        "required_stack_version": "0.3.33",
+        "stack_ref": "v0.3.33",
+        "default_verification": [
+          "uv run --no-project --with pytest pytest -q",
+          "make check"
+        ],
+        "links": {
+          "repo": ""
+        },
+        "contract_version": 2,
+        "release_profiles": {
+          "github-release": {
+            "provider": "github-release",
+            "remote": "origin",
+            "branch": "main",
+            "repository": "viggomeesters/go-workflow-stack"
+          }
+        }
+      },
+      "compatibility": {
+        "status": "passed",
+        "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "source_digest": "22625837e7925be42d5d9fccedada48cb17128d7ed2ebc800f28a688b254078b",
+        "exit_code": 0,
+        "errors": [],
+        "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+        "stderr": "",
+        "validation": "exact-target-workflow-snapshot"
+      }
+    },
+    "apply": null,
+    "doctor": {
+      "schema": "go-workflow.doctor.v1",
+      "repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "platform": {
+        "kind": "darwin",
+        "detected": true
+      },
+      "prerequisites": [
+        {
+          "name": "python",
+          "available": true,
+          "version": "3.12.13",
+          "path": "/Users/viggomeesters/.cache/uv/builds-v0/.tmpTKoFQp/bin/python"
+        },
+        {
+          "name": "git",
+          "available": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "name": "bash",
+          "available": true,
+          "path": "/bin/bash"
+        },
+        {
+          "name": "make",
+          "available": true,
+          "path": "/usr/bin/make"
+        },
+        {
+          "name": "uv",
+          "available": true,
+          "path": "/opt/homebrew/bin/uv"
+        }
+      ],
+      "agent": {
+        "name": "codex",
+        "available": true,
+        "compatible": true,
+        "path": "/Applications/ChatGPT.app/Contents/Resources/codex",
+        "prompt_flag": null
+      },
+      "stack": {
+        "version": "0.3.33",
+        "ref": "v0.3.33",
+        "git_head": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "pinned_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "identity_source": "git-checkout",
+        "provenance_requested_ref": "v0.3.33",
+        "required_version": "0.3.33",
+        "required_ref": "v0.3.33",
+        "exact_ref": true,
+        "development_override": false,
+        "compatible": true
+      },
+      "contract": {
+        "valid": true,
+        "errors": []
+      },
+      "ready": true,
+      "actions": []
+    },
+    "route": {
+      "repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "mode": "repo-local",
+      "state_root": ".go",
+      "project_id": "go-workflow-stack",
+      "project_name": "Go Workflow Stack",
+      "valid": true,
+      "reason": ".go/project.json exists",
+      "fallback": null,
+      "errors": []
+    },
+    "router": {
+      "schema": "go-workflow.router.v1",
+      "public_command": "go",
+      "selected_route": "task",
+      "stop_before_implementation": true,
+      "normalized_command": "go",
+      "raw_command": "go",
+      "intent": "Go task: capture autonomy-first vision architecture intake to verified release tasks; planning only; no execution",
+      "repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "state": {
+        "repo_exists": true,
+        "is_git_repo": true,
+        "has_go": true,
+        "has_project": true,
+        "has_vision": true,
+        "has_principles": true,
+        "has_hierarchy": true,
+        "open_task_count": 0,
+        "active_task_count": 0,
+        "blocked_task_count": 0,
+        "done_task_count": 140,
+        "valid": true,
+        "errors": []
+      },
+      "recommended": {
+        "command": "task create",
+        "reason": "public Go requested durable intake without execution",
+        "public_command": "go",
+        "selected_route": "task",
+        "stop_before_implementation": true,
+        "authority": "execute",
+        "authority_source": "go",
+        "implementation_authorized": false,
+        "planning_state_authorized": true,
+        "example": "python3 /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-autonomy-intake-v_jdt22y/runtime/go_workflow/cli.py task create /Users/viggomeesters/Dev/go-workflow-stack --summary '<next task>'"
+      },
+      "router_policy": "Expose one public Go command; classify explicit plan/loop/task-id/Wayfinder intent, then choose internal repo-local primitives without requiring another user command."
+    },
+    "task_counts": {
+      "open": 0,
+      "active": 0,
+      "blocked": 0,
+      "done": 140
+    },
+    "validate": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n"
+  },
+  "go-project-template": {
+    "preview": {
+      "schema": "go-workflow.stack-update-plan.v1",
+      "mode": "dry_run",
+      "repo": "/Users/viggomeesters/Dev/go-project-template",
+      "stack_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "from_version": "0.3.32",
+      "from_ref": "v0.3.32",
+      "to_version": "0.3.33",
+      "to_ref": "v0.3.33",
+      "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+      "runtime_contract_version": 2,
+      "project_contract_version": 2,
+      "lifecycle_policy_migrated": false,
+      "up_to_date": false,
+      "changes": [
+        ".go/project.json:required_stack_version",
+        ".go/project.json:stack_ref"
+      ],
+      "before_project": {
+        "schema": "go-workflow.repo-local.project.v1",
+        "kind": "project",
+        "id": "go-project-template",
+        "name": "Go Project Template",
+        "source_of_truth": "repo-local",
+        "contract_version": 2,
+        "project_mode": "template",
+        "required_stack_version": "0.3.32",
+        "stack_ref": "v0.3.32",
+        "default_verification": [
+          "bash scripts/validate-go.sh"
+        ],
+        "release_profiles": {
+          "template-source-maintenance": {
+            "provider": "git-tag",
+            "remote": "origin",
+            "branch": "main"
+          }
+        },
+        "dependency_projects": {
+          "go-workflow-stack": "../go-workflow-stack"
+        }
+      },
+      "after_project": {
+        "schema": "go-workflow.repo-local.project.v1",
+        "kind": "project",
+        "id": "go-project-template",
+        "name": "Go Project Template",
+        "source_of_truth": "repo-local",
+        "contract_version": 2,
+        "project_mode": "template",
+        "required_stack_version": "0.3.33",
+        "stack_ref": "v0.3.33",
+        "default_verification": [
+          "bash scripts/validate-go.sh"
+        ],
+        "release_profiles": {
+          "template-source-maintenance": {
+            "provider": "git-tag",
+            "remote": "origin",
+            "branch": "main"
+          }
+        },
+        "dependency_projects": {
+          "go-workflow-stack": "../go-workflow-stack"
+        }
+      },
+      "compatibility": {
+        "status": "passed",
+        "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "source_digest": "e827a8b43bc41c71324f7b90f13953b6826ba50f89e64902d2bb6a247bba0573",
+        "exit_code": 0,
+        "errors": [],
+        "stdout": "ok: /Users/viggomeesters/Dev/go-project-template/.go\n",
+        "stderr": "",
+        "validation": "exact-target-workflow-snapshot"
+      }
+    },
+    "apply": {
+      "schema": "go-workflow.stack-update-plan.v1",
+      "mode": "applied",
+      "repo": "/Users/viggomeesters/Dev/go-project-template",
+      "stack_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+      "from_version": "0.3.32",
+      "from_ref": "v0.3.32",
+      "to_version": "0.3.33",
+      "to_ref": "v0.3.33",
+      "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+      "runtime_contract_version": 2,
+      "project_contract_version": 2,
+      "lifecycle_policy_migrated": false,
+      "up_to_date": false,
+      "changes": [
+        ".go/project.json:required_stack_version",
+        ".go/project.json:stack_ref"
+      ],
+      "compatibility": {
+        "status": "passed",
+        "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "source_digest": "e827a8b43bc41c71324f7b90f13953b6826ba50f89e64902d2bb6a247bba0573",
+        "exit_code": 0,
+        "errors": [],
+        "stdout": "ok: /Users/viggomeesters/Dev/go-project-template/.go\n",
+        "stderr": "",
+        "validation": "exact-target-workflow-snapshot"
+      },
+      "rollback_record": ".go/updates/20260919T050310940702Z-v0.3.33-c72c7339f668.json"
+    },
+    "doctor": {
+      "schema": "go-workflow.doctor.v1",
+      "repo": "/Users/viggomeesters/Dev/go-project-template",
+      "platform": {
+        "kind": "darwin",
+        "detected": true
+      },
+      "prerequisites": [
+        {
+          "name": "python",
+          "available": true,
+          "version": "3.12.13",
+          "path": "/Users/viggomeesters/.cache/uv/builds-v0/.tmpTKoFQp/bin/python3"
+        },
+        {
+          "name": "git",
+          "available": true,
+          "path": "/usr/bin/git"
+        },
+        {
+          "name": "bash",
+          "available": true,
+          "path": "/bin/bash"
+        },
+        {
+          "name": "make",
+          "available": true,
+          "path": "/usr/bin/make"
+        },
+        {
+          "name": "uv",
+          "available": true,
+          "path": "/opt/homebrew/bin/uv"
+        }
+      ],
+      "agent": {
+        "name": "codex",
+        "available": true,
+        "compatible": true,
+        "path": "/Applications/ChatGPT.app/Contents/Resources/codex",
+        "prompt_flag": null
+      },
+      "stack": {
+        "version": "0.3.33",
+        "ref": "v0.3.33",
+        "git_head": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "pinned_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+        "identity_source": "git-checkout",
+        "provenance_requested_ref": "v0.3.33",
+        "required_version": "0.3.33",
+        "required_ref": "v0.3.33",
+        "exact_ref": true,
+        "development_override": false,
+        "compatible": true
+      },
+      "contract": {
+        "valid": true,
+        "errors": []
+      },
+      "ready": true,
+      "actions": []
+    },
+    "route": {
+      "repo": "/Users/viggomeesters/Dev/go-project-template",
+      "mode": "repo-local",
+      "state_root": ".go",
+      "project_id": "go-project-template",
+      "project_name": "Go Project Template",
+      "valid": true,
+      "reason": ".go/project.json exists",
+      "fallback": null,
+      "errors": []
+    },
+    "router": {
+      "schema": "go-workflow.router.v1",
+      "public_command": "go",
+      "selected_route": "task",
+      "stop_before_implementation": true,
+      "normalized_command": "go",
+      "raw_command": "go",
+      "intent": "Go task: capture autonomy-first vision architecture intake to verified release tasks; planning only; no execution",
+      "repo": "/Users/viggomeesters/Dev/go-project-template",
+      "state": {
+        "repo_exists": true,
+        "is_git_repo": true,
+        "has_go": true,
+        "has_project": true,
+        "has_vision": true,
+        "has_principles": true,
+        "has_hierarchy": true,
+        "open_task_count": 1,
+        "active_task_count": 0,
+        "blocked_task_count": 0,
+        "done_task_count": 23,
+        "valid": true,
+        "errors": []
+      },
+      "recommended": {
+        "command": "task create",
+        "reason": "public Go requested durable intake without execution",
+        "public_command": "go",
+        "selected_route": "task",
+        "stop_before_implementation": true,
+        "authority": "execute",
+        "authority_source": "go",
+        "implementation_authorized": false,
+        "planning_state_authorized": true,
+        "example": "python3 /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-autonomy-intake-v_jdt22y/runtime/go_workflow/cli.py task create /Users/viggomeesters/Dev/go-project-template --summary '<next task>'"
+      },
+      "router_policy": "Expose one public Go command; classify explicit plan/loop/task-id/Wayfinder intent, then choose internal repo-local primitives without requiring another user command."
+    },
+    "task_counts": {
+      "open": 1,
+      "active": 0,
+      "blocked": 0,
+      "done": 23
+    },
+    "validate": "ok: /Users/viggomeesters/Dev/go-project-template/.go\n"
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "project-orchestration",
+  "project": "go-workflow-stack",
+  "title": "Durable project orchestration with parallel workers and serial delivery",
+  "status": "draft",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Run two independent task builds concurrently while preserving individual task lifecycle and release evidence.",
+    "Recover project coordination without duplicate workers, unknown publication retries or chat-dependent state."
+  ],
+  "scope": {
+    "in": [
+      "Single-host project scheduler, admission, bounded native workers, durable phase-boundary messages, integration reconciliation and serial publication",
+      "Design reference: .go/plans/project-orchestration.md"
+    ],
+    "out": [
+      "Implementation or execution in this design turn",
+      "Cross-host coordination, live session injection, nested agent teams, new provider adapters and GitHub Actions"
+    ],
+    "systems": [
+      "go-workflow-stack",
+      "go-project-template (future opt-in rollout only)"
+    ],
+    "boundaries": [
+      "One canonical .go control state; distinct task worktrees; serialized integration/release channel"
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Less waiting and manual orchestration",
+        "A verified release per release-required task"
+      ],
+      "decision_rights": [
+        "Authorize implementation, task models, run budget and publication destinations"
+      ]
+    },
+    {
+      "role": "runtime-controller",
+      "concerns": [
+        "Durable ownership and deterministic recovery",
+        "No stale evidence or hidden authority expansion"
+      ],
+      "decision_rights": [
+        "Schedule within frozen authority and validated task/resource contracts; implementation not yet authorized"
+      ]
+    }
+  ],
+  "constraints": [
+    "Proposed design only; existing single-task runtime rules remain authoritative until changed and verified.",
+    "Retain existing task/run/workspace/completion records; project state references them rather than duplicating completion truth.",
+    "Use explicit parallel opt-in, two builders initially, native CLI workers and one host.",
+    "Distinguish worker paths from controller-only release paths without exceeding total task scope.",
+    "Use history-preserving base reconciliation, scope attribution and renewed final verification/critic before release.",
+    "No worker chat message grants authority or satisfies a completion/dependency gate.",
+    "2026-09-19 priority change: parallel implementation deferred to after verified serial autonomy; see .go/plans/autonomy-first.json. This draft is not an active implementation prerequisite."
+  ],
+  "quality_attributes": [
+    {
+      "id": "parallel-progress",
+      "scenario": "Two independent eligible tasks with explicit parallel opt-in",
+      "measure": "Simultaneously running owned build processes",
+      "threshold": 2
+    },
+    {
+      "id": "writer-exclusivity",
+      "scenario": "Controller crash, duplicate dispatch or surviving orphan",
+      "measure": "Concurrent writers for the same task/workspace generation",
+      "threshold": "At most 1"
+    },
+    {
+      "id": "verified-integration",
+      "scenario": "Task A releases while B is still building",
+      "measure": "B releases using evidence from before base reconciliation",
+      "threshold": 0
+    },
+    {
+      "id": "serial-publication",
+      "scenario": "Two candidates become eligible simultaneously",
+      "measure": "Active publisher reservations on one release channel",
+      "threshold": "At most 1"
+    },
+    {
+      "id": "authority-preservation",
+      "scenario": "Worker message, model switch request or capacity increase",
+      "measure": "Unapproved expansion of frozen task/run authority",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Worktree isolation does not isolate databases, ports, generated files or hostile subprocesses.",
+    "The integration/release lane may dominate runtime; more workers can increase stale work rather than throughput.",
+    "Merge reconciliation requires task-specific attribution; inherited upstream changes cannot simply be checked against the original base."
+  ],
+  "open_questions": [
+    "Before live proof: select an authorized pilot project, model profiles, budget and publication destination.",
+    "O1 must freeze exact versioned fields and CLI/API boundaries; illustrative design states are not an implemented schema."
+  ],
+  "decision_ids": []
+}

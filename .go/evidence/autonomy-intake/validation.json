@@ -1,0 +1,212 @@
+{
+  "status": "passed",
+  "implementation_started": false,
+  "repositories": {
+    "go-workflow-stack": {
+      "tasks": [
+        {
+          "id": "autonomy-01",
+          "open_unclaimed": true,
+          "pending_outcomes": 4,
+          "dependencies": [],
+          "readiness_findings": []
+        },
+        {
+          "id": "autonomy-02",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-01",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-01",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-03",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-01",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-01",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-04",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-03",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-03",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-05",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-01",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-02",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-01",
+            "dependency not done/approved: autonomy-02",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-06",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-03",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-05",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-03",
+            "dependency not done/approved: autonomy-05",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-07",
+          "open_unclaimed": true,
+          "pending_outcomes": 6,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-04",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-06",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-04",
+            "dependency not done/approved: autonomy-06",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-08",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-02",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-04",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-06",
+              "requires": "done_with_required_release_evidence"
+            },
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-07",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-02",
+            "dependency not done/approved: autonomy-04",
+            "dependency not done/approved: autonomy-06",
+            "dependency not done/approved: autonomy-07",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        },
+        {
+          "id": "autonomy-09",
+          "open_unclaimed": true,
+          "pending_outcomes": 6,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-08",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-08",
+            "architecture briefs must be accepted before claim: autonomous-campaign",
+            "material/foundational task requires at least one accepted governing architecture decision from task metadata or an applicable brief"
+          ]
+        }
+      ],
+      "schema_validation": "passed",
+      "whitespace": "passed"
+    },
+    "go-project-template": {
+      "tasks": [
+        {
+          "id": "autonomy-template-01",
+          "open_unclaimed": true,
+          "pending_outcomes": 5,
+          "dependencies": [
+            {
+              "project": "go-workflow-stack",
+              "task_id": "autonomy-09",
+              "requires": "done_with_required_release_evidence"
+            }
+          ],
+          "readiness_findings": [
+            "dependency not done/approved: autonomy-09"
+          ]
+        }
+      ],
+      "schema_validation": "passed",
+      "whitespace": "passed"
+    }
+  }
+}

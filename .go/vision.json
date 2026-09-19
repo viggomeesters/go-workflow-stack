@@ -57,5 +57,47 @@
     "stack_release": "v0.3.26",
     "template_release": "v0.3.16",
     "completion_note": "Thirteen ABC tasks completed. Opt-in product lifecycle, explicit task/critic models, durable context, primary controller with owned worktrees and serial verified release. Fresh phase workers supported; persistent-session/subagent adapters remain deferred."
-  }
+  },
+  "proposed_directions": [
+    {
+      "id": "project-orchestration",
+      "status": "deferred",
+      "implementation_status": "not_started",
+      "plan_ref": ".go/plans/project-orchestration.md",
+      "target": "Go bestuurt één projectrun met parallelle geïsoleerde workers, duurzame coördinatie en een volledige geverifieerde lifecycle per taak.",
+      "success_metrics": [
+        "Twee onafhankelijke builds overlappen aantoonbaar; scope/resourceconflicten worden tegengehouden.",
+        "Na een gewijzigde main krijgt de volgende kandidaat nieuw definitief bewijs en een eigen release.",
+        "Controlleruitval veroorzaakt geen dubbele writers, verloren taakvoortgang of dubbele publicatie."
+      ],
+      "non_goals": [
+        "Parallelisme als impliciete standaard",
+        "Multi-host of nested teams in v1",
+        "Vervangen van bestaande taak- en releasebewijzen door chats",
+        "GitHub Actions"
+      ],
+      "note": "Ontwerp op verzoek van 2026-09-18; eerdere completed ABC-direction en actuele runtimecontracten blijven ongewijzigd.",
+      "priority": "after_verified_serial_autonomy",
+      "superseded_priority_by": "autonomy-first"
+    },
+    {
+      "id": "autonomy-first",
+      "status": "planned",
+      "implementation_status": "not_started",
+      "plan_ref": ".go/plans/autonomy-first.json",
+      "target": "Eén begrensde seriële Go-run onderzoekt de opdracht, toetst visie/architectuur, maakt uitvoerbare taken, bouwt/herstelt en levert elke zelfstandige taak geverifieerd op zonder herhaalde gebruikersstarts.",
+      "success_metrics": [
+        "Iedere oorspronkelijke uitkomst heeft taak-, besluit-, bewijs- en releaseherkomst; geen betekenisverlies tussen verkenning en oplevering.",
+        "Meerdere taken worden autonoom afgehandeld, met begrensd herstel en cumulatief budget na onderbreking.",
+        "Lege taakvoorraad of aanwezige succescriteria worden niet gelijkgesteld aan bereikt productdoel.",
+        "Een echte nachtrun rapporteert gemeten duur, menselijke interventies, actuele Git-state en geverifieerde live uitkomsten."
+      ],
+      "non_goals": [
+        "Parallelle builders",
+        "Onbegrensde uitvoering vanuit brede visie",
+        "Nieuwe productkeuzes buiten mandaat",
+        "GitHub Actions"
+      ]
+    }
+  ]
 }

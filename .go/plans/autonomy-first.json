@@ -1,0 +1,143 @@
+{
+  "id": "autonomy-first",
+  "status": "planned",
+  "implementation_status": "not_started",
+  "created_at": "2026-09-19",
+  "coordinator_project": "go-workflow-stack",
+  "source": {
+    "request": "Zet om tot taken",
+    "direction": "Autonoom doorwerken van taakverkenning tot goed uitvoeren, met vision en architecture; autonomie, auditbaarheid, afspraken, nette Git en releases gaan voor parallelisme.",
+    "authority": "planning_only",
+    "messages": [
+      {
+        "role": "user",
+        "text": "Weetje wat het is, ik denk dat autonoom doorwerken voor het type projecten dat ik doe belangrijker is dan die parallelliteit. Als ik een agent betrouwbaar kan aftrappen en de nacht door kan laten werken dan is het ook OK.\n\nDus misschien toch inzetten op maximale autonomiteit, auditbaarheid, afspraken nakomen, git die netjes blijft, releases etc."
+      },
+      {
+        "role": "user",
+        "text": "Hoe tillen we go workflow stack ga autnoom doorwerken naar het volgende niveau?\n\nvan taakverkenning tm goed uitvoeren\n& we hebben ook vision en architecture erbij verzonnen tijd geleden natuurlijk"
+      },
+      {
+        "role": "user",
+        "text": "Zet om tot taken"
+      }
+    ]
+  },
+  "goal": "Een begrensde seriële projectrun verkent geautoriseerd werk, verbindt visie/besluiten aan taken en bewijs, herstelt uitvoeringsfouten en levert zelfstandig opeenvolgende taken op.",
+  "tasks": [
+    "autonomy-01",
+    "autonomy-02",
+    "autonomy-03",
+    "autonomy-04",
+    "autonomy-05",
+    "autonomy-06",
+    "autonomy-07",
+    "autonomy-08",
+    "autonomy-09",
+    "go-project-template:autonomy-template-01"
+  ],
+  "suggested_order": [
+    "autonomy-01",
+    "autonomy-02",
+    "autonomy-03",
+    "autonomy-04",
+    "autonomy-05",
+    "autonomy-06",
+    "autonomy-07",
+    "autonomy-08",
+    "autonomy-09",
+    "go-project-template:autonomy-template-01"
+  ],
+  "next_startable": [
+    "autonomy-01"
+  ],
+  "reused_work": [
+    "task-design-readiness",
+    "implement-semantic-go-task-decomposition-preserv",
+    "advice-model-04-outcomes",
+    "advice-model-05-e2e-proof",
+    "abc-03",
+    "abc-04",
+    "abc-05",
+    "abc-06",
+    "abc-07",
+    "abc-10",
+    "vision-goal-completion-audit"
+  ],
+  "deferred": [
+    "Parallel builders and inter-worker message bus",
+    "Multi-host scheduling and persistent-session/subagent adapters",
+    "Unbounded self-improvement or product discovery outside adopted goal"
+  ],
+  "assumptions": [
+    "Retain the user-selected Astra High for these source-maintenance tasks; validate availability before execution, no runtime/provider identity inference.",
+    "One owned task worktree and one builder; existing .go state and gates remain authoritative.",
+    "Every product task retains required individual release proof; planning does not authorize publication.",
+    "New verification filenames in task commands are intended deliverables, not tests already present or run.",
+    "The template freshness pin update to v0.3.33 is prerequisite metadata maintenance, not rollout of the planned autonomy feature."
+  ],
+  "open_decisions": [
+    {
+      "id": "night-pilot-bindings",
+      "owner": "run controller with user authority",
+      "blocks": [
+        "autonomy-09"
+      ],
+      "question": "Concrete disposable pilot repository, representative work, live model budget and release/deployment destination must be bound before the live campaign. Reuse explicit authority if available; never infer permission to mutate Hearthhold."
+    },
+    {
+      "id": "architecture-authority-readback",
+      "owner": "implementation controller",
+      "blocks": [
+        "autonomy-04",
+        "autonomy-08"
+      ],
+      "question": "Current classifier marks these tasks foundational. Preserve applicable named-human architecture gate; resolve actual scope and available explicit authority before completion. Planning is not approval."
+    }
+  ],
+  "design_ref": ".go/plans/autonomy-first.md",
+  "architecture_ref": ".go/architecture/briefs/autonomous-campaign.json",
+  "prior_parallel_design": {
+    "ref": ".go/plans/project-orchestration.md",
+    "status": "deferred",
+    "reuse": [
+      "Durable controller",
+      "Run authority/budgets",
+      "Serial integration and verified delivery",
+      "Recovery and proof boundaries"
+    ]
+  },
+  "dependencies": {
+    "autonomy-01": [],
+    "autonomy-02": [
+      "autonomy-01"
+    ],
+    "autonomy-03": [
+      "autonomy-01"
+    ],
+    "autonomy-04": [
+      "autonomy-03"
+    ],
+    "autonomy-05": [
+      "autonomy-01",
+      "autonomy-02"
+    ],
+    "autonomy-06": [
+      "autonomy-03",
+      "autonomy-05"
+    ],
+    "autonomy-07": [
+      "autonomy-04",
+      "autonomy-06"
+    ],
+    "autonomy-08": [
+      "autonomy-02",
+      "autonomy-04",
+      "autonomy-06",
+      "autonomy-07"
+    ],
+    "autonomy-09": [
+      "autonomy-08"
+    ]
+  }
+}

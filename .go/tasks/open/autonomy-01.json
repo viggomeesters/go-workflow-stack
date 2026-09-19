@@ -1,0 +1,121 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-01",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Define bounded run authority and outcome traceability",
+  "description": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/campaign_contracts.py",
+      "go_workflow/execution_contracts.py",
+      "go_workflow/cli.py",
+      "schemas/**",
+      "tests/test_autonomy_contracts.py",
+      "tests/test_abc_contracts.py",
+      "docs/autonomous-campaign.md",
+      "docs/architecture-lane.md",
+      ".go/architecture/briefs/autonomous-campaign.json",
+      ".go/decisions/events.jsonl",
+      ".go/plans/autonomy-first.json",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-01/**"
+    ]
+  },
+  "acceptance": [
+    "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+    "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+    "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "98d51d0abbdcb8771caafe28cf86323bb7810920cd7ab42f76576173332df74c",
+    "source_ref": "repo-local-intake:autonomy-01"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "architecture-lane-governance"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

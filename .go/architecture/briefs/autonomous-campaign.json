@@ -1,0 +1,101 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "autonomous-campaign",
+  "project": "go-workflow-stack",
+  "title": "Bounded serial autonomy from intent to verified delivery",
+  "status": "draft",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    "Turn authorized intent into grounded executable tasks connected to vision, architecture and original outcomes.",
+    "Continue serially through repair, independent task releases and recovery without manual per-task dispatch.",
+    "Prove actual bounded user goals and provide auditable delivery readback."
+  ],
+  "scope": {
+    "in": [
+      "Task exploration and semantic readiness, bounded campaign contract/controller, recovery/budgets, behavioral evidence and goal audit, serial release/cleanup, deterministic and live campaign proof"
+    ],
+    "out": [
+      "Parallel builders, inter-worker messaging bus, multi-host scheduling, new provider/session adapters, unbounded feature discovery and GitHub Actions"
+    ],
+    "systems": [
+      "go-workflow-stack",
+      "go-project-template through its own follow-up task"
+    ],
+    "boundaries": [
+      "Existing canonical .go remains the workflow authority; task/run/workspace/release records remain authoritative within one host and one writer at a time."
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "Reliable unattended progress",
+        "Original agreements and useful live results"
+      ],
+      "decision_rights": [
+        "Authorize goal, bounded delegation, budget and actual publication targets; current request authorizes task creation only"
+      ]
+    },
+    {
+      "role": "workflow-maintainer",
+      "concerns": [
+        "Legacy compatibility",
+        "No duplicate state or ceremonial architecture"
+      ],
+      "decision_rights": [
+        "Resolve bounded implementation choices using existing accepted architecture; never fabricate human approval"
+      ]
+    }
+  ],
+  "constraints": [
+    "Reuse existing ABC, R# outcomes, architecture decision/conformance gates and v0.3.33 readiness; implement deltas rather than duplicate systems.",
+    "Broad vision guides relevance but does not authorize new work; research and repair expansion must fit the adopted goal.",
+    "Make authority explicit and preserve prior user delegation; conditional architecture gates apply only where relevant.",
+    "Keep final proof tied to the tested candidate and observed release; preparation is not product completion.",
+    "One worker, durable task/project binding and cumulative budget; resume checks actual process and external-effect state.",
+    "Planning only now. autonomy-01 owns the architecture decision and accepted brief before dependent implementation."
+  ],
+  "quality_attributes": [
+    {
+      "id": "intent-coverage",
+      "scenario": "A rough multi-part request is explored, split, repaired and delivered",
+      "measure": "Original adopted outcomes lost or falsely verified",
+      "threshold": 0
+    },
+    {
+      "id": "serial-continuation",
+      "scenario": "Three eligible serial tasks with adequate budget",
+      "measure": "User prompts needed solely to dispatch the next task",
+      "threshold": 0
+    },
+    {
+      "id": "recovery-integrity",
+      "scenario": "Controller/process interruption or lost publication acknowledgement",
+      "measure": "Duplicate writers, repeated unobserved external effects or erased work",
+      "threshold": 0
+    },
+    {
+      "id": "truthful-goal-completion",
+      "scenario": "Queue empty but behavioral evidence missing",
+      "measure": "Goal reported achieved",
+      "threshold": 0
+    },
+    {
+      "id": "delivery-integrity",
+      "scenario": "Release-required task completed by builder",
+      "measure": "Task reported delivered without required fresh release/live proof",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Semantic task/readiness/goal judgement requires grounded review; JSON shape or deterministic fixtures cannot prove model quality.",
+    "Existing architecture classification may identify foundational changes; inspect real scope and existing human authority before execution, never infer approval from intake.",
+    "Pilot setup, runtime availability and live provider limits can block live proof even with green deterministic tests."
+  ],
+  "open_questions": [
+    "autonomy-01 must fix the versioned campaign/traceability contract and governing decisions before adoption.",
+    "autonomy-09 requires a concrete authorized pilot project, profiles, budget and delivery destination; Hearthhold is not implicitly authorized."
+  ],
+  "decision_ids": []
+}

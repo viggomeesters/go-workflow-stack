@@ -29,6 +29,8 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 
 For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the conditional task-local architecture lane, see [`docs/architecture-lane.md`](docs/architecture-lane.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
 
+Bounded multi-task authority and outcome traceability are specified in [`docs/autonomous-campaign.md`](docs/autonomous-campaign.md). Validation never grants execution or treats an empty queue as achieved product behavior.
+
 Routing rule: a target repo must own a valid `.go/project.json` before workflow execution starts. Repositories without that contract fail closed and must use `adopt` or `spike`; a vault is never an execution fallback.
 
 ## Practical architecture in one minute

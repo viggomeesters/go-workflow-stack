@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.34 — bounded autonomy campaign contracts
+
+- Bind serial campaigns to versioned intent, adopted outcomes, accepted decisions, explicit task/model authority, cumulative budgets, and separate delivery grants.
+- Keep validation read-only: empty queues, unresolved material choices, and broad vision cannot silently authorize work or claim goal completion.
+- Add positive, negative, drift, and legacy fixtures plus a grounded campaign architecture decision and operating guide.
+- Run managed verification in an evidence-identical disposable checkout so repository-wide fixture tests stay isolated without weakening worker guards.
+
 ## 0.3.33 — proportionate task design readiness
 
 - Honor explicit design prerequisites at none/local impact and before autonomous builds.

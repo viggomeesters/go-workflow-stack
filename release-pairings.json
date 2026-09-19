@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.33",
+  "current_stack_ref": "v0.3.34",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -212,6 +212,12 @@
       "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
       "template_ref": "v0.3.17",
       "note": "Immutable guided-onboarding starter baseline. Its current v0.3.32 runtime pin is independent of this compatibility baseline."
+    },
+    {
+      "stack_ref": "v0.3.34",
+      "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
+      "template_ref": "v0.3.17",
+      "note": "Preserved immutable starter baseline. Autonomy campaign adoption in the template remains owned by its separate autonomy-template-01 task."
     }
   ]
 }

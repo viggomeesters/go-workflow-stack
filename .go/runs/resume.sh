@@ -13,4 +13,4 @@ if [ -z "$STACK" ] || [ ! -f "$STACK/cli/go.py" ]; then
   exit 2
 fi
 cd "$REPO_ROOT"
-exec python3 "$STACK/cli/go.py" go-loop . --execute --max-tasks 10 --summary-chars 900 --max-minutes 90 --max-commands 10 --command-timeout-seconds 900 --max-attempts 5 --checkpoint-every-tasks 1 --agent agent --executor-agent auto --ship-policy none --semantic-critic --json
+exec python3 "$STACK/cli/go.py" go-auto . --execute --max-tasks 1 --summary-chars 900 --max-minutes 90 --max-commands 30 --command-timeout-seconds 3600 --max-attempts 3 --checkpoint-every-tasks 1 --agent codex-astra-high --executor-agent codex --ship-policy local-commit --semantic-critic --json

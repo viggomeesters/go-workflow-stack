@@ -22,6 +22,16 @@ for an opted-in task refuses to run until its registered workspace exists. A
 registered worker must match its current canonical task snapshot and claim.
 Model and phase changes reuse its workspace and execution lease.
 
+Managed verification that is not part of controller-owned publication runs in
+an unregistered disposable checkout. The controller clones the worker's exact
+HEAD, overlays every changed or untracked candidate path, and compares the
+resulting tracked-content and changed-file hashes before starting a check. Each
+check records those source hashes together with the managed candidate digest.
+This lets repository-wide checks create and mutate their own temporary fixture
+repositories without inheriting the registered worker boundary. The registered
+workspace remains read-only during verification, and its normal command guard
+still rejects direct workflow-state mutation.
+
 ## One control state
 
 The primary checkout's `.go/workspaces/<task>.json` owns the workspace registry.

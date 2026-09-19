@@ -1,6 +1,7 @@
 """Managed resume through real Git and bounded native-process fixtures."""
 import json
 import os
+import shlex
 import subprocess
 import sys
 from pathlib import Path
@@ -67,6 +68,39 @@ def test_budget_after_build_resumes_same_active_task_at_verification(tmp_path,mo
     assert resumed['run_id']==state['run_id'] and resumed['phase']=='release'
     assert resumed['checks'][0]['returncode']==0
     assert (workspace/'app.txt').read_text()=='built'
+
+
+def test_managed_verification_uses_an_unregistered_candidate_copy(tmp_path,monkeypatch):
+    repo,base,workspace,capture=runner_fixture(tmp_path,monkeypatch)
+    ps=tmp_path/'ps';ps.write_text('#!'+sys.executable+"\n");ps.chmod(0o755)
+    fixture=tmp_path/'verification-fixture'
+    observed_cwd=tmp_path/'verification-cwd.txt'
+    source=repo/'.go/tasks/open/task-schema-smoke.json';task=json.loads(source.read_text())
+    script=(
+        "import pathlib,subprocess,sys; "
+        f"cwd=pathlib.Path.cwd(); pathlib.Path({str(observed_cwd)!r}).write_text(str(cwd)); "
+        f"subprocess.run([sys.executable,{str(CLI)!r},'spike',{str(fixture)!r},'--project-id','verification-fixture'],cwd=cwd,check=True); "
+        "assert pathlib.Path('app.txt').read_text() == 'built'"
+    )
+    task['verification']=[shlex.join([sys.executable,'-c',script])]
+    source.write_text(json.dumps(task))
+
+    first=run_managed(repo,base,workspace,1,initial=True)
+    assert first.returncode==0,first.stdout+first.stderr
+    resumed=run_managed(repo,base,workspace,10)
+    assert resumed.returncode==0,resumed.stdout+resumed.stderr
+    assert json.loads(resumed.stdout)['status']=='release_pending',resumed.stdout+resumed.stderr
+    assert (fixture/'.go/project.json').is_file()
+    verification_cwd=Path(observed_cwd.read_text())
+    assert verification_cwd != workspace
+    assert not verification_cwd.exists()
+    state=json.loads((repo/'.go/runs/task-schema-smoke/run-state.json').read_text())
+    proof=state['checks'][0]['verification_source']
+    assert proof['candidate_digest']==state['checks'][0]['code_digest']
+    assert proof['tracked_content_sha256']==state['code']['tracked_content_sha256']
+    from go_workflow.execution_context import json_hash
+    assert proof['changed_files_sha256']==json_hash(state['code']['files'])
+    assert proof['changed_files']==['app.txt']
 
 
 def test_resume_invalidates_changed_code_without_rebuilding_confirmed_build(tmp_path,monkeypatch):

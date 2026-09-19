@@ -5,8 +5,11 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import stat
+import tempfile
 import uuid
+from contextlib import contextmanager
 from pathlib import Path
 from typing import Any
 
@@ -58,6 +61,51 @@ def git_state(workspace: Path, record: dict) -> dict:
             'index_sha256': digest(git(workspace, 'ls-files', '--stage', '-z').stdout.encode()),
             'tracked_content_sha256': json_hash(tracked_state),
             'files': {name: file_state(workspace / name) for name in paths}}
+
+
+def _copy_candidate_path(source: Path, target: Path) -> None:
+    if target.exists() or target.is_symlink():
+        if target.is_dir() and not target.is_symlink(): shutil.rmtree(target)
+        else: target.unlink()
+    if not source.exists() and not source.is_symlink(): return
+    target.parent.mkdir(parents=True, exist_ok=True)
+    if source.is_symlink(): target.symlink_to(os.readlink(source))
+    else: shutil.copy2(source, target)
+
+
+@contextmanager
+def verification_checkout(workspace: Path, record: dict, candidate_code: dict):
+    """Yield an unregistered checkout with the exact candidate file bytes."""
+    workspace = workspace.resolve()
+    candidate = git_state(workspace, record)
+    for key in ('head', 'base_commit', 'branch', 'index_sha256', 'tracked_content_sha256', 'files'):
+        if candidate_code.get(key) != candidate[key]:
+            raise ContextError('Managed candidate changed before verification isolation')
+    with tempfile.TemporaryDirectory(prefix='go-managed-verify-') as directory:
+        checkout = Path(directory) / 'candidate'
+        git(workspace, 'clone', '--quiet', '--no-hardlinks', '--no-checkout', '.', str(checkout))
+        git(checkout, 'checkout', '--quiet', '-b', 'verification-' + uuid.uuid4().hex, candidate['head'])
+        for name in candidate['files']:
+            relative = Path(name)
+            if relative.is_absolute() or '..' in relative.parts:
+                raise ContextError('Candidate path escapes verification checkout')
+            _copy_candidate_path(workspace / relative, checkout / relative)
+        actual = git_state(checkout, {
+            'path': str(checkout),
+            'base_commit': candidate['base_commit'],
+        })
+        if (actual['tracked_content_sha256'] != candidate['tracked_content_sha256']
+                or actual['files'] != candidate['files']):
+            raise ContextError('Disposable verification source differs from managed candidate')
+        proof = {
+            'schema': 'go-workflow.verification-source.v1',
+            'candidate_digest': json_hash(candidate_code),
+            'tracked_content_sha256': candidate['tracked_content_sha256'],
+            'changed_files_sha256': json_hash(candidate['files']),
+            'changed_files': sorted(candidate['files']),
+            'isolation': 'unregistered_disposable_checkout',
+        }
+        yield checkout, proof
 
 
 def canonical_sources(root: Path, task: dict) -> list[Path]:

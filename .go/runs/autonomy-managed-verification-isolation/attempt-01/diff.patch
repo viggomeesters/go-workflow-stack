@@ -1,0 +1,246 @@
+diff --git a/.go/runs/events.jsonl b/.go/runs/events.jsonl
+index 87bc035..e8ae102 100644
+--- a/.go/runs/events.jsonl
++++ b/.go/runs/events.jsonl
+@@ -172,3 +172,4 @@
+ {"schema": "go-workflow.repo-local.event.v1", "kind": "event", "event": "run.checked", "created_at": "2026-09-19T07:46:25+02:00", "task_id": "autonomy-01", "agent": "model-runtime", "data": {"action": "model.phase_started", "phase": "repair", "attempt": 3, "model_selection": {"requested": {"id": "gpt-6-astra", "effort": "high"}, "effective": null, "confirmation": "unconfirmed", "reason": "Runtime arguments enforced; no independent effective-model attestation", "capabilities": {"adapter": "codex", "model_control": true, "capability_source": "codex app-server model/list", "reason": null}}}}
+ {"schema": "go-workflow.repo-local.event.v1", "kind": "event", "event": "run.checked", "created_at": "2026-09-19T07:48:44+02:00", "task_id": "autonomy-01", "agent": "model-runtime", "data": {"action": "model.phase_completed", "phase": "repair", "attempt": 3, "model_selection": {"requested": {"id": "gpt-6-astra", "effort": "high"}, "effective": null, "confirmation": "unconfirmed", "reason": "Runtime arguments enforced; no independent effective-model attestation", "capabilities": {"adapter": "codex", "model_control": true, "capability_source": "codex app-server model/list", "reason": null}}, "usage": {"source": "codex_json_stream", "turns": [{"input_tokens": 1098318, "cached_input_tokens": 1026048, "output_tokens": 3112}], "elapsed_seconds": 138.55425762489904, "provider_invoice_cost_usd": null}, "returncode": 1}}
+ {"schema": "go-workflow.repo-local.event.v1", "kind": "event", "event": "task.blocked", "created_at": "2026-09-19T07:50:30+02:00", "task_id": "autonomy-01", "agent": "codex", "data": {"reason": "managed verification command cannot safely run repository-mutating fixtures from a registered worker checkout; bounded repair task required", "checks": [{"task_id": "autonomy-01", "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider", "returncode": 0, "stdout": "........................................................................ [100%]\n72 passed in 4.68s\n", "stderr": "", "timed_out": false}, {"task_id": "autonomy-01", "command": "make check", "returncode": 2, "stdout": "\"mode\"] == \"go-loop\" and p[\"continues_beyond_initial_tasks\"]' /tmp/go-loop-smoke.json; \\\n\t  python3 cli/go.py go-loop $TMP/spike-smoke --max-tasks 2 --json >/tmp/go-loop-alias-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"mode\"] == \"go-loop\" and p[\"next_tasks\"] == [\"first\", \"second\"]' /tmp/go-loop-alias-smoke.json; \\\n\t  git -C $TMP/spike-smoke add .go README.md .gitignore LICENSE SECURITY.md CONTRIBUTING.md CHANGELOG.md Makefile go scripts/check.sh; \\\n\t  git -C $TMP/spike-smoke -c user.name=Make -c user.email=make@example.com commit -m \"seed spike smoke\" -q; \\\n\t  python3 cli/go.py auto $TMP/spike-smoke --max-tasks 1 --execute --agent make-check --json >/tmp/go-auto-execute-smoke.json; \\\n\t  python3 -c 'import json,sys,pathlib; p=json.load(open(sys.argv[1])); r=pathlib.Path(sys.argv[2]); assert p[\"status\"] == \"budget_exhausted\" and p[\"completed_tasks\"] == [\"first\"] and (r/\".go/tasks/done/first.json\").is_file() and (r/\".go/tasks/open/second.json\").is_file() and (r/\".go/reflections/events.jsonl\").is_file()' /tmp/go-auto-execute-smoke.json $TMP/spike-smoke; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command gOo --intent \"ga verder\" --json >/tmp/go-router-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go\" and p[\"recommended\"][\"command\"] == \"auto\"' /tmp/go-router-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command GOO --intent \"controle afgeven werk tot groen\" --json >/tmp/go-router-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-loop-smoke.json; \\\n\t  python3 cli/go.py router $TMP/spike-smoke --command go-loop --json >/tmp/go-router-direct-loop-smoke.json; \\\n\t  python3 -c 'import json,sys; p=json.load(open(sys.argv[1])); assert p[\"normalized_command\"] == \"go-loop\" and p[\"recommended\"][\"command\"] == \"go-loop\"' /tmp/go-router-direct-loop-smoke.json\n", "stderr": "  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nfatal: cannot change to '/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/tmp.LRHYWU2clQ/spike-smoke': No such file or directory\nerror: Use the control checkout for workflow mutations; a worker may only record its owned task outcomes\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 293, in load\n    return loads(fp.read(),\n           ^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/__init__.py\", line 346, in loads\n    return _default_decoder.decode(s)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 338, in decode\n    obj, end = self.raw_decode(s, idx=_w(s, 0).end())\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/Users/viggomeesters/.local/share/uv/python/cpython-3.12.13-macos-aarch64-none/lib/python3.12/json/decoder.py\", line 356, in raw_decode\n    raise JSONDecodeError(\"Expecting value\", s, err.value) from None\njson.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nTraceback (most recent call last):\n  File \"<string>\", line 1, in <module>\nAssertionError\nmake: *** [check] Error 1\n", "timed_out": false}]}}
++{"schema": "go-workflow.repo-local.event.v1", "kind": "event", "event": "task.claimed", "created_at": "2026-09-19T07:51:18+02:00", "task_id": "autonomy-managed-verification-isolation", "agent": "codex-astra-high", "data": {"report_only_dirty": ["?? uv.lock — unrelated dirty state"], "executor": "go-auto", "base_commit": "073ef7cd763b2caa4ac0d63cbda3889220870917", "claimed_at": "2026-09-19T07:51:18+02:00"}}
+diff --git a/.go/tasks/open/autonomy-managed-verification-isolation.json b/.go/tasks/open/autonomy-managed-verification-isolation.json
+deleted file mode 100644
+index e73cc8c..0000000
+--- a/.go/tasks/open/autonomy-managed-verification-isolation.json
++++ /dev/null
+@@ -1,42 +0,0 @@
+-{
+-  "schema": "go-workflow.repo-local.task.v1",
+-  "kind": "task",
+-  "execution_mode": "agent",
+-  "shareable_delivery": "none",
+-  "id": "autonomy-managed-verification-isolation",
+-  "project": "go-workflow-stack",
+-  "status": "open",
+-  "summary": "Isolate managed verification without weakening worker guards",
+-  "description": "Run repository-wide verification for a managed task against an evidence-identical disposable checkout so fixture mutations do not inherit the registered worker boundary. Preserve the worker guard and bind proof to the exact candidate content.",
+-  "scope": {
+-    "read": [
+-      "**"
+-    ],
+-    "modify": [
+-      "go_workflow/run_state.py",
+-      "go_workflow/execution_context.py",
+-      "tests/test_abc_resume.py",
+-      "tests/test_abc_completion.py",
+-      "docs/task-workspaces.md"
+-    ]
+-  },
+-  "acceptance": [
+-    "Managed verification of make check can execute temporary fixture repositories without treating them as the registered task worker.",
+-    "The verification source is byte-identical for every scoped candidate change and proof remains bound to the managed candidate digest.",
+-    "The registered workspace mutation guard remains unchanged and still rejects direct control-state mutation."
+-  ],
+-  "verification": [
+-    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_abc_resume.py tests/test_abc_completion.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+-    "make check",
+-    "python3 cli/go.py validate .",
+-    "git diff --check"
+-  ],
+-  "claim": {
+-    "agent": null,
+-    "claimed_at": null
+-  },
+-  "work_status": "pending",
+-  "review_status": "none",
+-  "review_history": [],
+-  "evidence": []
+-}
+diff --git a/docs/task-workspaces.md b/docs/task-workspaces.md
+index 84ab0e6..8cd3b51 100644
+--- a/docs/task-workspaces.md
++++ b/docs/task-workspaces.md
+@@ -22,6 +22,16 @@ for an opted-in task refuses to run until its registered workspace exists. A
+ registered worker must match its current canonical task snapshot and claim.
+ Model and phase changes reuse its workspace and execution lease.
+ 
++Managed verification that is not part of controller-owned publication runs in
++an unregistered disposable checkout. The controller clones the worker's exact
++HEAD, overlays every changed or untracked candidate path, and compares the
++resulting tracked-content and changed-file hashes before starting a check. Each
++check records those source hashes together with the managed candidate digest.
++This lets repository-wide checks create and mutate their own temporary fixture
++repositories without inheriting the registered worker boundary. The registered
++workspace remains read-only during verification, and its normal command guard
++still rejects direct workflow-state mutation.
++
+ ## One control state
+ 
+ The primary checkout's `.go/workspaces/<task>.json` owns the workspace registry.
+diff --git a/go_workflow/execution_context.py b/go_workflow/execution_context.py
+index 94f0fe9..4c232bc 100644
+--- a/go_workflow/execution_context.py
++++ b/go_workflow/execution_context.py
+@@ -5,8 +5,11 @@ import hashlib
+ import json
+ import os
+ import re
++import shutil
+ import stat
++import tempfile
+ import uuid
++from contextlib import contextmanager
+ from pathlib import Path
+ from typing import Any
+ 
+@@ -60,6 +63,51 @@ def git_state(workspace: Path, record: dict) -> dict:
+             'files': {name: file_state(workspace / name) for name in paths}}
+ 
+ 
++def _copy_candidate_path(source: Path, target: Path) -> None:
++    if target.exists() or target.is_symlink():
++        if target.is_dir() and not target.is_symlink(): shutil.rmtree(target)
++        else: target.unlink()
++    if not source.exists() and not source.is_symlink(): return
++    target.parent.mkdir(parents=True, exist_ok=True)
++    if source.is_symlink(): target.symlink_to(os.readlink(source))
++    else: shutil.copy2(source, target)
++
++
++@contextmanager
++def verification_checkout(workspace: Path, record: dict, candidate_code: dict):
++    """Yield an unregistered checkout with the exact candidate file bytes."""
++    workspace = workspace.resolve()
++    candidate = git_state(workspace, record)
++    for key in ('head', 'base_commit', 'branch', 'index_sha256', 'tracked_content_sha256', 'files'):
++        if candidate_code.get(key) != candidate[key]:
++            raise ContextError('Managed candidate changed before verification isolation')
++    with tempfile.TemporaryDirectory(prefix='go-managed-verify-') as directory:
++        checkout = Path(directory) / 'candidate'
++        git(workspace, 'clone', '--quiet', '--no-hardlinks', '--no-checkout', '.', str(checkout))
++        git(checkout, 'checkout', '--quiet', '-b', 'verification-' + uuid.uuid4().hex, candidate['head'])
++        for name in candidate['files']:
++            relative = Path(name)
++            if relative.is_absolute() or '..' in relative.parts:
++                raise ContextError('Candidate path escapes verification checkout')
++            _copy_candidate_path(workspace / relative, checkout / relative)
++        actual = git_state(checkout, {
++            'path': str(checkout),
++            'base_commit': candidate['base_commit'],
++        })
++        if (actual['tracked_content_sha256'] != candidate['tracked_content_sha256']
++                or actual['files'] != candidate['files']):
++            raise ContextError('Disposable verification source differs from managed candidate')
++        proof = {
++            'schema': 'go-workflow.verification-source.v1',
++            'candidate_digest': json_hash(candidate_code),
++            'tracked_content_sha256': candidate['tracked_content_sha256'],
++            'changed_files_sha256': json_hash(candidate['files']),
++            'changed_files': sorted(candidate['files']),
++            'isolation': 'unregistered_disposable_checkout',
++        }
++        yield checkout, proof
++
++
+ def canonical_sources(root: Path, task: dict) -> list[Path]:
+     sources = [root / name for name in ('project.json', 'vision.json', 'architecture-principles.json', 'hierarchy.json')]
+     sources.append(root / 'tasks/active' / (task['id'] + '.json'))
+diff --git a/go_workflow/run_state.py b/go_workflow/run_state.py
+index 03f9990..b313e86 100644
+--- a/go_workflow/run_state.py
++++ b/go_workflow/run_state.py
+@@ -18,12 +18,13 @@ import subprocess
+ import time
+ import uuid
+ 
+-from .execution_context import git_state, json_hash, canonical_sources, file_state
++from .execution_context import (git_state, json_hash, canonical_sources, file_state,
++                                verification_checkout)
+ from .model_profiles import freeze_selection
+ from .state_io import atomic_json, atomic_move_json, repository_lock, _pid_alive
+ from .worktrees import (WorkspaceError, active_task, checked_scope, cleanup_workspace,
+                         create_workspace, owned_record, read_object, registry_path,
+-                        verify_workspace, execution_lease)
++                        verify_workspace, execution_lease, registered_workspace)
+ 
+ SCHEMA = 'go-workflow.managed-run.v1'
+ PROCESS = ContextVar('managed_phase_process', default=None)
+@@ -153,6 +154,12 @@ def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
+                 record = owned_record(control, task_id, owner, run_id, active=not readback_after_finish)
+                 verify_workspace(record)
+                 if str(Path.cwd().resolve()) != record['path']: raise RunStateError('Foreign verification workspace')
++        elif (channel == 'managed' and state['phase'] == 'verify'
++              and isinstance(state.get('execution_cwd'), str)):
++            if str(Path.cwd().resolve()) != state['execution_cwd']:
++                raise RunStateError('Verification bootstrap cwd changed')
++            if registered_workspace(Path.cwd()) is not None:
++                raise RunStateError('Disposable verification checkout must be unregistered')
+         else:
+             record = owned_record(control, task_id, owner, run_id)
+             verify_workspace(record)
+@@ -554,7 +561,13 @@ def _execute_managed(control, args, task_id, api, result):
+                         check, output = completion.execute_check(workspace, task, command, session, timeout_seconds=timeout)
+                         output = {'returncode': output['returncode'], 'completion_check': check}
+                     else:
+-                        output = api.run_verification_commands(workspace, {**task, 'verification': [command]}, timeout_seconds=timeout)[0]
++                        with verification_checkout(workspace, record, before) as (verification_repo, source_proof):
++                            session.update(execution_cwd=str(verification_repo.resolve()))
++                            output = api.run_verification_commands(
++                                verification_repo, {**task, 'verification': [command]}, timeout_seconds=timeout,
++                            )[0]
++                            output['verification_source'] = source_proof
++                            output['code_digest'] = json_hash(before)
+             else:
+                 feedback = {'checks': state['checks'], 'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {}}
+                 if phase == 'critic':
+diff --git a/tests/test_abc_resume.py b/tests/test_abc_resume.py
+index bec7506..ead16dd 100644
+--- a/tests/test_abc_resume.py
++++ b/tests/test_abc_resume.py
+@@ -1,6 +1,7 @@
+ """Managed resume through real Git and bounded native-process fixtures."""
+ import json
+ import os
++import shlex
+ import subprocess
+ import sys
+ from pathlib import Path
+@@ -69,6 +70,39 @@ def test_budget_after_build_resumes_same_active_task_at_verification(tmp_path,mo
+     assert (workspace/'app.txt').read_text()=='built'
+ 
+ 
++def test_managed_verification_uses_an_unregistered_candidate_copy(tmp_path,monkeypatch):
++    repo,base,workspace,capture=runner_fixture(tmp_path,monkeypatch)
++    ps=tmp_path/'ps';ps.write_text('#!'+sys.executable+"\n");ps.chmod(0o755)
++    fixture=tmp_path/'verification-fixture'
++    observed_cwd=tmp_path/'verification-cwd.txt'
++    source=repo/'.go/tasks/open/task-schema-smoke.json';task=json.loads(source.read_text())
++    script=(
++        "import pathlib,subprocess,sys; "
++        f"cwd=pathlib.Path.cwd(); pathlib.Path({str(observed_cwd)!r}).write_text(str(cwd)); "
++        f"subprocess.run([sys.executable,{str(CLI)!r},'spike',{str(fixture)!r},'--project-id','verification-fixture'],cwd=cwd,check=True); "
++        "assert pathlib.Path('app.txt').read_text() == 'built'"
++    )
++    task['verification']=[shlex.join([sys.executable,'-c',script])]
++    source.write_text(json.dumps(task))
++
++    first=run_managed(repo,base,workspace,1,initial=True)
++    assert first.returncode==0,first.stdout+first.stderr
++    resumed=run_managed(repo,base,workspace,10)
++    assert resumed.returncode==0,resumed.stdout+resumed.stderr
++    assert json.loads(resumed.stdout)['status']=='release_pending',resumed.stdout+resumed.stderr
++    assert (fixture/'.go/project.json').is_file()
++    verification_cwd=Path(observed_cwd.read_text())
++    assert verification_cwd != workspace
++    assert not verification_cwd.exists()
++    state=json.loads((repo/'.go/runs/task-schema-smoke/run-state.json').read_text())
++    proof=state['checks'][0]['verification_source']
++    assert proof['candidate_digest']==state['checks'][0]['code_digest']
++    assert proof['tracked_content_sha256']==state['code']['tracked_content_sha256']
++    from go_workflow.execution_context import json_hash
++    assert proof['changed_files_sha256']==json_hash(state['code']['files'])
++    assert proof['changed_files']==['app.txt']
++
++
+ def test_resume_invalidates_changed_code_without_rebuilding_confirmed_build(tmp_path,monkeypatch):
+     repo,base,workspace,capture=runner_fixture(tmp_path,monkeypatch)
+     (repo/'personal.txt').write_text('untouched')

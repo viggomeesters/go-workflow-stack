@@ -1,0 +1,12 @@
+{
+  "schema": "go-workflow.attempt-verdict.v1",
+  "task_id": "autonomy-managed-verification-isolation",
+  "attempt": 1,
+  "strategy": "direct_fix",
+  "build_status": "passed",
+  "verify_status": "failed",
+  "critic_status": "blocking_findings",
+  "repair_status": "failed",
+  "judge_status": "retry",
+  "created_at": "2026-09-19T08:10:08+02:00"
+}

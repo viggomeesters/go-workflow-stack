@@ -18,12 +18,13 @@ import subprocess
 import time
 import uuid
 
-from .execution_context import git_state, json_hash, canonical_sources, file_state
+from .execution_context import (git_state, json_hash, canonical_sources, file_state,
+                                verification_checkout)
 from .model_profiles import freeze_selection
 from .state_io import atomic_json, atomic_move_json, repository_lock, _pid_alive
 from .worktrees import (WorkspaceError, active_task, checked_scope, cleanup_workspace,
                         create_workspace, owned_record, read_object, registry_path,
-                        verify_workspace, execution_lease)
+                        verify_workspace, execution_lease, registered_workspace)
 
 SCHEMA = 'go-workflow.managed-run.v1'
 PROCESS = ContextVar('managed_phase_process', default=None)
@@ -153,6 +154,12 @@ def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
                 record = owned_record(control, task_id, owner, run_id, active=not readback_after_finish)
                 verify_workspace(record)
                 if str(Path.cwd().resolve()) != record['path']: raise RunStateError('Foreign verification workspace')
+        elif (channel == 'managed' and state['phase'] == 'verify'
+              and isinstance(state.get('execution_cwd'), str)):
+            if str(Path.cwd().resolve()) != state['execution_cwd']:
+                raise RunStateError('Verification bootstrap cwd changed')
+            if registered_workspace(Path.cwd()) is not None:
+                raise RunStateError('Disposable verification checkout must be unregistered')
         else:
             record = owned_record(control, task_id, owner, run_id)
             verify_workspace(record)
@@ -554,7 +561,13 @@ def _execute_managed(control, args, task_id, api, result):
                         check, output = completion.execute_check(workspace, task, command, session, timeout_seconds=timeout)
                         output = {'returncode': output['returncode'], 'completion_check': check}
                     else:
-                        output = api.run_verification_commands(workspace, {**task, 'verification': [command]}, timeout_seconds=timeout)[0]
+                        with verification_checkout(workspace, record, before) as (verification_repo, source_proof):
+                            session.update(execution_cwd=str(verification_repo.resolve()))
+                            output = api.run_verification_commands(
+                                verification_repo, {**task, 'verification': [command]}, timeout_seconds=timeout,
+                            )[0]
+                            output['verification_source'] = source_proof
+                            output['code_digest'] = json_hash(before)
             else:
                 feedback = {'checks': state['checks'], 'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {}}
                 if phase == 'critic':

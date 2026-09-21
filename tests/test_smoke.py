@@ -960,7 +960,11 @@ def test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime(tmp_path: Pat
     (source / "cli" / "go.py").write_text('STACK_VERSION = "0.3.0"\n', encoding="utf-8")
     subprocess.run(["git", "add", "."], cwd=source, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "v1", "-q"], cwd=source, check=True)
-    subprocess.run(["git", "tag", "v0.3.0"], cwd=source, check=True)
+    subprocess.run(
+        ["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "tag", "-a", "v0.3.0", "-m", "v0.3.0"],
+        cwd=source,
+        check=True,
+    )
     subprocess.run(["git", "clone", "--bare", "-q", str(source), str(remote)], check=True)
     subprocess.run(["git", "clone", "--branch", "v0.3.0", "-q", str(remote), str(checkout)], check=True)
     pinned_head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=checkout, text=True, capture_output=True, check=True).stdout.strip()

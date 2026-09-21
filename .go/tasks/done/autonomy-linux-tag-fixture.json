@@ -1,0 +1,140 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "autonomy-linux-tag-fixture",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Make the pinned-runtime bootstrap test hermetic",
+  "description": "Repair the Linux release gate exposed while shipping autonomy-01. The pinned-runtime positive fixture currently creates a lightweight tag even though bootstrap-stack.sh correctly requires annotated immutable tags; user Git configuration can mask the mismatch on macOS. Create the fixture's tag explicitly annotated without weakening production bootstrap integrity.",
+  "scope": {
+    "read": [
+      "tests/test_smoke.py",
+      "../go-project-template/scripts/bootstrap-stack.sh"
+    ],
+    "modify": [
+      "tests/test_smoke.py"
+    ]
+  },
+  "acceptance": [
+    "The positive pinned-runtime bootstrap fixture creates an explicit annotated tag and passes with sanitized Git configuration on Linux.",
+    "The same-version wrong-commit negative test still rejects the checkout, so production exact-commit enforcement is unchanged."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<10' --with 'jsonschema>=4.23' python -m pytest tests/test_smoke.py::test_template_bootstrap_keeps_explicit_stack_on_pinned_runtime tests/test_smoke.py::test_template_bootstrap_rejects_same_version_wrong_commit_without_dev_override -q -p no:cacheprovider",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-21T21:21:16+02:00",
+    "base_commit": "30c7a5884423f6cb7914863f4392da89e47d008a"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-21T21:27:37+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Manual critic rechecked exact one-test fixture diff, immutable-tag semantics and full Linux release output; no blocking findings.",
+      "transaction_id": "a853547ee3124a9cb12984586cefbaf2"
+    },
+    {
+      "created_at": "2026-09-21T21:28:16+02:00",
+      "agent": "codex",
+      "status": "needs_fix",
+      "evidence": "Finish evidence incorrectly inferred unrelated uv.lock as changed_files; preserve audit history and rerun finish with explicit tests/test_smoke.py attribution.",
+      "owner": "codex"
+    },
+    {
+      "created_at": "2026-09-21T21:28:16+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Corrected evidence explicitly attributes tests/test_smoke.py; recheck and full Linux release gate remain green.",
+      "transaction_id": "8043d03ed9534e668749536a006a6ce6"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-21T21:27:37+02:00",
+      "task_id": "autonomy-linux-tag-fixture",
+      "agent": "codex",
+      "summary": "verification_command=GIT_CONFIG_GLOBAL=/dev/null pytest focused plus scripts/release-check.sh 0.3.34 --allow-candidate on WSL2; verification_result=2 focused passed, compatibility 156 passed, smoke 197 passed, template pairing and standalone distribution passed; critic=passed: diff review confirms production bootstrap unchanged and negative wrong-commit case remains green; runtime=codex; billing_mode=subscription",
+      "changed_files": [
+        "uv.lock"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "30c7a5884423f6cb7914863f4392da89e47d008a",
+        "observed_head_commit": "612c2f66a39799cb3e1283cc89ce8dec7dc94206"
+      },
+      "verification": {
+        "command": "GIT_CONFIG_GLOBAL=/dev/null pytest focused plus scripts/release-check.sh 0.3.34 --allow-candidate on WSL2",
+        "result": "2 focused passed, compatibility 156 passed, smoke 197 passed, template pairing and standalone distribution passed"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "subscription",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed: diff review confirms production bootstrap unchanged and negative wrong-commit case remains green",
+        "skip_reason": null
+      }
+    },
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-21T21:28:16+02:00",
+      "task_id": "autonomy-linux-tag-fixture",
+      "agent": "codex",
+      "summary": "changed_files=tests/test_smoke.py; verification_command=GIT_CONFIG_GLOBAL=/dev/null pytest focused plus scripts/release-check.sh 0.3.34 --allow-candidate on WSL2; verification_result=2 focused passed, compatibility 156 passed, smoke 197 passed, template pairing and standalone distribution passed; critic=passed: exact diff review confirms production bootstrap unchanged and negative wrong-commit case remains green; runtime=codex; billing_mode=subscription",
+      "changed_files": [
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "30c7a5884423f6cb7914863f4392da89e47d008a",
+        "observed_head_commit": "612c2f66a39799cb3e1283cc89ce8dec7dc94206"
+      },
+      "verification": {
+        "command": "GIT_CONFIG_GLOBAL=/dev/null pytest focused plus scripts/release-check.sh 0.3.34 --allow-candidate on WSL2",
+        "result": "2 focused passed, compatibility 156 passed, smoke 197 passed, template pairing and standalone distribution passed"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "codex",
+        "model": null,
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "subscription",
+        "owner": "codex",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed: exact diff review confirms production bootstrap unchanged and negative wrong-commit case remains green",
+        "skip_reason": null
+      }
+    }
+  ]
+}

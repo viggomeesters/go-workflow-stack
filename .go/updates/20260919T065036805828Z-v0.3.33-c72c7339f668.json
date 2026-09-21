@@ -1,0 +1,61 @@
+{
+  "schema": "go-workflow.stack-update-rollback.v1",
+  "status": "applied",
+  "created_at": "2026-09-19T06:50:36.805864+00:00",
+  "target": ".go/project.json",
+  "from_ref": "v0.3.34",
+  "to_ref": "v0.3.33",
+  "resolved_commit": "c72c7339f66861fc1c69a80e22514829a46cef09",
+  "before_project": {
+    "schema": "go-workflow.repo-local.project.v1",
+    "kind": "project",
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack",
+    "source_of_truth": "repo-local",
+    "project_mode": "project",
+    "required_stack_version": "0.3.34",
+    "stack_ref": "v0.3.34",
+    "default_verification": [
+      "uv run --no-project --with pytest pytest -q",
+      "make check"
+    ],
+    "links": {
+      "repo": ""
+    },
+    "contract_version": 2,
+    "release_profiles": {
+      "github-release": {
+        "provider": "github-release",
+        "remote": "origin",
+        "branch": "main",
+        "repository": "viggomeesters/go-workflow-stack"
+      }
+    }
+  },
+  "after_project": {
+    "schema": "go-workflow.repo-local.project.v1",
+    "kind": "project",
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack",
+    "source_of_truth": "repo-local",
+    "project_mode": "project",
+    "required_stack_version": "0.3.33",
+    "stack_ref": "v0.3.33",
+    "default_verification": [
+      "uv run --no-project --with pytest pytest -q",
+      "make check"
+    ],
+    "links": {
+      "repo": ""
+    },
+    "contract_version": 2,
+    "release_profiles": {
+      "github-release": {
+        "provider": "github-release",
+        "remote": "origin",
+        "branch": "main",
+        "repository": "viggomeesters/go-workflow-stack"
+      }
+    }
+  }
+}

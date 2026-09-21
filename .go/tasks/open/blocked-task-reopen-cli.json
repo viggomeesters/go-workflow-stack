@@ -1,0 +1,48 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "blocked-task-reopen-cli",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Add a supported CLI transition to reopen blocked tasks",
+  "description": "Claude Code observed that pinned go-workflow-stack v0.3.33 has no supported unblock/reopen command for blocked tasks. SDP-OM-026 used a direct schema-valid file move, validated with ./go validate ., as a one-off workaround. Replace that operational gap with an explicit repo-local CLI lifecycle transition; do not treat direct file moves as the supported procedure.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      "go_workflow/cli.py",
+      "go_workflow/state_io.py",
+      "schemas/task.schema.json",
+      "tests/test_smoke.py",
+      "README.md"
+    ],
+    "modify": [
+      "go_workflow/cli.py",
+      "go_workflow/state_io.py",
+      "tests/test_task_reopen.py",
+      "tests/test_smoke.py",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "A documented task reopen CLI command transitions exactly one blocked task to open through the repository lifecycle API; it rejects missing, active, already-open and done task IDs.",
+    "The transition retains the task content and prior blocked metadata, records who reopened it and why in an append-only lifecycle event, and writes atomically so a failed transition cannot leave duplicate or missing task records.",
+    "The command validates the repo-local contract, task identity and path boundaries before mutation; direct movement of files between task state directories is not documented as the normal operational path.",
+    "Behavioral tests prove successful reopen, all invalid source-state cases, event/audit content, atomic failure recovery and complete repository validation after the operation."
+  ],
+  "verification": [
+    ".venv/bin/python -m pytest tests/test_task_reopen.py tests/test_smoke.py -q",
+    ".venv/bin/python cli/go.py validate .",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

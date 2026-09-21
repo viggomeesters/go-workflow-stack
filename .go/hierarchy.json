@@ -163,7 +163,9 @@
         "GW-STACKPRE001",
         "release-v0312-stack-freshness",
         "register-v0312-template-pairing",
-        "task-design-readiness"
+        "task-design-readiness",
+        "checkpoint-01",
+        "blocked-task-reopen-cli"
       ]
     },
     {

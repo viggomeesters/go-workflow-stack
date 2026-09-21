@@ -1,0 +1,55 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "checkpoint-01",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Store official Go checkpoints in repo-local .go state",
+  "description": "Make checkpoints a first-class go-workflow-stack capability. Introduce a versioned, validated checkpoint record stored under .go/checkpoints/, plus supported CLI write/read/list behavior. A checkpoint must point to canonical .go tasks, runs, evidence and git state rather than duplicate them; it must record the continuation objective, current/remaining state, exact safe resume command and redaction status. Preserve the existing managed run-state and release/deployment checkpoints as their own authoritative channels, and prove legacy run-state remains compatible. Do not write a generic CHECKPOINT.md or any vault/global state.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      "go_workflow/cli.py",
+      "go_workflow/run_state.py",
+      "go_workflow/state_io.py",
+      "schemas/run-state.schema.json",
+      "tests/test_abc_resume.py",
+      "tests/test_completed_capture.py",
+      "docs/state-safety.md"
+    ],
+    "modify": [
+      "go_workflow/checkpoints.py",
+      "go_workflow/cli.py",
+      "go_workflow/run_state.py",
+      "schemas/checkpoint.schema.json",
+      "tests/test_checkpoints.py",
+      "tests/test_abc_resume.py",
+      "docs/checkpoints.md",
+      "docs/state-safety.md",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "A supported Go CLI checkpoint command writes a schema-versioned JSON record only below .go/checkpoints/ and can list/read the record by stable identity.",
+    "Each record has explicit repository/task-or-run identity, creation time, continuation objective, canonical references for git/.go evidence, remaining work, a concrete safe resume command, and a redaction verdict; it never copies secrets or creates a parallel task/decision source of truth.",
+    "Checkpoint creation validates the repo-local .go contract and rejects traversal, arbitrary output paths, malformed records, missing referenced local task/run artifacts, and a resume command that is not bound to the checkpoint identity.",
+    "Existing managed run-state, publication and deployment checkpoints retain their paths, schemas and read/resume behavior; new general checkpoints reference them where relevant rather than replacing or mutating them.",
+    "Behavioral tests cover creation, deterministic list/read, invalid or unsafe inputs, redaction scanning, and resume compatibility alongside the existing managed-run regression suite."
+  ],
+  "verification": [
+    ".venv/bin/python -m pytest tests/test_checkpoints.py tests/test_abc_resume.py tests/test_completed_capture.py -q",
+    ".venv/bin/python cli/go.py validate .",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": []
+}

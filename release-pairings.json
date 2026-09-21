@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.34",
+  "current_stack_ref": "v0.3.35",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -218,6 +218,12 @@
       "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
       "template_ref": "v0.3.17",
       "note": "Preserved immutable starter baseline. Autonomy campaign adoption in the template remains owned by its separate autonomy-template-01 task."
+    },
+    {
+      "stack_ref": "v0.3.35",
+      "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
+      "template_ref": "v0.3.17",
+      "note": "Preserved immutable starter baseline. Autonomous intake remains a stack capability until the separate autonomy-template-01 onboarding task lands."
     }
   ]
 }

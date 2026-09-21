@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.35 — evidence-backed autonomous intake
+
+- Turn a rough request into versioned, source-bound model assessment before task materialization.
+- Reuse or update matching work idempotently while preserving every requested outcome and feedback revision.
+- Enforce planning, advice and execution authority at intake and claim time; unresolved questions block only affected work.
+- Isolate assessment adapters from the target repository and persist controlled model arguments, usage and raw content hashes.
+- Keep research distinct from implementation when root cause is unknown, with executable dependency and decision references.
+
 ## 0.3.34 — bounded autonomy campaign contracts
 
 - Bind serial campaigns to versioned intent, adopted outcomes, accepted decisions, explicit task/model authority, cumulative budgets, and separate delivery grants.

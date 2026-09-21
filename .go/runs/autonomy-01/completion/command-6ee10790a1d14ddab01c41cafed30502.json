@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-01",
+  "project": "go-workflow-stack",
+  "contract_digest": "aee09fca6cbae2aed4a052e6c8c215972563c09feec9547db2e9fb0a17f5907b",
+  "revision": "4fb83e6732da31c9bccf5e5319c5b6f8290b7f2a",
+  "content_digest": "651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/private/tmp/go-autonomy-01-closure.axPGGQ/go-workflow-stack",
+  "elapsed_seconds": 0.4072595000034198,
+  "returncode": 0,
+  "stdout": "ok: /private/tmp/go-autonomy-01-closure.axPGGQ/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

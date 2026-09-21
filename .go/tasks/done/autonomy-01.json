@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "autonomy-01",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Define bounded run authority and outcome traceability",
   "description": "Define and validate a serial project-run contract connecting original request, bounded goal, applicable vision/principles/accepted decisions, existing task R# outcomes and required delivery evidence. Freeze the minimum contract and governing architecture before dependent runtime work; do not build a second task queue. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
   "scope": {
@@ -51,8 +51,8 @@
     "claimed_at": "2026-09-19T07:27:43+02:00",
     "base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
+  "work_status": "completed",
+  "review_status": "approved",
   "review_history": [
     {
       "created_at": "2026-09-19T08:15:40+02:00",
@@ -60,9 +60,83 @@
       "status": "needs_fix",
       "evidence": "Verification-isolation repair aa5cef1 is complete and independently verified; resume the preserved managed candidate.",
       "owner": "codex-astra-high"
+    },
+    {
+      "created_at": "2026-09-21T21:51:58+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Completion evidence passed at content digest 651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa; immutable v0.3.34 release and remote readback verified; all R1-R4 and architecture conformance passed.",
+      "transaction_id": "8937d94058ae4e41aac154b5964d6e19",
+      "delivery": {
+        "delivery_id": "autonomy-first-v1",
+        "html": ".go/deliveries/autonomy-first-v1/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v1/manifest.json",
+        "source_sha256": "962c22bf36c7adf325b3bbd318807dc08c6e31359f0ced43f6808138d7ce34a0",
+        "html_sha256": "f9099534d2879ba518f10738900980df46b58e915e3657301b9abc6c67ef411f"
+      }
     }
   ],
-  "evidence": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-21T21:51:58+02:00",
+      "task_id": "autonomy-01",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=.go/architecture/briefs/autonomous-campaign.json,.go/decisions/events.jsonl,.go/project.json,CHANGELOG.md,README.md,docs/architecture-lane.md,docs/autonomous-campaign.md,docs/releases/v0.3.34.md,docs/task-workspaces.md,go_workflow/campaign_contracts.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/execution_context.py,go_workflow/run_state.py,pyproject.toml,release-pairings.json,schemas/campaign-contract.schema.json,tests/test_abc_resume.py,tests/test_autonomy_contracts.py,tests/test_smoke.py; verification_command=declared content-bound verification in clean clone; verification_result=passed focused contracts plus make check plus validate plus diff check; critic=passed same-agent adversarial review covering every changed product path; architecture_conformance=passed architecture-lane-governance; requested_outcomes=R1,R2,R3,R4 verified; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=subscription; release=v0.3.34 f6d29e0bc72fe36af122bc0debb8856806fb38fb https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.34; remote_readback=origin/main and annotated v0.3.34 resolve to f6d29e0; preserved_user_dirt=uv.lock excluded",
+      "changed_files": [
+        ".go/architecture/briefs/autonomous-campaign.json",
+        ".go/decisions/events.jsonl",
+        ".go/project.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/architecture-lane.md",
+        "docs/autonomous-campaign.md",
+        "docs/releases/v0.3.34.md",
+        "docs/task-workspaces.md",
+        "go_workflow/campaign_contracts.py",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/execution_context.py",
+        "go_workflow/run_state.py",
+        "pyproject.toml",
+        "release-pairings.json",
+        "schemas/campaign-contract.schema.json",
+        "tests/test_abc_resume.py",
+        "tests/test_autonomy_contracts.py",
+        "tests/test_smoke.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "58e3568bd0e552b7b38a69704517f56a57a7acf1",
+        "observed_head_commit": "4fb83e6732da31c9bccf5e5319c5b6f8290b7f2a"
+      },
+      "verification": {
+        "command": "declared content-bound verification in clean clone",
+        "result": "passed focused contracts plus make check plus validate plus diff check"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "user-selected gpt-6-astra high (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent adversarial review covering every changed product path",
+        "skip_reason": null
+      }
+    }
+  ],
   "execution_contract": {
     "schema": "go-workflow.execution-contract.v1",
     "task_kind": "product",
@@ -92,29 +166,53 @@
       "id": "R1",
       "text": "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-21T21:50:07+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-01/completion/verification-aec117d2a867454f98523dd891c8c626.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-21T21:50:07+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-01/completion/verification-aec117d2a867454f98523dd891c8c626.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-21T21:50:07+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-01/completion/verification-aec117d2a867454f98523dd891c8c626.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-21T21:50:07+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-01/completion/release-5e602afcfe314ed4b52368d2761d747e.json"
+        }
+      ]
     }
   ],
   "architecture": {
@@ -134,8 +232,12 @@
       "sha256": "1f9d24bd6bc121b15ee18a1d2399417afdeb819585598c3be329eff5625bdaee"
     },
     "verification": {
-      "path": ".go/runs/autonomy-01/completion/verification-237027ff2a5b4cf98582050f6e477542.json",
-      "sha256": "0f95ea8df0e315f7cd8fabde238e42165f8d9a8c0bc39d133462c511a932ad9b"
+      "path": ".go/runs/autonomy-01/completion/verification-aec117d2a867454f98523dd891c8c626.json",
+      "sha256": "aa2aae12a8c4e2081a5460606a4ef30ca52496cd52a04a256760aef99e2b3781"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-01/completion/critic-229df06066cd4c9388af06649b6124c4.json",
+      "sha256": "05209fd28b8e9eef170fb101665efe11968caaf35477c8deb2b1749fbb506d94"
     }
   },
   "release_receipt": {

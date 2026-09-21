@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "0075b60a0516d27f91405b53ba32edfd59062051325afcc603b654815303c1cd",
+  "revision": "31b5266807da14481415b62a337b5f2ca55955ce",
+  "content_digest": "6928dfb63eeeb4ad486233bf0861c3ca3d7a25e6561215c11861c9ff6d50a62a",
+  "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_intake.py tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+  "cwd": "/private/tmp/autonomy-02-final-proof.JdnDrB",
+  "elapsed_seconds": 5.65926391701214,
+  "returncode": 0,
+  "stdout": "............................................                             [100%]\n44 passed in 4.71s\n",
+  "stderr": "",
+  "timed_out": false
+}

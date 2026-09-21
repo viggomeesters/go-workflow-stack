@@ -1,0 +1,57 @@
+{
+  "schema": "go-workflow.task-design-review.v1",
+  "task_id": "autonomy-02",
+  "disposition": "ready",
+  "reviewer": "codex-astra-high",
+  "reviewed_at": "2026-09-21T22:15:00+02:00",
+  "observable_before": [
+    "Bare Go creates a syntactic intent task without grounded repository exploration.",
+    "Repeated rough intake can create suffixed duplicate tasks.",
+    "Advice/planning provenance does not itself gate a materialized task claim."
+  ],
+  "observable_after": [
+    "A bounded read-only adapter assesses a versioned repository snapshot and returns explicit reuse, update or create actions.",
+    "Applying the same assessment is idempotent and preserves every original outcome/source plus later feedback.",
+    "Planning/advice authority and unresolved user questions block only affected task claims; independent authorized work remains eligible.",
+    "An unknown bug root cause can materialize research, never a claimed implementation fix."
+  ],
+  "states_and_edges": [
+    "prepared -> assessed -> applied",
+    "planning/advice -> explicit execute promotion before claim",
+    "unresolved question -> affected task blocked while independent task remains claimable",
+    "unknown bug -> research task -> later implementation dependency"
+  ],
+  "non_goals": [
+    "No keyword or schema heuristic presented as semantic quality.",
+    "No automatic vision or decision-ledger rewrite.",
+    "No task execution or publication during intake.",
+    "No new agent/provider protocol; reuse the released adapter boundary."
+  ],
+  "dependencies": [
+    ".go/tasks/done/autonomy-01.json and its v0.3.34 release evidence",
+    "go_workflow.task_design review instructions",
+    "go_workflow adapter protocol and controlled model selection",
+    "existing R# outcome, architecture and dependency claim gates"
+  ],
+  "delegated_choices": [
+    "Exact JSON field names and CLI spelling are reversible implementation choices within the task scope.",
+    "The assessment can use the existing critic/read-only adapter phase because this is evaluation, not product mutation."
+  ],
+  "unresolved_material_choices": [],
+  "proof": [
+    "Adapter-double tests prove exact request transport and persisted result binding without claiming model intelligence.",
+    "Positive/negative tests cover reuse, repeated apply, feedback preservation, superseded decisions, unknown bugs, questions and authority gates.",
+    "A real bounded Codex assessment is retained as run evidence before release.",
+    "Declared focused tests, make check, content-bound completion, critic and immutable release/readback close R1-R5."
+  ],
+  "inspected_refs": [
+    ".go/tasks/active/autonomy-02.json",
+    ".go/plans/autonomy-first.json",
+    ".go/architecture/briefs/autonomous-campaign.json",
+    "docs/task-design-readiness.md",
+    "go_workflow/task_design.py",
+    "go_workflow/adapter_protocol.py",
+    "go_workflow/cli.py:create_task_from_intent",
+    "go_workflow/routing.py"
+  ]
+}

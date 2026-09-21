@@ -1,0 +1,13 @@
+{
+  "schema": "go-workflow.self-reflect.v1",
+  "task_id": "autonomy-02",
+  "outcome": "durable_learning",
+  "process_miss": "Canonical verification and critic artifacts were captured after integration instead of before it, requiring an evidence-identical recovery clone.",
+  "selfimprove": {
+    "path": "/Users/viggomeesters/.codex/skills/go-goal/SKILL.md",
+    "change": "Require final-candidate verification and critic capture before integration/version preparation, followed by release readback, finish/review and cleanup.",
+    "verification": "Readback confirms the sequencing guard at lines 11-15."
+  },
+  "product_impact": "none",
+  "memory_or_config_change": "none"
+}

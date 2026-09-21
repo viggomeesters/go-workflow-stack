@@ -1,0 +1,120 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "0075b60a0516d27f91405b53ba32edfd59062051325afcc603b654815303c1cd",
+  "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+  "content_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-02",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_intake.py tests/test_task_design_readiness.py tests/test_architecture.py -q -p no:cacheprovider",
+        "cwd": "/private/tmp/autonomy-02-proof-git.5sHXCS",
+        "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+        "worktree_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-02/completion/command-77106ee7680d42d6ace0765ec3ab0ed4.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-02/completion/command-77106ee7680d42d6ace0765ec3ab0ed4.json",
+        "sha256": "f57cb3b68f72206c446e7ecb6908be0896626f367e6b15a0722de5fe0aa97466"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-02",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/private/tmp/autonomy-02-proof-git.5sHXCS",
+        "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+        "worktree_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-02/completion/command-37f87138dd7943b4a617326cd1f02be6.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-02/completion/command-37f87138dd7943b4a617326cd1f02be6.json",
+        "sha256": "aa21d8270a12cd2af1e4826b5615218eb46dbb51acfcef2356408d191d2d032f"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-02",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/private/tmp/autonomy-02-proof-git.5sHXCS",
+        "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+        "worktree_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-02/completion/command-4f94aed22fef4a2d90adeaff6a54c24b.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-02/completion/command-4f94aed22fef4a2d90adeaff6a54c24b.json",
+        "sha256": "d1f9beb72ac92a45e3cc8af3ce0858ec2a3b0ee48270250a1d10426a227658ae"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-02",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/private/tmp/autonomy-02-proof-git.5sHXCS",
+        "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+        "worktree_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-02/completion/command-96c1c7e1b0dd4162b474c96323cb46ac.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-02/completion/command-96c1c7e1b0dd4162b474c96323cb46ac.json",
+        "sha256": "2a63339be88848b545d0df4f492e4c8d96df49792ab9f28bb2346ac1b5358046"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

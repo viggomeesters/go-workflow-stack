@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "0075b60a0516d27f91405b53ba32edfd59062051325afcc603b654815303c1cd",
+  "revision": "31b5266807da14481415b62a337b5f2ca55955ce",
+  "content_digest": "6928dfb63eeeb4ad486233bf0861c3ca3d7a25e6561215c11861c9ff6d50a62a",
+  "command": "git diff --check",
+  "cwd": "/private/tmp/autonomy-02-final-proof.JdnDrB",
+  "elapsed_seconds": 0.3067713329801336,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

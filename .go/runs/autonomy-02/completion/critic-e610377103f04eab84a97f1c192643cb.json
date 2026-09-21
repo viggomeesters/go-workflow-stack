@@ -1,0 +1,22 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "0075b60a0516d27f91405b53ba32edfd59062051325afcc603b654815303c1cd",
+  "revision": "49cfbe29d6a1c922ecd0e49d8e05a90105098dde",
+  "content_digest": "4a7a2da48541acd3ce81013977a1fa6573b592c6af7df278ab60d896bf6d1c1f",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Reviewed the complete intake delta after 44 focused tests and the isolated smoke gate. Outcome coverage is enforced, assessment adapters cannot mutate the target, create/update plans are prevalidated before writes, intake authority is claim-gated without changing legacy manual claims, and model identity is reported only as requested/unconfirmed. No blocking implementation, scope, provenance, or authority finding remains.",
+  "reviewed_paths": [
+    "README.md",
+    "docs/autonomous-intake.md",
+    "go_workflow/cli.py",
+    "go_workflow/intake.py",
+    "schemas/intake-assessment.schema.json",
+    "skills/repo-local-agent-workflow/SKILL.md",
+    "tests/test_autonomy_intake.py"
+  ],
+  "blocking_findings": []
+}

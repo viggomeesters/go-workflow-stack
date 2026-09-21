@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.release-evidence.v1",
+  "status": "verified",
+  "task_id": "autonomy-02",
+  "project": "go-workflow-stack",
+  "contract_digest": "0075b60a0516d27f91405b53ba32edfd59062051325afcc603b654815303c1cd",
+  "content_digest": "6928dfb63eeeb4ad486233bf0861c3ca3d7a25e6561215c11861c9ff6d50a62a",
+  "profile": {
+    "name": "github-release",
+    "provider": "github-release",
+    "remote": "origin",
+    "branch": "main",
+    "repository": "viggomeesters/go-workflow-stack"
+  },
+  "remote_url": "https://github.com/viggomeesters/go-workflow-stack.git",
+  "tag": "v0.3.35",
+  "commit": "31b5266807da14481415b62a337b5f2ca55955ce",
+  "tag_object": "571ac16db8b69beacce8be04b9c1df3457f243a6",
+  "branch_commit": "31b5266807da14481415b62a337b5f2ca55955ce",
+  "refs": {
+    "refs/heads/main": "31b5266807da14481415b62a337b5f2ca55955ce",
+    "refs/tags/v0.3.35": "571ac16db8b69beacce8be04b9c1df3457f243a6",
+    "refs/tags/v0.3.35^{}": "31b5266807da14481415b62a337b5f2ca55955ce"
+  },
+  "publication": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-21T21:19:27Z",
+    "tagName": "v0.3.35",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.35"
+  },
+  "observed_at": "2026-09-21T21:19:38.851909+00:00"
+}

@@ -1,0 +1,68 @@
+{
+  "schema": "go-workflow.live-intake-proof.v1",
+  "task_id": "autonomy-02",
+  "status": "passed",
+  "captured_at": "2026-09-21T22:55:00+02:00",
+  "target": "disposable minimal fixture repository",
+  "authority": {
+    "mode": "planning",
+    "source_ref": "autonomy-02:live-model-proof",
+    "implementation_authorized": false
+  },
+  "intent": {
+    "text": "Investigate and document how the fixture validation task should expose retry stop states without changing runtime behavior.",
+    "sha256": "bc8c2fb2a97ceda4018bc6b223c9cd2d74e809429cf8f306ff81ff36112108ca"
+  },
+  "intake_id": "c05dd5fcec69b6f7d724e8273dee226b3ca0e462d5bcccc41905920d9f62082c",
+  "request_sha256": "351a004ab47bcf5b48da3ac4bbb03a1aabeab6e0bbddbcaa7f8658878d135540",
+  "assessment": {
+    "disposition": "ready",
+    "summary": "O1 requests investigation and documentation only. The existing schema-validation task defines no retry states and the fixture contains no retry runtime or traces. The model created a bounded research task and explicitly refused to claim runtime behavior or a fix.",
+    "action": "create",
+    "task_id": "task-retry-stop-state-research",
+    "work_type": "research",
+    "root_cause": "not_applicable",
+    "substantial": true,
+    "questions": [],
+    "relevant_decisions": [],
+    "non_goals": [
+      "No retry policy or runtime behavior change.",
+      "No claim that unavailable runtime behavior was verified.",
+      "No execution authority inherited from planning."
+    ]
+  },
+  "model_selection": {
+    "requested": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "effective": null,
+    "confirmation": "unconfirmed",
+    "reason": "Runtime arguments enforced; no independent effective-model attestation",
+    "capabilities": {
+      "adapter": "codex",
+      "model_control": true,
+      "capability_source": "codex app-server model/list",
+      "reason": null
+    }
+  },
+  "usage": {
+    "source": "codex_json_stream",
+    "turns": [
+      {
+        "input_tokens": 95531,
+        "cached_input_tokens": 82432,
+        "output_tokens": 1051
+      }
+    ],
+    "elapsed_seconds": 41.67119820800144,
+    "provider_invoice_cost_usd": null
+  },
+  "raw_provenance": {
+    "intake_record_sha256": "28dd12a0b8c5cad56c32b36f1d0c5626c197e86815003dd66d9b0e51eb5d8ff5",
+    "materialized_task_sha256": "e1b1493aaad403f6d8ea833fcad0688d43b45f43386aeb0028590c1294ec3a22",
+    "result_schema": "go-workflow.intake-explore-result.v1",
+    "result_status": "applied"
+  },
+  "proof_boundary": "This proves a real bounded adapter assessment, controlled requested model/effort, structured persistence, research-vs-fix judgment and planning authority. It does not claim effective-model attestation, provider invoice cost, task execution, publication or semantic quality for arbitrary future requests."
+}

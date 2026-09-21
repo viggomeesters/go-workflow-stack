@@ -126,5 +126,27 @@
     "decision_ids": [],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "release": {
+      "path": ".go/runs/autonomy-01/completion/release-5e602afcfe314ed4b52368d2761d747e.json",
+      "sha256": "1f9d24bd6bc121b15ee18a1d2399417afdeb819585598c3be329eff5625bdaee"
+    },
+    "verification": {
+      "path": ".go/runs/autonomy-01/completion/verification-237027ff2a5b4cf98582050f6e477542.json",
+      "sha256": "0f95ea8df0e315f7cd8fabde238e42165f8d9a8c0bc39d133462c511a932ad9b"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-01",
+    "project": "go-workflow-stack",
+    "commit": "f6d29e0bc72fe36af122bc0debb8856806fb38fb",
+    "tag": "v0.3.34",
+    "evidence": [
+      ".go/runs/autonomy-01/completion/release-5e602afcfe314ed4b52368d2761d747e.json"
+    ]
   }
 }

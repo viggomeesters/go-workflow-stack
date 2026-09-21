@@ -1,0 +1,165 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "autonomy-01",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-51c43fe798a9456681b54bbac2c70d00",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_contracts.py tests/test_abc_contracts.py tests/test_architecture.py -q -p no:cacheprovider",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f6d29e0bc72fe36af122bc0debb8856806fb38fb",
+        "worktree_digest": "651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-01/completion/command-47ceadd0c8684d968cc500b585c264e7.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-01/completion/command-47ceadd0c8684d968cc500b585c264e7.json",
+        "sha256": "a7cdb887d204f1a78fb4ed08ca70dea96189129874df1dcbce18397f2c4cd3f8"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "failed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f6d29e0bc72fe36af122bc0debb8856806fb38fb",
+        "worktree_digest": "651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa",
+        "exit_code": 2,
+        "evidence": [
+          ".go/runs/autonomy-01/completion/command-a0e813188b914f62a612e25ba1839f62.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-01/completion/command-a0e813188b914f62a612e25ba1839f62.json",
+        "sha256": "f6fb86615ccb55b6ad490f639f2d5adf55a2271d476b38b0d855f6eebad2f047"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f6d29e0bc72fe36af122bc0debb8856806fb38fb",
+        "worktree_digest": "651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-01/completion/command-66cbaba51df948d18700eb49ea1275cb.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-01/completion/command-66cbaba51df948d18700eb49ea1275cb.json",
+        "sha256": "cf87914ef481e04aa4ce9f412dc5ae51682c25d0feab08650ed2d1656ecda30b"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-01",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "f6d29e0bc72fe36af122bc0debb8856806fb38fb",
+        "worktree_digest": "651e4b073140dc083ba01799c1af56296351328b875a942a76b4a81a9219ceaa",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-01/completion/command-0bdf975ed4734b39a2ef2197f15de453.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-01/completion/command-0bdf975ed4734b39a2ef2197f15de453.json",
+        "sha256": "e79ddfe138356a0fe58b2303792931a981909badd21627457f275eef65a7f5dd"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Original intent and adopted goal are versioned and linked to task outcomes; accepted/proposed/delegated/unresolved decisions are distinguishable. Routine tuning uses existing authority; material out-of-mandate choices remain unresolved, never fabricated approvals.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "The campaign contract bounds permitted tasks, research/repair expansion, model profiles, shared budget, release/deployment authority and stop conditions. An empty queue cannot authorize invented work from the broad vision.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Adopt a reasoned governing architecture brief/decision using existing principles and gates; no parallel builders, new human approval system or silent rewrite of historical contracts. Proposed fields must be validated with positive/negative and legacy fixtures.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "aee09fca6cbae2aed4a052e6c8c215972563c09feec9547db2e9fb0a17f5907b",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "mac.home",
+    "pid": 20213
+  },
+  "worker_group": null,
+  "inflight": null
+}

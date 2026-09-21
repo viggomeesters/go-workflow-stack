@@ -37,6 +37,8 @@ if str(STACK_ROOT) not in sys.path:
 from go_workflow.execution_contracts import (dependency_findings, resolve_execution_contract, validate_dependencies, validate_execution_contract, validate_phase_profiles, validate_verification_evidence)
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
 from go_workflow.task_design import review_contract
+from go_workflow.intake import (RECORD_SCHEMA as INTAKE_RECORD_SCHEMA, prepare_request, record_path,
+                                validate_assessment, validate_record as validate_intake_record)
 from go_workflow.migrations import plan_contract_migration
 from go_workflow.adapter_protocol import build_adapter_request, normalize_adapter_result, validate_adapter_result, codex_stream_payload
 from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
@@ -573,6 +575,12 @@ def validate_repo(repo: Path, *, skip_lifecycle_migration: bool = False) -> list
                 errors.append(str(exc))
     for task_id in sorted(linked_task_ids - task_ids):
         errors.append(f".go/hierarchy.json: linked task {task_id!r} does not exist in any task state")
+    for path in sorted((root / "intake").glob("*.json")):
+        try:
+            for finding in validate_intake_record(load_json(path), project_id, task_ids):
+                errors.append(f"{relative(repo, path)}: {finding}")
+        except RepoLocalError as exc:
+            errors.append(str(exc))
     for path in sorted((root / 'workspaces').glob('*.json')):
         try:
             record = validate_record(load_json(path))
@@ -1398,6 +1406,21 @@ def task_contract_findings(task: dict[str, Any]) -> list[str]:
     scope = task.get("scope") or {}
     if not isinstance(scope, dict) or not isinstance(scope.get("modify"), list):
         findings.append("task modify scope is missing or invalid")
+    findings.extend(intake_claim_findings(task))
+    return findings
+
+
+def intake_claim_findings(task: dict[str, Any]) -> list[str]:
+    """Return only intake authority blockers, preserving legacy manual claims."""
+    findings: list[str] = []
+    intake = task.get("intake")
+    if isinstance(intake, dict):
+        authority = intake.get("authority") or {}
+        if authority.get("mode") != "execute" or authority.get("implementation_authorized") is not True:
+            findings.append(f"{authority.get('mode', 'unknown')} intake is not execution authority")
+        questions = intake.get("unresolved_question_ids") or []
+        if questions:
+            findings.append("intake has unresolved user questions: " + ", ".join(map(str, questions)))
     return findings
 
 
@@ -3342,6 +3365,172 @@ def create_task_from_intent(repo: Path, intent: str, agent: str = "agent", sourc
     }
 
 
+def cmd_intake_explore(args: argparse.Namespace) -> int:
+    """Run one bounded read-only semantic assessment, then optionally materialize its plan."""
+    repo = Path(args.repo).resolve()
+    errors = validate_repo(repo)
+    if errors:
+        raise RepoLocalError("cannot explore intake in invalid .go state:\n- " + "\n- ".join(errors))
+    try:
+        request = prepare_request(repo, args.intent, args.source_ref, args.authority)
+    except ValueError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    target = record_path(repo, request)
+    if target.is_file():
+        existing = load_json(target)
+        if existing.get("schema") == INTAKE_RECORD_SCHEMA and existing.get("status") == "applied":
+            payload = {"schema": "go-workflow.intake-explore-result.v1", "status": "already_applied",
+                       "intake_id": existing["id"], "task_ids": existing["task_ids"],
+                       "questions": existing["assessment"]["questions"]}
+            print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else f"intake: {payload['status']}")
+            return 0
+    if not args.write:
+        payload = {"schema": "go-workflow.intake-explore-result.v1", "status": "prepared", "request": request,
+                   "write_required": True}
+        print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else "intake: prepared")
+        return 0
+    synthetic = {
+        "schema": TASK_SCHEMA, "kind": "task", "id": "intake-" + request["sha256"][:16],
+        "project": request["project"], "status": "open", "summary": "Assess bounded intake",
+        "scope": {"read": ["**"], "modify": []}, "acceptance": ["Return a grounded intake assessment"],
+        "verification": ["adapter protocol validation"], "claim": {"agent": None, "claimed_at": None},
+        "intake_request": request,
+    }
+    assessment_command = args.assessment_command
+    if not assessment_command:
+        if args.executor_agent != "codex" or not args.model:
+            raise RepoLocalError("--write requires --assessment-command or explicit --executor-agent codex --model --effort")
+        profile = {"id": args.model, "effort": args.effort}
+        synthetic["execution_contract"] = {
+            "schema": "go-workflow.execution-contract.v1", "task_kind": "no_change",
+            "model": profile, "critic_model": profile,
+            "release": {"mode": "none", "reason": "Read-only bounded intake assessment"},
+        }
+        assessment_command = native_agent_command(
+            "codex", "critic",
+            "Assess only the supplied task.intake_request against the repository snapshot. Do not edit files. "
+            "Include exactly one extra intake_assessment object in the final adapter result. Use this exact shape "
+            "(replace values, retain every key and no others): "
+            "{\"schema\":\"go-workflow.intake-assessment.v1\",\"request_sha256\":\"<task.intake_request.sha256>\","
+            "\"summary\":\"<grounded summary>\",\"disposition\":\"ready|questions|research_first\",\"actions\":[{"
+            "\"action\":\"create|reuse|update\",\"task_id\":\"<id>\",\"summary\":\"<summary>\","
+            "\"work_type\":\"implementation|bug_fix|research\",\"root_cause\":\"known|unknown|not_applicable\","
+            "\"substantial\":true,\"outcome_ids\":[\"O1\"],\"scope\":{\"read\":[\"path/**\"],"
+            "\"modify\":[\"path/**\"]},\"behavior\":{\"before\":[\"...\"],\"after\":[\"...\"],"
+            "\"states\":[\"...\"],\"edges\":[\"...\"]},\"non_goals\":[\"...\"],\"dependencies\":[],"
+            "\"delegated_choices\":[\"...\"],\"question_ids\":[],\"acceptance\":[\"...\"],"
+            "\"verification\":[\"...\"]}],\"questions\":[],\"relevant_decisions\":[]}. "
+            "Map every request outcome exactly once or more. Existing task IDs require reuse/update; new IDs require create. "
+            "Unknown bug causes must use work_type research. Questions use {id,text,owner,blocks}; decisions use {id,status}.",
+            model_profile=profile,
+        )
+    with tempfile.TemporaryDirectory(prefix="go-intake-assessment-") as directory:
+        assessment_repo = Path(directory) / "repo"
+        shutil.copytree(repo, assessment_repo, symlinks=True,
+                        ignore=shutil.ignore_patterns(".git", "__pycache__", ".pytest_cache", ".mypy_cache"))
+        subprocess.run(["git", "init", "-q"], cwd=assessment_repo, check=True)
+        result = run_hook_command(assessment_repo, assessment_command, synthetic, 1,
+                                  "bounded-intake-exploration", "critic",
+                                  timeout_seconds=args.timeout_seconds, require_protocol=True)
+    if result.get("status") != "success":
+        detail = str(result.get("summary") or "unknown failure")
+        process_detail = str(result.get("stderr") or result.get("stdout") or "").strip()
+        if process_detail:
+            detail += ": " + process_detail[-1000:]
+        raise RepoLocalError("intake assessment adapter did not succeed: " + detail)
+    assessment = result.get("intake_assessment")
+    findings = validate_assessment(assessment, request)
+    if findings:
+        rendered = json.dumps(assessment, ensure_ascii=False, sort_keys=True)[:2000]
+        raise RepoLocalError("invalid intake assessment:\n- " + "\n- ".join(findings) + "\npayload: " + rendered)
+    root = go_root(repo)
+    project = load_json(root / "project.json")
+    task_ids: list[str] = []
+    created_ids: list[str] = []
+    questions = {item.get("id"): item for item in assessment["questions"] if isinstance(item, dict)}
+    outcomes = {item["id"]: item for item in request["outcomes"]}
+    prepared: list[tuple[dict[str, Any], list[Path], dict[str, Any]]] = []
+    for action in assessment["actions"]:
+        task_id = action["task_id"]
+        matches = [task_path(root, state, task_id) for state in ("open", "active", "blocked", "done")
+                   if task_path(root, state, task_id).is_file()]
+        if action["action"] in {"reuse", "update"}:
+            if len(matches) != 1:
+                raise RepoLocalError("assessment references missing or duplicated existing task: " + task_id)
+            task = load_json(matches[0])
+            if action["action"] == "update" and task["status"] != "open":
+                raise RepoLocalError("only an open task may receive intake feedback: " + task_id)
+        else:
+            if matches:
+                raise RepoLocalError("assessment create collides with existing task: " + task_id)
+            task = {
+                "schema": TASK_SCHEMA, "kind": "task", "execution_mode": "agent", "shareable_delivery": "auto",
+                "id": task_id, "project": project["id"], "status": "open", "summary": action["summary"],
+                "description": assessment["summary"], "scope": action["scope"],
+                "acceptance": action["acceptance"], "verification": action["verification"],
+                "claim": {"agent": None, "claimed_at": None}, "evidence": [],
+            }
+        current = {item["text"]: item for item in task.get("requested_outcomes", [])}
+        for outcome_id in action["outcome_ids"]:
+            outcome = outcomes[outcome_id]
+            current.setdefault(outcome["text"], {"id": "R" + str(len(current) + 1), "text": outcome["text"],
+                                                   "source": outcome["source_ref"] + "#" + outcome_id,
+                                                   "status": "pending", "evidence": []})
+        history = list(task.get("intake_history", []))
+        if request["intent"]["sha256"] not in {item.get("sha256") for item in history if isinstance(item, dict)}:
+            history.append(request["intent"])
+        if action["action"] == "update":
+            task["acceptance"] = list(dict.fromkeys([*task.get("acceptance", []), *action["acceptance"]]))
+            task["verification"] = list(dict.fromkeys([*task.get("verification", []), *action["verification"]]))
+            task["scope"] = {
+                key: list(dict.fromkeys([*(task.get("scope") or {}).get(key, []), *action["scope"][key]]))
+                for key in ("read", "modify")
+            }
+        task.update(outcome_tracking_version=1, requested_outcomes=list(current.values()),
+                    dependencies=action["dependencies"], intake_history=history,
+                    task_design={key: action[key] for key in ("work_type", "root_cause", "substantial", "behavior", "non_goals", "delegated_choices")},
+                    intake={"id": request["id"], "request_sha256": request["sha256"],
+                            "authority": request["authority"], "action": action["action"],
+                            "unresolved_question_ids": action["question_ids"]})
+        task.setdefault("intent_source", request["intent"])
+        task_errors = validate_task(task, f"intake:{task_id}")
+        if task_errors:
+            raise RepoLocalError("intake produced invalid task:\n- " + "\n- ".join(task_errors))
+        prepared.append((action, matches, task))
+    for action, matches, task in prepared:
+        task_id = action["task_id"]
+        if action["action"] == "create":
+            dump_json(task_path(root, "open", task_id), task)
+            created_ids.append(task_id)
+        elif action["action"] == "update":
+            dump_json(matches[0], task)
+        task_ids.append(task_id)
+    if created_ids:
+        hierarchy = load_json(root / "hierarchy.json")
+        epics = hierarchy_epics(hierarchy)
+        if epics:
+            epics[0].setdefault("tasks", [])
+            epics[0]["tasks"].extend(task_id for task_id in created_ids if task_id not in epics[0]["tasks"])
+            set_hierarchy_epics(hierarchy, epics)
+            dump_json(root / "hierarchy.json", hierarchy)
+    record = {"schema": INTAKE_RECORD_SCHEMA, "id": request["id"], "status": "applied",
+              "request": request, "assessment": assessment, "task_ids": task_ids,
+              "authority": request["authority"],
+              "adapter": {key: result.get(key) for key in
+                          ("summary", "command", "returncode", "timed_out", "model_selection", "usage")
+                          if key in result}}
+    target.parent.mkdir(parents=True, exist_ok=True)
+    dump_json(target, record)
+    append_jsonl(root / "runs/events.jsonl", event("intake", "run.checked", args.agent, {
+        "action": "intake.assessed", "intake_id": request["id"], "task_ids": task_ids,
+        "authority": request["authority"], "question_ids": sorted(questions), "path": relative(repo, target),
+    }))
+    payload = {"schema": "go-workflow.intake-explore-result.v1", "status": "applied",
+               "intake_id": request["id"], "task_ids": task_ids, "questions": assessment["questions"]}
+    print(json.dumps(payload, indent=2, ensure_ascii=False) if args.json else f"intake: applied {', '.join(task_ids)}")
+    return 0
+
+
 def validate_execution_brief(data: dict[str, Any]) -> list[str]:
     """Validate the compact, durable handoff between recommendation and execution."""
     errors: list[str] = []
@@ -4352,6 +4541,9 @@ def cmd_claim(args: argparse.Namespace) -> int:
                 raise RepoLocalError(f"task is not open: {data.get('status')}")
             if data.get("claim", {}).get("agent"):
                 raise RepoLocalError(f"task already claimed by {data['claim']['agent']}")
+            contract_errors = intake_claim_findings(data)
+            if contract_errors:
+                raise RepoLocalError("task contract blocked claim: " + "; ".join(contract_errors))
             dependency_errors = dependency_findings(repo, data, readiness=True)
             if dependency_errors:
                 raise RepoLocalError("dependency preflight blocked claim: " + "; ".join(dependency_errors))
@@ -5198,6 +5390,22 @@ def build_parser() -> argparse.ArgumentParser:
     spike.add_argument("--json", action="store_true")
     spike.add_argument('--lifecycle-settings', default='', help='Explicit lifecycle settings for a new project; no execution authority')
     spike.set_defaults(func=cmd_spike)
+    intake = sub.add_parser("intake", help="Explore rough intent through a bounded semantic assessment")
+    intake_sub = intake.add_subparsers(dest="intake_command", required=True)
+    intake_explore = intake_sub.add_parser("explore", help="Prepare or apply an adapter-assessed intake")
+    intake_explore.add_argument("repo", nargs="?", default=".")
+    intake_explore.add_argument("--intent", required=True)
+    intake_explore.add_argument("--source-ref", required=True)
+    intake_explore.add_argument("--authority", choices=["advice", "planning", "execute"], default="planning")
+    intake_explore.add_argument("--assessment-command", default="")
+    intake_explore.add_argument("--executor-agent", choices=["codex", "none"], default="none")
+    intake_explore.add_argument("--model", default="")
+    intake_explore.add_argument("--effort", choices=["none", "minimal", "low", "medium", "high", "xhigh", "max", "ultra"], default="high")
+    intake_explore.add_argument("--timeout-seconds", type=int, default=900)
+    intake_explore.add_argument("--write", action="store_true")
+    intake_explore.add_argument("--agent", default="agent")
+    intake_explore.add_argument("--json", action="store_true")
+    intake_explore.set_defaults(func=cmd_intake_explore)
     go = sub.add_parser("go", help="Bare go universal router: loose command vs repo-local .go autonomous loop")
     go.add_argument("repo", nargs="?", default=".")
     go.add_argument("--intent", default="")

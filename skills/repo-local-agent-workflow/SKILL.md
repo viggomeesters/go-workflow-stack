@@ -131,6 +131,23 @@ The runtime carries the same rubric in `task_design_review`; it is instructions,
 not an automatically granted readiness verdict. See `docs/task-design-readiness.md`
 for the audit, compatibility boundary and paired examples.
 
+## Bounded semantic intake
+
+For a substantial or unclear rough request, use `intake explore` before claim
+instead of treating syntax, keywords or a schema-valid placeholder as semantic
+task design. Preserve the exact intent/source and all `O#` outcomes. Let the
+read-only controlled adapter inspect current code, tasks, vision and latest
+decision states, then require explicit `create`, `reuse` or `update` actions.
+
+Deterministic validation proves transport, bindings, authority, persistence and
+atomicity only; the model/reviewer owns the content judgment. Unknown bug causes
+become research. Superseded decisions stay superseded. Advice/planning may write
+durable assessment/tasks but cannot authorize claim, and unresolved questions
+block only the affected tasks. Never rewrite vision or the decision ledger from
+an intake assessment. Repeated identical intake is idempotent; later feedback
+updates an open task without erasing earlier outcomes, sources, acceptance or
+verification. See `docs/autonomous-intake.md`.
+
 ## Starting or retrofitting a project
 
 Default route when a repo needs repo-local workflow state:
@@ -160,6 +177,7 @@ For v0.3+ end-to-end command routing, use these higher-level primitives:
 ```bash
 python3 ~/github/go-workflow-stack/cli/go.py router <target-repo> --command GOO --intent "<rough Viggo input>" --json
 python3 ~/github/go-workflow-stack/cli/go.py spike <target-repo> --brief "<rough intent>" --task-scope code
+python3 ~/github/go-workflow-stack/cli/go.py intake explore <target-repo> --intent "<exact request>" --source-ref "<origin>" --authority planning --executor-agent codex --model gpt-6-astra --effort high --write --json
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --json
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --emit-handoff --json
 python3 ~/github/go-workflow-stack/cli/go.py auto <target-repo> --max-tasks 3 --execute --agent hermes --json

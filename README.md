@@ -30,6 +30,7 @@ Agent work should be clone-readable. A future agent should be able to inspect a 
 For the full practical architecture and application flow, see [`docs/practical-architecture.md`](docs/practical-architecture.md). For the conditional task-local architecture lane, see [`docs/architecture-lane.md`](docs/architecture-lane.md). For the user-facing go/GO/GOO command router, see [`docs/go-command-router.md`](docs/go-command-router.md). For the current `$go-*` bridge status, see [`docs/go-bridge-status.md`](docs/go-bridge-status.md). For v0.2+ authoring commands, see [`docs/authoring-primitives.md`](docs/authoring-primitives.md). For clone-safe bundle handoffs, see [`docs/export-import-bundles.md`](docs/export-import-bundles.md). Versioned state upgrades and agent integrations are documented in [`docs/contract-migrations.md`](docs/contract-migrations.md) and [`docs/agent-adapter-protocol.md`](docs/agent-adapter-protocol.md).
 
 Bounded multi-task authority and outcome traceability are specified in [`docs/autonomous-campaign.md`](docs/autonomous-campaign.md). Validation never grants execution or treats an empty queue as achieved product behavior.
+Substantial rough requests can use [bounded semantic intake](docs/autonomous-intake.md) to assess current code/tasks/decisions through a read-only model adapter before reusing, updating, or creating executable work.
 
 Routing rule: a target repo must own a valid `.go/project.json` before workflow execution starts. Repositories without that contract fail closed and must use `adopt` or `spike`; a vault is never an execution fallback.
 
@@ -121,6 +122,7 @@ The apply command validates the paired template and then creates a project-speci
 
 - `router <repo> --command GOO --intent <text>`: normalize `go`/`GO`/`GOO`/`gOo`, inspect repo state, and recommend direct handling, `spike`, `auto`, `go-loop`, or task creation. Missing repos are `mode=create_repo`; existing repos without `.go` are `mode=repair_existing_repo`.
 - `spike <repo> --brief <text> [--task-scope code|docs]`: create/adopt a repo, scaffold repo-complete basics, write `.go` vision/principles/epics/tasks, and validate. `code` is the default so generated tasks include CLI/test scope for implementation repos.
+- `intake explore <repo> --intent <text> --source-ref <ref> --authority advice|planning|execute`: prepare a versioned repository snapshot or, with `--write`, run a bounded read-only adapter assessment and atomically reuse/update/create grounded tasks. Advice/planning and unresolved questions remain claim blockers. Use explicit `--executor-agent codex --model ... --effort ...` for controlled model assessment or `--assessment-command` for protocol fixtures.
 - `auto <repo>`: hand off control for autonomous execution. It is the machine-readable shape behind Viggo saying bare `go` in a repo-local project: validate the durable contract, claim the next task, execute, verify, critic, repair, ship, finish, reflect, and continue until done, a repository gate, or budget. Add `--emit-handoff` for an agent handoff; add `--execute` for direct execution. Tasks with `execution_mode: agent` select Codex first and Hermes second by default; `mechanical` tasks only run declared commands. Agent work uses a write-scoped ephemeral session, followed by a separate read-only deep critic. Generic acceptance is rejected before claim and the built-in semantic critic remains enabled as a structural backstop.
 - `go-loop <repo>` / `loop <repo>`: stronger Ralph/Oh-My-Codex-style control-handoff loop; continue selecting/claiming/repairing tasks until done, budget, or blocker.
 - `go <repo> --intent <text> --intent-source-ref <ref> --write`: materialize the exact instruction as `intent_source.text` plus SHA-256 and an optional durable origin reference. For a later standalone Telegram `GO`, pass the preceding message text unchanged and reference that message/session; do not reconstruct the intent from a summary.
@@ -159,6 +161,7 @@ The apply command validates the paired template and then creates a project-speci
   architecture-principles.json
   vision.json
   hierarchy.json
+  intake/*.json
   tasks/open/*.json
   tasks/active/*.json
   tasks/done/*.json

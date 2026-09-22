@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.37 — persistent campaign recovery supervision
+
+- Recover exact task dispatch after controller death while refusing live or cross-host owner takeover.
+- Freeze and persist wall, command, and repair budgets across resume without replenishment.
+- Back off temporary provider failures with the same exact model binding and no silent fallback.
+- Detect evidence-identical no-progress, preserve failed proof, and continue only with eligible independent work.
+- Add durable pause, drain, and cancel boundaries that preserve tasks, workspaces, and external-effect evidence.
+
 ## 0.3.36 — durable serial campaign continuation
 
 - Execute an explicit campaign allowlist serially through the existing managed task, workspace, completion and release lifecycle.

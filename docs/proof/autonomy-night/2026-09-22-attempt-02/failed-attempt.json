@@ -1,0 +1,22 @@
+{
+  "schema": "go-workflow.autonomy-live-attempt.v1",
+  "status": "failed",
+  "started_at": "2026-09-22T13:32:47.702305Z",
+  "finished_at": "2026-09-22T13:39:47.803084Z",
+  "elapsed_seconds": 420.111,
+  "commands": {
+    "baseline": {
+      "path": "000-baseline.json",
+      "sha256": "3ae0c44043ba58fbfed34130308a49d330c16c3fb85db8700f51d6215fb06a56"
+    },
+    "intake": {
+      "path": "001-intake.json",
+      "sha256": "540136961502ea327f9cf7f64bd5f0df1bb868de5e6993fc7dc77f631c33c6a5"
+    },
+    "initial_controller": {
+      "path": "002-controller-initial.json",
+      "sha256": "5733d1882ef4f9e0d1aa010ad921ed4f6deb2b314f5e6ee908d4e870a77411b7"
+    }
+  },
+  "error": "controller was not automatically interrupted after the first remote release"
+}

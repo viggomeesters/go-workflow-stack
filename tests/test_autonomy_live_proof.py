@@ -4,6 +4,8 @@ import hashlib
 import importlib.util
 import json
 from pathlib import Path
+import subprocess
+import sys
 
 import pytest
 
@@ -104,6 +106,7 @@ def test_prepare_creates_a_new_buggy_project_with_real_release_contracts(tmp_pat
     tests = (prepared["repo"] / "tests/test_notes.py").read_text()
     assert "import notes" in tests
     assert "from notes import normalize_notes, render_report" not in tests
+    assert "test_render_report_uses_normalized_notes" not in tests
     for task_id in ("normalize-notes", "render-report"):
         task = json.loads((prepared["repo"] / f".go/tasks/open/{task_id}.json").read_text())
         assert task["execution_contract"]["release"] == {"mode": "required", "profile": "local"}
@@ -111,6 +114,17 @@ def test_prepare_creates_a_new_buggy_project_with_real_release_contracts(tmp_pat
             {"id": "gpt-5.6-terra", "effort": "high"},
             {"id": "gpt-6-astra", "effort": "medium"},
         ]
+
+    (prepared["repo"] / "notes.py").write_text(
+        "def normalize_notes(lines):\n"
+        "    return list(dict.fromkeys(item.strip() for item in lines if item.strip()))\n"
+    )
+    focused = subprocess.run(
+        [sys.executable, "-m", "pytest", "tests/test_notes.py", "-q", "-k", "normalize"],
+        cwd=prepared["repo"], text=True, capture_output=True,
+    )
+    assert focused.returncode == 0, focused.stdout + focused.stderr
+    assert "1 passed, 2 deselected" in focused.stdout
 
 
 def test_checker_accepts_content_bound_raw_process_and_remote_evidence(tmp_path):

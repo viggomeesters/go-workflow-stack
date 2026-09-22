@@ -218,7 +218,7 @@ def prepare(work_root: Path, *, runtime: Path = ROOT, pilot_path: Path = HERE / 
         "import notes\n\n\n"
         "def test_normalize_notes_strips_blanks_and_stably_deduplicates():\n"
         "    assert notes.normalize_notes([' alpha ', '', 'beta', 'alpha', '  ']) == ['alpha', 'beta']\n\n\n"
-        "def test_render_report_uses_normalized_notes():\n"
+        "def test_render_report_uses_cleaned_entries():\n"
         "    assert notes.render_report([' alpha ', 'alpha', 'beta']) == '# Notes\\n\\n- alpha\\n- beta\\n'\n\n\n"
         "def test_render_report_has_empty_state():\n"
         "    assert notes.render_report([' ', '']) == '# Notes\\n\\n_No notes._\\n'\n",

@@ -121,3 +121,10 @@ context transport and blocked critic handling. The native transport fixture uses
 a deterministic CLI double; it proves message delivery and refusal behavior, not
 model intelligence or real visual correctness. Same-agent content review and raw
 test outputs are retained in this task's repository-local evidence.
+
+Outcome-tracked critic runs now add a fresh `behavior_review` context. Tasks that
+declare `behavior_review_version: 1` require a grounded result. Each original R# is bound to the current candidate, critic context
+and hashed inspected bytes. This is still not a keyword-based semantic oracle: the
+critic supplies the reasoned judgment, while the runtime rejects stale, preparatory,
+unrelated or claim-only support and constrains blocked-result repairs. See
+[`autonomy-evidence.md`](autonomy-evidence.md) for the proof and publication boundary.

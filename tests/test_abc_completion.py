@@ -58,12 +58,29 @@ def test_approval_cannot_bypass_missing_publication_proof(tmp_path,review_status
 
 def prepare_proofs(repo,task):
     from go_workflow.completion import capture_verification,record_critic,bind
+    from go_workflow.cli import build_execution_context
     from go_workflow.shipping import capture_release
     artifact,verification=capture_verification(repo,task['id'],'owner')
     assert artifact['status']=='passed'
     review={'schema':'go-workflow.critic-review.v1',**bind(repo,task),'status':'passed','reviewer':'owner',
             'review_mode':'same_agent','summary':'Fixture reviewed delivered app content and mandatory verification.',
             'blocking_findings':[],'reviewed_paths':['app.txt','.go/project.json']}
+    if task.get('outcome_tracking_version') == 1:
+        contract=build_execution_context(repo,task,phase='critic')['behavior_review']
+        evidence=[]
+        import hashlib
+        for outcome in task.get('requested_outcomes',[]):
+            evidence.append({'kind':'source','role':'behavior_proof','path':'app.txt',
+                'sha256':hashlib.sha256((repo/'app.txt').read_bytes()).hexdigest(),
+                'task_id':task['id'],'requirement_id':outcome['id'],
+                'candidate_digest':contract['candidate_digest'],'context_digest':contract['context_digest'],
+                'observation':'Inspected the exact delivered app fixture bytes.'})
+        review['behavior_review']={'schema':'go-workflow.behavior-review.v1','task_id':task['id'],
+            'context_digest':contract['context_digest'],'candidate_digest':contract['candidate_digest'],
+            'acceptance_digest':contract['acceptance_digest'],'status':'passed','publication_pending':True,
+            'outcomes':[{'requirement_id':outcome['id'],'status':'passed',
+                'rationale':'The current delivered app fixture directly establishes this outcome.',
+                'evidence':[item]} for outcome,item in zip(task['requested_outcomes'],evidence)],'repairs':[]}
     critic=record_critic(repo,task['id'],'owner',review)
     git(repo,'tag','-a','v1.2','-m','fixture release');git(repo,'push','origin','main','refs/tags/v1.2')
     release,reference=capture_release(repo,task['id'],'owner','v1.2')

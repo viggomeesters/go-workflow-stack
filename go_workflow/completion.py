@@ -224,6 +224,16 @@ def record_critic(repo, task_id, owner, review):
                 or not isinstance(review.get('summary'), str) or not review['summary'].strip()
                 or review.get('blocking_findings') != []):
             raise CompletionError('Critic review must explicitly pass for the current task/contract/content')
+        from .task_design import behavior_review_required
+        if behavior_review_required(task):
+            from .architecture import resolve_applicable_architecture
+            from .task_design import behavior_review_context, validate_behavior_review
+            vision = json.loads((root / 'vision.json').read_text())
+            contract = behavior_review_context(task, vision, resolve_applicable_architecture(root, task),
+                                               binding['content_digest'], phase='critic')
+            findings = validate_behavior_review(repo, task, contract, review.get('behavior_review'))
+            if findings:
+                raise CompletionError('Critic behavior review is invalid: ' + '; '.join(findings))
         required = changed_content(repo, task, content_snapshot(repo, task))
         reviewed = review.get('reviewed_paths')
         if (not isinstance(reviewed, list) or not reviewed or not all(isinstance(p, str) and p for p in reviewed)
@@ -286,6 +296,15 @@ def completion_findings(repo, task, *, current=True, remote=True, phase_only=Fal
                 or not critic.get('reviewer') or not critic.get('reviewed_paths') or not critic.get('summary')
                 or critic.get('review_mode') not in {'same_agent', 'independent'}):
             raise CompletionError('Critic evidence is incomplete or blocked')
+        from .task_design import behavior_review_required
+        if current and behavior_review_required(task):
+            from .architecture import resolve_applicable_architecture
+            from .task_design import behavior_review_context, validate_behavior_review
+            vision = json.loads((root / 'vision.json').read_text())
+            contract = behavior_review_context(task, vision, resolve_applicable_architecture(root, task),
+                                               digest, phase='critic')
+            findings = validate_behavior_review(repo, task, contract, critic.get('behavior_review'))
+            if findings: raise CompletionError('Critic behavior review is invalid: ' + '; '.join(findings))
         if current and not changed_content(repo, task, snapshot).issubset(set(critic['reviewed_paths'])):
             raise CompletionError('Critic proof does not cover current changed product paths')
         # Internal publisher precondition, before a release can exist. Public

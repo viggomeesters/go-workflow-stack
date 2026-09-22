@@ -29,6 +29,9 @@
         "agent"
       ]
     },
+    "behavior_review_version": {
+      "const": 1
+    },
     "architecture": {
       "type": "object",
       "additionalProperties": false,

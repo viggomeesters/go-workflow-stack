@@ -1,0 +1,73 @@
+{
+  "schema": "go-workflow.autonomy-outcome-examples.v1",
+  "cases": [
+    {
+      "id": "preparation-only",
+      "description": "A plan is not delivered behavior.",
+      "evidence": [
+        {
+          "kind": "source",
+          "role": "preparation",
+          "path": "app.txt",
+          "sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "task_id": "task-schema-smoke",
+          "requirement_id": "R1",
+          "candidate_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "context_digest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "observation": "Implementation plan drafted."
+        }
+      ]
+    },
+    {
+      "id": "stale-capture",
+      "description": "A screenshot from another candidate is stale.",
+      "evidence": [
+        {
+          "kind": "visual_capture",
+          "role": "behavior_proof",
+          "path": "app.txt",
+          "sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "task_id": "task-schema-smoke",
+          "requirement_id": "R1",
+          "candidate_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "context_digest": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+          "observation": "Old screenshot looked correct."
+        }
+      ]
+    },
+    {
+      "id": "unrelated-green",
+      "description": "A green structural check does not establish the requested behavior.",
+      "evidence": [
+        {
+          "kind": "test_result",
+          "role": "unrelated",
+          "path": "app.txt",
+          "sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "task_id": "task-schema-smoke",
+          "requirement_id": "R1",
+          "candidate_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "context_digest": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+          "observation": "JSON schema validation passed."
+        }
+      ]
+    },
+    {
+      "id": "unreproduced-claim",
+      "description": "A claimed fix without reproduction or observation is unsupported.",
+      "evidence": [
+        {
+          "kind": "source",
+          "role": "claim_only",
+          "path": "app.txt",
+          "sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "task_id": "task-schema-smoke",
+          "requirement_id": "R1",
+          "candidate_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "context_digest": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+          "observation": "The author says the bug is fixed but did not reproduce it."
+        }
+      ]
+    }
+  ]
+}

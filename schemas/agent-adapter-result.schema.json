@@ -37,6 +37,9 @@
     "findings": {
       "type": "array"
     },
+    "behavior_review": {
+      "$ref": "behavior-review.schema.json"
+    },
     "model_selection": {
       "type": "object",
       "additionalProperties": false,

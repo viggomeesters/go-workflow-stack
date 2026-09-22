@@ -1,0 +1,23 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "autonomy-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "4cd2c8dd4ada5d5a7fdb7587171682efde5f32b8f25627e0bc51c5ef0f3f175b",
+  "revision": "4a6b3cc478602d072ecacfe01a0f912680ef8d82",
+  "content_digest": "2358a226bd4e923baffc57b7a780b0c67ddc65be153b272f1db46b0acd5e05b0",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "status": "passed",
+  "summary": "Adversarial review covered deterministic allowlist selection, active and cleanup precedence, single-builder locking, mandate and snapshot integrity, cumulative accounting, completion reconciliation after injected process loss, deployment-target non-escalation, truthful stop classification, resume-script fidelity, unchanged non-campaign routing, and the declared documentation boundary. Two blocking recovery gaps found during review were repaired and regression-tested before this pass; no blocking findings remain on the bound candidate.",
+  "reviewed_paths": [
+    "README.md",
+    "docs/autonomous-campaign.md",
+    "go_workflow/campaign.py",
+    "go_workflow/campaign_contracts.py",
+    "go_workflow/cli.py",
+    "schemas/campaign-run.schema.json",
+    "tests/test_autonomy_campaign.py",
+    "tests/test_autonomy_contracts.py"
+  ],
+  "blocking_findings": []
+}

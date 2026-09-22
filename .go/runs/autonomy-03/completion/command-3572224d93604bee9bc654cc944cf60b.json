@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "4cd2c8dd4ada5d5a7fdb7587171682efde5f32b8f25627e0bc51c5ef0f3f175b",
+  "revision": "ae5130eeb1e3097d48d413c7b0f17d9bff24432b",
+  "content_digest": "9048dc3ab1cf1fcf24210e3dd91e908d959fed50c7ff11bafbb810824e0929e6",
+  "command": "make check",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 1.0926616248907521,
+  "returncode": 2,
+  "stdout": "python3 -m py_compile cli/go.py go_workflow/cli.py\nTEMPLATE=$(if [ -d ../go-project-template/.go ]; then printf '%s' ../go-project-template; else printf '%s' fixtures/minimal; fi); \\\n\t  python3 cli/go.py validate $TEMPLATE; \\\n\t  python3 cli/go.py readback $TEMPLATE; \\\n\t  python3 cli/go.py status $TEMPLATE --json >/tmp/go-project-template-status.json; \\\n\t  if [ -d ../go-project-template/.go ]; then python3 cli/go.py template-check ../go-project-template --json >/tmp/go-template-check.json; fi\nok: /Users/viggomeesters/Dev/go-project-template/.go\nProject: Go Project Template (go-project-template)\nNorth star: A clone-local agent contract proves repo-local continuation.\nWedge: Self-contained project OS, not a central workflow database.\nPrinciples: json-first; abc-release-evidence; abc-explicit-model-contract; abc-durable-worker-context; abc-task-workspace; abc-final-candidate-proof; abc-selective-legacy-reuse\nEpics: workflow-contract; complete-advice-to-outcome-model; architecture-lane; autonomy-first\nArchitecture: briefs=2; open_deviations=0; active_waivers=0\nNext task: task-schema-smoke — Prove the cloned template can execute its repo-local contract\n",
+  "stderr": "make: *** [check] Error 1\n",
+  "timed_out": false
+}

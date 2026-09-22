@@ -1,0 +1,79 @@
+{
+  "schema": "go-workflow.task-design-review.v1",
+  "task_id": "autonomy-03",
+  "reviewer": "codex-astra-high",
+  "disposition": "ready",
+  "sources": [
+    ".go/tasks/active/autonomy-03.json",
+    ".go/plans/autonomy-first.json",
+    ".go/architecture/briefs/autonomous-campaign.json",
+    ".go/decisions/events.jsonl#bounded-serial-campaign-contract-v1",
+    "docs/autonomous-campaign.md",
+    "go_workflow/campaign_contracts.py",
+    "go_workflow/run_state.py"
+  ],
+  "before": "Campaign contracts are validated read-only and managed execution preserves one task/worktree, but execute_loop_plan returns after one managed task and retains no campaign-wide selection or consumption checkpoint.",
+  "after": "An explicit foreground campaign invocation freezes one validated contract revision, persists cumulative controller state, resumes authoritative managed work before deterministic allowlisted selection, and advances serially after a task reaches its existing completed/cleaned lifecycle state.",
+  "public_interface": {
+    "entrypoints": [
+      "go --campaign <contract> --campaign-workspace-root <outside-repo-dir> --execute",
+      "auto --campaign <contract> --campaign-workspace-root <outside-repo-dir> --execute",
+      "loop/go-loop with the same optional flags"
+    ],
+    "compatibility": "Calls without --campaign keep the existing single-task and legacy batch behavior byte-for-byte at the routing boundary.",
+    "resume": "The generated resume arguments retain the campaign contract and workspace root; controller state binds the canonical contract digest and refuses silent mandate drift."
+  },
+  "state_model": {
+    "owner": ".go/runs/campaigns/<campaign-id>/state.json",
+    "contract_snapshot": ".go/runs/campaigns/<campaign-id>/contract-r<revision>-<sha256-prefix>.json",
+    "states": [
+      "running",
+      "task_in_progress",
+      "budget_exhausted",
+      "no_eligible_tasks",
+      "authority_required",
+      "unsafe_repository",
+      "unknown_external_effect"
+    ],
+    "edges": [
+      "new -> running after repository-bound contract validation and immutable snapshot",
+      "running -> task_in_progress after deterministic selection and persisted intent",
+      "task_in_progress -> running only after existing task lifecycle returns task_complete/done",
+      "running/task_in_progress -> budget_exhausted when cumulative wall/task/attempt ceiling is reached",
+      "running -> no_eligible_tasks when no permitted eligible task exists; this is never goal_verified",
+      "task_in_progress -> authority_required/unsafe_repository/unknown_external_effect on classified fail-closed results"
+    ],
+    "authority": "Task status, managed run state, workspace registry, release receipt and outcome evidence remain canonical; campaign state records selection/consumption/provenance but never copies authoritative outcome status."
+  },
+  "selection_precedence": [
+    "One permitted active managed task with a durable checkpoint",
+    "One permitted delivered task with pending release/cleanup checkpoint",
+    "First eligible open task in authority.permitted_tasks order",
+    "Skip task-local dependency, decision or readiness blockers and record reasons; continue scanning unrelated permitted tasks",
+    "Fail closed on foreign active work, missing active checkpoint, conflicting controller, unsafe repository or unresolved external effect"
+  ],
+  "budget": {
+    "source": "campaign.authority.budget",
+    "persisted": [
+      "active wall seconds",
+      "task attempts started",
+      "unique tasks completed"
+    ],
+    "resume_rule": "Consumption is monotonic for the frozen campaign digest and cannot reset by process restart or CLI retry."
+  },
+  "non_goals": [
+    "No daemon, timer, background service or unattended trigger",
+    "No parallel builders, multi-host scheduling or new worker adapter",
+    "No hidden global queue or copied task/outcome lifecycle",
+    "No inferred publication/deployment authority and no repeated unknown external effect",
+    "No claim that task exhaustion proves the vision or campaign goal",
+    "No change to existing behavior when --campaign is absent"
+  ],
+  "evidence_plan": [
+    "Public-interface RED/GREEN tests for serial advancement and durable resume",
+    "Negative tests for deterministic allowlist order, task-local skip, mandate drift, cumulative budget and unsafe active state",
+    "Existing managed resume/worktree regressions and full make check",
+    "Fresh critic and architecture conformance against the final candidate before integration/release"
+  ],
+  "reasoning": "This is the smallest compatible placement: campaign_contracts retains immutable authority validation, run_state retains task/process ownership, task_state remains the task index, and the new campaign module owns only serial orchestration and its durable audit checkpoint."
+}

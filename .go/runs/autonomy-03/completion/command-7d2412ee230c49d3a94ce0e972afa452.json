@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-03",
+  "project": "go-workflow-stack",
+  "contract_digest": "4cd2c8dd4ada5d5a7fdb7587171682efde5f32b8f25627e0bc51c5ef0f3f175b",
+  "revision": "ae5130eeb1e3097d48d413c7b0f17d9bff24432b",
+  "content_digest": "9048dc3ab1cf1fcf24210e3dd91e908d959fed50c7ff11bafbb810824e0929e6",
+  "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_campaign.py tests/test_abc_resume.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 64.62431016599294,
+  "returncode": 0,
+  "stdout": "..........................................                               [100%]\n42 passed in 63.23s (0:01:03)\n",
+  "stderr": "",
+  "timed_out": false
+}

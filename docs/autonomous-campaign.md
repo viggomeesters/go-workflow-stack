@@ -7,6 +7,22 @@ workspace, release and outcome records remain authoritative. The campaign
 controller owns only deterministic selection, a frozen mandate snapshot and
 cumulative controller accounting.
 
+The release gate for this contract is the executable injected-failure campaign:
+
+```sh
+bash scripts/check-autonomy.sh
+```
+
+It starts a real CLI controller process and real worker processes against
+disposable Git worktrees and a local bare remote. One controller invocation must
+turn one assessed rough request into two serial task releases and an achieved
+goal audit. `fixtures/autonomy-campaign/coverage.json` maps its complete failure
+matrix to executable tests, including decision isolation, intake completeness,
+critic repair, no-progress, shared budget, orphan recovery, dirty Git, remote
+movement, ambiguous publication, failed live readback and cleanup retry. This is
+deterministic orchestration evidence: it makes no live-model, hosted-provider,
+production mutation, overnight reliability or GitHub Actions claim.
+
 ```sh
 python3 cli/go.py validate /path/to/repo --campaign /path/to/contract.json --json
 python3 cli/go.py validate /path/to/repo --campaign /path/to/revision-2.json \

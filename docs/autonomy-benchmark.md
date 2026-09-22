@@ -2,6 +2,38 @@
 
 This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; claims must stay tied to the proven runtime boundary.
 
+## Injected-failure autonomy campaign (v0.3.42)
+
+`fixtures/autonomy-campaign/campaign.py` proves the complete deterministic
+control path from one rough request through semantic intake, two serial managed
+tasks, worktrees, behavioral review, bounded repair, local release publication,
+cleanup and a final outcome-bound goal audit. The fixture starts the public CLI
+in a real controller process and each build, critic and repair phase in a real
+worker process. Git effects use disposable repositories and a local bare remote.
+One invocation must autonomously publish both task releases; the test does not
+dispatch each task separately.
+
+The executable matrix in `fixtures/autonomy-campaign/coverage.json` binds every
+claimed failure mode to named tests and its expected observable result. Run it
+from a normal checkout with:
+
+```bash
+bash scripts/check-autonomy.sh
+```
+
+The matrix covers an unresolved material decision alongside independent work,
+an omitted rough requirement, a failed behavioral critic followed by repair,
+repeated no-progress, cumulative shared budgets, dead and foreign controllers,
+dirty Git, a changed remote base, lost publication acknowledgement, failed live
+readback, cleanup retry and malformed false-green evidence. Raw managed-run
+artifacts and immutable local tag/remote readback are asserted, rather than
+accepting labels or provider stubs as completion.
+
+This remains a deterministic orchestration proof. Its worker implements the
+native adapter protocol without calling a live model, and its Git remote is
+local. It does not prove overnight wall-clock reliability, hosted-provider
+availability, general model quality, real consumer mutations or GitHub Actions.
+
 
 ## A/B/C campaign (v0.3.26)
 
@@ -83,13 +115,13 @@ sample does not measure general model quality or guarantee future availability.
 | Real codebase repair fixture | `PASS` | Mini Python package failing pytest is repaired by go-loop without user intervention | Fixture is small; larger repos still depend on adapter. |
 | Repair attempts like Ralph ladder | `PASS` | `--max-attempts`, strategy ladder, repair fixtures: fail → repair → pass | Strategy names are recorded; adapter decides actual technique. |
 | Exact resume state | `PASS` | `.go/runs/latest.json` stores effective flags and resume command including budgets, repair flags, critic/follow-up, ship policy, allow flags | Resume does not restore external process env beyond command/flags. |
-| Restartable multi-task campaign | `PASS` | A two-stage release-notes fixture builds, receives a blocking critic verdict, repairs, verifies, commits, stops on task budget, executes the persisted resume command, completes the second task, and passes the goal audit | The adapter is deterministic so orchestration failures are reproducible; live-model quality remains separate. |
+| Restartable multi-task campaign | `PASS` | The injected-failure campaign takes one rough request through intake, two serial task releases and goal audit in one controller process; the earlier A/B/C fixture separately proves persisted resume after a budget stop | The adapters are deterministic so orchestration failures are reproducible; live-model quality remains separate. |
 | Linux/Hermes contract | `PASS` | `bash scripts/check-linux.sh` runs the full suite and stack/template pairing locally with Python 3.11+; `go doctor` verifies host readiness | Live Hermes model quality remains an explicit opt-in local check. |
 | Scoped transactional ship policy | `PASS` | Tests prove unrelated dirt is not committed, unauthorized push leaves the verified task active, and failed local commits restore task/evidence state | A push can still fail after a valid local commit and require an explicit retry. |
 | Vision/principles execution context | `PASS` | Every build/critic/repair hook receives `GO_CONTEXT_JSON`; attempt `prompt.md` also records north star, metrics, principles, hierarchy, and task | Adapters must actually obey the supplied contract. |
 | Template-to-project pairing | `PASS` | Pairing check executes first `auto`; `spike` and `apply-template.sh` replace template identity with project-specific vision/tasks | User intent still determines whether the generated vision is useful. |
 | Vision-level completion audit | `PASS` | The outcome-bound shared campaign audit binds every frozen goal outcome to exact task/R# links, current lifecycle and architecture evidence, release/deployment receipts, and an auditable handoff; empty queues and declared metrics cannot pass | Semantic proof still depends on the quality of the recorded task critic and selected verification. |
-| Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL` | Hardened conductor, safe default agent selection, deep critic, adapter context, budgets, scope, executable resume, restartable multi-task campaign, transactional shipping, and goal audit are covered locally | A real non-fake adapter campaign and broader repo diversity are not yet benchmarked. |
+| Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL` | Hardened conductor, safe default agent selection, deep critic, adapter context, budgets, scope, executable resume, restartable multi-task campaign, transactional shipping, injected-failure recovery, and goal audit are covered locally | An unattended live-model campaign and broader repo diversity are not yet benchmarked. |
 | Unconstrained self-improving agent | `PARTIAL` | Can plug Codex/Hermes; `.go` controls state and evidence | The Python CLI does not embed an LLM or bypass safety gates. |
 
 ## Current verdict
@@ -116,6 +148,7 @@ The honest claim is:
 12. Transactional task/ship behavior for policy and local-commit failures. ✅
 13. Vision, architecture principles, hierarchy, evidence, decisions, and task context passed to every adapter. ✅
 14. Outcome-bound campaign audit plus classified handoff before `goal_verified`. ✅
+15. End-to-end serial campaign gate with executable injected-failure coverage and immutable local release readback. ✅
 
 ## Honest limits
 
@@ -125,3 +158,4 @@ The honest claim is:
 - Real-world large-repo performance still depends on adapter quality, test quality, and task scope quality.
 - Adapter selection and the deep-critic protocol are covered with deterministic CLI fixtures; a campaign against a real model remains deliberately unclaimed.
 - Campaign completion proves the bounded adopted goal, not every continuing idea in the product vision.
+- The deterministic end-to-end campaign uses local bare remotes and performs no hosted release, production deployment, consumer mutation or GitHub Actions run.

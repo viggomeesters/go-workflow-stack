@@ -25,4 +25,5 @@ PYTHONDONTWRITEBYTECODE=1 PYTHONPATH="$ROOT" "${RUNNER[@]}" \
   "$ROOT/tests/test_completed_capture.py" \
   "$ROOT/tests/test_task_design_readiness.py" \
   "$ROOT/tests/test_architecture.py" -q
+bash "$ROOT/scripts/check-autonomy.sh"
 echo "compatibility release gate: passed"

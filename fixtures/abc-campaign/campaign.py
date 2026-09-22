@@ -61,6 +61,10 @@ def setup(destination, runtime=ROOT):
     hierarchy['epics'][0]['features'][0]['tasks']=['campaign-1','campaign-2'];write(repo / '.go/hierarchy.json',hierarchy)
     (repo/'VERSION').write_text('1.1.0\n');(repo/'CHANGELOG.md').write_text('# Local campaign\n')
     (repo/'AGENTS.md').write_text('Local disposable two-task proof. Follow the task context. No subagents. Only app.txt is model-authored; the controller owns workflow state, versioning and publication. No external deployment.\n')
+    synced=subprocess.run(
+        [sys.executable,str(runtime/'cli/go.py'),'agents','sync',str(repo),'--apply','--json'],
+        cwd=repo,text=True,capture_output=True,timeout=30)
+    if synced.returncode:raise RuntimeError(synced.stdout+synced.stderr)
     git(repo,'add','.');git(repo,'commit','-qm','two explicit dependent campaign tasks')
     git(repo,'tag','-a','v1.1.0','-m','local baseline');git(repo,'push','origin','main','refs/tags/v1.1.0')
     return repo

@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.42 — injected-failure autonomy campaign
+
+- Prove one rough request can pass semantic intake and one controller process can release two serial managed tasks before a grounded goal audit.
+- Exercise real controller/worker processes, disposable Git worktrees and local bare-remote publication with immutable tag/readback assertions.
+- Bind unresolved decisions, omitted requirements, critic repair, no-progress, cumulative budgets, orphan ownership, dirty Git, remote movement, ambiguous effects and cleanup recovery to an executable failure matrix.
+- Gate and document the proof's limits: deterministic adapter, local Git effects, no production consumer mutation, hosted-provider claim or GitHub Actions evidence.
+
 ## 0.3.41 — task-by-task autonomous delivery truth
 
 - Require campaign transitions to consume exact task, managed-run, workspace, publication and deployment readbacks before counting a managed task delivered.

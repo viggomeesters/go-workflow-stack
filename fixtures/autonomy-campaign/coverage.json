@@ -1,0 +1,103 @@
+{
+  "schema": "go-workflow.autonomy-campaign-coverage.v1",
+  "scenarios": {
+    "serial_journey": {
+      "injected_effect": "One rough request is assessed once and one controller process must deliver two ordered tasks.",
+      "expected_observation": "Both tasks are built in isolated worktrees, reviewed, published to a local bare remote, cleaned up, and followed by a grounded goal audit.",
+      "tests": [
+        "test_autonomy_end_to_end.py::test_one_controller_process_explores_repairs_releases_two_tasks_and_audits_goal"
+      ]
+    },
+    "unresolved_material_decision": {
+      "injected_effect": "The first task requires a material decision while the second task remains independent.",
+      "expected_observation": "The independent task ships, the unresolved task remains open, and the goal cannot be reported as achieved.",
+      "tests": [
+        "test_autonomy_end_to_end.py::test_unresolved_task_does_not_prevent_independent_release"
+      ]
+    },
+    "omitted_requirement": {
+      "injected_effect": "The intake assessor omits one requested outcome from its proposed task set.",
+      "expected_observation": "Intake fails before it writes accepted intake state or invokes a worker.",
+      "tests": [
+        "test_autonomy_end_to_end.py::test_omitted_rough_requirement_is_rejected_before_task_or_worker_write"
+      ]
+    },
+    "behavioral_critic_repair": {
+      "injected_effect": "The first behavioral critic returns a grounded blocking finding.",
+      "expected_observation": "The same task receives the finding in a repair phase and must pass a second critic before release.",
+      "tests": [
+        "test_autonomy_end_to_end.py::test_one_controller_process_explores_repairs_releases_two_tasks_and_audits_goal",
+        "test_autonomy_outcomes.py::test_native_critic_cannot_report_success_without_grounded_review"
+      ]
+    },
+    "repair_no_progress": {
+      "injected_effect": "A repair repeats the same failure signature without changing the relevant state.",
+      "expected_observation": "The controller records no progress and stops retrying instead of looping indefinitely.",
+      "tests": [
+        "test_autonomy_recovery.py::test_repeated_identical_failure_records_no_progress"
+      ]
+    },
+    "shared_budget": {
+      "injected_effect": "A campaign resumes after spending command and repair budget.",
+      "expected_observation": "The resumed controller uses the cumulative ledger and cannot reset the shared limits.",
+      "tests": [
+        "test_autonomy_recovery.py::test_command_and_repair_budgets_are_cumulative_across_resume"
+      ]
+    },
+    "controller_orphan": {
+      "injected_effect": "A controller dies after dispatch and a separate controller attempts to take over live ownership.",
+      "expected_observation": "A dead dispatch resumes the same task, while a live foreign controller identity is refused.",
+      "tests": [
+        "test_autonomy_recovery.py::test_dispatch_checkpoint_recovers_same_task_after_controller_death",
+        "test_autonomy_recovery.py::test_live_foreign_controller_identity_refuses_takeover"
+      ]
+    },
+    "dirty_git": {
+      "injected_effect": "The control repository has an unrelated tracked modification before publication.",
+      "expected_observation": "Publication fails closed, creates no tag, and preserves the user's dirty file byte-for-byte.",
+      "tests": [
+        "test_autonomy_end_to_end.py::test_dirty_control_repo_blocks_publication_and_preserves_dirt"
+      ]
+    },
+    "changed_remote_base": {
+      "injected_effect": "The remote base moves after a worker has produced green evidence.",
+      "expected_observation": "The controller preserves both histories, invalidates stale checks, and withholds release until reconciliation is verified.",
+      "tests": [
+        "test_abc_end_to_end.py::test_conflicting_base_after_green_preserves_both_sides_without_release",
+        "test_autonomy_delivery.py::test_history_preserving_reconciliation_updates_only_owned_workspace_and_invalidates_checks"
+      ]
+    },
+    "lost_publication_ack": {
+      "injected_effect": "A publish command succeeds but its acknowledgement is lost.",
+      "expected_observation": "Authoritative readback reconciles the effect without issuing a duplicate publication.",
+      "tests": [
+        "test_abc_release.py::test_lost_command_acknowledgement_reconciles_without_duplicate_effect",
+        "test_abc_release.py::test_github_create_lost_response_uses_readback_without_republication"
+      ]
+    },
+    "failed_live_readback": {
+      "injected_effect": "Deployment readback reports a wrong or uncertain target after an external effect.",
+      "expected_observation": "The effect remains pending and later recovers without a second deployment.",
+      "tests": [
+        "test_abc_deployment.py::test_wrong_or_uncertain_target_stays_pending_and_recovers_without_second_effect"
+      ]
+    },
+    "cleanup_retry": {
+      "injected_effect": "Workspace cleanup fails after delivery and is retried during resume.",
+      "expected_observation": "Resume performs cleanup only, does not republish, and preserves ignored user files.",
+      "tests": [
+        "test_abc_resume.py::test_cleanup_retry_only_cleans_the_already_delivered_task",
+        "test_abc_worktrees.py::test_cleanup_failure_has_recovery_without_republishing_and_preserves_ignored_files"
+      ]
+    },
+    "false_green_rejection": {
+      "injected_effect": "Effect checkpoints or critic output claim success without valid grounded evidence.",
+      "expected_observation": "Malformed or ungrounded success is classified unsafe and cannot satisfy completion.",
+      "tests": [
+        "test_autonomy_delivery.py::test_malformed_effect_checkpoints_are_unsafe_not_success_or_absence",
+        "test_autonomy_outcomes.py::test_native_critic_cannot_report_success_without_grounded_review"
+      ]
+    }
+  },
+  "limits": "This deterministic local proof uses real controller and worker processes, Git worktrees, and local bare remotes. It does not claim unattended wall-clock reliability, hosted-provider availability, real consumer mutations, or GitHub Actions execution."
+}

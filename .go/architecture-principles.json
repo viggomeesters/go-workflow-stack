@@ -16,6 +16,12 @@
       "enforcement": "schema validation and CLI checks"
     },
     {
+      "id": "repository-intelligence-separation",
+      "statement": "The durable repository map records stable semantic intent; the detailed code graph is a regenerable materialized view of source code and never a competing source of truth.",
+      "rationale": "Agents need fast application context without turning generated summaries into authoritative architecture or polluting Git history with symbol-level churn.",
+      "enforcement": "repository-map schema validation, deterministic local indexing, freshness hashes, .go self-exclusion and repository-index conformance checks"
+    },
+    {
       "id": "goal-contract-before-execution",
       "statement": "Every autonomous go run must define or repair the end goal, acceptance, verification, and task boundary before implementation.",
       "rationale": "Autonomy without an explicit goal becomes random feature generation.",

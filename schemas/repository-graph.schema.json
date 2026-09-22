@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repository-graph.v1",
+  "title": "Derived Go Repository Graph",
+  "type": "object",
+  "required": ["schema", "kind", "project", "authority", "source_digest", "sources", "nodes", "edges", "coverage"],
+  "additionalProperties": true,
+  "properties": {
+    "schema": {"const": "go-workflow.repository-graph.v1"},
+    "kind": {"const": "repository_graph"},
+    "project": {"type": "string", "minLength": 1},
+    "authority": {"const": "derived_from_source"},
+    "source_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "map_digest": {"type": ["string", "null"], "pattern": "^[0-9a-f]{64}$"},
+    "sources": {"type": "array", "items": {"type": "object"}},
+    "nodes": {"type": "array", "items": {"type": "object", "required": ["id", "kind"]}},
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source", "target", "kind"],
+        "properties": {
+          "source": {"type": "string", "minLength": 1},
+          "target": {"type": "string", "minLength": 1},
+          "kind": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "coverage": {"type": "object"}
+  }
+}

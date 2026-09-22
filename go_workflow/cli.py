@@ -66,6 +66,14 @@ from go_workflow.agents_gateway import (
 )
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
+from go_workflow.repository_index import (
+    GRAPH_RELATIVE_PATH,
+    RepositoryIndexError,
+    build_graph,
+    index_status,
+    query_graph,
+    validate_repository_map,
+)
 from go_workflow.architecture import (
     architecture_briefs,
     architecture_claim_findings,
@@ -551,6 +559,18 @@ def validate_repo(repo: Path, *, skip_lifecycle_migration: bool = False) -> list
         except RepoLocalError as exc:
             errors.append(str(exc))
     project_id = str(documents.get("project.json", {}).get("id") or "")
+    repository_map = root / "repository-map.json"
+    if repository_map.exists():
+        try:
+            errors.extend(
+                validate_repository_map(
+                    load_json(repository_map),
+                    relative(repo, repository_map),
+                    project=project_id,
+                )
+            )
+        except RepoLocalError as exc:
+            errors.append(str(exc))
     required_stack_version = str(documents.get("project.json", {}).get("required_stack_version") or "0.0.0")
     if semantic_version_tuple(STACK_VERSION) < semantic_version_tuple(required_stack_version):
         errors.append(f".go/project.json: requires go-workflow-stack >= {required_stack_version}, current runtime is {STACK_VERSION}")
@@ -4151,6 +4171,39 @@ def cmd_status(args: argparse.Namespace) -> int:
     return 0 if route["valid"] else 1
 
 
+def cmd_index_build(args: argparse.Namespace) -> int:
+    graph = build_graph(Path(args.repo))
+    if args.json:
+        print(json.dumps(graph, indent=2, ensure_ascii=False))
+    else:
+        print(f"graph: {GRAPH_RELATIVE_PATH}")
+        print(f"files: {graph['coverage']['files']}")
+        print(f"nodes: {graph['coverage']['nodes']}")
+        print(f"edges: {graph['coverage']['edges']}")
+    return 0
+
+
+def cmd_index_status(args: argparse.Namespace) -> int:
+    status = index_status(Path(args.repo))
+    if args.json:
+        print(json.dumps(status, indent=2, ensure_ascii=False))
+    else:
+        print(f"present: {str(status['present']).lower()}")
+        print(f"fresh: {str(status['fresh']).lower()}")
+        print(f"reason: {status['reason']}")
+    return 0 if status["fresh"] else 1
+
+
+def cmd_index_query(args: argparse.Namespace) -> int:
+    result = query_graph(Path(args.repo), args.query, limit=args.limit)
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        for node in result["nodes"]:
+            print(f"{node['id']}\t{node.get('kind', '')}\t{node.get('path', '')}")
+    return 0
+
+
 def template_check_environment(source: dict[str, str], stack_root: Path) -> dict[str, str]:
     env = source.copy()
     if is_git_checkout(stack_root):
@@ -5666,6 +5719,22 @@ def build_parser() -> argparse.ArgumentParser:
     status.add_argument("repo", nargs="?", default=".")
     status.add_argument("--json", action="store_true")
     status.set_defaults(func=cmd_status)
+    index = sub.add_parser("index", help="Build and query the local derived repository graph")
+    index_sub = index.add_subparsers(dest="index_command", required=True)
+    index_build = index_sub.add_parser("build", help="Build the deterministic local repository graph")
+    index_build.add_argument("repo", nargs="?", default=".")
+    index_build.add_argument("--json", action="store_true")
+    index_build.set_defaults(func=cmd_index_build)
+    index_status_parser = index_sub.add_parser("status", help="Check whether the local repository graph is fresh")
+    index_status_parser.add_argument("repo", nargs="?", default=".")
+    index_status_parser.add_argument("--json", action="store_true")
+    index_status_parser.set_defaults(func=cmd_index_status)
+    index_query = index_sub.add_parser("query", help="Select a bounded lexical subgraph")
+    index_query.add_argument("repo", nargs="?", default=".")
+    index_query.add_argument("query")
+    index_query.add_argument("--limit", type=int, default=20)
+    index_query.add_argument("--json", action="store_true")
+    index_query.set_defaults(func=cmd_index_query)
     template_check = sub.add_parser("template-check", help="Validate a go-project-template checkout against this stack")
     template_check.add_argument("template_repo", nargs="?", default="../go-project-template")
     template_check.add_argument("--json", action="store_true")
@@ -6327,7 +6396,7 @@ def main() -> int:
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError, PublicationError, CampaignError) as exc:
+    except (RepoLocalError, RepositoryIndexError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError, PublicationError, CampaignError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

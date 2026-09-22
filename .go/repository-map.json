@@ -1,0 +1,86 @@
+{
+  "schema": "go-workflow.repository-map.v1",
+  "kind": "repository_map",
+  "project": "go-workflow-stack",
+  "nodes": [
+    {
+      "id": "workflow-runtime",
+      "kind": "application",
+      "summary": "CLI and Python runtime that operate the repository-local Go contract.",
+      "paths": [
+        "cli/**",
+        "go_workflow/**"
+      ],
+      "depends_on": [
+        "contract-schemas"
+      ],
+      "tests": [
+        "test-suite"
+      ]
+    },
+    {
+      "id": "contract-schemas",
+      "kind": "interface",
+      "summary": "Versioned JSON schemas for durable and derived Go contract documents.",
+      "paths": [
+        "schemas/**"
+      ],
+      "depends_on": [],
+      "tests": [
+        "test-suite"
+      ]
+    },
+    {
+      "id": "test-suite",
+      "kind": "test_suite",
+      "summary": "Behavioral, contract, and regression verification for the stack.",
+      "paths": [
+        "tests/**"
+      ],
+      "depends_on": [
+        "workflow-runtime",
+        "contract-schemas",
+        "test-fixtures"
+      ],
+      "tests": []
+    },
+    {
+      "id": "test-fixtures",
+      "kind": "data",
+      "summary": "Minimal portable repository-local contracts used by tests and adoption flows.",
+      "paths": [
+        "fixtures/**"
+      ],
+      "depends_on": [
+        "contract-schemas"
+      ],
+      "tests": [
+        "test-suite"
+      ]
+    },
+    {
+      "id": "operator-guides",
+      "kind": "interface",
+      "summary": "Human-facing usage, architecture, lifecycle, and release documentation.",
+      "paths": [
+        "README.md",
+        "docs/**"
+      ],
+      "depends_on": [
+        "workflow-runtime",
+        "contract-schemas"
+      ],
+      "tests": [
+        "test-suite"
+      ]
+    }
+  ],
+  "overlays": [
+    {
+      "node_id": "workflow-runtime",
+      "notes": [
+        "The detailed source graph is generated locally and is not authoritative workflow state."
+      ]
+    }
+  ]
+}

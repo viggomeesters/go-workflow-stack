@@ -1,0 +1,32 @@
+{
+  "schema": "go-workflow.repository-map.v1",
+  "kind": "repository_map",
+  "project": "repo-local-spike-fixture",
+  "nodes": [
+    {
+      "id": "application",
+      "kind": "application",
+      "summary": "Application source owned by the adopted repository.",
+      "paths": [
+        "src/**"
+      ],
+      "depends_on": [],
+      "tests": [
+        "tests"
+      ]
+    },
+    {
+      "id": "tests",
+      "kind": "test_suite",
+      "summary": "Verification for the application source.",
+      "paths": [
+        "tests/**"
+      ],
+      "depends_on": [
+        "application"
+      ],
+      "tests": []
+    }
+  ],
+  "overlays": []
+}

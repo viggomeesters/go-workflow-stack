@@ -1,0 +1,144 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "repository-intelligence-03-blast-conformance",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Verify blast radius and expose architecture-to-code drift",
+  "description": "Complete repository intelligence with local diff impact, test recommendations and conformance reporting. Compare declared task nodes and intended component dependencies with the observed fresh graph, without GitHub Actions or automatic architecture rewrites.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/plans/repository-intelligence.json",
+      "go_workflow/repository_index.py",
+      "go_workflow/architecture.py",
+      "go_workflow/completion.py",
+      "go_workflow/cli.py",
+      "schemas/repository-map.schema.json",
+      "schemas/repository-graph.schema.json"
+    ],
+    "modify": [
+      "go_workflow/repository_index.py",
+      "go_workflow/architecture.py",
+      "go_workflow/completion.py",
+      "go_workflow/cli.py",
+      "schemas/task.schema.json",
+      "tests/test_repository_blast.py",
+      "docs/repository-intelligence.md",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "A local JSON CLI command calculates changed nodes plus bounded reverse dependency impact from a Git diff and recommends linked test nodes with exact provenance.",
+    "When a task declares repository_context, conformance reports intended nodes, actual changed nodes, impacted components, missing declarations and unexpected scope; advisory policy reports findings while strict policy exits non-zero.",
+    "Repository-map intended component dependencies are compared with observed fresh graph edges so architecture-to-code drift is visible without rewriting architecture or treating the graph as authoritative.",
+    "Stale, missing and unsupported graph conditions are explicit and safe; no GitHub Actions, hosted service, LLM or global state is required.",
+    "Behavioral tests prove clean, in-scope, transitive, undeclared, strict-failure, stale-cache and intended-dependency-drift cases through the public CLI."
+  ],
+  "verification": [
+    ".venv/bin/python -m pytest tests/test_repository_blast.py tests/test_repository_context.py tests/test_repository_index.py -q",
+    ".venv/bin/python cli/go.py validate .",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "critic_model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "current",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "repository-intelligence-01-index-contract",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "repository-intelligence-02-task-context",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Complete repository intelligence with local diff impact, test recommendations and conformance reporting. Compare declared task nodes and intended component dependencies with the observed fresh graph, without GitHub Actions or automatic architecture rewrites.",
+    "sha256": "726e868d1410fa7e92edb8d3d60b8262d8bbb64959cea31a46ff2eb9ab82f069",
+    "source_ref": "repo-local-intake:repository-intelligence-03-blast-conformance"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "A local JSON CLI command calculates changed nodes plus bounded reverse dependency impact from a Git diff and recommends linked test nodes with exact provenance.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "When a task declares repository_context, conformance reports intended nodes, actual changed nodes, impacted components, missing declarations and unexpected scope; advisory policy reports findings while strict policy exits non-zero.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Repository-map intended component dependencies are compared with observed fresh graph edges so architecture-to-code drift is visible without rewriting architecture or treating the graph as authoritative.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Stale, missing and unsupported graph conditions are explicit and safe; no GitHub Actions, hosted service, LLM or global state is required.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Behavioral tests prove clean, in-scope, transitive, undeclared, strict-failure, stale-cache and intended-dependency-drift cases through the public CLI.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "repository-intelligence"
+    ],
+    "concerns": [
+      "data",
+      "integration"
+    ],
+    "decision_ids": [
+      "repository-intelligence-derived-view-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

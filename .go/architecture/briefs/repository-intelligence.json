@@ -1,0 +1,99 @@
+{
+  "schema": "go-workflow.architecture-brief.v1",
+  "kind": "architecture_brief",
+  "id": "repository-intelligence",
+  "project": "go-workflow-stack",
+  "title": "Repository intelligence as a derived application view",
+  "status": "accepted",
+  "owner": "go-workflow-stack maintainers",
+  "outcomes": [
+    ".go connects durable product intent and executable tasks to a current, queryable representation of the repository without becoming a second code source of truth.",
+    "Agents receive bounded relevant application context and can verify actual blast radius against declared task scope."
+  ],
+  "scope": {
+    "in": [
+      "Durable semantic repository-map contract",
+      "Regenerable file, component, symbol, import and test graph",
+      "Task-to-node references and bounded execution context",
+      "Local blast-radius and architecture drift reporting"
+    ],
+    "out": [
+      "Hosted indexing services or mandatory model providers",
+      "Cross-repository graph federation",
+      "Automatic mutation of architecture intent from observed code",
+      "Complete compiler-grade extraction for every language in the first release"
+    ],
+    "systems": [
+      "go-workflow repository-local state",
+      "execution-context construction",
+      "architecture and completion gates"
+    ],
+    "boundaries": [
+      "Source code describes observed implementation; repository-map describes durable semantic identity; architecture briefs and decisions describe intent; tasks describe authorized work.",
+      "Generated graph data stays below .go/cache and is never canonical task, decision or architecture state."
+    ]
+  },
+  "stakeholders": [
+    {
+      "role": "workflow-user",
+      "concerns": [
+        "low ceremony",
+        "fresh repository understanding",
+        "auditable blast radius",
+        "clean Git history"
+      ],
+      "decision_rights": [
+        "curate stable component identity and intended dependencies",
+        "choose advisory or strict task impact policy"
+      ]
+    },
+    {
+      "role": "executing-agent",
+      "concerns": [
+        "bounded context",
+        "exact source provenance",
+        "deterministic freshness",
+        "actionable impact findings"
+      ],
+      "decision_rights": [
+        "rebuild and query derived graph data",
+        "report observed drift without rewriting accepted intent"
+      ]
+    }
+  ],
+  "constraints": [
+    "Existing repositories and tasks without repository-intelligence state remain valid.",
+    "The index excludes .go itself and cannot recursively ingest workflow state.",
+    "No GitHub Actions, hosted service or model call is required for build, query or blast-radius verification.",
+    "Direct node references survive regeneration and resolve against committed repository-map state."
+  ],
+  "quality_attributes": [
+    {
+      "id": "deterministic-index",
+      "scenario": "The same repository bytes and map are indexed twice.",
+      "measure": "Byte differences between generated graph payloads after excluding the generated timestamp",
+      "threshold": 0
+    },
+    {
+      "id": "bounded-context",
+      "scenario": "A task requests repository context for named nodes and queries.",
+      "measure": "Selected nodes beyond the declared budget, excluding directly requested mandatory nodes",
+      "threshold": 0
+    },
+    {
+      "id": "impact-traceability",
+      "scenario": "A task diff changes indexed source before finish.",
+      "measure": "Changed or transitively impacted nodes omitted from the blast-radius result",
+      "threshold": 0
+    }
+  ],
+  "risks": [
+    "Generated topology can become stale or be mistaken for authoritative architecture.",
+    "Fine-grained symbol data can create excessive context and Git churn if committed.",
+    "Heuristic extraction can miss dynamic dependencies; results must state coverage and freshness rather than claim completeness."
+  ],
+  "open_questions": [],
+  "decision_ids": [
+    "repository-intelligence-derived-view-v1"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "id": "repository-intelligence",
+  "status": "planned",
+  "implementation_status": "not_started",
+  "created_at": "2026-09-22",
+  "coordinator_project": "go-workflow-stack",
+  "source": {
+    "request": "Verwerk de visie dat .go naast taken en architectuur ook een index van de applicatie wordt.",
+    "direction": "Neem het Graft-principe op in .go als een duurzame semantische repository-map plus een regenererbare codegraaf, gekoppeld aan taken, contextselectie en blast-radiusverificatie.",
+    "authority": "sent_as_goal"
+  },
+  "goal": ".go verbindt gewenste architectuur, actuele code-topologie en uitvoerbaar werk in een zelfbeschrijvend, lokaal en bewijsbaar repositorymodel.",
+  "tasks": [
+    "repository-intelligence-01-index-contract",
+    "repository-intelligence-02-task-context",
+    "repository-intelligence-03-blast-conformance"
+  ],
+  "suggested_order": [
+    "repository-intelligence-01-index-contract",
+    "repository-intelligence-02-task-context",
+    "repository-intelligence-03-blast-conformance"
+  ],
+  "dependencies": {
+    "repository-intelligence-01-index-contract": [],
+    "repository-intelligence-02-task-context": [
+      "repository-intelligence-01-index-contract"
+    ],
+    "repository-intelligence-03-blast-conformance": [
+      "repository-intelligence-01-index-contract",
+      "repository-intelligence-02-task-context"
+    ]
+  },
+  "assumptions": [
+    "The first implementation remains provider-free and deterministic; no LLM is required to build or query the index.",
+    "The durable map is compact and committed, while symbol-level graph data is local and regenerable.",
+    "Python receives symbol/import extraction first; every supported repository still receives language-neutral file, component and test nodes.",
+    "The feature is opt-in and backward compatible for repositories without repository-map state."
+  ],
+  "deferred": [
+    "Embedding/vector search",
+    "Cross-repository federated graphs",
+    "Compiler or tree-sitter integrations for every language",
+    "Automatically rewriting architecture intent from observed code"
+  ],
+  "architecture_ref": ".go/architecture/briefs/repository-intelligence.json"
+}

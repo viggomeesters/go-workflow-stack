@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.44 — repository intelligence foundation
+
+- Add an optional committed repository map with stable semantic component IDs, intended dependencies, test ownership and overlays.
+- Build a deterministic provider-free local graph with generic file/component/test nodes plus Python symbols and imports while excluding `.go`, dependencies and build output.
+- Expose `index build`, `index status` and bounded `index query` commands with exact provenance and fail-closed stale detection.
+- Preserve authority boundaries: source, architecture and tasks remain canonical; the detailed graph is ignored, derived and regenerable.
+
 ## 0.3.43 — live unattended autonomy proof
 
 - Preserve a content-bound native-Codex campaign from semantic intake through two independently verified local releases and a grounded goal audit.

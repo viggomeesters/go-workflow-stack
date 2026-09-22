@@ -1,0 +1,140 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "repository-intelligence-02-task-context",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "Bind tasks to stable repository nodes and select bounded execution context",
+  "description": "Extend task and worker-context contracts so work references stable repository-map node IDs and receives a fresh, token-bounded subgraph with provenance. Keep tasks declarative and avoid copying generated repository prose into canonical task state.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/plans/repository-intelligence.json",
+      "go_workflow/repository_index.py",
+      "go_workflow/execution_context.py",
+      "go_workflow/task_design.py",
+      "go_workflow/cli.py",
+      "schemas/task.schema.json",
+      "schemas/execution-context.schema.json"
+    ],
+    "modify": [
+      "go_workflow/repository_index.py",
+      "go_workflow/execution_context.py",
+      "go_workflow/task_design.py",
+      "go_workflow/cli.py",
+      "schemas/task.schema.json",
+      "schemas/execution-context.schema.json",
+      "tests/test_repository_context.py",
+      "docs/repository-intelligence.md",
+      "README.md"
+    ]
+  },
+  "acceptance": [
+    "Tasks may declare a strict repository_context contract containing stable node references, bounded discovery queries and a context budget; runtime and published schema validation agree.",
+    "Explicit node references resolve against the durable repository map and fail with actionable errors when invalid; legacy tasks without repository_context remain unchanged.",
+    "Build, critic and repair execution contexts contain only the selected fresh subgraph, exact source hashes and a clear authority/freshness statement, never the whole repository graph or copied generated summaries.",
+    "Context selection is deterministic, follows bounded dependency edges, includes relevant tests and respects the declared budget while retaining directly requested nodes.",
+    "Behavioral tests prove task validation, exact resolution, bounded selection, stale/missing cache behavior, legacy compatibility and durable context verification."
+  ],
+  "verification": [
+    ".venv/bin/python -m pytest tests/test_repository_context.py tests/test_architecture.py tests/test_abc_context.py -q",
+    ".venv/bin/python cli/go.py validate .",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "critic_model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "current",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "repository-intelligence-01-index-contract",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Extend task and worker-context contracts so work references stable repository-map node IDs and receives a fresh, token-bounded subgraph with provenance. Keep tasks declarative and avoid copying generated repository prose into canonical task state.",
+    "sha256": "b737e9b7aadb4b2eefd217c00cac618189162d75e9541b40f34759de764ceb3b",
+    "source_ref": "repo-local-intake:repository-intelligence-02-task-context"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Tasks may declare a strict repository_context contract containing stable node references, bounded discovery queries and a context budget; runtime and published schema validation agree.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Explicit node references resolve against the durable repository map and fail with actionable errors when invalid; legacy tasks without repository_context remain unchanged.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Build, critic and repair execution contexts contain only the selected fresh subgraph, exact source hashes and a clear authority/freshness statement, never the whole repository graph or copied generated summaries.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Context selection is deterministic, follows bounded dependency edges, includes relevant tests and respects the declared budget while retaining directly requested nodes.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Behavioral tests prove task validation, exact resolution, bounded selection, stale/missing cache behavior, legacy compatibility and durable context verification.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "repository-intelligence"
+    ],
+    "concerns": [
+      "data",
+      "integration"
+    ],
+    "decision_ids": [
+      "repository-intelligence-derived-view-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

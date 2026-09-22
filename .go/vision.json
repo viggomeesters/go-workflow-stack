@@ -3,10 +3,10 @@
   "kind": "vision",
   "project": "go-workflow-stack",
   "status": "active",
-  "north_star": "Viggo can say only `go`; the agent resolves loose vs repo-local work, repairs the .go contract if needed, then autonomously works toward the defined goal until done, blocked, or budget-exhausted.",
-  "wedge": "A repo-local autonomous workflow stack: .go holds vision, principles, hierarchy, tasks, evidence, decisions, and loop state; Hermes/Bertus uses it to run a Ralph/old-go-workflow-style build→verify→critic→repair→ship loop without Viggo spamming micro-commands.",
+  "north_star": "Viggo can say only `go`; the repository explains both its intended direction and its current application topology, after which the agent autonomously works toward the defined goal until done, blocked, or budget-exhausted.",
+  "wedge": "A repo-local autonomous workflow and intelligence stack: .go holds durable intent, work, proof and a compact semantic repository map, while a regenerable code graph supplies current implementation context for the build→verify→critic→repair→ship loop.",
   "target_user": "Viggo and future autonomous agents continuing this project.",
-  "core_promise": "One `go` can turn rough intent into a valid .go contract, split the goal into tasks, claim/execute/recheck/devil/repair/commit/finish each task, self-reflect, capture lessons, and report compactly.",
+  "core_promise": "One `go` can turn rough intent into a valid .go contract, select the relevant subgraph of the application, split the goal into tasks, execute and review each task against actual impact, capture durable knowledge, and report compactly.",
   "product_principles": [
     "repo-local",
     "goal-first",
@@ -14,7 +14,9 @@
     "bounded-loop-persistence",
     "proof-first",
     "feedback-turns-into-tasks",
-    "quiet-telegram"
+    "quiet-telegram",
+    "self-describing-repositories",
+    "derived-context-not-authority"
   ],
   "non_goals": [
     "no hidden central execution state",
@@ -22,7 +24,9 @@
     "no broad scope expansion without explicit goal fit",
     "no unbounded public/destructive/payment actions",
     "no command-spam handoff back to Viggo",
-    "no technical fluff handoff"
+    "no technical fluff handoff",
+    "no generated code graph as a second source of truth",
+    "no whole-repository context dump when a bounded subgraph is sufficient"
   ],
   "success_metrics": [
     "a bare `go` routes correctly between loose work and repo-local .go work",
@@ -30,7 +34,10 @@
     "open work is split into executable tasks with acceptance and verification",
     "loop continues across tasks without Viggo re-triggering each phase",
     "recheck/devil/self-reflect findings create repairs or follow-up tasks before final done",
-    "final report includes commits, verification, and open/blocker state"
+    "final report includes commits, verification, and open/blocker state",
+    "a fresh index deterministically maps application components, source symbols, tests and dependency edges without indexing .go itself",
+    "tasks can bind to stable repository-map nodes and receive a provenance-bearing, token-bounded implementation subgraph",
+    "verification exposes undeclared blast radius and drift between intended architecture and observed code topology"
   ],
   "planned_direction": {
     "id": "abc-lifecycle",
@@ -59,6 +66,25 @@
     "completion_note": "Thirteen ABC tasks completed. Opt-in product lifecycle, explicit task/critic models, durable context, primary controller with owned worktrees and serial verified release. Fresh phase workers supported; persistent-session/subagent adapters remain deferred."
   },
   "proposed_directions": [
+    {
+      "id": "repository-intelligence",
+      "status": "planned",
+      "implementation_status": "not_started",
+      "plan_ref": ".go/plans/repository-intelligence.json",
+      "target": "Make .go the self-describing control and knowledge plane of a repository by connecting durable intent and tasks to a deterministic, regenerable index of the application that lives beside them.",
+      "success_metrics": [
+        "A compact committed repository map names stable application components while the full symbol and dependency graph remains regenerable and non-authoritative.",
+        "Tasks reference stable repository nodes and execution contexts contain only the relevant fresh subgraph with exact source provenance.",
+        "A local blast-radius and conformance check reports changed and transitively impacted components, tests and undeclared scope without requiring GitHub Actions.",
+        "Legacy repositories and tasks without repository-intelligence state remain valid and behave as before."
+      ],
+      "non_goals": [
+        "Committing a Markdown file for every source symbol",
+        "Replacing source code, architecture briefs, decisions or task state with generated summaries",
+        "Embedding a third-party hosted index or mandatory LLM provider",
+        "Indexing .go into its own application graph"
+      ]
+    },
     {
       "id": "project-orchestration",
       "status": "deferred",

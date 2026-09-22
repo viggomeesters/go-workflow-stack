@@ -264,6 +264,17 @@
         "autonomy-linux-tag-fixture",
         "agents-root-go-contract"
       ]
+    },
+    {
+      "id": "repository-intelligence",
+      "title": "Repository intelligence",
+      "description": "Connect durable .go intent and tasks to a deterministic, regenerable application index without creating a second source of truth.",
+      "features": [],
+      "tasks": [
+        "repository-intelligence-01-index-contract",
+        "repository-intelligence-02-task-context",
+        "repository-intelligence-03-blast-conformance"
+      ]
     }
   ]
 }

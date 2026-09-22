@@ -1,0 +1,14 @@
+{
+  "task_id": "repository-intelligence-03-blast-conformance",
+  "project": "go-workflow-stack",
+  "contract_digest": "15ed0df7433da724b3bcef738d0f6b3314b176a8f4a579e1cd0cca224b507e0d",
+  "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+  "content_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+  "command": ".venv/bin/python -m pytest tests/test_repository_blast.py tests/test_repository_context.py tests/test_repository_index.py -q",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 4.396446583094075,
+  "returncode": 0,
+  "stdout": "...........................                                              [100%]\n27 passed in 3.69s\n",
+  "stderr": "",
+  "timed_out": false
+}

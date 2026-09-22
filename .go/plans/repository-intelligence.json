@@ -1,7 +1,7 @@
 {
   "id": "repository-intelligence",
-  "status": "planned",
-  "implementation_status": "not_started",
+  "status": "completed",
+  "implementation_status": "released",
   "created_at": "2026-09-22",
   "coordinator_project": "go-workflow-stack",
   "source": {
@@ -42,5 +42,7 @@
     "Compiler or tree-sitter integrations for every language",
     "Automatically rewriting architecture intent from observed code"
   ],
-  "architecture_ref": ".go/architecture/briefs/repository-intelligence.json"
+  "architecture_ref": ".go/architecture/briefs/repository-intelligence.json",
+  "stack_release": "v0.3.46",
+  "completion_note": "All three tasks are approved and released. The stack now provides a durable repository map, a fresh bounded execution subgraph, and local blast-radius/task-conformance/architecture-drift evidence."
 }

@@ -68,8 +68,8 @@
   "proposed_directions": [
     {
       "id": "repository-intelligence",
-      "status": "planned",
-      "implementation_status": "not_started",
+      "status": "completed",
+      "implementation_status": "released",
       "plan_ref": ".go/plans/repository-intelligence.json",
       "target": "Make .go the self-describing control and knowledge plane of a repository by connecting durable intent and tasks to a deterministic, regenerable index of the application that lives beside them.",
       "success_metrics": [
@@ -83,7 +83,9 @@
         "Replacing source code, architecture briefs, decisions or task state with generated summaries",
         "Embedding a third-party hosted index or mandatory LLM provider",
         "Indexing .go into its own application graph"
-      ]
+      ],
+      "stack_release": "v0.3.46",
+      "completion_note": "Delivered through repository-intelligence-01 through -03 with deterministic index, bounded task context, strict/advisory blast conformance, drift reporting and verified GitHub releases v0.3.44-v0.3.46."
     },
     {
       "id": "project-orchestration",

@@ -1,0 +1,120 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "repository-intelligence-03-blast-conformance",
+  "project": "go-workflow-stack",
+  "contract_digest": "15ed0df7433da724b3bcef738d0f6b3314b176a8f4a579e1cd0cca224b507e0d",
+  "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+  "content_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-03-blast-conformance",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python -m pytest tests/test_repository_blast.py tests/test_repository_context.py tests/test_repository_index.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+        "worktree_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-03-blast-conformance/completion/command-f72105e9d4144fe78e6ce2e4d7cba1cf.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/command-f72105e9d4144fe78e6ce2e4d7cba1cf.json",
+        "sha256": "f5b4cc489ff67f41fbfee9dd05bbd89ac4366d67ad3777d0e9259e960a186a69"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-03-blast-conformance",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+        "worktree_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-03-blast-conformance/completion/command-3bc7ff434e5a4b6bb39f08772bc35953.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/command-3bc7ff434e5a4b6bb39f08772bc35953.json",
+        "sha256": "1101ebc2cc8fa7d28005e53b2ebff7ff13083aab87068ea31d47e04ada497398"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-03-blast-conformance",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+        "worktree_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-03-blast-conformance/completion/command-50898bf0cb9642d8a419389b6585e60a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/command-50898bf0cb9642d8a419389b6585e60a.json",
+        "sha256": "c4d91c86b4850a7bf2be98eef5a6b1819af4fe2b622e14fd372d358d3a70fb4d"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-03-blast-conformance",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+        "worktree_digest": "304f32dadcef04cf5987289c7adbf0ac494651078189a8cba40e2fd701898fbd",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-03-blast-conformance/completion/command-c8f4cd5092164192b722d1e403adc0de.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/command-c8f4cd5092164192b722d1e403adc0de.json",
+        "sha256": "a84916fd65a510b41a480a6728614132d597d1515ec9ac73fada258e77e58b40"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

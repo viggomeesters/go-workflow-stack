@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "repository-intelligence-03-blast-conformance",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Verify blast radius and expose architecture-to-code drift",
   "description": "Complete repository intelligence with local diff impact, test recommendations and conformance reporting. Compare declared task nodes and intended component dependencies with the observed fresh graph, without GitHub Actions or automatic architecture rewrites.",
   "scope": {
@@ -55,10 +55,72 @@
     "claimed_at": "2026-09-22T19:49:51+02:00",
     "base_commit": "d492b86ffa8e219c2882e8b068c9d0d326fd3b86"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T20:08:17+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Same-agent critic passed; all R1-R5 outcomes bind executed verification; v0.3.46 GitHub release readback verified.",
+      "transaction_id": "e5139fd775c642b89a16432e6ca7659d",
+      "delivery": {
+        "delivery_id": "repository-intelligence-v3",
+        "html": ".go/deliveries/repository-intelligence-v3/index.html",
+        "manifest": ".go/deliveries/repository-intelligence-v3/manifest.json",
+        "source_sha256": "3d8e7d8e979283271daf6da5fd623bea9ba56aacfe8f04e17573f9c9714e44b9",
+        "html_sha256": "56f0ab0f6503625fccfb125179459bc4a403aee1bd5496de1b5585f108186bc6"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T20:08:10+02:00",
+      "task_id": "repository-intelligence-03-blast-conformance",
+      "agent": "codex",
+      "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/repository-blast.schema.json|tests/test_repository_blast.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=declared task checks plus Linux release-check v0.3.46; verification_result=passed (27 focused, 156+26+197 release suites); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription",
+      "changed_files": [
+        "go_workflow/repository_index.py",
+        "go_workflow/cli.py",
+        "schemas/repository-blast.schema.json",
+        "tests/test_repository_blast.py",
+        "docs/repository-intelligence.md",
+        "README.md",
+        "release metadata"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "d492b86ffa8e219c2882e8b068c9d0d326fd3b86",
+        "observed_head_commit": "b1358ecd3d15340f3ed69eb8790409d96b1264c0"
+      },
+      "verification": {
+        "command": "declared task checks plus Linux release-check v0.3.46",
+        "result": "passed (27 focused, 156+26+197 release suites)"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "Codex desktop plus Lima Linux",
+        "model": "gpt-6-astra",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop plus Lima Linux",
+        "billing_mode": "subscription",
+        "owner": "codex",
+        "model": "gpt-6-astra",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
   "execution_contract": {
     "schema": "go-workflow.execution-contract.v1",
     "task_kind": "product",
@@ -102,36 +164,66 @@
       "id": "R1",
       "text": "A local JSON CLI command calculates changed nodes plus bounded reverse dependency impact from a Git diff and recommends linked test nodes with exact provenance.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T20:05:04+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "When a task declares repository_context, conformance reports intended nodes, actual changed nodes, impacted components, missing declarations and unexpected scope; advisory policy reports findings while strict policy exits non-zero.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T20:05:04+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Repository-map intended component dependencies are compared with observed fresh graph edges so architecture-to-code drift is visible without rewriting architecture or treating the graph as authoritative.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T20:05:05+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Stale, missing and unsupported graph conditions are explicit and safe; no GitHub Actions, hosted service, LLM or global state is required.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T20:05:05+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Behavioral tests prove clean, in-scope, transitive, undeclared, strict-failure, stale-cache and intended-dependency-drift cases through the public CLI.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T20:05:05+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json"
+        }
+      ]
     }
   ],
   "architecture": {
@@ -164,5 +256,31 @@
     "dependency_depth": 2,
     "include_tests": true,
     "impact_policy": "strict"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/verification-e35f076ecd974190b12e9bc6d3210d2f.json",
+      "sha256": "dbd0b58fac2930d5d37e452ec930cac25cd4aafe11b520794e6c84da93ee4122"
+    },
+    "critic": {
+      "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/critic-6b663fd3df76447d80c1a03ce9df137a.json",
+      "sha256": "5b1ed4d0bff7d83ada39758b657accd3e721bf965f3cb83822c07e54452a8b2b"
+    },
+    "release": {
+      "path": ".go/runs/repository-intelligence-03-blast-conformance/completion/release-d80def15bda84cb9b6987b60a62d5131.json",
+      "sha256": "6dcab34c4e03743065663c64229520bab2fa085b66d89dd7bfd92dec3577c463"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "repository-intelligence-03-blast-conformance",
+    "project": "go-workflow-stack",
+    "commit": "b1358ecd3d15340f3ed69eb8790409d96b1264c0",
+    "tag": "v0.3.46",
+    "evidence": [
+      ".go/runs/repository-intelligence-03-blast-conformance/completion/release-d80def15bda84cb9b6987b60a62d5131.json"
+    ]
   }
 }

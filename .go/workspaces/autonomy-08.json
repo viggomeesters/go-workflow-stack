@@ -1,0 +1,20 @@
+{
+  "task_id": "autonomy-08",
+  "owner": "codex-astra-high",
+  "run_id": "autonomy-08-20260922",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "path": "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-08",
+  "branch": "codex/autonomy-08",
+  "base_branch": "main",
+  "base_commit": "b01c0eda7c447eea20becd3cd95efb0eaadd4ac8",
+  "schema": "go-workflow.workspace-state.v1",
+  "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+  "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+  "generation": "0a84a49a987a403d9ee636f43f8e9e87",
+  "state": "cleaned",
+  "integration": {
+    "workspace_head": "aa4603a4fd10001138e65d428dcaf848c5a57089",
+    "integrated_commit": "aa4603a4fd10001138e65d428dcaf848c5a57089"
+  },
+  "recovery_action": "No action; delivered branch is retained"
+}

@@ -1,0 +1,40 @@
+{
+  "task_id": "autonomy-08",
+  "project": "go-workflow-stack",
+  "contract_digest": "3b812f23610250f0993a281c858620f6605ec4fbf612919d8e17d4927be1b6b5",
+  "revision": "aa4603a4fd10001138e65d428dcaf848c5a57089",
+  "content_digest": "0dd764f562cc41b306f627cb6a094601d45667db5d32eadd55a825e3b9ffd584",
+  "command": "git diff --check",
+  "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-5cwceuhr/candidate",
+  "elapsed_seconds": 1.6017546670045704,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "candidate_digest": "5edc871acceda1d9141b6c788e454c9096375c28b071127c79d693322f1e626b",
+    "tracked_content_sha256": "82d53669a7c8e06e89e3edb84c13e8eea66eccfc86df2530643fe32ba20feeb1",
+    "changed_files_sha256": "c297dbb9b1bebac37cb149d941e4edf42d88e6bfd2276325f5e7119d6a501859",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/autonomous-campaign.md",
+      "docs/autonomy-benchmark.md",
+      "docs/releases/v0.3.42.md",
+      "fixtures/abc-campaign/campaign.py",
+      "fixtures/autonomy-campaign/assessor.py",
+      "fixtures/autonomy-campaign/campaign.py",
+      "fixtures/autonomy-campaign/coverage.json",
+      "fixtures/autonomy-campaign/worker.py",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json",
+      "scripts/check-autonomy.sh",
+      "scripts/check-compatibility.sh",
+      "tests/test_autonomy_end_to_end.py"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

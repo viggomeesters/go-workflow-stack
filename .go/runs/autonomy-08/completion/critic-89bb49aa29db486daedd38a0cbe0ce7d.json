@@ -1,0 +1,32 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "status": "passed",
+  "task_id": "autonomy-08",
+  "project": "go-workflow-stack",
+  "contract_digest": "3b812f23610250f0993a281c858620f6605ec4fbf612919d8e17d4927be1b6b5",
+  "revision": "aa4603a4fd10001138e65d428dcaf848c5a57089",
+  "content_digest": "0dd764f562cc41b306f627cb6a094601d45667db5d32eadd55a825e3b9ffd584",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Hardening review passed for the exact committed candidate. One rough request is assessed once and one controller invocation drives two serial managed tasks through isolated worktrees, actual build/critic/repair worker processes, local Git publication, cleanup and a grounded goal audit. The first critic is forced to block and its exact feedback reaches repair before a second critic can pass. The unresolved-decision case still publishes independent work but cannot report goal completion; omitted intake outcomes fail before durable intake or worker execution; dirty control state preserves user bytes and withholds publication. The executable coverage manifest binds each additional recovery, cumulative-budget, changed-base, lost-acknowledgement, live-readback, cleanup and false-green claim to a named behavioral test, and compatibility invokes the full autonomy gate. Review corrected the independent beta acceptance from a hardcoded ordinal version to an actual next-release receipt. Documentation explicitly limits the proof to deterministic adapters, disposable local Git and no hosted, production, live-model, overnight or GitHub Actions claim. All five autonomous-campaign quality attributes are covered without duplicating runtime state or effect ownership. Exact-candidate verification, make, validate, diff, 155 compatibility tests and 26 injected-failure tests pass; no blocking finding remains.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/autonomous-campaign.md",
+    "docs/autonomy-benchmark.md",
+    "docs/releases/v0.3.42.md",
+    "fixtures/abc-campaign/campaign.py",
+    "fixtures/autonomy-campaign/assessor.py",
+    "fixtures/autonomy-campaign/campaign.py",
+    "fixtures/autonomy-campaign/coverage.json",
+    "fixtures/autonomy-campaign/worker.py",
+    "go_workflow/constants.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "scripts/check-autonomy.sh",
+    "scripts/check-compatibility.sh",
+    "tests/test_autonomy_end_to_end.py"
+  ]
+}

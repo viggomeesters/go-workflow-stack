@@ -1,0 +1,285 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-08",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Exercise the full autonomous journey with injected failures",
+  "description": "Build a reproducible campaign fixture from rough request through exploration, decisions, tasks, build, repair, goal review, separate releases and recovery. Reuse existing ABC campaign and regression primitives. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "fixtures/autonomy-campaign/**",
+      "fixtures/abc-campaign/campaign.py",
+      "tests/test_autonomy_end_to_end.py",
+      "scripts/check-autonomy.sh",
+      "scripts/check-compatibility.sh",
+      "docs/autonomy-benchmark.md",
+      "docs/autonomous-campaign.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-08/**"
+    ]
+  },
+  "acceptance": [
+    "Run real controller/worker processes, Git worktrees and local bare remotes with deterministic adapter doubles; prove more than one serial task progresses and publishes without manually dispatching each task.",
+    "Failure matrix covers unresolved material decision with independent eligible work, omitted requirement, failed behavioral critic, repair/no-progress limit, shared budget, controller/orphan failure, dirty Git, changed remote base, lost publication acknowledgement, failed live-readback and cleanup retry.",
+    "Preserve raw command output and immutable evidence links; test that false-green mutations are rejected. Tests must exercise behavior, not compare metadata labels or fake provider-model identity.",
+    "Gate experimental autonomy claims on this suite and document remaining live-model/runtime limits. No GitHub Actions or real consumer mutations.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_end_to_end.py tests/test_abc_end_to_end.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T14:01:13+02:00",
+    "base_commit": "b01c0eda7c447eea20becd3cd95efb0eaadd4ac8"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T15:08:19+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": ".go/runs/autonomy-08/completion/critic-89bb49aa29db486daedd38a0cbe0ce7d.json",
+      "transaction_id": "13aa69a3d0354ef5903a613ad3e96f70",
+      "delivery": {
+        "delivery_id": "autonomy-first-v10",
+        "html": ".go/deliveries/autonomy-first-v10/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v10/manifest.json",
+        "source_sha256": "fd9efe586a75687f71535f2a9cc88e43f500c9247c3eae23ecfeed68be0d21dd",
+        "html_sha256": "d3f90bce15a97bf3fea5e6cac54bdfd19db39e7888538a0edce64d4e1ab56cdf"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T15:08:19+02:00",
+      "task_id": "autonomy-08",
+      "agent": "codex-astra-high",
+      "summary": "summary=R1-R5 verified by one-controller two-release behavior proof, injected-failure matrix, exact architecture conformance and immutable v0.3.42 remote readback; verification_command=declared four-command task gate plus compatibility/autonomy gates and Linux release-check 0.3.42 --validate-existing; verification_result=passed: 10 focused tests, 155 compatibility tests, 26 injected-failure tests, 197 smoke tests, make check, validate, diff-check, template pairing and standalone install; critic=passed same-agent hardening review with no blocking findings; runtime=Codex desktop; model=gpt-6-astra high; billing_mode=subscription; self_reflect=product lesson: end-to-end autonomy claims need executable failure bindings and exact release readback. Process miss: direct full-suite execution in a registered worker and an initial Linux clone without its paired template produced invalid environmental failures; recovery used the official isolated collector and immutable sibling template without weakening guards or touching user uv.lock.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/runs/events.jsonl",
+        ".go/tasks/open/autonomy-08.json",
+        ".go/runs/autonomy-08/completion-state.json",
+        ".go/runs/autonomy-08/completion/command-04f5ae6dd8c84d34815cee7c6927e68d.json",
+        ".go/runs/autonomy-08/completion/command-18c39b9404264aedada319eb1cde6560.json",
+        ".go/runs/autonomy-08/completion/command-1d2a0d68b04c4c91a4c5779401167f97.json",
+        ".go/runs/autonomy-08/completion/command-2ec3cc7506094e27b68800da0333d1e3.json",
+        ".go/runs/autonomy-08/completion/command-521674a6d5604c19b87661bff9b02a06.json",
+        ".go/runs/autonomy-08/completion/command-5c45a89cf82c4f339d25d1cb76be3937.json",
+        ".go/runs/autonomy-08/completion/command-7003ff6412d7462281a95e9e755e72c9.json",
+        ".go/runs/autonomy-08/completion/command-7a02c5c5f70949c8a143f9e0a210fd34.json",
+        ".go/runs/autonomy-08/completion/command-c924f59fa2664262adb2d6db8e3ad1a7.json",
+        ".go/runs/autonomy-08/completion/command-cc9f8a1ccbed48ff8cf45526af769080.json",
+        ".go/runs/autonomy-08/completion/command-da77593f6e2548c3ba3089e26a2e89cd.json",
+        ".go/runs/autonomy-08/completion/command-eb2a15df285245eaa0ea8ed38bf681fe.json",
+        ".go/runs/autonomy-08/completion/critic-89bb49aa29db486daedd38a0cbe0ce7d.json",
+        ".go/runs/autonomy-08/completion/critic-f656da041e1f44e1826e6ce24c5119ac.json",
+        ".go/runs/autonomy-08/completion/release-aed4723d4744456195078fbb7e743267.json",
+        ".go/runs/autonomy-08/completion/verification-19675c34f19e454cb79fc3de440d69f1.json",
+        ".go/runs/autonomy-08/completion/verification-1b30f8c5f4d24f4ebf0bfdc65fefd81a.json",
+        ".go/runs/autonomy-08/completion/verification-f07fb0a6215340709eeb331f1f3c73f0.json",
+        ".go/runs/autonomy-08/publication-process.json",
+        ".go/tasks/active/autonomy-08.json",
+        ".go/workspaces/autonomy-08.json",
+        "uv.lock"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "b01c0eda7c447eea20becd3cd95efb0eaadd4ac8",
+        "observed_head_commit": "aa4603a4fd10001138e65d428dcaf848c5a57089"
+      },
+      "verification": {
+        "command": "declared four-command task gate plus compatibility/autonomy gates and Linux release-check 0.3.42 --validate-existing",
+        "result": "passed: 10 focused tests, 155 compatibility tests, 26 injected-failure tests, 197 smoke tests, make check, validate, diff-check, template pairing and standalone install"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent hardening review with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-02",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-04",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-06",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-07",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Build a reproducible campaign fixture from rough request through exploration, decisions, tasks, build, repair, goal review, separate releases and recovery. Reuse existing ABC campaign and regression primitives. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "cb7d9c46d03e711e8db0d44ccc1dcdecd27781aa6dbbec8e636a76f258edae20",
+    "source_ref": "repo-local-intake:autonomy-08"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Run real controller/worker processes, Git worktrees and local bare remotes with deterministic adapter doubles; prove more than one serial task progresses and publishes without manually dispatching each task.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T15:06:01+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-08/completion/verification-1b30f8c5f4d24f4ebf0bfdc65fefd81a.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Failure matrix covers unresolved material decision with independent eligible work, omitted requirement, failed behavioral critic, repair/no-progress limit, shared budget, controller/orphan failure, dirty Git, changed remote base, lost publication acknowledgement, failed live-readback and cleanup retry.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T15:06:01+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-08/completion/verification-1b30f8c5f4d24f4ebf0bfdc65fefd81a.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Preserve raw command output and immutable evidence links; test that false-green mutations are rejected. Tests must exercise behavior, not compare metadata labels or fake provider-model identity.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T15:06:01+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-08/completion/critic-89bb49aa29db486daedd38a0cbe0ce7d.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Gate experimental autonomy claims on this suite and document remaining live-model/runtime limits. No GitHub Actions or real consumer mutations.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T15:06:01+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-08/completion/critic-89bb49aa29db486daedd38a0cbe0ce7d.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T15:06:01+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-08/completion/release-aed4723d4744456195078fbb7e743267.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-08/completion/verification-1b30f8c5f4d24f4ebf0bfdc65fefd81a.json",
+      "sha256": "0073da9637a7882e4d22f68b57c8d9d2b939ea612bf7bc72cfdd69738bb3cf85"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-08/completion/critic-89bb49aa29db486daedd38a0cbe0ce7d.json",
+      "sha256": "94980dc87839e1fa65a98136ba014bbf8d8ba70e2b9392bfe527940e5c8ab191"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-08/completion/release-aed4723d4744456195078fbb7e743267.json",
+      "sha256": "a45d233722389af41f6492e974ade9757b2cf3c5979dc1b5b769981ed4056de6"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-08",
+    "project": "go-workflow-stack",
+    "commit": "aa4603a4fd10001138e65d428dcaf848c5a57089",
+    "tag": "v0.3.42",
+    "evidence": [
+      ".go/runs/autonomy-08/completion/release-aed4723d4744456195078fbb7e743267.json"
+    ]
+  }
+}

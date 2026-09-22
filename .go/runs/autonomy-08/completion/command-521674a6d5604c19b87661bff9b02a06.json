@@ -1,0 +1,40 @@
+{
+  "task_id": "autonomy-08",
+  "project": "go-workflow-stack",
+  "contract_digest": "3b812f23610250f0993a281c858620f6605ec4fbf612919d8e17d4927be1b6b5",
+  "revision": "f9d153aeec00e6dd5347051acbe70f6551a0c30b",
+  "content_digest": "52393f47f6c26e3244c0501b2fd282e437caad283c9d45b0f4b29919f65110c4",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-fg2dy84c/candidate",
+  "elapsed_seconds": 1.5806580829666927,
+  "returncode": 0,
+  "stdout": "ok: /private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-fg2dy84c/candidate/.go\n",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "candidate_digest": "29172fb319b65216ae040559f53be0bb8e772da67c1a16721c4ea1f010ab4d8f",
+    "tracked_content_sha256": "baac08874d8859ec001f2450901f56f7c262075fc03f30ed885a415e40e4828d",
+    "changed_files_sha256": "3dd0b54544c440927120f1ab9a8d61c77c4f3a8a663f6bd5f56d9334eca7e6d6",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/autonomous-campaign.md",
+      "docs/autonomy-benchmark.md",
+      "docs/releases/v0.3.42.md",
+      "fixtures/abc-campaign/campaign.py",
+      "fixtures/autonomy-campaign/assessor.py",
+      "fixtures/autonomy-campaign/campaign.py",
+      "fixtures/autonomy-campaign/coverage.json",
+      "fixtures/autonomy-campaign/worker.py",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json",
+      "scripts/check-autonomy.sh",
+      "scripts/check-compatibility.sh",
+      "tests/test_autonomy_end_to_end.py"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

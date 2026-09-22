@@ -84,7 +84,7 @@ def validate_record(record):
     if not ID.fullmatch(record['task_id']) or not SHA.fullmatch(record['base_commit']): raise WorkspaceError('Invalid workspace task/base identity')
     if record['state'] not in {'creating', 'ready', 'integrated', 'cleanup_failed', 'cleaned'}:
         raise WorkspaceError('Invalid workspace state')
-    optional = {'integration', 'ownership_history', 'cleanup_error', 'recovery_action'}
+    optional = {'integration', 'ownership_history', 'reconciliations', 'cleanup_error', 'recovery_action'}
     if set(record) - required - optional: raise WorkspaceError('Unknown workspace registry fields')
     for name in ('owner', 'run_id'):
         if not ID.fullmatch(record[name]): raise WorkspaceError('Invalid workspace ' + name)
@@ -106,6 +106,18 @@ def validate_record(record):
         if (not isinstance(history, list) or any(not isinstance(item, dict) or set(item) != {'owner', 'run_id'}
                 or not all(isinstance(value, str) and ID.fullmatch(value) for value in item.values()) for item in history)):
             raise WorkspaceError('Invalid workspace ownership history')
+    if 'reconciliations' in record:
+        history = record['reconciliations']
+        keys = {'old_base_commit', 'new_base_commit', 'workspace_head_before',
+                'workspace_head_after', 'reconciled_at', 'evidence_invalidated'}
+        if (not isinstance(history, list) or any(
+                not isinstance(item, dict) or set(item) != keys
+                or not all(isinstance(item.get(name), str) and SHA.fullmatch(item[name])
+                           for name in keys - {'reconciled_at', 'evidence_invalidated'})
+                or not isinstance(item.get('reconciled_at'), str) or not item['reconciled_at']
+                or item.get('evidence_invalidated') is not True
+                for item in history)):
+            raise WorkspaceError('Invalid workspace reconciliation history')
     return record
 
 
@@ -342,6 +354,102 @@ def integration_slot(control, task_id, owner, run_id, *, timeout_seconds=10.0):
             yield {'task_id': task_id, 'base_branch': record['base_branch'],
                    'base_commit': record['base_commit'], 'workspace_head': git_text(Path(record['path']), 'rev-parse', 'HEAD'),
                    'path': record['path'], 'generation': record['generation']}
+
+
+def reconcile_workspace(control, task_id, owner, run_id):
+    """Merge an advanced linear base into one clean owned task workspace.
+
+    This never moves the control checkout, rewrites task history or retries a
+    publication effect.  A conflict is aborted back to the exact prior worker
+    head; the caller gets the bounded paths and must repair through task scope.
+    """
+    from datetime import datetime, timezone
+    import fnmatch
+
+    control = Path(control).resolve()
+    with repository_lock(control / '.go', 'workspace-integration'):
+        with repository_lock(control / '.go', 'workspace-execution-' + task_id):
+            record = verify_workspace(owned_record(control, task_id, owner, run_id))
+            require_run_idle(record)
+            if record['state'] != 'ready':
+                raise WorkspaceError('Only a ready workspace can reconcile an advanced base')
+            require_clean(record)
+            checked_scope(record)
+            if (control / '.go/runs' / task_id / 'release-state.json').exists():
+                raise WorkspaceError('Publication intent already exists; resume exact readback instead of reconciling')
+            branch = record['base_branch']
+            if git_text(control, 'symbolic-ref', '--quiet', '--short', 'HEAD') != branch:
+                raise WorkspaceError('Control checkout must be on the registered base branch')
+            new_base = git_text(control, 'rev-parse', 'refs/heads/' + branch)
+            if git_text(control, 'rev-parse', 'HEAD') != new_base:
+                raise WorkspaceError('Control checkout HEAD differs from its registered base branch')
+            old_base = record['base_commit']
+            if new_base == old_base:
+                return record
+            if git(control, 'merge-base', '--is-ancestor', old_base, new_base, check=False).returncode:
+                raise WorkspaceError('Advanced base is not a linear descendant; preserve both histories for explicit repair')
+            worker = Path(record['path'])
+            before = git_text(worker, 'rev-parse', 'HEAD')
+            if git(worker, 'merge-base', '--is-ancestor', before, new_base, check=False).returncode == 0:
+                merged = git(worker, '-c', 'core.hooksPath=/dev/null', 'merge', '--ff-only', new_base, check=False)
+            else:
+                merged = git(worker, '-c', 'core.hooksPath=/dev/null',
+                             '-c', 'user.name=go-workflow', '-c', 'user.email=go-workflow@local.invalid',
+                             'merge', '--no-ff', '--no-edit', new_base, check=False)
+            if merged.returncode:
+                conflicts = sorted(path for path in git(worker, 'diff', '--name-only', '--diff-filter=U', '-z').stdout.split('\0') if path)
+                git(worker, 'merge', '--abort', check=False)
+                if git_text(worker, 'rev-parse', 'HEAD') != before:
+                    raise WorkspaceError('Reconciliation failed and exact worker recovery is unknown; preserve the workspace')
+                task = active_task(control, task_id, owner)
+                allowed = (task.get('scope') or {}).get('modify') or []
+                outside = [path for path in conflicts if not any(
+                    fnmatch.fnmatchcase(path, pattern) or path == pattern.rstrip('/')
+                    or path.startswith(pattern.rstrip('/') + '/') for pattern in allowed)]
+                label = ' outside task scope' if outside else ''
+                paths = outside or conflicts
+                raise WorkspaceError('Reconciliation conflicts' + label + ': ' + ', '.join(paths or ['unknown path']))
+            after = git_text(worker, 'rev-parse', 'HEAD')
+            proposed = dict(record)
+            proposed['base_commit'] = new_base
+            proposed.setdefault('reconciliations', []).append({
+                'old_base_commit': old_base,
+                'new_base_commit': new_base,
+                'workspace_head_before': before,
+                'workspace_head_after': after,
+                'reconciled_at': datetime.now(timezone.utc).isoformat(),
+                'evidence_invalidated': True,
+            })
+            validate_record(proposed)
+            checked_scope(proposed)
+            atomic_json(registry_path(control, task_id), proposed)
+
+            run_path = control / '.go/runs' / task_id / 'run-state.json'
+            if run_path.is_file():
+                from .run_state import read_state, run_code
+
+                state = read_state(control, task_id)
+                state['history'].append({
+                    'event': 'workspace.base_reconciled',
+                    'old_base_commit': old_base,
+                    'new_base_commit': new_base,
+                    'workspace_head_before': before,
+                    'workspace_head_after': after,
+                    'invalidated_checks': state['checks'],
+                    'invalidated_phase_evidence': state['phase_evidence'],
+                })
+                state.update(
+                    workspace=proposed,
+                    phase=state['phase'] if state['phase'] in {'build', 'repair'} else 'verify',
+                    check_index=0,
+                    checks=[],
+                    phase_evidence=[],
+                    inflight=None,
+                    worker_group=None,
+                    code=run_code(worker, proposed, active_task(control, task_id, owner)),
+                )
+                atomic_json(run_path, state)
+            return proposed
 
 
 def record_integration(control, task_id, owner, run_id, integrated_commit):

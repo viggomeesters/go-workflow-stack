@@ -48,7 +48,7 @@ from go_workflow.release import PublicationError
 from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run
 from go_workflow.completion import CompletionError, require_completion, lifecycle_report
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
-    validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
+    validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, reconcile_workspace, rebind_workspace, owned_record, verify_workspace,
     WorkspaceError, create_workspace, workflow_root, is_git_checkout)
 from go_workflow.capacity_policy import plan_capacity
 from go_workflow.campaign import CampaignError, execute_campaign, plan_campaign
@@ -5918,7 +5918,7 @@ def build_parser() -> argparse.ArgumentParser:
         workspace_create.add_argument("--" + field, required=True)
     workspace_create.add_argument("--json", action="store_true")
     workspace_create.set_defaults(func=cmd_workspace_create)
-    for operation in ('status', 'stage', 'integration-check', 'record-integration', 'cleanup', 'rebind'):
+    for operation in ('status', 'stage', 'integration-check', 'record-integration', 'cleanup', 'reconcile', 'rebind'):
         workspace_op = workspace_sub.add_parser(operation)
         workspace_op.add_argument('repo')
         for field in ('task-id', 'owner', 'run-id'):
@@ -6243,6 +6243,7 @@ def cmd_workspace_operation(args: argparse.Namespace) -> int:
     elif operation == 'stage': result = stage_workspace(*params)
     elif operation == 'cleanup': result = cleanup_workspace(*params)
     elif operation == 'record-integration': result = record_integration(*params, args.integrated_commit)
+    elif operation == 'reconcile': result = reconcile_workspace(*params)
     elif operation == 'rebind': result = rebind_workspace(*params, args.new_owner, args.new_run_id)
     else:
         with integration_slot(*params) as result:

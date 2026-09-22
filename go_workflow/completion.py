@@ -9,9 +9,9 @@ import stat
 import tempfile
 import time
 import uuid
-from contextlib import contextmanager
+from contextlib import contextmanager, nullcontext
 
-from .execution_context import json_hash
+from .execution_context import git_state, json_hash, verification_checkout
 from .execution_contracts import validate_verification_evidence
 from .state_io import atomic_json, repository_lock
 from .worktrees import (active_task, git, git_text, read_object, registered_workspace,
@@ -168,14 +168,21 @@ def execute_check(repo, task, command, session, *, timeout_seconds=900, binding=
     with tempfile.TemporaryDirectory(prefix='go-completion-cache-') as cache:
         env['PYTHONPYCACHEPREFIX'] = cache
         env['PYTEST_ADDOPTS'] = env.get('PYTEST_ADDOPTS', '') + ' -p no:cacheprovider'
-        with session.operation():
-            output = run_shell_with_timeout(repo, command, env, timeout_seconds)
+        record = registered_workspace(repo)
+        isolation = (verification_checkout(repo, record, git_state(repo, record)) if record
+                     else nullcontext((repo, None)))
+        with isolation as (execution_repo, source_proof):
+            session.update(execution_cwd=str(execution_repo.resolve()))
+            with session.operation():
+                output = run_shell_with_timeout(execution_repo, command, env, timeout_seconds)
         session.update(inflight=None)
-    raw = save_artifact(root, task['id'], 'command', {**binding, 'command': command, 'cwd': str(repo),
-                         'elapsed_seconds': time.monotonic() - started, **output})
+    raw_value = {**binding, 'command': command, 'cwd': str(execution_repo),
+                 'elapsed_seconds': time.monotonic() - started, **output}
+    if source_proof is not None: raw_value['verification_source'] = source_proof
+    raw = save_artifact(root, task['id'], 'command', raw_value)
     proof = {'schema': 'go-workflow.verification-evidence.v1', 'task_id': task['id'], 'phase_id': 'verify',
         'requirement_ids': [item['id'] for item in task.get('requested_outcomes', [])] or ['acceptance'],
-        'status': 'passed' if output['returncode'] == 0 else 'failed', 'command': command, 'cwd': str(repo),
+        'status': 'passed' if output['returncode'] == 0 else 'failed', 'command': command, 'cwd': str(execution_repo),
         'revision': binding['revision'], 'worktree_digest': binding['content_digest'],
         'exit_code': output['returncode'], 'evidence': [raw['path']]}
     return {'verification': proof, 'raw': raw}, output

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.task-delivery-report.v1",
+  "title": "Read-only task delivery truth",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "task_id",
+    "release_policy",
+    "delivered",
+    "reported_live",
+    "head_relation",
+    "publication",
+    "workspace_state",
+    "blockers",
+    "stop_condition"
+  ],
+  "properties": {
+    "schema": {"const": "go-workflow.task-delivery-report.v1"},
+    "task_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "release_policy": {"enum": ["required", "none"]},
+    "delivered": {"type": "boolean"},
+    "reported_live": {"type": "boolean"},
+    "head_relation": {
+      "enum": [
+        "not_applicable",
+        "released_head",
+        "checkpoint_only_advance",
+        "product_advance",
+        "released_commit_not_preserved"
+      ]
+    },
+    "publication": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["status", "commit", "tag"],
+      "properties": {
+        "status": {"enum": ["not_applicable", "verified"]},
+        "commit": {"anyOf": [{"type": "null"}, {"type": "string", "pattern": "^[0-9a-f]{40}$"}]},
+        "tag": {"anyOf": [{"type": "null"}, {"type": "string", "minLength": 1}]}
+      }
+    },
+    "workspace_state": {
+      "enum": ["missing", "creating", "ready", "integrated", "cleanup_failed", "cleaned"]
+    },
+    "blockers": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["code", "message", "condition"],
+        "properties": {
+          "code": {"type": "string", "pattern": "^[a-z][a-z0-9_]*$"},
+          "message": {"type": "string", "minLength": 1},
+          "condition": {"enum": ["authority_required", "unsafe_repository", "unknown_external_effect"]}
+        }
+      }
+    },
+    "stop_condition": {
+      "anyOf": [
+        {"type": "null"},
+        {"enum": ["authority_required", "unsafe_repository", "unknown_external_effect"]}
+      ]
+    }
+  }
+}

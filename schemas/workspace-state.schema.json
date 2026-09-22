@@ -124,6 +124,29 @@
           }
         }
       }
+    },
+    "reconciliations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "old_base_commit",
+          "new_base_commit",
+          "workspace_head_before",
+          "workspace_head_after",
+          "reconciled_at",
+          "evidence_invalidated"
+        ],
+        "properties": {
+          "old_base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "new_base_commit": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "workspace_head_before": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "workspace_head_after": {"type": "string", "pattern": "^[0-9a-f]{40}$"},
+          "reconciled_at": {"type": "string", "minLength": 1},
+          "evidence_invalidated": {"const": true}
+        }
+      }
     }
   },
   "allOf": [

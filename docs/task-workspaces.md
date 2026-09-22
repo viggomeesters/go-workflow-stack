@@ -77,8 +77,16 @@ operation. It yields exact base and candidate revisions after identity, clean
 state, scope and unchanged-base checks. The CLI `workspace integration-check`
 is only a preview: its lock is released when the command returns. A publisher
 must hold the Python context across integration; this module does not publish.
-An advanced base is retained as a reconciliation blocker, with no automatic
-reset/rebase. Rebase and final-candidate proof orchestration follow in abc-05/06.
+An advanced base is retained as a reconciliation blocker. The controller can run
+`workspace reconcile` for one clean, idle, owned workspace after the control
+checkout has advanced linearly on the registered base branch. Reconciliation
+merges the new base without rewriting task history, records both exact histories,
+updates the managed binding, and invalidates verification and critic evidence so
+the final candidate is proved again. It never resets the control checkout or
+touches unregistered branches/worktrees. A merge conflict is aborted to the exact
+prior worker head and reports conflict paths; out-of-scope conflicts are explicitly
+identified. Existing publication intent blocks reconciliation and must be resumed
+through publisher readback instead.
 
 After actual integration, `workspace record-integration --integrated-commit SHA`
 (with the same repo/task/owner/run flags) verifies that the complete workspace

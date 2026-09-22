@@ -200,6 +200,29 @@ Standalone publication leaves cleanup to the workspace command. Keep the
 canonical state and workspace together for recovery. Do not delete reservations,
 overwrite conflicting tags or fabricate observations to bypass a pending run.
 
+## Campaign delivery truth (v0.3.41)
+
+After the managed runner returns, a campaign projects one read-only delivery
+report from the canonical task, managed checkpoint, workspace registry, release
+checkpoint and content-bound release/deployment evidence. A managed task is not
+counted complete until its approved task lifecycle and cleanup are confirmed and,
+for `release.mode: required`, the durable publisher is `published` with a verified
+receipt and evidence. An explicit reasoned `release.mode: none` is honored without
+inventing a tag, remote, deployment target or delay for unrelated research.
+
+The report exposes structured blocker codes and maps pending/unknown effects,
+unsafe Git state and missing authority separately. It never performs an external
+effect. The publisher still owns observe-before-retry and its channel reservation.
+A required deployment can be reported live only when the release evidence binds
+its verified deployment proof; source/library releases remain published but not
+live.
+
+The released product commit remains valid when the base branch advances only
+through operational `.go` checkpoint content. Product content is compared by the
+same operationally filtered snapshot used by completion, so closing a task does
+not redeploy it. Later product commits are a distinct advance, while loss of the
+released commit from branch history is an unsafe blocker.
+
 Verification commands must leave the owned workspace clean enough to integrate;
 Python and pytest caches are redirected/disabled by the controlled collector.
 User files and other generated output are preserved and can block cleanup.

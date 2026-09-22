@@ -157,7 +157,12 @@ def worker_enter(control, task_id, run_id, nonce, owner, channel="managed"):
             if Path.cwd().resolve() != control:
                 record = owned_record(control, task_id, owner, run_id, active=not readback_after_finish)
                 verify_workspace(record)
-                if str(Path.cwd().resolve()) != record['path']: raise RunStateError('Foreign verification workspace')
+                registered = registered_workspace(Path.cwd())
+                owned_worker = str(Path.cwd().resolve()) == record['path']
+                isolated_verify = (registered is None and state['phase'] in {'verify', 'release'}
+                                   and str(Path.cwd().resolve()) == state['execution_cwd'])
+                if not owned_worker and not isolated_verify:
+                    raise RunStateError('Foreign verification workspace')
         elif (channel == 'managed' and state['phase'] == 'verify'
               and isinstance(state.get('execution_cwd'), str)):
             if str(Path.cwd().resolve()) != state['execution_cwd']:

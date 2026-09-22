@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.41 — task-by-task autonomous delivery truth
+
+- Require campaign transitions to consume exact task, managed-run, workspace, publication and deployment readbacks before counting a managed task delivered.
+- Report structured Git/release blockers without presenting local completion as publication or a source-only release as a live deployment.
+- Preserve verified releases across checkpoint-only branch advances, so lifecycle closure never triggers a duplicate release or deployment.
+- Add history-preserving reconciliation for a clean owned workspace on a linearly advanced base; conflicts abort safely and all prior verification/critic evidence is invalidated.
+
 ## 0.3.40 — outcome-bound campaign goal audit
 
 - Audit every adopted campaign outcome against current lifecycle and architecture-conformance evidence; an empty queue or declared metric is never completion proof.

@@ -328,6 +328,14 @@ def _reconcile_completed_task(
     run = _load_object(run_path, "managed completion checkpoint")
     if run.get("phase") != "complete":
         return
+    workspace_path = repo / ".go" / "workspaces" / f"{task_id}.json"
+    if workspace_path.is_file():
+        from .campaign_delivery import delivery_report
+
+        delivery = delivery_report(repo, task_id)
+        if not delivery["delivered"]:
+            exact = "; ".join(item["message"] for item in delivery["blockers"])
+            raise CampaignError(f"completed task lacks delivery proof: {task_id}: {exact}")
     state["completed_tasks"].append(task_id)
     state["consumption"]["tasks_completed"] += 1
     state["current_task"] = None
@@ -826,8 +834,24 @@ def execute_campaign(
             state["dispatch"]["stage"] = "returned"
             result["checks"].extend(task_result.get("checks") or [])
             completed = task_result.get("completed_tasks") or []
-            successful = code == 0 and task_result.get("status") in {"task_complete", "done"} and task["id"] in completed
+            managed_delivery = getattr(execute_task, "__name__", "") == "execute_managed"
+            delivery = None
+            if managed_delivery:
+                from .campaign_delivery import delivery_report
+
+                delivery = delivery_report(repo, task["id"])
+                task_result["delivery"] = delivery
+            successful = (
+                code == 0
+                and task_result.get("status") in {"task_complete", "done"}
+                and task["id"] in completed
+                and (delivery is None or delivery["delivered"])
+            )
             if not successful:
+                if delivery is not None and code == 0 and task["id"] in completed and not delivery["delivered"]:
+                    task_result["summary"] = "Delivery proof incomplete: " + "; ".join(
+                        item["message"] for item in delivery["blockers"]
+                    )
                 failure = _failure_record(task, task_result, state["failures"])
                 state["failures"].append(failure)
                 if _temporary_provider_failure(task_result):
@@ -847,11 +871,14 @@ def execute_campaign(
                     )
                     break
                 no_progress = failure["repeat_count"] >= 2
+                delivery_condition = delivery.get("stop_condition") if delivery is not None else None
                 condition = (
                     "budget_exhausted"
                     if task_result.get("status") == "budget_exhausted"
                     or state["resources"]["commands_used"] >= state["limits"]["max_commands"]
                     or state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"]
+                    else delivery_condition
+                    if delivery_condition is not None
                     else "unknown_external_effect"
                     if "external effect" in str(task_result.get("summary", "")).lower()
                     else "authority_required"

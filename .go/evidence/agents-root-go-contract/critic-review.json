@@ -1,0 +1,125 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "b6a23368f635b2d640e91270e0dcb84fba1df7c844151d91d2e3b6e6c89a8dba",
+  "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+  "content_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Rechecked the integrated v0.3.39 candidate against the five original outcomes. Exact root/casing validation, bounded repair, bootstrap/migration/update convergence, preserved custom bytes/mode, full gateway obligations, template pairing and Linux behavior are proven. Publication remains the downstream controller gate.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "AGENTS.md",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/agent-adapter-protocol.md",
+    "docs/agents-gateway.md",
+    "docs/contract-migrations.md",
+    "docs/releases/v0.3.39.md",
+    "docs/stack-updates.md",
+    "fixtures/minimal/AGENTS.md",
+    "go_workflow/agents_gateway.py",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/stack_update.py",
+    "go_workflow/worktrees.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "skills/repo-local-agent-workflow/SKILL.md",
+    "tests/test_agents_gateway.py",
+    "tests/test_smoke.py"
+  ],
+  "behavior_review": {
+    "schema": "go-workflow.behavior-review.v1",
+    "task_id": "agents-root-go-contract",
+    "context_digest": "4ac508e3b13e9b9be358d36ddc5c5f8c5689196a8094b4cd98ddf955b4721aee",
+    "candidate_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+    "acceptance_digest": "028fd9fa25c777608a59341d28e537028a8fa94aec2e05c6472bec852638e21e",
+    "status": "passed",
+    "publication_pending": true,
+    "outcomes": [
+      {
+        "requirement_id": "R1",
+        "status": "passed",
+        "rationale": "Validation enumerates repository-root entries, requires exact `AGENTS.md` casing, rejects missing/link/directory/invalid gateway states, and returns the explicit bounded sync command.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "go_workflow/agents_gateway.py",
+            "sha256": "5668753e613b7bc248d04d0f1fcb20eeb1c346c6e750dcbcb0bed0d852a464a6",
+            "task_id": "agents-root-go-contract",
+            "requirement_id": "R1",
+            "candidate_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+            "context_digest": "4ac508e3b13e9b9be358d36ddc5c5f8c5689196a8094b4cd98ddf955b4721aee",
+            "observation": "Inspected exact-case root discovery, regular-file guard, strict block comparison and actionable validation findings."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R2",
+        "status": "passed",
+        "rationale": "One shared planner/renderer drives explicit sync, init/adopt/spike, migration and stack update. It changes only the managed pair, preserves CRLF custom bytes and mode, refuses ambiguous markers, and restores prior content during rollback.",
+        "evidence": [
+          {
+            "kind": "test_result",
+            "role": "behavior_proof",
+            "path": "tests/test_agents_gateway.py",
+            "sha256": "62c5fafcbb30de810cdb8119c643ffe3acdea5316c188722000043faad361325",
+            "task_id": "agents-root-go-contract",
+            "requirement_id": "R2",
+            "candidate_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+            "context_digest": "4ac508e3b13e9b9be358d36ddc5c5f8c5689196a8094b4cd98ddf955b4721aee",
+            "observation": "Ran and inspected good/bad, idempotence, casing, byte/mode, migration, stack-update rollback and all bootstrap-path tests in the 209-test Linux gate."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R3",
+        "status": "passed",
+        "rationale": "The checked-in managed block explicitly directs agents to `.go` and the required freshness, context reads, validate/status/router, scope, evidence, critic/repair, finish/release and truthful goal audit behavior.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "AGENTS.md",
+            "sha256": "dc84cb74b217539f2b948e73c8d151f17b6bd550279a621a14b3fada75ae376e",
+            "task_id": "agents-root-go-contract",
+            "requirement_id": "R3",
+            "candidate_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+            "context_digest": "4ac508e3b13e9b9be358d36ddc5c5f8c5689196a8094b4cd98ddf955b4721aee",
+            "observation": "Read the final managed block and confirmed every required handoff obligation is explicit without replacing surrounding repository policy."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R4",
+        "status": "passed",
+        "rationale": "The minimal fixture contains the exact generic block, custom text is proven preserved, and the paired template v0.3.18 retains its richer instructions outside the block while passing template-check and first-auto execution.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "fixtures/minimal/AGENTS.md",
+            "sha256": "050fe88bb3385d740b13861c48bdcaf9f92ff51d2bb526c56b40d423e23fb8cc",
+            "task_id": "agents-root-go-contract",
+            "requirement_id": "R4",
+            "candidate_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+            "context_digest": "4ac508e3b13e9b9be358d36ddc5c5f8c5689196a8094b4cd98ddf955b4721aee",
+            "observation": "Compared the generic fixture block with the stack and template gateways; repository-specific instructions remain outside the bounded markers."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R5",
+        "status": "pending_downstream",
+        "rationale": "The exact integrated candidate and paired template passed 209 combined tests, 156 compatibility tests, 197 smoke tests, make check and standalone installation; tags, pushes, GitHub releases and remote readback remain the downstream controller gate.",
+        "evidence": []
+      }
+    ],
+    "repairs": []
+  }
+}

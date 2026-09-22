@@ -1,0 +1,14 @@
+{
+  "task_id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "b6a23368f635b2d640e91270e0dcb84fba1df7c844151d91d2e3b6e6c89a8dba",
+  "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+  "content_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+  "command": "git diff --check",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.34888283303007483,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

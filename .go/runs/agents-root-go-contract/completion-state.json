@@ -1,0 +1,181 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-14e39da64557430e8485fa206f1b63c9",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "agents-root-go-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "limactl shell go-release -- bash -lc 'cd /tmp/go-v039-candidate.dHV9Qx/go-workflow-stack && uv run --no-project --python 3.12 --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest tests/test_agents_gateway.py tests/test_smoke.py -q -p no:cacheprovider'",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+        "worktree_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/agents-root-go-contract/completion/command-6430861447ea4f5eb41b95d1cc17c8b1.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/agents-root-go-contract/completion/command-6430861447ea4f5eb41b95d1cc17c8b1.json",
+        "sha256": "6ee06e87b5078cea8c7b57344c77db707611e2459dc95da1b1fd31ea29b0abc2"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "agents-root-go-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "limactl shell go-release -- bash -lc 'cd /tmp/go-v039-candidate.dHV9Qx/go-workflow-stack && make check'",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+        "worktree_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/agents-root-go-contract/completion/command-7250eaef735c4689a4f0dda3b7842e88.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/agents-root-go-contract/completion/command-7250eaef735c4689a4f0dda3b7842e88.json",
+        "sha256": "d2ca5e481f4e795b73f118b39cd0bdc57bc1a864e5a89e8ba6d1df41a38f4762"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "agents-root-go-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+        "worktree_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/agents-root-go-contract/completion/command-3dcad38772ca4d779ef3faf3adf80a95.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/agents-root-go-contract/completion/command-3dcad38772ca4d779ef3faf3adf80a95.json",
+        "sha256": "1b3f9fd9938e90eac20f1fe1196f40b6a6eedab00f04403369e6345aeb57c0cd"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "agents-root-go-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+        "worktree_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/agents-root-go-contract/completion/command-6a66312420874b3fa814788162a79894.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/agents-root-go-contract/completion/command-6a66312420874b3fa814788162a79894.json",
+        "sha256": "2887fb7285011c1409f3a053dac48f581445b38113c2467aee93ff8f7ef60496"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "A repository with .go but without root AGENTS.md fails validation with an actionable repair instruction; AGENTS.md casing and root location are explicit.",
+      "source": "user",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Bootstrap, adoption, migration and update paths install or safely repair a bounded Go gateway block while preserving repository-specific instructions outside that block.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "The gateway points agents to .go as repository source of truth and requires reading vision, architecture principles, hierarchy, selected task, validation/status/router, scoped execution, evidence, critic/repair and completion rules.",
+      "source": "user",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "The contract permits extra repository obligations and does not impose irrelevant global policy; fixtures, docs and the project template compatibility check prove fresh and existing repository behavior.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "The change is covered by good/bad migration and validation tests and is released with immutable local and remote readback evidence.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "b6a23368f635b2d640e91270e0dcb84fba1df7c844151d91d2e3b6e6c89a8dba",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "mac.home",
+    "pid": 840
+  },
+  "worker_group": null,
+  "inflight": null
+}

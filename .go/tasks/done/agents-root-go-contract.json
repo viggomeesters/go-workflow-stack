@@ -1,0 +1,255 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Require root AGENTS.md as the .go execution gateway",
+  "description": "Make every repository with a .go contract carry a root AGENTS.md that directs agents into the repository-local .go source of truth, defines the mandatory Go routing/read/validation behavior, preserves repository-specific obligations, and is installed or repaired by supported bootstrap/update paths without overwriting unrelated instructions.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "fixtures/minimal/**",
+      "docs/**",
+      "skills/**",
+      "README.md",
+      "AGENTS.md",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "release-pairings.json",
+      ".go/project.json",
+      ".go/evidence/agents-root-go-contract/**"
+    ]
+  },
+  "acceptance": [
+    "A repository with .go but without root AGENTS.md fails validation with an actionable repair instruction; AGENTS.md casing and root location are explicit.",
+    "Bootstrap, adoption, migration and update paths install or safely repair a bounded Go gateway block while preserving repository-specific instructions outside that block.",
+    "The gateway points agents to .go as repository source of truth and requires reading vision, architecture principles, hierarchy, selected task, validation/status/router, scoped execution, evidence, critic/repair and completion rules.",
+    "The contract permits extra repository obligations and does not impose irrelevant global policy; fixtures, docs and the project template compatibility check prove fresh and existing repository behavior.",
+    "The change is covered by good/bad migration and validation tests and is released with immutable local and remote readback evidence."
+  ],
+  "verification": [
+    "limactl shell go-release -- bash -lc 'cd /tmp/go-v039-candidate.dHV9Qx/go-workflow-stack && uv run --no-project --python 3.12 --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest tests/test_agents_gateway.py tests/test_smoke.py -q -p no:cacheprovider'",
+    "limactl shell go-release -- bash -lc 'cd /tmp/go-v039-candidate.dHV9Qx/go-workflow-stack && make check'",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T11:14:24+02:00",
+    "base_commit": "3918bf142886328b79126207e4531ac31f6c3a3d"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T11:58:34+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json",
+      "transaction_id": "d3dc570259eb482db08b44e0c0edee20",
+      "delivery": {
+        "delivery_id": "autonomy-first-v7",
+        "html": ".go/deliveries/autonomy-first-v7/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v7/manifest.json",
+        "source_sha256": "b114b46a98152e4cc7cd2015cdf13aa45a349f8bce811385d06f2e5685cb3c89",
+        "html_sha256": "6e8161cbb822da3dfce8aa5aef82d358f62acb96e7c08714b74b15a8286a4b56"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T11:58:21+02:00",
+      "task_id": "agents-root-go-contract",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=AGENTS.md,go_workflow/agents_gateway.py,go_workflow/cli.py,go_workflow/stack_update.py,go_workflow/worktrees.py,tests/test_agents_gateway.py,tests/test_smoke.py,fixtures/minimal/AGENTS.md,docs/agents-gateway.md,README.md,skills/repo-local-agent-workflow/SKILL.md,release-pairings.json,version/release docs; verification_command=209 combined Linux tests plus 156 compatibility and 197 smoke release gates, make check, standalone distribution, validate, diff check; verification_result=passed; critic=passed grounded R1-R5 behavior review; release=v0.3.39 commit 656693a45324c065c61c104fa3ff73f7f3978244 and template v0.3.18 commit 9db583edcd110a95d3b7f6d9f5e543b7d68c96ca with remote tag/release readback; runtime=Codex desktop; model=gpt-6-astra high; billing_mode=subscription",
+      "changed_files": [
+        "AGENTS.md",
+        "go_workflow/agents_gateway.py",
+        "go_workflow/cli.py",
+        "go_workflow/stack_update.py",
+        "go_workflow/worktrees.py",
+        "tests/test_agents_gateway.py",
+        "tests/test_smoke.py",
+        "fixtures/minimal/AGENTS.md",
+        "docs/agents-gateway.md",
+        "README.md",
+        "skills/repo-local-agent-workflow/SKILL.md",
+        "release-pairings.json",
+        "version/release docs"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "3918bf142886328b79126207e4531ac31f6c3a3d",
+        "observed_head_commit": "656693a45324c065c61c104fa3ff73f7f3978244"
+      },
+      "verification": {
+        "command": "209 combined Linux tests plus 156 compatibility and 197 smoke release gates, make check, standalone distribution, validate, diff check",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed grounded R1-R5 behavior review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-05",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "behavior_review_version": 1,
+  "intent_source": {
+    "text": "Require root AGENTS.md as the .go execution gateway without overwriting repository-specific instructions.",
+    "sha256": "caced8231b664cf1cc103f117a9bf4b9d95a072260a7c2e0073a1dca9c7a39bc",
+    "source_ref": "user-request:2026-09-22"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "A repository with .go but without root AGENTS.md fails validation with an actionable repair instruction; AGENTS.md casing and root location are explicit.",
+      "source": "user",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:58:05+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Bootstrap, adoption, migration and update paths install or safely repair a bounded Go gateway block while preserving repository-specific instructions outside that block.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:58:05+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "The gateway points agents to .go as repository source of truth and requires reading vision, architecture principles, hierarchy, selected task, validation/status/router, scoped execution, evidence, critic/repair and completion rules.",
+      "source": "user",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:58:05+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "The contract permits extra repository obligations and does not impose irrelevant global policy; fixtures, docs and the project template compatibility check prove fresh and existing repository behavior.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:58:06+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "The change is covered by good/bad migration and validation tests and is released with immutable local and remote readback evidence.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:58:06+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/agents-root-go-contract/completion/release-567b3a47b8454354a47ba5f083c66d08.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "decision"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/agents-root-go-contract/completion/verification-79092bad40864e23acf304462ac04bb2.json",
+      "sha256": "027360900b254752d2dc94c48f6e1453ad1271e65230e9bc9d03cba589694c63"
+    },
+    "critic": {
+      "path": ".go/runs/agents-root-go-contract/completion/critic-4daa2cb7181948829a6472254f6afaea.json",
+      "sha256": "735274e681a07eb7a92791a9700c73e5f7dd103f200347166330522ccc4cd025"
+    },
+    "release": {
+      "path": ".go/runs/agents-root-go-contract/completion/release-567b3a47b8454354a47ba5f083c66d08.json",
+      "sha256": "99bb684b21fb29d7d9d60859c13f55be77686ceccffc359e74eedfdf80cd7422"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "agents-root-go-contract",
+    "project": "go-workflow-stack",
+    "commit": "656693a45324c065c61c104fa3ff73f7f3978244",
+    "tag": "v0.3.39",
+    "evidence": [
+      ".go/runs/agents-root-go-contract/completion/release-567b3a47b8454354a47ba5f083c66d08.json"
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "task_id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "b6a23368f635b2d640e91270e0dcb84fba1df7c844151d91d2e3b6e6c89a8dba",
+  "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+  "content_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+  "command": "limactl shell go-release -- bash -lc 'cd /tmp/go-v039-candidate.dHV9Qx/go-workflow-stack && uv run --no-project --python 3.12 --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest tests/test_agents_gateway.py tests/test_smoke.py -q -p no:cacheprovider'",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 47.71751733298879,
+  "returncode": 0,
+  "stdout": "........................................................................ [ 34%]\n........................................................................ [ 68%]\n.................................................................        [100%]\n209 passed in 46.48s\n",
+  "stderr": "",
+  "timed_out": false
+}

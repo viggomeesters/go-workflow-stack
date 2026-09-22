@@ -1,0 +1,14 @@
+{
+  "task_id": "agents-root-go-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "175f650ce77d20b240ce015ff574380d6b3897c8c8cd663e0accf9a247b0e808",
+  "revision": "656693a45324c065c61c104fa3ff73f7f3978244",
+  "content_digest": "f1fd8f963b713f6933c4a3ff6780d0f9a3b607c99bf070f26e9667ee2b5a9de6",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.5291298330994323,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

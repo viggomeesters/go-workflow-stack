@@ -1,0 +1,24 @@
+{
+  "schema": "go-workflow.task-design-review.v1",
+  "task_id": "autonomy-04",
+  "reviewer": "codex-astra-high",
+  "disposition": "ready",
+  "authority_source": "User instruction: Go uitvoeren, explicitly listing autonomy-01 through autonomy-09 and autonomy-template-01; later stale checkpoint instruction was explicitly revoked.",
+  "risk_acceptance": "Execute the named foundational recovery task within its existing scope, managed workspace, verification, critic and release gates; no parallel worker, daemon, implicit provider change or unbounded retry authority.",
+  "before": "The v0.3.36 campaign controller persists selection and coarse cumulative task attempts, but it does not yet own an explicit dispatch lease, durable controller operation stage, no-progress classification, bounded provider backoff, or pause/drain/cancel semantics.",
+  "after": "The existing foreground serial controller records an owned durable dispatch/checkpoint lifecycle around the existing managed runner, resumes exact stages without a second writer, retains cumulative command/wall/repair consumption, classifies repeated evidence-identical failures, and exposes explicit pause/drain/cancel effects without inventing a daemon or new worker adapter.",
+  "constraints": [
+    "Task, run-state, workspace, completion and release records remain authoritative.",
+    "One controller and one managed builder; live/unknown process identity fails closed.",
+    "Budgets and frozen model identity are monotonic across restart.",
+    "External effects require readback; cancel stops only proven owned processes and preserves work.",
+    "New workers receive canonical task/architecture plus referenced failed evidence, never an assumed transcript."
+  ],
+  "evidence_plan": [
+    "Inject controller death before/after dispatch and at stage boundaries.",
+    "Prove live-orphan refusal, exact recovery and raw failure preservation.",
+    "Prove cumulative wall/command/repair ceilings and unchanged model binding across resume.",
+    "Prove no-progress strategy change or precise task-local blocking and explicit pause/drain/cancel state effects.",
+    "Run declared regressions, content-bound critic, immutable release and remote readback."
+  ]
+}

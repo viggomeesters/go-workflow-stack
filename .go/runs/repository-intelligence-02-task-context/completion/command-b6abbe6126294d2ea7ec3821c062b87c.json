@@ -1,0 +1,14 @@
+{
+  "task_id": "repository-intelligence-02-task-context",
+  "project": "go-workflow-stack",
+  "contract_digest": "dcc85804227efef55ca47a5ba9d562571bcda8a69ce9ab17193ec059990de401",
+  "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+  "content_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+  "command": ".venv/bin/python cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.49794816598296165,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Dev/go-workflow-stack/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

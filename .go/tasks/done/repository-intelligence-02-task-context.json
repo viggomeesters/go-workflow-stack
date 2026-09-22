@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "repository-intelligence-02-task-context",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Bind tasks to stable repository nodes and select bounded execution context",
   "description": "Extend task and worker-context contracts so work references stable repository-map node IDs and receives a fresh, token-bounded subgraph with provenance. Keep tasks declarative and avoid copying generated repository prose into canonical task state.",
   "scope": {
@@ -55,10 +55,73 @@
     "claimed_at": "2026-09-22T19:31:03+02:00",
     "base_commit": "67749b3bcf5c5cba1c8463d5173eb11548f6cf37"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T19:49:32+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Same-agent critic passed; all R1-R5 outcomes bind executed verification; v0.3.45 GitHub release readback verified.",
+      "transaction_id": "1392a68acc754bd9b27d3ba326eb686d",
+      "delivery": {
+        "delivery_id": "repository-intelligence-v2",
+        "html": ".go/deliveries/repository-intelligence-v2/index.html",
+        "manifest": ".go/deliveries/repository-intelligence-v2/manifest.json",
+        "source_sha256": "ba0359d67b0746598f74fd539d1a54761fa746573c8c0bc03d74ceaa0c9c33a7",
+        "html_sha256": "a0439d6772edfa860960ef0883d96a2fc95d46840a1657dc8cd82d2ae27d84af"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T19:49:32+02:00",
+      "task_id": "repository-intelligence-02-task-context",
+      "agent": "codex",
+      "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/task.schema.json|schemas/execution-context.schema.json|tests/test_repository_context.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=declared task checks plus Linux release-check v0.3.45; verification_result=passed (32 focused, 156+26+197 release suites); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription",
+      "changed_files": [
+        "go_workflow/repository_index.py",
+        "go_workflow/cli.py",
+        "schemas/task.schema.json",
+        "schemas/execution-context.schema.json",
+        "tests/test_repository_context.py",
+        "docs/repository-intelligence.md",
+        "README.md",
+        "release metadata"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "67749b3bcf5c5cba1c8463d5173eb11548f6cf37",
+        "observed_head_commit": "370719be5e7b358897a9a675b0073d1aa397bc52"
+      },
+      "verification": {
+        "command": "declared task checks plus Linux release-check v0.3.45",
+        "result": "passed (32 focused, 156+26+197 release suites)"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "Codex desktop plus Lima Linux",
+        "model": "gpt-6-astra",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop plus Lima Linux",
+        "billing_mode": "subscription",
+        "owner": "codex",
+        "model": "gpt-6-astra",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
   "execution_contract": {
     "schema": "go-workflow.execution-contract.v1",
     "task_kind": "product",
@@ -112,36 +175,66 @@
       "id": "R1",
       "text": "Tasks may declare a strict repository_context contract containing stable node references, bounded discovery queries and a context budget; runtime and published schema validation agree.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T19:49:12+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Explicit node references resolve against the durable repository map and fail with actionable errors when invalid; legacy tasks without repository_context remain unchanged.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T19:49:12+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Build, critic and repair execution contexts contain only the selected fresh subgraph, exact source hashes and a clear authority/freshness statement, never the whole repository graph or copied generated summaries.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T19:49:12+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Context selection is deterministic, follows bounded dependency edges, includes relevant tests and respects the declared budget while retaining directly requested nodes.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T19:49:12+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Behavioral tests prove task validation, exact resolution, bounded selection, stale/missing cache behavior, legacy compatibility and durable context verification.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T19:49:12+02:00",
+          "agent": "codex",
+          "summary": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json"
+        }
+      ]
     }
   ],
   "architecture": {
@@ -158,5 +251,31 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/repository-intelligence-02-task-context/completion/verification-d54b7061760e4d76b3950116329ca1ca.json",
+      "sha256": "698fb41f65acdddce8001c8034c18c53033380453ea15bc37cfb8f63e4d7d78b"
+    },
+    "critic": {
+      "path": ".go/runs/repository-intelligence-02-task-context/completion/critic-f91b568816924405870537f083231ef4.json",
+      "sha256": "de3d6b46ebe4318d85ce38873109322ab1eb6dfb8278fb613543672e6a4a819a"
+    },
+    "release": {
+      "path": ".go/runs/repository-intelligence-02-task-context/completion/release-39a224bf42a946c192e4aa8490fbc53c.json",
+      "sha256": "2bd002a6f5f88534d054a88dd9e0dcd0a17c9fdcd23e238b86adf234ce5d3e94"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "repository-intelligence-02-task-context",
+    "project": "go-workflow-stack",
+    "commit": "370719be5e7b358897a9a675b0073d1aa397bc52",
+    "tag": "v0.3.45",
+    "evidence": [
+      ".go/runs/repository-intelligence-02-task-context/completion/release-39a224bf42a946c192e4aa8490fbc53c.json"
+    ]
   }
 }

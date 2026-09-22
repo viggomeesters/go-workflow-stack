@@ -1,0 +1,120 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "repository-intelligence-02-task-context",
+  "project": "go-workflow-stack",
+  "contract_digest": "dcc85804227efef55ca47a5ba9d562571bcda8a69ce9ab17193ec059990de401",
+  "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+  "content_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-02-task-context",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python -m pytest tests/test_repository_context.py tests/test_architecture.py tests/test_abc_context.py -q",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+        "worktree_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-02-task-context/completion/command-a7c3e3f7f898491298598757229f630f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-02-task-context/completion/command-a7c3e3f7f898491298598757229f630f.json",
+        "sha256": "55287f6599d8c482b73c9c8acc9e0138ff168a40d0c093fa6ada72a220397f25"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-02-task-context",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+        "worktree_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-02-task-context/completion/command-b6abbe6126294d2ea7ec3821c062b87c.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-02-task-context/completion/command-b6abbe6126294d2ea7ec3821c062b87c.json",
+        "sha256": "09a4bc73bf85aad6ce148f2527bcc7074fb9f5b4d5121d7c8deb60a4fb0b21c6"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-02-task-context",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+        "worktree_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-02-task-context/completion/command-d7cf32f388634e6d8865dc0c83e525e2.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-02-task-context/completion/command-d7cf32f388634e6d8865dc0c83e525e2.json",
+        "sha256": "bcf7038103ab9ea6aca172ea60d15ad6b06521e5bcc0b2bf3b6834aed87ae142"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-02-task-context",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "370719be5e7b358897a9a675b0073d1aa397bc52",
+        "worktree_digest": "e7741097fde779d9041bd8def9d1be2ed33ab8478201ba685037428e7601f348",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-02-task-context/completion/command-e4b4b15ccb7b4dfa82346c48bb59ddb0.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-02-task-context/completion/command-e4b4b15ccb7b4dfa82346c48bb59ddb0.json",
+        "sha256": "1faf096bec5cd0cc0024a45398e7a560874b6052f8650f8d0ba8c7b03f8cb676"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

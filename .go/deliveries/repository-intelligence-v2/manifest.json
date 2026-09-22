@@ -1,0 +1,54 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "repository-intelligence-v2",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "repository-intelligence",
+    "title": "Repository intelligence"
+  },
+  "release": {
+    "version": 2,
+    "status": "released",
+    "created_at": "2026-09-22T19:49:34+02:00",
+    "supersedes": "repository-intelligence-v1"
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "passed"
+  },
+  "sections": {
+    "summary": "Connect durable .go intent and tasks to a deterministic, regenerable application index without creating a second source of truth.",
+    "delivered_scope": [
+      "Add the repository-map contract and deterministic application index",
+      "Bind tasks to stable repository nodes and select bounded execution context"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Add the repository-map contract and deterministic application index",
+        "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/repository-map.schema.json|schemas/repository-graph.schema.json|tests/test_repository_index.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=Linux release-check v0.3.44 plus declared task commands; verification_result=passed (156+26+197 release suites and 205 task tests); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription"
+      },
+      {
+        "label": "Bind tasks to stable repository nodes and select bounded execution context",
+        "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/task.schema.json|schemas/execution-context.schema.json|tests/test_repository_context.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=declared task checks plus Linux release-check v0.3.45; verification_result=passed (32 focused, 156+26+197 release suites); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription"
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Verify blast radius and expose architecture-to-code drift"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "ba0359d67b0746598f74fd539d1a54761fa746573c8c0bc03d74ceaa0c9c33a7",
+    "html_sha256": "a0439d6772edfa860960ef0883d96a2fc95d46840a1657dc8cd82d2ae27d84af"
+  }
+}

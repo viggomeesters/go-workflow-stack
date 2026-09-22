@@ -25,6 +25,14 @@ import time
 ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 TASK_IDS = ["normalize-notes", "render-report"]
+FROZEN_VERIFICATION = {
+    "normalize-notes": ["python3 -m pytest tests/test_notes.py -q -k normalize"],
+    "render-report": ["python3 -m pytest tests/test_notes.py -q -k render"],
+}
+FROZEN_SCOPE = {
+    "read": [".go/**", "notes.py", "tests/**", "README.md", "VERSION", "CHANGELOG.md"],
+    "modify": ["notes.py", "README.md", "VERSION", "CHANGELOG.md"],
+}
 
 
 def write(path: Path, value: object) -> None:
@@ -55,10 +63,7 @@ def _task(seed: dict, *, task_id: str, summary: str, description: str,
         execution_mode="agent",
         shareable_delivery="none",
         order=order,
-        scope={
-            "read": [".go/**", "notes.py", "tests/**", "README.md", "VERSION", "CHANGELOG.md"],
-            "modify": ["notes.py", "README.md", "VERSION", "CHANGELOG.md"],
-        },
+        scope=copy.deepcopy(FROZEN_SCOPE),
         acceptance=acceptance,
         verification=verification,
         work_status="pending",
@@ -96,6 +101,38 @@ def _decision_event() -> dict:
             "decision": "Use synthetic notes data, a new repository, a local bare remote, and no deployment.",
             "consequences": ["Every task still requires its own annotated tag and remote readback."],
         },
+    }
+
+
+def restore_frozen_boundaries(repo: Path, pilot: dict) -> dict:
+    """Keep semantic intake, but never let it broaden the pre-authorized execution boundary."""
+    removed: dict[str, list[str]] = {}
+    profiles = {item["task_id"]: {key: item[key] for key in ("id", "effort")} for item in pilot["models"]}
+    for index, task_id in enumerate(TASK_IDS):
+        path = repo / ".go/tasks/open" / f"{task_id}.json"
+        task = json.loads(path.read_text(encoding="utf-8"))
+        frozen = FROZEN_VERIFICATION[task_id]
+        removed[task_id] = [item for item in task.get("verification", []) if item not in frozen]
+        task["verification"] = list(frozen)
+        task["scope"] = copy.deepcopy(FROZEN_SCOPE)
+        task["execution_contract"] = {
+            "schema": "go-workflow.execution-contract.v1",
+            "task_kind": "product",
+            "model": profiles[task_id],
+            "release": {"mode": "required", "profile": "local"},
+            "workspace": {"mode": "task_worktree", "base_branch": "main",
+                          "control_state": "repo_local_single_writer"},
+        }
+        task["dependencies"] = [] if index == 0 else [{
+            "project": pilot["repository"]["project_id"],
+            "task_id": TASK_IDS[0],
+            "requires": "done_with_required_release_evidence",
+        }]
+        write(path, task)
+    return {
+        "frozen_before_model_calls": True,
+        "restored_after_intake": True,
+        "removed_verification": removed,
     }
 
 
@@ -411,6 +448,7 @@ def run_live(prepared: dict, *, proof_dir: Path) -> dict:
         intake_payload = json.loads(result.stdout)
         if intake_payload.get("task_ids") != TASK_IDS:
             raise RuntimeError(f"native intake did not retain frozen tasks: {intake_payload.get('task_ids')}")
+        intake_boundary = restore_frozen_boundaries(repo, pilot)
 
         contract_path = prepared["work_root"] / "campaign.json"
         write(contract_path, _contract(repo, pilot))
@@ -500,6 +538,7 @@ def run_live(prepared: dict, *, proof_dir: Path) -> dict:
             "timing": {"started_at": started_at, "finished_at": finished_at,
                        "elapsed_seconds": round(time.monotonic() - started, 3)},
             "human_interventions": 0,
+            "intake_boundary": intake_boundary,
             "commands": commands,
             "interruption": {"kind": "SIGTERM", "automatic": True, "after_remote_tag": first_tag,
                              "initial_returncode": initial.returncode},

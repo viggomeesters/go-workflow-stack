@@ -53,6 +53,9 @@ def validate_proof(proof: Path, *, pilot_path: Path) -> dict:
         raise ValueError("pilot authority hash does not match the frozen contract")
     if manifest.get("human_interventions") != 0:
         raise ValueError("proof required human interventions after launch")
+    boundary = manifest.get("intake_boundary") or {}
+    if boundary.get("frozen_before_model_calls") is not True or boundary.get("restored_after_intake") is not True:
+        raise ValueError("pilot execution boundary was not frozen and restored after intake")
     elapsed = (manifest.get("timing") or {}).get("elapsed_seconds")
     if not isinstance(elapsed, (int, float)) or isinstance(elapsed, bool) or elapsed <= 0:
         raise ValueError("proof lacks measured elapsed time")

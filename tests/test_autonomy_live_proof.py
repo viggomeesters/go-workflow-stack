@@ -55,6 +55,8 @@ def valid_proof(tmp_path: Path) -> Path:
         "timing": {"started_at": "2026-09-22T20:00:00Z", "finished_at": "2026-09-22T20:20:00Z",
                    "elapsed_seconds": 1200.0},
         "human_interventions": 0,
+        "intake_boundary": {"frozen_before_model_calls": True, "restored_after_intake": True,
+                            "removed_verification": {}},
         "commands": {"baseline": baseline, "intake": intake, "initial_controller": initial,
                      "resume_controller": resumed},
         "interruption": {"kind": "SIGTERM", "automatic": True, "after_remote_tag": "v1.2.0",
@@ -125,6 +127,23 @@ def test_prepare_creates_a_new_buggy_project_with_real_release_contracts(tmp_pat
     )
     assert focused.returncode == 0, focused.stdout + focused.stderr
     assert "1 passed, 2 deselected" in focused.stdout
+
+
+def test_intake_cannot_broaden_frozen_execution_boundaries(tmp_path):
+    campaign = load(CAMPAIGN_PATH, "autonomy_live_campaign_boundary")
+    prepared = campaign.prepare(tmp_path / "work", runtime=ROOT, pilot_path=PILOT_PATH)
+    path = prepared["repo"] / ".go/tasks/open/normalize-notes.json"
+    task = json.loads(path.read_text())
+    task["verification"].append("Verify the behavior by inspection.")
+    task["scope"]["modify"].append("tests/**")
+    write_json(path, task)
+
+    result = campaign.restore_frozen_boundaries(prepared["repo"], prepared["pilot"])
+
+    restored = json.loads(path.read_text())
+    assert restored["verification"] == ["python3 -m pytest tests/test_notes.py -q -k normalize"]
+    assert restored["scope"]["modify"] == ["notes.py", "README.md", "VERSION", "CHANGELOG.md"]
+    assert result["removed_verification"]["normalize-notes"] == ["Verify the behavior by inspection."]
 
 
 def test_checker_accepts_content_bound_raw_process_and_remote_evidence(tmp_path):

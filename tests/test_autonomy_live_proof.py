@@ -105,6 +105,7 @@ def test_prepare_creates_a_new_buggy_project_with_real_release_contracts(tmp_pat
     assert campaign.git(prepared["repo"], "status", "--porcelain") == ""
     assert campaign.git(prepared["repo"], "ls-remote", "origin", "refs/tags/v1.1.0")
     assert "return list(lines)" in (prepared["repo"] / "notes.py").read_text()
+    assert (prepared["repo"] / ".gitignore").read_text() == "__pycache__/\n.pytest_cache/\n"
     tests = (prepared["repo"] / "tests/test_notes.py").read_text()
     assert "import notes" in tests
     assert "from notes import normalize_notes, render_report" not in tests

@@ -262,6 +262,7 @@ def prepare(work_root: Path, *, runtime: Path = ROOT, pilot_path: Path = HERE / 
         encoding="utf-8",
     )
     (repo / "README.md").write_text("# Synthetic notes\n\nDisposable local autonomy proof.\n", encoding="utf-8")
+    (repo / ".gitignore").write_text("__pycache__/\n.pytest_cache/\n", encoding="utf-8")
     (repo / "VERSION").write_text("1.1.0\n", encoding="utf-8")
     (repo / "CHANGELOG.md").write_text("# Changelog\n\n## 1.1.0\n\n- Seed synthetic proof.\n", encoding="utf-8")
     (repo / "AGENTS.md").write_text(

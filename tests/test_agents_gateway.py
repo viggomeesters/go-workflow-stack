@@ -97,6 +97,22 @@ def test_gateway_sync_replaces_only_its_bounded_block(tmp_path: Path):
     assert (repo / "AGENTS.md").read_text(encoding="utf-8") == custom_before + GATEWAY_BLOCK.rstrip("\n") + custom_after
 
 
+def test_gateway_sync_preserves_crlf_custom_bytes_and_file_mode(tmp_path: Path):
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / ".go").mkdir()
+    agents = repo / "AGENTS.md"
+    before = b"# Windows-local rules\r\n\r\nKeep these bytes.\r\n"
+    agents.write_bytes(before)
+    agents.chmod(0o640)
+
+    result = run_go("agents", "sync", repo, "--apply", "--json")
+
+    assert result.returncode == 0, result.stderr
+    assert agents.read_bytes().startswith(before)
+    assert agents.stat().st_mode & 0o777 == 0o640
+
+
 def test_gateway_sync_refuses_ambiguous_markers_without_writing(tmp_path: Path):
     from go_workflow.agents_gateway import GATEWAY_START
 

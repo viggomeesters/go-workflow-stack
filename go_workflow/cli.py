@@ -4512,15 +4512,21 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         hierarchy_path = root / "hierarchy.json"
         before_project = project_path.read_text(encoding="utf-8")
         before_hierarchy = hierarchy_path.read_text(encoding="utf-8")
-        dump_json(project_path, documents["project.json"])
-        dump_json(hierarchy_path, documents["hierarchy.json"])
-        apply_agents_gateway(repo, gateway_plan)
-        errors = validate_repo(repo)
-        if errors:
+        gateway_applied = False
+        try:
+            dump_json(project_path, documents["project.json"])
+            dump_json(hierarchy_path, documents["hierarchy.json"])
+            apply_agents_gateway(repo, gateway_plan)
+            gateway_applied = True
+            errors = validate_repo(repo)
+            if errors:
+                raise RepoLocalError("migration produced an invalid contract:\n- " + "\n- ".join(errors))
+        except BaseException:
             atomic_write_text(project_path, before_project)
             atomic_write_text(hierarchy_path, before_hierarchy)
-            restore_agents_gateway(repo, gateway_plan)
-            raise RepoLocalError("migration produced an invalid contract:\n- " + "\n- ".join(errors))
+            if gateway_applied:
+                restore_agents_gateway(repo, gateway_plan)
+            raise
         plan["applied"] = True
         append_jsonl(
             root / "runs" / "events.jsonl",

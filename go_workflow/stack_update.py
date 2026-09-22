@@ -290,6 +290,7 @@ def _apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
     gateway = plan_agents_gateway(repo)
     rollback['before_agents'] = gateway['before']
     rollback['before_agents_path'] = gateway['source_path']
+    rollback['before_agents_mode'] = gateway['before_mode']
     rollback['after_agents_sha256'] = gateway['after_sha256']
     atomic_json(rollback_path, rollback)
     try:
@@ -331,5 +332,6 @@ def rollback_stack_update(repo: Path, rollback_record: str) -> None:
             restore_agents_gateway(repo, {
                 'before': data.get('before_agents'),
                 'source_path': data.get('before_agents_path'),
+                'before_mode': data.get('before_agents_mode'),
             })
         data['status'] = 'rolled_back'; atomic_json(path, data)

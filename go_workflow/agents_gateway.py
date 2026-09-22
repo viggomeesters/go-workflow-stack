@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import os
 from pathlib import Path
+import stat
 from typing import Any
 import uuid
 
@@ -50,18 +51,20 @@ def _agents_entries(repo: Path) -> tuple[Path | None, list[Path]]:
     return exact, matches
 
 
-def _read_existing(repo: Path) -> tuple[Path | None, str | None, bool]:
+def _read_existing(repo: Path) -> tuple[Path | None, str | None, bool, int | None]:
     exact, matches = _agents_entries(repo)
     if len(matches) > 1:
         names = ", ".join(sorted(path.name for path in matches))
         raise AgentsGatewayError(f"multiple case variants of root AGENTS.md exist: {names}")
     source = exact or (matches[0] if matches else None)
     if source is None:
-        return None, None, False
+        return None, None, False, None
     if source.is_symlink() or not source.is_file():
         raise AgentsGatewayError("root AGENTS.md must be a regular file, not a link or directory")
     try:
-        return source, source.read_text(encoding="utf-8"), exact is not None
+        with source.open("r", encoding="utf-8", newline="") as handle:
+            content = handle.read()
+        return source, content, exact is not None, stat.S_IMODE(source.stat().st_mode)
     except (OSError, UnicodeError) as exc:
         raise AgentsGatewayError(f"cannot read root AGENTS.md as UTF-8: {exc}") from exc
 
@@ -92,7 +95,7 @@ def plan_agents_gateway(repo: Path) -> dict[str, Any]:
     repo = Path(repo).resolve()
     if not (repo / ".go").is_dir():
         raise AgentsGatewayError(f"cannot install AGENTS.md gateway without repository-local .go: {repo}")
-    source, before, exact_case = _read_existing(repo)
+    source, before, exact_case, before_mode = _read_existing(repo)
     after, action = render_gateway(before)
     if source is not None and not exact_case and action == "none":
         action = "rename"
@@ -107,6 +110,7 @@ def plan_agents_gateway(repo: Path) -> dict[str, Any]:
         "action": action,
         "before_sha256": _sha256(before),
         "after_sha256": _sha256(after),
+        "before_mode": before_mode,
         "before": before,
         "after": after,
     }
@@ -117,7 +121,7 @@ def apply_agents_gateway(repo: Path, plan: dict[str, Any] | None = None) -> dict
     with repository_lock(repo / ".go", "agents-gateway"):
         fresh = plan_agents_gateway(repo)
         if plan is not None:
-            compared = ("repo", "path", "source_path", "action", "before_sha256", "after_sha256")
+            compared = ("repo", "path", "source_path", "action", "before_sha256", "after_sha256", "before_mode")
             if any(plan.get(key) != fresh.get(key) for key in compared):
                 raise AgentsGatewayError("root AGENTS.md changed after planning; inspect and retry")
         if fresh["action"] != "none":
@@ -129,6 +133,7 @@ def apply_agents_gateway(repo: Path, plan: dict[str, Any] | None = None) -> dict
                 os.replace(repo / source_name, displaced)
             try:
                 atomic_write_text(target, fresh["after"])
+                target.chmod(fresh["before_mode"] if fresh["before_mode"] is not None else 0o644)
                 if displaced is not None:
                     displaced.unlink()
             except BaseException:
@@ -147,12 +152,13 @@ def restore_agents_gateway(repo: Path, plan: dict[str, Any]) -> None:
             entry.unlink()
     if before is not None and isinstance(source_name, str):
         atomic_write_text(repo / source_name, before)
+        (repo / source_name).chmod(int(plan.get("before_mode") or 0o644))
 
 
 def validate_agents_gateway(repo: Path) -> list[str]:
     repo = Path(repo).resolve()
     try:
-        source, existing, exact_case = _read_existing(repo)
+        source, existing, exact_case, _mode = _read_existing(repo)
         if source is None:
             return [
                 "root AGENTS.md is required whenever .go exists; repair with "

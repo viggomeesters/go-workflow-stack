@@ -22,6 +22,17 @@ Detached background workers are outside this supported process contract.
 Standalone workspace execution, stage, integration, rebind and cleanup apply
 the same liveness check, even after a controller crash releases its kernel lock.
 
+Campaign controllers add a repository-wide controller lock plus durable
+host/PID/nonce, dispatch stage, and active-wall timestamp. The dispatch intent
+is written before task binding and again before calling the managed runner. A
+new controller refuses a live or cross-host owner, accounts conservatively for
+an uncleared wall interval, and resumes from canonical task/run/workspace state.
+It never relies on a surviving chat transcript. Frozen command and repair
+limits, cumulative use, provider backoff, exact model binding, raw failure proof,
+and pause/drain/cancel records live in the campaign checkpoint. One-shot control
+actions stop only at the lock-protected durable boundary and never signal an
+unverified process.
+
 Setup intent is durable before claim/worktree creation. Confirmed phases and
 individual verification commands survive renewed budgets. Interrupted phases
 retain their evidence and Git state; unknown results are not upgraded to success.

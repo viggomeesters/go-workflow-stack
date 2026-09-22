@@ -5833,6 +5833,12 @@ def build_parser() -> argparse.ArgumentParser:
         command_parser.add_argument('--campaign', default='', help='explicit bounded campaign contract')
         command_parser.add_argument('--previous-campaign', default='', help='previous immutable campaign revision')
         command_parser.add_argument('--campaign-workspace-root', default='', help='outside-repository root for campaign task worktrees')
+        command_parser.add_argument(
+            '--campaign-action',
+            choices=['run', 'resume', 'pause', 'drain', 'cancel'],
+            default='run',
+            help='durable campaign controller action; control actions stop at a checkpoint boundary',
+        )
         for field in ('task-id', 'workspace-path', 'workspace-branch', 'base-branch', 'base-commit', 'run-id'):
             command_parser.add_argument('--' + field, default='')
     managed_parser = sub.add_parser('managed', help='Internal managed-run process boundary')

@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-09/cli/go.py",
+    "auto",
+    "/private/tmp/go-autonomy-night-20260922-live7/project",
+    "--campaign",
+    "/private/tmp/go-autonomy-night-20260922-live7/campaign.json",
+    "--campaign-workspace-root",
+    "/private/tmp/go-autonomy-night-20260922-live7/workspaces",
+    "--execute",
+    "--agent",
+    "autonomy-live-controller",
+    "--executor-agent",
+    "codex",
+    "--max-commands",
+    "100",
+    "--max-minutes",
+    "60",
+    "--max-attempts",
+    "4",
+    "--command-timeout-seconds",
+    "900",
+    "--ship-policy",
+    "push",
+    "--allow-push",
+    "--json"
+  ],
+  "returncode": -15,
+  "stdout": "",
+  "stderr": "",
+  "elapsed_seconds": 164.871
+}

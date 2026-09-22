@@ -2,6 +2,44 @@
 
 This benchmark states what the stack proves against the desired Ralph / Oh-My-Codex style loop. It is deliberately blunt: green tests are not the same as unconstrained autonomy; claims must stay tied to the proven runtime boundary.
 
+## Live unattended synthetic campaign (v0.3.43)
+
+`fixtures/autonomy-live/campaign.py` is an explicit opt-in proof with native
+Codex workers, not a protocol double. It freezes a synthetic repository, exact
+allowed paths, Terra High and Astra Medium worker profiles, a one-hour shared
+budget, local-only Git publication and no deployment before any model call.
+Native semantic intake is retained, while a deterministic boundary check
+prevents model-authored assessment text from broadening the frozen executable
+scope or verification commands.
+
+The successful 2026-09-22 run took **437.987 seconds**. With no human
+interventions after launch it observed the seeded normalization failure,
+materialized the two intended outcomes, completed `normalize-notes` and
+`render-report` through separate build, verification, critic and release
+lifecycles, published and read back `v1.2.0` and `v1.3.0`, received SIGTERM
+automatically after the first remote tag, drained the interrupted worker and
+resumed to `goal_verified`. Seven adapter-usage records were preserved. The
+final synthetic repository was clean and its local `main` matched remote
+`main` exactly.
+
+Validate the content-bound result without replaying model calls or effects:
+
+```bash
+python3 scripts/check-autonomy-proof.py \
+  --proof docs/proof/autonomy-night/2026-09-22
+```
+
+The manifest, morning report and four hashed raw process records live under
+`docs/proof/autonomy-night/2026-09-22/`. Six earlier fail-closed attempts are
+also retained separately; they exposed coupled test collection, an overly
+broad pytest selector, non-executable intake verification text, generated
+workspace caches and a resume race with a still-live worker process group.
+
+This proves a bounded seven-minute synthetic run on one machine with a local
+bare Git remote. It is not an eight-hour production night, hosted publication,
+deployment, private-repository mutation, general model-quality benchmark or
+independent attestation of the provider's effective model identity/billing.
+
 ## Injected-failure autonomy campaign (v0.3.42)
 
 `fixtures/autonomy-campaign/campaign.py` proves the complete deterministic
@@ -121,16 +159,16 @@ sample does not measure general model quality or guarantee future availability.
 | Vision/principles execution context | `PASS` | Every build/critic/repair hook receives `GO_CONTEXT_JSON`; attempt `prompt.md` also records north star, metrics, principles, hierarchy, and task | Adapters must actually obey the supplied contract. |
 | Template-to-project pairing | `PASS` | Pairing check executes first `auto`; `spike` and `apply-template.sh` replace template identity with project-specific vision/tasks | User intent still determines whether the generated vision is useful. |
 | Vision-level completion audit | `PASS` | The outcome-bound shared campaign audit binds every frozen goal outcome to exact task/R# links, current lifecycle and architecture evidence, release/deployment receipts, and an auditable handoff; empty queues and declared metrics cannot pass | Semantic proof still depends on the quality of the recorded task critic and selected verification. |
-| Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL` | Hardened conductor, safe default agent selection, deep critic, adapter context, budgets, scope, executable resume, restartable multi-task campaign, transactional shipping, injected-failure recovery, and goal audit are covered locally | An unattended live-model campaign and broader repo diversity are not yet benchmarked. |
+| Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL` | In addition to deterministic injected-failure coverage, the native-Codex synthetic campaign completed two separately released tasks, automatic interruption/resume and final goal audit in 437.987 seconds with zero interventions after launch | One short synthetic repository and local Git remote do not establish overnight reliability, hosted effects or broader repo/model diversity. |
 | Unconstrained self-improving agent | `PARTIAL` | Can plug Codex/Hermes; `.go` controls state and evidence | The Python CLI does not embed an LLM or bypass safety gates. |
 
 ## Current verdict
 
-Current level: **hardened `.go` conductor with a real adapter boundary; integrated Ralph/Oh-My-Codex-level coding autonomy remains partial.**
+Current level: **hardened `.go` conductor with one content-bound live unattended proof; broad Ralph/Oh-My-Codex-level reliability remains partial.**
 
 The honest claim is:
 
-> Viggo can use `go` / `go-loop` as the control-handoff language. The stack now reliably conducts bounded and restartable task execution, selects a safe default coding adapter, deep-criticises first green, commits transactionally, and passes durable project context into adapters. It is Ralph/OMX-like in control-loop shape, but should not claim universal equivalence until live-model campaigns across varied repositories are benchmarked.
+> Viggo can use `Go` as the control-handoff language. The stack has completed one bounded native-Codex campaign from semantic intake through two independent releases, an automatic interruption/resume and a grounded goal audit without human intervention after launch. That is real unattended evidence, but not an overnight or universal reliability claim; varied repositories, longer runs and hosted effects remain unproven.
 
 ## Green criteria now covered
 
@@ -149,6 +187,7 @@ The honest claim is:
 13. Vision, architecture principles, hierarchy, evidence, decisions, and task context passed to every adapter. ✅
 14. Outcome-bound campaign audit plus classified handoff before `goal_verified`. ✅
 15. End-to-end serial campaign gate with executable injected-failure coverage and immutable local release readback. ✅
+16. Content-bound live native-Codex campaign with two releases, automatic interruption/resume, usage evidence and zero measured interventions after launch. ✅
 
 ## Honest limits
 
@@ -156,6 +195,6 @@ The honest claim is:
 - `push` remains behind `--allow-push`; this is a safety feature, not a missing autonomous capability.
 - The built-in semantic critic is intentionally conservative. Agent-mode tasks add a separate read-only Codex/Hermes review; `--critic-command` remains available for a custom judge.
 - Real-world large-repo performance still depends on adapter quality, test quality, and task scope quality.
-- Adapter selection and the deep-critic protocol are covered with deterministic CLI fixtures; a campaign against a real model remains deliberately unclaimed.
+- One short native-Codex campaign is proven; longer unattended runs, other adapters and varied real repositories remain unclaimed.
 - Campaign completion proves the bounded adopted goal, not every continuing idea in the product vision.
 - The deterministic end-to-end campaign uses local bare remotes and performs no hosted release, production deployment, consumer mutation or hosted CI run.

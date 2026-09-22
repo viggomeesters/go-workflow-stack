@@ -1,0 +1,220 @@
+{
+  "schema": "go-workflow.autonomy-live-proof.v1",
+  "status": "passed",
+  "mode": "live-native-codex-unattended",
+  "pilot": {
+    "path": "fixtures/autonomy-live/pilot.json",
+    "sha256": "39460190d94d9e5243cd45e896e3cc9edbe0f4936d8ad1400b14be41c5b206ec"
+  },
+  "runtime": {
+    "candidate": true,
+    "revision": "483eef224bdcb090bc02b24f572a3f8d047f5727"
+  },
+  "timing": {
+    "started_at": "2026-09-22T14:04:49.992920Z",
+    "finished_at": "2026-09-22T14:12:07.945264Z",
+    "elapsed_seconds": 437.987
+  },
+  "human_interventions": 0,
+  "intake_boundary": {
+    "frozen_before_model_calls": true,
+    "restored_after_intake": true,
+    "removed_verification": {
+      "normalize-notes": [
+        "PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -p no:cacheprovider --capture=sys tests/test_notes.py -q -k normalize",
+        "Read-only behavior checks cover empty input, all-blank input, and separated duplicates.",
+        "Critic reviews the normalization change against O1; controller independently verifies the first release's annotated tag and local remote readback."
+      ],
+      "render-report": [
+        "PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -p no:cacheprovider --capture=sys tests/test_notes.py -q -k render",
+        "PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 python3 -m pytest -p no:cacheprovider --capture=sys tests/test_notes.py -q",
+        "Read-only behavior check confirms render_report([]) matches the documented empty state.",
+        "Critic reviews output and README against O2; controller verifies prerequisite release evidence and the second release's distinct annotated tag and local remote readback."
+      ]
+    }
+  },
+  "commands": {
+    "baseline": {
+      "path": "000-baseline.json",
+      "sha256": "c3586b126d1f98fc27a0dcae398c88a165484f6fdbd3be915af48f01041ce21c"
+    },
+    "intake": {
+      "path": "001-intake.json",
+      "sha256": "a63d0e121cf7b50927d3ed071868ce7da3cdf699885200370823eb7bec23de11"
+    },
+    "initial_controller": {
+      "path": "002-controller-initial.json",
+      "sha256": "b39106aa2af7d50ace9220706bdf9dbbf54fbdbf3749a716024318bce4cccbbe"
+    },
+    "resume_controller": {
+      "path": "003-controller-resume.json",
+      "sha256": "94fd46c027388f500f9d59cd3d115b83f4db4f9ca4e3faf5e4420ef89191c2d5"
+    }
+  },
+  "interruption": {
+    "kind": "SIGTERM",
+    "automatic": true,
+    "after_remote_tag": "v1.2.0",
+    "initial_returncode": -15,
+    "worker_drain_seconds": 1.012
+  },
+  "fault": {
+    "kind": "real_seeded_bug",
+    "baseline_failed": true,
+    "final_passed": true
+  },
+  "workers": [
+    {
+      "task_id": "normalize-notes",
+      "adapter": "codex",
+      "model": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    {
+      "task_id": "render-report",
+      "adapter": "codex",
+      "model": "gpt-6-astra",
+      "effort": "medium"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "normalize-notes",
+      "tag": "v1.2.0",
+      "commit": "234f361f7f65c4085e61a0689657d360d8a9eeb7",
+      "remote_commit": "234f361f7f65c4085e61a0689657d360d8a9eeb7"
+    },
+    {
+      "id": "render-report",
+      "tag": "v1.3.0",
+      "commit": "16951a8caa8becd0220ecf0118df8a949cc8e78d",
+      "remote_commit": "16951a8caa8becd0220ecf0118df8a949cc8e78d"
+    }
+  ],
+  "goal_audit": {
+    "status": "achieved",
+    "goal_verified": true
+  },
+  "git": {
+    "clean": true,
+    "remote_main": "705586b64539a07010c03e0e8e517cc0a2478c8d",
+    "local_main": "705586b64539a07010c03e0e8e517cc0a2478c8d"
+  },
+  "usage": {
+    "status": "observed",
+    "records": [
+      {
+        "source": ".go/intake/7f1825121fc0b4ebb3499396c5fd5200f0397e30b3383f61cf4aed4607748058.json",
+        "raw": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 163126,
+              "cached_input_tokens": 144128,
+              "output_tokens": 1713
+            }
+          ],
+          "elapsed_seconds": 112.91617720806971,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      {
+        "source": ".go/runs/normalize-notes/completion/critic-b5abb9f6871f4da8b2d37bbeb243ea15.json",
+        "raw": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 220846,
+              "cached_input_tokens": 179456,
+              "output_tokens": 5606
+            }
+          ],
+          "elapsed_seconds": 113.04936333396472,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      {
+        "source": ".go/runs/normalize-notes/run-state.json",
+        "raw": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 156728,
+              "cached_input_tokens": 136704,
+              "output_tokens": 1745
+            }
+          ],
+          "elapsed_seconds": 44.980516292038374,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      {
+        "source": ".go/runs/render-report/completion/critic-9460cee2af9c468892083ce326ffb810.json",
+        "raw": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 236602,
+              "cached_input_tokens": 190464,
+              "output_tokens": 2401
+            }
+          ],
+          "elapsed_seconds": 100.33435625000857,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      {
+        "source": ".go/runs/render-report/run-state.json",
+        "raw": {
+          "source": "codex_json_stream",
+          "turns": [
+            {
+              "input_tokens": 137671,
+              "cached_input_tokens": 105344,
+              "output_tokens": 946
+            }
+          ],
+          "elapsed_seconds": 52.28926791599952,
+          "provider_invoice_cost_usd": null
+        }
+      },
+      {
+        "source": ".go/runs/render-report/synthetic-notes-night-20260922-render-report-r1/build-01-329ca3e4290348c090fefcc8a51a6548/context.json",
+        "raw": {
+          "schema": "go-workflow.usage-attribution.v1",
+          "runtime_kind": "configured controller publisher",
+          "billing_mode": "unknown",
+          "owner": "autonomy-live-controller",
+          "model": "requested gpt-5.6-terra (effective identity unconfirmed)",
+          "token_estimate": null,
+          "api_equivalent_cost_usd": null,
+          "provider_invoice_cost_usd": null,
+          "cost_label": "api_equivalent_not_invoice_cost"
+        }
+      },
+      {
+        "source": ".go/tasks/done/render-report.json",
+        "raw": {
+          "schema": "go-workflow.usage-attribution.v1",
+          "runtime_kind": "configured controller publisher",
+          "billing_mode": "unknown",
+          "owner": "autonomy-live-controller",
+          "model": "requested gpt-6-astra (effective identity unconfirmed)",
+          "token_estimate": null,
+          "api_equivalent_cost_usd": null,
+          "provider_invoice_cost_usd": null,
+          "cost_label": "api_equivalent_not_invoice_cost"
+        }
+      }
+    ]
+  },
+  "privacy": {
+    "synthetic_only": true,
+    "private_repositories_touched": []
+  },
+  "limitations": [
+    "This was a bounded synthetic run, not an eight-hour production night.",
+    "Effective provider model identity and billing are reported by the adapter, not independently attested.",
+    "Publication used a local bare Git remote and there was no deployment target."
+  ]
+}

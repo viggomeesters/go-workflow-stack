@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.43 — live unattended autonomy proof
+
+- Preserve a content-bound native-Codex campaign from semantic intake through two independently verified local releases and a grounded goal audit.
+- Prove automatic SIGTERM interruption after the first remote tag and unattended resume through the second task without per-task dispatch.
+- Record 437.987 measured seconds, zero interventions after launch, observed adapter usage, exact tag/remote commits, clean Git readback and an auditable morning report.
+- Retain six failed attempts and state the boundary honestly: short synthetic repository, local bare remote, no hosted publication, deployment, private consumer mutation or eight-hour claim.
+
 ## 0.3.42 — injected-failure autonomy campaign
 
 - Prove one rough request can pass semantic intake and one controller process can release two serial managed tasks before a grounded goal audit.

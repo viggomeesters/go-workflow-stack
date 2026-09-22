@@ -33,7 +33,7 @@ For the full practical architecture and application flow, see [`docs/practical-a
 
 Bounded multi-task authority and outcome traceability are specified in [`docs/autonomous-campaign.md`](docs/autonomous-campaign.md). Validation never grants execution or treats an empty queue as achieved product behavior.
 Substantial rough requests can use [bounded semantic intake](docs/autonomous-intake.md) to assess current code/tasks/decisions through a read-only model adapter before reusing, updating, or creating executable work.
-The deterministic [autonomy benchmark](docs/autonomy-benchmark.md) runs one rough request through two serial local releases and an outcome audit, with an executable injected-failure matrix. Run it with `bash scripts/check-autonomy.sh`; it does not claim a live-model or hosted-provider run.
+The [autonomy benchmark](docs/autonomy-benchmark.md) combines a deterministic injected-failure matrix with a preserved native-Codex synthetic campaign: two serial local releases, automatic interruption/resume and an outcome audit in 437.987 measured seconds with zero interventions after launch. It remains a bounded local proof, not an eight-hour, hosted-provider or production-deployment claim.
 
 Routing rule: a target repo must own a valid `.go/project.json` and an exact-case root `AGENTS.md` gateway before workflow execution starts. Repositories without `.go` must use `adopt` or `spike`; repositories with `.go` but a missing/stale gateway use `agents sync . --apply`. A vault is never an execution fallback. See the [root gateway contract](docs/agents-gateway.md).
 

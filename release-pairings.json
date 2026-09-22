@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.42",
+  "current_stack_ref": "v0.3.43",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -266,6 +266,12 @@
       "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
       "template_ref": "v0.3.18",
       "note": "Injected-failure autonomy campaign baseline; reusable template onboarding remains owned by autonomy-template-01."
+    },
+    {
+      "stack_ref": "v0.3.43",
+      "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
+      "template_ref": "v0.3.18",
+      "note": "Live unattended synthetic campaign baseline; reusable template onboarding remains owned by autonomy-template-01."
     }
   ]
 }

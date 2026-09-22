@@ -26,8 +26,12 @@ ROOT = Path(__file__).resolve().parents[2]
 HERE = Path(__file__).resolve().parent
 TASK_IDS = ["normalize-notes", "render-report"]
 FROZEN_VERIFICATION = {
-    "normalize-notes": ["python3 -m pytest tests/test_notes.py -q -k normalize"],
-    "render-report": ["python3 -m pytest tests/test_notes.py -q -k render"],
+    "normalize-notes": [
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -p no:cacheprovider tests/test_notes.py -q -k normalize"
+    ],
+    "render-report": [
+        "PYTHONDONTWRITEBYTECODE=1 python3 -m pytest -p no:cacheprovider tests/test_notes.py -q -k render"
+    ],
 }
 FROZEN_SCOPE = {
     "read": [".go/**", "notes.py", "tests/**", "README.md", "VERSION", "CHANGELOG.md"],
@@ -206,7 +210,7 @@ def prepare(work_root: Path, *, runtime: Path = ROOT, pilot_path: Path = HERE / 
             summary="Repair deterministic note normalization",
             description=descriptions["normalize-notes"],
             acceptance=["Whitespace and blanks are removed; duplicates retain stable first-seen order."],
-            verification=["python3 -m pytest tests/test_notes.py -q -k normalize"],
+            verification=FROZEN_VERIFICATION["normalize-notes"],
             model={key: pilot["models"][0][key] for key in ("id", "effort")},
             order=1,
         ),
@@ -216,7 +220,7 @@ def prepare(work_root: Path, *, runtime: Path = ROOT, pilot_path: Path = HERE / 
             summary="Add a normalized Markdown notes report",
             description=descriptions["render-report"],
             acceptance=["Markdown rendering uses normalized notes and has an explicit empty state."],
-            verification=["python3 -m pytest tests/test_notes.py -q -k render"],
+            verification=FROZEN_VERIFICATION["render-report"],
             model={key: pilot["models"][1][key] for key in ("id", "effort")},
             order=2,
         ),

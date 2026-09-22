@@ -5,7 +5,6 @@ import importlib.util
 import json
 from pathlib import Path
 import subprocess
-import sys
 
 import pytest
 
@@ -122,12 +121,12 @@ def test_prepare_creates_a_new_buggy_project_with_real_release_contracts(tmp_pat
         "def normalize_notes(lines):\n"
         "    return list(dict.fromkeys(item.strip() for item in lines if item.strip()))\n"
     )
-    focused = subprocess.run(
-        [sys.executable, "-m", "pytest", "tests/test_notes.py", "-q", "-k", "normalize"],
-        cwd=prepared["repo"], text=True, capture_output=True,
-    )
+    focused = subprocess.run(campaign.FROZEN_VERIFICATION["normalize-notes"], shell=True,
+                             cwd=prepared["repo"], text=True, capture_output=True)
     assert focused.returncode == 0, focused.stdout + focused.stderr
     assert "1 passed, 2 deselected" in focused.stdout
+    status = campaign.git(prepared["repo"], "status", "--porcelain", "--ignored").splitlines()
+    assert status == ["M notes.py"]
 
 
 def test_intake_cannot_broaden_frozen_execution_boundaries(tmp_path):
@@ -142,7 +141,7 @@ def test_intake_cannot_broaden_frozen_execution_boundaries(tmp_path):
     result = campaign.restore_frozen_boundaries(prepared["repo"], prepared["pilot"])
 
     restored = json.loads(path.read_text())
-    assert restored["verification"] == ["python3 -m pytest tests/test_notes.py -q -k normalize"]
+    assert restored["verification"] == campaign.FROZEN_VERIFICATION["normalize-notes"]
     assert restored["scope"]["modify"] == ["notes.py", "README.md", "VERSION", "CHANGELOG.md"]
     assert result["removed_verification"]["normalize-notes"] == ["Verify the behavior by inspection."]
 

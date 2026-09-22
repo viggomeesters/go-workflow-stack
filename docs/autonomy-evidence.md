@@ -55,3 +55,24 @@ critic runs and their current completion captures require the grounded
 behavior-review object; historical records are not rewritten. The context may be
 carried for older R# tasks so adapters can adopt it, but missing strict-review output
 only becomes a completion blocker after the task declares version 1.
+
+## Campaign goal audit
+
+Task completion is an input, not the campaign conclusion. When an explicit
+campaign has no eligible work left, the controller now runs the same
+`go-workflow.campaign-goal-audit.v1` audit exposed by `campaign audit`. It checks
+each frozen goal outcome against its exact task/R# links, current hashed lifecycle
+artifacts, required release or live receipts, and applicable architecture
+conformance. A historical task without explicit outcome-tracking adoption cannot
+be upgraded into fresh proof by interpretation.
+
+The audit records `achieved`, `partial`, `blocked`, or `excluded` per outcome.
+Only a complete set of achieved or explicitly excluded outcomes can yield
+`goal_verified`; an empty queue, an active vision, or declared success metrics do
+not. Missing-work proposals are deduplicated and limited to the contract's
+research/repair allowances. Broader vision proposals stay outside the run.
+
+The durable JSON audit and Markdown handoff live under
+`.go/runs/campaigns/<campaign-id>/`. Their provenance labels keep local
+verification, hosted releases, exact live receipts, pending work, and user
+decisions visibly distinct.

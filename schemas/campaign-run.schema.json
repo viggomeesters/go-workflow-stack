@@ -55,7 +55,8 @@
         "provider_backoff",
         "paused",
         "drained",
-        "cancelled"
+        "cancelled",
+        "goal_verified"
       ]
     },
     "started_at": {"type": "string", "minLength": 1},
@@ -226,7 +227,8 @@
                 "provider_backoff",
                 "paused",
                 "drained",
-                "cancelled"
+                "cancelled",
+                "goal_verified"
               ]
             },
             "reason": {"type": "string", "minLength": 1},

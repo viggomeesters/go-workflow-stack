@@ -33,7 +33,7 @@ RUN_SCHEMA = "go-workflow.campaign-run.v1"
 RUN_STATUSES = {
     "running", "task_in_progress", "budget_exhausted", "no_eligible_tasks",
     "authority_required", "unsafe_repository", "unknown_external_effect",
-    "provider_backoff", "paused", "drained", "cancelled",
+    "provider_backoff", "paused", "drained", "cancelled", "goal_verified",
 }
 RUN_FIELDS = {
     "schema", "campaign_id", "project", "contract", "workspace_root", "status",
@@ -732,16 +732,26 @@ def execute_campaign(
                     _stop(state_path, state, "authority_required", reason, task_id=blocked)
                     result.update(status="authority_required", summary=reason, blocked_task=blocked)
                     break
-                _stop(
-                    state_path,
-                    state,
-                    "no_eligible_tasks",
-                    "No permitted eligible task remains; goal verification is a separate audit.",
+                from .campaign_audit import audit_campaign_goal
+                audit = audit_campaign_goal(
+                    repo,
+                    contract_path,
+                    previous_path=previous,
+                    persist=True,
                 )
-                result.update(
-                    status="no_eligible_tasks",
-                    summary="No permitted eligible task remains; campaign goal is not verified.",
-                )
+                result["completion_audit"] = audit
+                result["goal_verified"] = audit["goal_verified"]
+                if audit["goal_verified"]:
+                    reason = "Every adopted campaign outcome has current required proof."
+                    _stop(state_path, state, "goal_verified", reason)
+                    result.update(status="goal_verified", summary=reason)
+                else:
+                    reason = (
+                        "No permitted eligible task remains, but the shared goal audit is "
+                        f"{audit['status']}; empty queue is not completion proof."
+                    )
+                    _stop(state_path, state, "no_eligible_tasks", reason)
+                    result.update(status="no_eligible_tasks", summary=reason)
                 break
 
             task = selected[0]
@@ -918,4 +928,4 @@ def execute_campaign(
             result["completed_tasks"] = list(state["completed_tasks"])
         result["campaign_state"] = str(state_path.relative_to(repo))
         api.write_latest_run_state(repo, repo / ".go", result, args, mode)
-    return (0 if result["status"] == "budget_exhausted" else 1), result
+    return (0 if result["status"] in {"budget_exhausted", "goal_verified"} else 1), result

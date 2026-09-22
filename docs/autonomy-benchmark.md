@@ -88,7 +88,7 @@ sample does not measure general model quality or guarantee future availability.
 | Scoped transactional ship policy | `PASS` | Tests prove unrelated dirt is not committed, unauthorized push leaves the verified task active, and failed local commits restore task/evidence state | A push can still fail after a valid local commit and require an explicit retry. |
 | Vision/principles execution context | `PASS` | Every build/critic/repair hook receives `GO_CONTEXT_JSON`; attempt `prompt.md` also records north star, metrics, principles, hierarchy, and task | Adapters must actually obey the supplied contract. |
 | Template-to-project pairing | `PASS` | Pairing check executes first `auto`; `spike` and `apply-template.sh` replace template identity with project-specific vision/tasks | User intent still determines whether the generated vision is useful. |
-| Vision-level completion audit | `PASS` | Final audit requires no open/active/blocked tasks, evidence on every done task, valid cross-file contract, declared success metrics, and passing project-level verification | Textual success metrics are structurally present, not semantically proven without a deep critic adapter. |
+| Vision-level completion audit | `PASS` | The outcome-bound shared campaign audit binds every frozen goal outcome to exact task/R# links, current lifecycle and architecture evidence, release/deployment receipts, and an auditable handoff; empty queues and declared metrics cannot pass | Semantic proof still depends on the quality of the recorded task critic and selected verification. |
 | Oh-My-Codex/Ralph-style integrated runtime | `PARTIAL` | Hardened conductor, safe default agent selection, deep critic, adapter context, budgets, scope, executable resume, restartable multi-task campaign, transactional shipping, and goal audit are covered locally | A real non-fake adapter campaign and broader repo diversity are not yet benchmarked. |
 | Unconstrained self-improving agent | `PARTIAL` | Can plug Codex/Hermes; `.go` controls state and evidence | The Python CLI does not embed an LLM or bypass safety gates. |
 
@@ -115,7 +115,7 @@ The honest claim is:
 11. Cross-file project/hierarchy/task coherence validation. ✅
 12. Transactional task/ship behavior for policy and local-commit failures. ✅
 13. Vision, architecture principles, hierarchy, evidence, decisions, and task context passed to every adapter. ✅
-14. Vision-level structural completion audit plus project-wide verification before `done`. ✅
+14. Outcome-bound campaign audit plus classified handoff before `goal_verified`. ✅
 
 ## Honest limits
 
@@ -124,4 +124,4 @@ The honest claim is:
 - The built-in semantic critic is intentionally conservative. Agent-mode tasks add a separate read-only Codex/Hermes review; `--critic-command` remains available for a custom judge.
 - Real-world large-repo performance still depends on adapter quality, test quality, and task scope quality.
 - Adapter selection and the deep-critic protocol are covered with deterministic CLI fixtures; a campaign against a real model remains deliberately unclaimed.
-- Task exhaustion is not yet a semantic audit that the vision itself has been achieved.
+- Campaign completion proves the bounded adopted goal, not every continuing idea in the product vision.

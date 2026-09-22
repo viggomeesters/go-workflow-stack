@@ -4592,6 +4592,31 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_campaign_audit(args: argparse.Namespace) -> int:
+    """Run the same outcome audit used by campaign completion."""
+    from .campaign_audit import audit_campaign_goal
+
+    repo = Path(args.repo).resolve()
+    previous = Path(args.previous_campaign).resolve() if args.previous_campaign else None
+    try:
+        audit = audit_campaign_goal(
+            repo,
+            Path(args.contract).resolve(),
+            previous_path=previous,
+            persist=not args.read_only,
+        )
+    except (ValueError, OSError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    if args.json:
+        print(json.dumps(audit, indent=2, ensure_ascii=False))
+    else:
+        print(f"campaign {audit['campaign_id']}: {audit['status']}")
+        print(f"handoff: {audit['handoff']['path']}")
+        for outcome in audit["outcomes"]:
+            print(f"- {outcome['id']}: {outcome['status']}")
+    return 0 if audit["goal_verified"] else 1
+
+
 def cmd_next(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     errors = validate_repo(repo)
@@ -5833,6 +5858,15 @@ def build_parser() -> argparse.ArgumentParser:
     validate.add_argument('--previous-campaign', help='Previous immutable revision required for campaign revision > 1')
     validate.add_argument('--json', action='store_true')
     validate.set_defaults(func=cmd_validate)
+    campaign_parser = sub.add_parser("campaign", help="Inspect bounded campaign completion evidence")
+    campaign_sub = campaign_parser.add_subparsers(dest="campaign_command", required=True)
+    campaign_audit = campaign_sub.add_parser("audit", help="Audit adopted outcomes and write a compact handoff")
+    campaign_audit.add_argument("repo", nargs="?", default=".")
+    campaign_audit.add_argument("--contract", required=True)
+    campaign_audit.add_argument("--previous-campaign", default="")
+    campaign_audit.add_argument("--read-only", action="store_true", help="compute without writing audit/handoff artifacts")
+    campaign_audit.add_argument("--json", action="store_true")
+    campaign_audit.set_defaults(func=cmd_campaign_audit)
     nxt = sub.add_parser("next", help="Print the first claimable open task")
     nxt.add_argument("repo", nargs="?", default=".")
     nxt.set_defaults(func=cmd_next)

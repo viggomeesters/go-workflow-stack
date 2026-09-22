@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.40 — outcome-bound campaign goal audit
+
+- Audit every adopted campaign outcome against current lifecycle and architecture-conformance evidence; an empty queue or declared metric is never completion proof.
+- Classify outcomes as achieved, partial, blocked or explicitly excluded and propose only deduplicated research/repair work allowed by the frozen mandate.
+- Persist one machine-readable audit plus a compact handoff linking the original request, decisions, tasks, tested candidates, releases and exact live receipts.
+- Make every campaign execution route use the shared audit before reporting `goal_verified`; historical unadopted task records remain history rather than fresh proof.
+
 ## 0.3.39 — mandatory root AGENTS.md gateway
 
 - Require an exact-case root `AGENTS.md` whenever repository-local `.go/` state exists.

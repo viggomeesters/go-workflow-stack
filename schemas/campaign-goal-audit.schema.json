@@ -1,0 +1,123 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.campaign-goal-audit.v1",
+  "title": "Current-evidence campaign goal audit",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "campaign_id", "project", "contract", "original_request", "goal",
+    "status", "goal_verified", "outcomes", "contract_findings", "queue",
+    "follow_ups", "provenance", "handoff"
+  ],
+  "properties": {
+    "schema": {"const": "go-workflow.campaign-goal-audit.v1"},
+    "campaign_id": {"$ref": "#/$defs/id"},
+    "project": {"$ref": "#/$defs/id"},
+    "contract": {
+      "type": "object", "additionalProperties": false,
+      "required": ["revision", "sha256"],
+      "properties": {
+        "revision": {"type": "integer", "minimum": 1},
+        "sha256": {"$ref": "#/$defs/sha"}
+      }
+    },
+    "original_request": {
+      "type": "object", "additionalProperties": false,
+      "required": ["text", "sha256", "source_ref"],
+      "properties": {
+        "text": {"$ref": "#/$defs/text"},
+        "sha256": {"$ref": "#/$defs/sha"},
+        "source_ref": {"$ref": "#/$defs/text"}
+      }
+    },
+    "goal": {"$ref": "#/$defs/text"},
+    "status": {"enum": ["achieved", "partial", "blocked"]},
+    "goal_verified": {"type": "boolean"},
+    "outcomes": {
+      "type": "array", "minItems": 1,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "text", "status", "required_evidence", "task_outcomes", "findings"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"},
+          "text": {"$ref": "#/$defs/text"},
+          "status": {"enum": ["achieved", "partial", "blocked", "excluded"]},
+          "required_evidence": {
+            "type": "array", "uniqueItems": true,
+            "items": {"enum": ["verification", "critic", "release", "live"]}
+          },
+          "task_outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["task_id", "requirement_id", "task_state", "status", "findings", "evidence"],
+              "properties": {
+                "task_id": {"$ref": "#/$defs/id"},
+                "requirement_id": {"type": "string", "pattern": "^R[1-9][0-9]*$"},
+                "task_state": {"enum": ["open", "active", "blocked", "done", "missing"]},
+                "status": {"enum": ["achieved", "partial", "blocked"]},
+                "findings": {"$ref": "#/$defs/texts"},
+                "evidence": {"type": "array", "items": {"$ref": "#/$defs/provenance"}}
+              }
+            }
+          },
+          "findings": {"$ref": "#/$defs/texts"}
+        }
+      }
+    },
+    "contract_findings": {"$ref": "#/$defs/texts"},
+    "queue": {
+      "type": "object", "additionalProperties": false,
+      "required": ["open", "active", "blocked"],
+      "properties": {
+        "open": {"$ref": "#/$defs/ids"},
+        "active": {"$ref": "#/$defs/ids"},
+        "blocked": {"$ref": "#/$defs/ids"}
+      }
+    },
+    "follow_ups": {
+      "type": "array", "uniqueItems": true,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["key", "kind", "outcome_id", "modify", "reason", "source_ref"],
+        "properties": {
+          "key": {"$ref": "#/$defs/text"},
+          "kind": {"enum": ["repair", "research"]},
+          "outcome_id": {"$ref": "#/$defs/id"},
+          "modify": {"$ref": "#/$defs/texts"},
+          "reason": {"$ref": "#/$defs/text"},
+          "source_ref": {"$ref": "#/$defs/text"}
+        }
+      }
+    },
+    "provenance": {"type": "array", "items": {"$ref": "#/$defs/provenance"}},
+    "handoff": {
+      "type": "object", "additionalProperties": false,
+      "required": ["path", "format"],
+      "properties": {
+        "path": {"type": "string", "pattern": "^\\.go/runs/campaigns/"},
+        "format": {"const": "markdown"}
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "sha": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "text": {"type": "string", "minLength": 1, "pattern": "\\S"},
+    "texts": {"type": "array", "items": {"$ref": "#/$defs/text"}},
+    "ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}},
+    "provenance": {
+      "type": "object", "additionalProperties": false,
+      "required": ["evidence_class", "kind", "task_id", "outcome_id", "ref", "sha256", "details"],
+      "properties": {
+        "evidence_class": {"enum": ["locally_verified", "release", "live", "pending", "user_decision"]},
+        "kind": {"$ref": "#/$defs/text"},
+        "task_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+        "outcome_id": {"anyOf": [{"$ref": "#/$defs/id"}, {"type": "null"}]},
+        "ref": {"$ref": "#/$defs/text"},
+        "sha256": {"anyOf": [{"$ref": "#/$defs/sha"}, {"type": "null"}]},
+        "details": {"type": "object"}
+      }
+    }
+  }
+}

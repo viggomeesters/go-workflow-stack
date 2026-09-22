@@ -1,0 +1,62 @@
+{
+  "schema": "go-workflow.autonomy-live-pilot.v1",
+  "id": "synthetic-notes-night-20260922",
+  "intent": "Ship a tiny local notes library in two independently verified releases.\n1. Repair note normalization so whitespace, blank entries and duplicates are handled deterministically.\n2. Add a Markdown report renderer over normalized notes with an empty-state message.",
+  "repository": {
+    "kind": "new_disposable",
+    "seed": "fixtures/minimal",
+    "project_id": "autonomy-live-notes"
+  },
+  "authority": {
+    "mode": "execute",
+    "source_ref": "conversation:2026-09-22:Go-uitvoeren-and-continue",
+    "allowed_work": [
+      "notes.py",
+      "README.md"
+    ]
+  },
+  "models": [
+    {
+      "task_id": "normalize-notes",
+      "id": "gpt-5.6-terra",
+      "effort": "high"
+    },
+    {
+      "task_id": "render-report",
+      "id": "gpt-6-astra",
+      "effort": "medium"
+    }
+  ],
+  "intake_model": {
+    "id": "gpt-6-astra",
+    "effort": "high"
+  },
+  "budget": {
+    "wall_seconds": 3600,
+    "max_tasks": 3,
+    "max_attempts": 6,
+    "max_commands": 100,
+    "command_timeout_seconds": 900
+  },
+  "publication": {
+    "provider": "git-tag",
+    "remote": "new_local_bare",
+    "allow_push": true
+  },
+  "deployment": {
+    "mode": "none",
+    "reason": "The authorized synthetic pilot has no live service target."
+  },
+  "interruption": {
+    "kind": "SIGTERM",
+    "after_remote_tag": "v1.2.0",
+    "resume": "automatic"
+  },
+  "privacy": {
+    "synthetic_data_only": true,
+    "private_repositories": "forbidden",
+    "forbidden_names": [
+      "hearthhold"
+    ]
+  }
+}

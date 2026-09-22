@@ -1,0 +1,105 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.campaign-run.v1",
+  "title": "Durable bounded serial campaign controller state",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "campaign_id",
+    "project",
+    "contract",
+    "workspace_root",
+    "status",
+    "started_at",
+    "updated_at",
+    "current_task",
+    "completed_tasks",
+    "consumption",
+    "history",
+    "stop"
+  ],
+  "properties": {
+    "schema": {"const": "go-workflow.campaign-run.v1"},
+    "campaign_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "project": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+    "contract": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["revision", "sha256", "source_path", "snapshot_path"],
+      "properties": {
+        "revision": {"type": "integer", "minimum": 1},
+        "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "source_path": {"type": "string", "minLength": 1},
+        "snapshot_path": {"type": "string", "pattern": "^\\.go/runs/campaigns/"}
+      }
+    },
+    "workspace_root": {"type": "string", "minLength": 1},
+    "status": {
+      "enum": [
+        "running",
+        "task_in_progress",
+        "budget_exhausted",
+        "no_eligible_tasks",
+        "authority_required",
+        "unsafe_repository",
+        "unknown_external_effect"
+      ]
+    },
+    "started_at": {"type": "string", "minLength": 1},
+    "updated_at": {"type": "string", "minLength": 1},
+    "current_task": {
+      "anyOf": [
+        {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+        {"type": "null"}
+      ]
+    },
+    "completed_tasks": {
+      "type": "array",
+      "items": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+      "uniqueItems": true
+    },
+    "consumption": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active_wall_seconds", "attempts_started", "tasks_completed"],
+      "properties": {
+        "active_wall_seconds": {"type": "number", "minimum": 0},
+        "attempts_started": {"type": "integer", "minimum": 0},
+        "tasks_completed": {"type": "integer", "minimum": 0}
+      }
+    },
+    "history": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
+    "stop": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["condition", "reason", "task_id"],
+          "properties": {
+            "condition": {
+              "enum": [
+                "budget_exhausted",
+                "no_eligible_tasks",
+                "authority_required",
+                "unsafe_repository",
+                "unknown_external_effect"
+              ]
+            },
+            "reason": {"type": "string", "minLength": 1},
+            "task_id": {
+              "anyOf": [
+                {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+                {"type": "null"}
+              ]
+            }
+          }
+        }
+      ]
+    }
+  }
+}

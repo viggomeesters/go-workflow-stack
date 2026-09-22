@@ -252,6 +252,10 @@ def campaign_task_findings(data: Any, task: dict[str, Any]) -> list[str]:
         for key in ('model', 'critic_model'):
             if key in contract and contract[key] not in authority['models']:
                 errors.append(f'task {key} outside campaign model profiles')
+        release = contract.get('release')
+        if (isinstance(release, dict) and release.get('mode') == 'required'
+                and release.get('profile') not in authority['release']['profiles']):
+            errors.append('task release profile outside campaign authority')
     return errors
 
 
@@ -324,6 +328,10 @@ def campaign_findings(repo: Path, data: Any, *, previous: Any = None) -> list[st
                     for key in ('model', 'critic_model'):
                         if key in contract and contract[key] not in data['authority']['models']:
                             errors.append(f'{task_id}: {key} outside campaign model profiles')
+                    release = contract.get('release')
+                    if (isinstance(release, dict) and release.get('mode') == 'required'
+                            and release.get('profile') not in data['authority']['release']['profiles']):
+                        errors.append(f'{task_id}: release profile outside campaign authority')
             for outcome in data['goal']['outcomes']:
                 for link in outcome['task_outcomes']:
                     if link['task_id'] != task_id:

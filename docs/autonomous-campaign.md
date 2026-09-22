@@ -1,24 +1,26 @@
 # Bounded serial campaign contracts
 
 A campaign connects an authorized request to a bounded goal and existing task
-outcomes. It is an opt-in **contract**, not another task queue, a runner, an
-approval, or a completion record. This first increment supplies the versioned
-schema, pure validation functions and a read-only CLI check. Exploration,
-controller execution, cumulative accounting, recovery, goal auditing and
-publication integration belong to the dependent autonomy tasks.
+outcomes. It is an opt-in **contract plus foreground serial controller**, not
+another task queue, an approval, or a completion record. Task, managed-run,
+workspace, release and outcome records remain authoritative. The campaign
+controller owns only deterministic selection, a frozen mandate snapshot and
+cumulative controller accounting.
 
 ```sh
 python3 cli/go.py validate /path/to/repo --campaign /path/to/contract.json --json
 python3 cli/go.py validate /path/to/repo --campaign /path/to/revision-2.json \
   --previous-campaign /path/to/revision-1.json --json
+python3 cli/go.py auto /path/to/repo --campaign /path/to/contract.json \
+  --campaign-workspace-root /path/to/workspaces --execute --json
 ```
 
-The check reads the canonical `.go` even when invoked in an owned task worktree.
-It writes nothing, launches no workers and performs no publication. Without
-`--campaign`, existing validation and historical contracts retain their semantics.
-The validator does not discover a campaign from a broad vision or an empty queue.
-The controller chooses and stores immutable revisions; this increment does not
-introduce an on-disk active-campaign pointer or a new state writer.
+Validation reads the canonical `.go` even when invoked in an owned task
+worktree. It writes nothing, launches no workers and performs no publication.
+Execution requires `--execute`, an explicit contract and an outside-repository
+workspace root. Without `--campaign`, existing single-task and legacy batch
+behavior is unchanged. The controller never discovers a campaign from a broad
+vision, chat history or an empty queue.
 
 ## Contract and traceability
 
@@ -86,8 +88,9 @@ Decision dispositions are deliberately distinct:
 
 `campaign_task_findings(contract, task)` checks static campaign restrictions:
 planning mode, exact task membership, unresolved/proposed decisions affecting
-that task, and explicit task/critic model profiles. An independent task remains
-eligible under these restrictions when another task has an unresolved choice.
+that task, explicit task/critic model profiles, and required release-profile
+membership. An independent task remains eligible under these restrictions when
+another task has an unresolved choice.
 
 A valid contract can describe blocked work. Callers must first validate the
 contract against the repository with `campaign_findings`, then check task
@@ -118,11 +121,12 @@ runtime capability/effective-identity checks remain necessary before dispatch.
 
 `authority.budget` has positive integer `wall_seconds`, `max_tasks` and
 `max_attempts`. These are campaign-wide ceilings covering initial work,
-research, repair and retries across interruption/resume, not fresh per-task
-allowances. The controller must retain consumption; rewriting a contract cannot
-reset it. A contract can permit more tasks than can fit the current budget.
-Budget exhaustion stops work rather than making the contract structurally
-invalid. Metering and enforcement are intentionally not claimed by this build.
+research, repair and controller retries across interruption/resume, not fresh
+per-task allowances. The controller checkpoints active wall time after every
+completed task and stop, counts every task execution attempt, and counts unique
+completed tasks. The frozen contract digest prevents a retry from resetting
+consumption. A contract can permit more tasks than fit its budget; exhaustion
+stops with a durable resumable record rather than making the contract invalid.
 
 `authority.release` names configured project release profiles and separately
 sets `allow_push`; an enabled grant requires its own source reference.
@@ -142,10 +146,23 @@ All six stop conditions must be declared:
 - `unsafe_repository`: preserve dirt and stop unsafe writes.
 - `unknown_external_effect`: reconcile the effect before further external writes.
 
-The contract contains no parallelism setting: this design permits one builder
-and one owned task worktree at a time. Future runtime work must consume these
-bounds; existing `auto`/`loop` commands do not yet enforce this new campaign
-contract merely because its validation passes.
+The contract contains no parallelism setting: the foreground controller holds
+one repository campaign lock, selects one task, and calls the existing managed
+task runner once at a time. `auto`, `go`, `loop`, and `go-loop` consume the
+campaign only when `--campaign` is explicit. They first resume a permitted
+active managed task, then a delivered task awaiting release/cleanup recovery,
+then the first eligible open task in `authority.permitted_tasks` order.
+Task-local blockers are reported and skipped; foreign active work, missing
+checkpoints and unsafe repository state fail closed.
+
+The durable controller record is
+`.go/runs/campaigns/<campaign-id>/state.json`, validated by
+[`campaign-run.schema.json`](../schemas/campaign-run.schema.json). A sibling
+immutable snapshot binds revision and canonical digest. Resume refuses contract,
+workspace-root or snapshot drift. `no_eligible_tasks` explicitly leaves
+`goal_verified: false`; a later goal audit owns that conclusion. There is no
+daemon, timer, parallel dispatch, hidden active-campaign pointer or new
+publication mechanism.
 
 ## Governing decision and adoption
 
@@ -190,9 +207,11 @@ resolved contract-design question is removed. The plan retains its original
 planning-only source history. Live pilot bindings and any applicable named-human
 architecture gate remain unresolved until their actual authority is available.
 The controller records conformance through the existing architecture lane.
-Contract tests support intent/authority integrity; they do not prove serial
-continuation, recovery, delivery or the live campaign. Those require dependent
-task proof.
+Contract tests support intent/authority integrity. The autonomy-03 runtime tests
+add serial continuation, active/cleanup precedence, cumulative resume, frozen
+snapshot checks, deployment-target non-escalation and a real managed
+cleanup-to-next-task transition. Goal auditing and an actual unattended live
+campaign remain separately owned work.
 
 R1/R2 are implemented by the schema, validator and fixtures. R3 has the adopted
 governing decision/brief and positive/negative/legacy validation evidence.

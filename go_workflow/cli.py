@@ -51,6 +51,7 @@ from go_workflow.worktrees import (guard_workspace_command, registered_workspace
     validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, rebind_workspace, owned_record, verify_workspace,
     WorkspaceError, create_workspace, workflow_root, is_git_checkout)
 from go_workflow.capacity_policy import plan_capacity
+from go_workflow.campaign import CampaignError, execute_campaign, plan_campaign
 from go_workflow.routing import detected_platform, normalize_router_command, recommend_route
 from go_workflow.task_state import open_task_records, pending_review_task_ids as task_state_pending_review_task_ids, task_path
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
@@ -1325,7 +1326,18 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
     max_commands = max(arg_int(args, "max_commands", max_tasks * 12), 1)
     command_timeout_seconds = max(arg_int(args, "command_timeout_seconds", 900), 1)
     checkpoint_every_tasks = max(arg_int(args, "checkpoint_every_tasks", 1), 1)
-    tasks = [task[1] for task in open_tasks(repo)[:max_tasks]]
+    campaign = None
+    if getattr(args, "campaign", ""):
+        previous = Path(args.previous_campaign) if getattr(args, "previous_campaign", "") else None
+        campaign, campaign_tasks = plan_campaign(
+            repo,
+            Path(args.campaign),
+            sys.modules[__name__],
+            previous_path=previous,
+        )
+        tasks = campaign_tasks[:max_tasks]
+    else:
+        tasks = [task[1] for task in open_tasks(repo)[:max_tasks]]
     is_loop = mode == "go-loop"
     stop_conditions = [
         "no_open_tasks_and_no_self_reflect_follow_up",
@@ -1364,7 +1376,7 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
         "telegram_policy": {"default": "silent_until_done_blocker_or_checkpoint", "checkpoint_every_tasks": checkpoint_every_tasks, "summary_chars": args.summary_chars},
         "final_result_fields": ["status", "completed_tasks", "blocked_task", "evidence", "checks", "completion_audit", "summary", "next_action"],
     }
-    return {
+    result = {
         "mode": mode,
         "repo": str(repo),
         "project_id": project.get("id"),
@@ -1388,6 +1400,9 @@ def build_loop_plan(repo: Path, args: argparse.Namespace, mode: str = "go-auto")
             "stop_conditions": stop_conditions,
         },
     }
+    if campaign is not None:
+        result["campaign"] = campaign
+    return result
 
 
 def task_contract_findings(task: dict[str, Any]) -> list[str]:
@@ -2523,6 +2538,9 @@ def build_resume_args(mode: str, args: argparse.Namespace) -> list[str]:
         ("--repair-agent", "repair_agent"),
         ("--executor-agent", "executor_agent"),
         ("--ship-policy", "ship_policy"),
+        ("--campaign", "campaign"),
+        ("--previous-campaign", "previous_campaign"),
+        ("--campaign-workspace-root", "campaign_workspace_root"),
     ]:
         value = arg_str(args, name)
         if value:
@@ -2610,6 +2628,8 @@ def write_latest_run_state(repo: Path, root: Path, result: dict[str, Any], args:
 
 
 def execute_loop_plan(repo: Path, args: argparse.Namespace, mode: str) -> tuple[int, dict[str, Any]]:
+    if getattr(args, "campaign", ""):
+        return execute_campaign(repo, args, mode, sys.modules[__name__], execute_managed)
     managed = select_managed_task(repo, args, sys.modules[__name__])
     if managed is not None:
         return execute_managed(repo, args, mode, managed, sys.modules[__name__])
@@ -5810,6 +5830,9 @@ def build_parser() -> argparse.ArgumentParser:
     context_verify.set_defaults(func=cmd_context_verify)
     for command_parser in (go, auto, *[sub.choices[name] for name in ('loop', 'go-loop')]):
         command_parser.add_argument('--allow-deploy', action='store_true')
+        command_parser.add_argument('--campaign', default='', help='explicit bounded campaign contract')
+        command_parser.add_argument('--previous-campaign', default='', help='previous immutable campaign revision')
+        command_parser.add_argument('--campaign-workspace-root', default='', help='outside-repository root for campaign task worktrees')
         for field in ('task-id', 'workspace-path', 'workspace-branch', 'base-branch', 'base-commit', 'run-id'):
             command_parser.add_argument('--' + field, default='')
     managed_parser = sub.add_parser('managed', help='Internal managed-run process boundary')
@@ -6190,7 +6213,7 @@ def main() -> int:
     try:
         guard_workspace_command(args)
         return int(args.func(args))
-    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError, PublicationError) as exc:
+    except (RepoLocalError, StateLockError, WorkspaceError, ContextError, RunStateError, CompletionError, PublicationError, CampaignError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
 

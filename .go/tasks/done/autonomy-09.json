@@ -1,0 +1,333 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-09",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prove an unattended multi-task night run with real workers",
+  "description": "Validate the completed serial chain against a representative disposable project using real supported workers and authorized release targets. Hearthhold is a source of representative cases, not permission to modify its product or saves. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "docs/autonomy-benchmark.md",
+      "docs/proof/autonomy-night/**",
+      "fixtures/autonomy-live/**",
+      "scripts/check-autonomy-proof.py",
+      "tests/test_autonomy_live_proof.py",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-09/**"
+    ]
+  },
+  "acceptance": [
+    "Before model calls, freeze a concrete pilot repository, allowed work, worker profiles, shared budget and publication/deployment targets from actual authority; missing choices remain explicit blockers, never invented consent.",
+    "A real unattended run starts with sufficiently concrete user intent, explores and materializes work, completes multiple separately delivered tasks, repairs a genuine or controlled fault and survives one documented interruption without manual per-task dispatch.",
+    "Record actual elapsed unattended time, task progress, user interventions, repair/release results and observed usage. No eight-hour or zero-intervention claim unless measured; stop early if the goal is fulfilled rather than inventing work.",
+    "Read back remote/live versions, preserve original outcomes/vision/architecture links, prove Git state and produce the morning report. Failed attempts remain evidence. A fixture double or hand-steered sequence does not satisfy this live proof.",
+    "Update the public autonomy capability assessment only to the level demonstrated; publish no private pilot data or local saves.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_live_proof.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T15:10:07+02:00",
+    "base_commit": "784c3763effcadb0f32274ad60cc956be3fca11e"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T16:36:45+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json",
+      "transaction_id": "a4df588b3fd444b9be28202a44017525",
+      "delivery": {
+        "delivery_id": "autonomy-first-v11",
+        "html": ".go/deliveries/autonomy-first-v11/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v11/manifest.json",
+        "source_sha256": "1d0da061256c3afd12c5e31a3f7b3c005f9ce6a4561a231c197fff4d20cb7c1d",
+        "html_sha256": "68488add4997348da3626815aeef351e76ebeaefcea545bc93c75bc2ca0b91e7"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T16:36:23+02:00",
+      "task_id": "autonomy-09",
+      "agent": "codex-astra-high",
+      "summary": "summary=Proved a bounded unattended real-worker campaign and published immutable v0.3.43; changed_files=.go/project.json,CHANGELOG.md,README.md,docs/autonomy-benchmark.md,docs/proof/autonomy-night/2026-09-22-attempt-01/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-01/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-01/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-01/failed-attempt.json,docs/proof/autonomy-night/2026-09-22-attempt-02/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-02/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-02/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-02/failed-attempt.json,docs/proof/autonomy-night/2026-09-22-attempt-03/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-03/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-03/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-03/failed-attempt.json,docs/proof/autonomy-night/2026-09-22-attempt-04/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-04/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-04/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-04/failed-attempt.json,docs/proof/autonomy-night/2026-09-22-attempt-05/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-05/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-05/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-05/failed-attempt.json,docs/proof/autonomy-night/2026-09-22-attempt-06/000-baseline.json,docs/proof/autonomy-night/2026-09-22-attempt-06/001-intake.json,docs/proof/autonomy-night/2026-09-22-attempt-06/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22-attempt-06/003-controller-resume.json,docs/proof/autonomy-night/2026-09-22-attempt-06/failed-attempt.json,docs/proof/autonomy-night/2026-09-22/000-baseline.json,docs/proof/autonomy-night/2026-09-22/001-intake.json,docs/proof/autonomy-night/2026-09-22/002-controller-initial.json,docs/proof/autonomy-night/2026-09-22/003-controller-resume.json,docs/proof/autonomy-night/2026-09-22/manifest.json,docs/proof/autonomy-night/2026-09-22/morning-report.md,docs/releases/v0.3.43.md,fixtures/autonomy-live/campaign.py,fixtures/autonomy-live/pilot.json,go_workflow/constants.py,pyproject.toml,release-pairings.json,scripts/check-autonomy-proof.py,tests/test_autonomy_live_proof.py; verification_command=declared four-command completion gate plus Linux release-check 0.3.43 --validate-existing; verification_result=passed: 12 targeted, make check, validate, diff-check, 156 compatibility, 26 injected-failure, 197 smoke, template pairing and standalone install; critic=passed same-agent hardening review with no blocking findings; architecture_conformance=passed autonomous-campaign decision and five quality attributes; runtime=Codex desktop; model=gpt-6-astra high; billing_mode=subscription; release=v0.3.43 f031040ebefcdb31a0b643248344090d8651ac6e https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.43; self_reflect=six preserved failed attempts produced concrete harness hardening; uv.lock preserved as unrelated user dirt",
+      "changed_files": [
+        ".go/project.json",
+        "CHANGELOG.md",
+        "README.md",
+        "docs/autonomy-benchmark.md",
+        "docs/proof/autonomy-night/2026-09-22-attempt-01/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-01/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-01/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-01/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-02/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-02/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-02/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-02/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-03/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-03/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-03/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-03/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-04/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-04/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-04/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-04/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-05/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-05/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-05/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-05/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-06/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-06/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-06/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-06/003-controller-resume.json",
+        "docs/proof/autonomy-night/2026-09-22-attempt-06/failed-attempt.json",
+        "docs/proof/autonomy-night/2026-09-22/000-baseline.json",
+        "docs/proof/autonomy-night/2026-09-22/001-intake.json",
+        "docs/proof/autonomy-night/2026-09-22/002-controller-initial.json",
+        "docs/proof/autonomy-night/2026-09-22/003-controller-resume.json",
+        "docs/proof/autonomy-night/2026-09-22/manifest.json",
+        "docs/proof/autonomy-night/2026-09-22/morning-report.md",
+        "docs/releases/v0.3.43.md",
+        "fixtures/autonomy-live/campaign.py",
+        "fixtures/autonomy-live/pilot.json",
+        "go_workflow/constants.py",
+        "pyproject.toml",
+        "release-pairings.json",
+        "scripts/check-autonomy-proof.py",
+        "tests/test_autonomy_live_proof.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "784c3763effcadb0f32274ad60cc956be3fca11e",
+        "observed_head_commit": "f031040ebefcdb31a0b643248344090d8651ac6e"
+      },
+      "verification": {
+        "command": "declared four-command completion gate plus Linux release-check 0.3.43 --validate-existing",
+        "result": "passed: 12 targeted, make check, validate, diff-check, 156 compatibility, 26 injected-failure, 197 smoke, template pairing and standalone install"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent hardening review with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-08",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Validate the completed serial chain against a representative disposable project using real supported workers and authorized release targets. Hearthhold is a source of representative cases, not permission to modify its product or saves. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "1dfac257a22b3343cde6f79f963213e069bd80b1bfda3a5f5d159fac1b8ac4ee",
+    "source_ref": "repo-local-intake:autonomy-09"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Before model calls, freeze a concrete pilot repository, allowed work, worker profiles, shared budget and publication/deployment targets from actual authority; missing choices remain explicit blockers, never invented consent.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "docs/proof/autonomy-night/2026-09-22/001-intake.json"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "A real unattended run starts with sufficiently concrete user intent, explores and materializes work, completes multiple separately delivered tasks, repairs a genuine or controlled fault and survives one documented interruption without manual per-task dispatch.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "docs/proof/autonomy-night/2026-09-22/manifest.json"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Record actual elapsed unattended time, task progress, user interventions, repair/release results and observed usage. No eight-hour or zero-intervention claim unless measured; stop early if the goal is fulfilled rather than inventing work.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "docs/proof/autonomy-night/2026-09-22/morning-report.md"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/verification-d6ff629e489444208493fb7c3732c630.json"
+        },
+        {
+          "created_at": "2026-09-22T16:34:40+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Read back remote/live versions, preserve original outcomes/vision/architecture links, prove Git state and produce the morning report. Failed attempts remain evidence. A fixture double or hand-steered sequence does not satisfy this live proof.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "docs/proof/autonomy-night/2026-09-22/manifest.json"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Update the public autonomy capability assessment only to the level demonstrated; publish no private pilot data or local saves.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": "docs/autonomy-benchmark.md"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json"
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T16:32:17+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/release-9be0039454d045e6992fdb5890466f17.json"
+        },
+        {
+          "created_at": "2026-09-22T16:34:23+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-09/completion/release-526a48988f614164b0dae1fcab65b998.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-09/completion/verification-cd197fc4eca04478acab003440477071.json",
+      "sha256": "897b1145d5d6a8f3d1b140142e2de7b5b96cd7e714a096b2a8ba93e37daff5db"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-09/completion/critic-de77796dffca470784f0c3145ccaffb9.json",
+      "sha256": "66c3e0d9c70509f8e4bd79af19fb2c2689e53954ff03a2526eb7ce755f30ae6c"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-09/completion/release-526a48988f614164b0dae1fcab65b998.json",
+      "sha256": "d5fc5b60563e840d299865a92cba9facc1b487a87671240a7d32c49d2fc42712"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-09",
+    "project": "go-workflow-stack",
+    "commit": "f031040ebefcdb31a0b643248344090d8651ac6e",
+    "tag": "v0.3.43",
+    "evidence": [
+      ".go/runs/autonomy-09/completion/release-526a48988f614164b0dae1fcab65b998.json"
+    ]
+  }
+}

@@ -1,0 +1,189 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "repository-intelligence-01-index-contract",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Add the repository-map contract and deterministic application index",
+  "description": "Implement the repository-intelligence foundation from .go/plans/repository-intelligence.json: a compact committed semantic repository map plus a provider-free, regenerable detailed graph. Source code remains authoritative, .go is excluded from self-indexing, and existing repositories remain valid without opting in.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/vision.json",
+      ".go/architecture-principles.json",
+      ".go/plans/repository-intelligence.json",
+      "docs/practical-architecture.md",
+      "go_workflow/cli.py",
+      "go_workflow/state_io.py",
+      "schemas/task.schema.json",
+      "fixtures/minimal/.go"
+    ],
+    "modify": [
+      "go_workflow/repository_index.py",
+      "go_workflow/cli.py",
+      "schemas/repository-map.schema.json",
+      "schemas/repository-graph.schema.json",
+      "fixtures/minimal/.go/repository-map.json",
+      "fixtures/minimal/.go/cache/.gitignore",
+      ".go/repository-map.json",
+      ".go/cache/.gitignore",
+      "tests/test_repository_index.py",
+      "docs/repository-intelligence.md",
+      "README.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      ".go/project.json",
+      "release-pairings.json",
+      "CHANGELOG.md",
+      "docs/releases/v0.3.44.md"
+    ]
+  },
+  "acceptance": [
+    "An optional schema-versioned .go/repository-map.json stores compact stable component nodes, paths, intended dependencies and overlays; repository validation accepts legacy repos without it and strictly validates it when present.",
+    "A provider-free index build deterministically enumerates Git-visible source while excluding .go, VCS metadata, dependencies and build output; it records content hashes plus language-neutral file/component/test nodes and Python symbol/import edges in .go/cache/repository-graph.json.",
+    "The detailed graph is explicitly derived, local and regenerable: .go/cache ignores generated contents, repeated unchanged builds are byte-stable, and source/architecture/task state remain authoritative.",
+    "Public JSON CLI behavior builds, reports status and queries a bounded repository subgraph with exact path/symbol provenance and actionable missing/stale errors.",
+    "Behavioral tests prove schema/runtime agreement, deterministic output, exclusions, stale detection, generic and Python extraction, query limits and backward compatibility."
+  ],
+  "verification": [
+    ".venv/bin/python -m pytest tests/test_repository_index.py tests/test_smoke.py -q",
+    ".venv/bin/python cli/go.py validate .",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-22T18:53:16+02:00",
+    "base_commit": "40f2b5519e6938012713507fcdd3752bcf9c63b3"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T19:30:35+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Same-agent critic passed; v0.3.44 release and GitHub readback verified; no blocking findings.",
+      "transaction_id": "7776216c2e3e490a99e16908de27825c",
+      "delivery": {
+        "delivery_id": "repository-intelligence-v1",
+        "html": ".go/deliveries/repository-intelligence-v1/index.html",
+        "manifest": ".go/deliveries/repository-intelligence-v1/manifest.json",
+        "source_sha256": "7ec6ed48564921a2b6462b6f31f12b89ebe048dafbf08ac48638297bb5e664df",
+        "html_sha256": "52c565cadb23b17bbc2594552ba7107099ce7b3e68b224a132f5c23b68c01f72"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T19:30:29+02:00",
+      "task_id": "repository-intelligence-01-index-contract",
+      "agent": "codex",
+      "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/repository-map.schema.json|schemas/repository-graph.schema.json|tests/test_repository_index.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=Linux release-check v0.3.44 plus declared task commands; verification_result=passed (156+26+197 release suites and 205 task tests); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription",
+      "changed_files": [
+        "go_workflow/repository_index.py",
+        "go_workflow/cli.py",
+        "schemas/repository-map.schema.json",
+        "schemas/repository-graph.schema.json",
+        "tests/test_repository_index.py",
+        "docs/repository-intelligence.md",
+        "README.md",
+        "release metadata"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "40f2b5519e6938012713507fcdd3752bcf9c63b3",
+        "observed_head_commit": "b814f2e4adcea0029ca890433279eda130590d58"
+      },
+      "verification": {
+        "command": "Linux release-check v0.3.44 plus declared task commands",
+        "result": "passed (156+26+197 release suites and 205 task tests)"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "Codex desktop plus Lima Linux",
+        "model": "gpt-6-astra",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop plus Lima Linux",
+        "billing_mode": "subscription",
+        "owner": "codex",
+        "model": "gpt-6-astra",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent review with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "critic_model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "current",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "repository-intelligence"
+    ],
+    "concerns": [
+      "data",
+      "integration"
+    ],
+    "decision_ids": [
+      "repository-intelligence-derived-view-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/repository-intelligence-01-index-contract/completion/verification-58bf0757f42d4760bcd22a37875513eb.json",
+      "sha256": "b9d0c2b21bed00cb47d6b036136bde13b1d6fc7cfbff391a9c6d1368a295df1c"
+    },
+    "critic": {
+      "path": ".go/runs/repository-intelligence-01-index-contract/completion/critic-24297e5d1c9d4cee930ef8cace32a5c9.json",
+      "sha256": "79d71290e3f03b24b5107f6f2b6025b6b9ff7299ecc9aaabe7526ee7f97c502c"
+    },
+    "release": {
+      "path": ".go/runs/repository-intelligence-01-index-contract/completion/release-f3e5b596f24a487ea7fbee6cbbeebb5c.json",
+      "sha256": "0c06b2a6961593bad4035c56c056419f9574950573e50817a196c8c9048a86fd"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "repository-intelligence-01-index-contract",
+    "project": "go-workflow-stack",
+    "commit": "b814f2e4adcea0029ca890433279eda130590d58",
+    "tag": "v0.3.44",
+    "evidence": [
+      ".go/runs/repository-intelligence-01-index-contract/completion/release-f3e5b596f24a487ea7fbee6cbbeebb5c.json"
+    ]
+  }
+}

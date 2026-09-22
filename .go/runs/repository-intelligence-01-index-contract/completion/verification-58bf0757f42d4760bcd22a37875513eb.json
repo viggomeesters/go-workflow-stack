@@ -1,0 +1,104 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "repository-intelligence-01-index-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "8f3c67b93dc904512986d4119b306e5ab299eb487881329c28ee97043eadba15",
+  "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+  "content_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-01-index-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python -m pytest tests/test_repository_index.py tests/test_smoke.py -q",
+        "cwd": "/home/viggomeesters.guest/ri-task/task1-proof",
+        "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+        "worktree_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-01-index-contract/completion/command-001565c2ea5d4fb2ad03668cdee1d3f6.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-01-index-contract/completion/command-001565c2ea5d4fb2ad03668cdee1d3f6.json",
+        "sha256": "cce55f97a4b77ac7eb30f9a4594e436f6e2022dfd7ce9186c679533d3da13cee"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-01-index-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": ".venv/bin/python cli/go.py validate .",
+        "cwd": "/home/viggomeesters.guest/ri-task/task1-proof",
+        "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+        "worktree_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-01-index-contract/completion/command-283433337d634a05a0b592917e98223e.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-01-index-contract/completion/command-283433337d634a05a0b592917e98223e.json",
+        "sha256": "070b8a788addcdace78186354fca18e53c197dd27ac0e69a1a0eb1153cc9713e"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-01-index-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/home/viggomeesters.guest/ri-task/task1-proof",
+        "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+        "worktree_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-01-index-contract/completion/command-89e7b18bb0e549118664953dcb13fa45.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-01-index-contract/completion/command-89e7b18bb0e549118664953dcb13fa45.json",
+        "sha256": "638348eae734288eb7f082984f25c5428b58c6b520690dfeb80faeb6c990237b"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "repository-intelligence-01-index-contract",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/home/viggomeesters.guest/ri-task/task1-proof",
+        "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+        "worktree_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/repository-intelligence-01-index-contract/completion/command-c82ef0cb476e4596a6e49a1f6c04825b.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/repository-intelligence-01-index-contract/completion/command-c82ef0cb476e4596a6e49a1f6c04825b.json",
+        "sha256": "9894fbbf749378e52fb6efa040545151515886432696fba837485e4d049d09db"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

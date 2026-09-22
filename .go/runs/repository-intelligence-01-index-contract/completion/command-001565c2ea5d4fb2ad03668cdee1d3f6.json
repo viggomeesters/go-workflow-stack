@@ -1,0 +1,14 @@
+{
+  "task_id": "repository-intelligence-01-index-contract",
+  "project": "go-workflow-stack",
+  "contract_digest": "8f3c67b93dc904512986d4119b306e5ab299eb487881329c28ee97043eadba15",
+  "revision": "b814f2e4adcea0029ca890433279eda130590d58",
+  "content_digest": "c28563caf72e11a63fb8e42d9bdd810c8c2e876ac5bb494f3bdbc97c87fda470",
+  "command": ".venv/bin/python -m pytest tests/test_repository_index.py tests/test_smoke.py -q",
+  "cwd": "/home/viggomeesters.guest/ri-task/task1-proof",
+  "elapsed_seconds": 52.22136293099902,
+  "returncode": 0,
+  "stdout": "........................................................................ [ 35%]\n........................................................................ [ 70%]\n.............................................................            [100%]\n205 passed in 51.63s\n",
+  "stderr": "",
+  "timed_out": false
+}

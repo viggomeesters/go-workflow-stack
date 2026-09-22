@@ -1,0 +1,50 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "repository-intelligence-v1",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "repository-intelligence",
+    "title": "Repository intelligence"
+  },
+  "release": {
+    "version": 1,
+    "status": "released",
+    "created_at": "2026-09-22T19:30:37+02:00",
+    "supersedes": null
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "passed"
+  },
+  "sections": {
+    "summary": "Connect durable .go intent and tasks to a deterministic, regenerable application index without creating a second source of truth.",
+    "delivered_scope": [
+      "Add the repository-map contract and deterministic application index"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Add the repository-map contract and deterministic application index",
+        "summary": "changed_files=go_workflow/repository_index.py|go_workflow/cli.py|schemas/repository-map.schema.json|schemas/repository-graph.schema.json|tests/test_repository_index.py|docs/repository-intelligence.md|README.md|release metadata; verification_command=Linux release-check v0.3.44 plus declared task commands; verification_result=passed (156+26+197 release suites and 205 task tests); critic=passed same-agent review with no blocking findings; runtime=Codex desktop plus Lima Linux; model=gpt-6-astra; billing_mode=subscription"
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Bind tasks to stable repository nodes and select bounded execution context",
+      "Verify blast radius and expose architecture-to-code drift"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "7ec6ed48564921a2b6462b6f31f12b89ebe048dafbf08ac48638297bb5e664df",
+    "html_sha256": "52c565cadb23b17bbc2594552ba7107099ce7b3e68b224a132f5c23b68c01f72"
+  }
+}

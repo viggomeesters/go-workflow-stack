@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.38 — grounded outcome behavior review
+
+- Carry exact original R# outcomes, governing product goals and explained applicable architecture into fresh critic context.
+- Bind passed outcome judgments to current candidate/context identities and hashed inspected source, test, runtime, browser, visual or audio evidence.
+- Reject preparation-only proof, unrelated green checks, stale captures and unreproduced completion claims for strict-review tasks.
+- Turn blocked reviews into bounded in-scope repairs without rewriting acceptance or demanding future publication receipts.
+- Preserve historical review compatibility through explicit `behavior_review_version: 1` adoption.
+
 ## 0.3.37 — persistent campaign recovery supervision
 
 - Recover exact task dispatch after controller death while refusing live or cross-host owner takeover.

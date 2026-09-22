@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.37",
+  "current_stack_ref": "v0.3.38",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -236,6 +236,12 @@
       "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
       "template_ref": "v0.3.17",
       "note": "Preserved immutable starter baseline. Campaign recovery supervision remains a stack capability until the separate autonomy-template-01 onboarding task lands."
+    },
+    {
+      "stack_ref": "v0.3.38",
+      "template_commit": "9d185d2e741957d18264fb02690c932caeb45c41",
+      "template_ref": "v0.3.17",
+      "note": "Preserved immutable starter baseline. Grounded behavior-review onboarding remains owned by the separate autonomy-template-01 task."
     }
   ]
 }

@@ -16,6 +16,8 @@ Task authoring and review follow [proportionate design readiness](docs/task-desi
 structural validity is separate from a grounded content assessment. Explicit
 unresolved design prerequisites block execution, while routine tuning and bounded
 research keep their existing lightweight paths.
+Strict outcome tasks use [grounded autonomy evidence](docs/autonomy-evidence.md) to
+bind each R# judgment to the current candidate, critic context and inspected bytes.
 
 ## Why this exists
 

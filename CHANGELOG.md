@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.45 — task-bound repository context
+
+- Let tasks bind stable repository-map nodes, bounded lexical queries, dependency depth, test inclusion and advisory/strict impact policy.
+- Resolve fresh deterministic subgraphs with exact source hashes while retaining directly requested nodes and enforcing node/edge budgets.
+- Supply only the selected subgraph to build, critic and repair context; missing maps, unknown IDs and stale graphs fail closed.
+- Add schema-backed `task create --repository-context` authoring while preserving legacy task behavior.
+
 ## 0.3.44 — repository intelligence foundation
 
 - Add an optional committed repository map with stable semantic component IDs, intended dependencies, test ownership and overlays.

@@ -72,7 +72,10 @@ from go_workflow.repository_index import (
     build_graph,
     index_status,
     query_graph,
+    select_repository_context,
     validate_repository_map,
+    validate_repository_context,
+    validate_task_repository_context,
 )
 from go_workflow.architecture import (
     architecture_briefs,
@@ -366,6 +369,8 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
                 errors.extend(validate_verification_evidence(proof))
                 if isinstance(proof, dict) and proof.get("task_id") != task_id:
                     errors.append("verification evidence task_id mismatch")
+    if "repository_context" in data:
+        errors.extend(validate_repository_context(data.get("repository_context"), f"{rel}: repository_context"))
     if "architecture" in data:
         errors.extend(validate_task_architecture(data.get("architecture"), rel))
     if "work_status" in data:
@@ -591,6 +596,7 @@ def validate_repo(repo: Path, *, skip_lifecycle_migration: bool = False) -> list
             try:
                 data = load_json(path)
                 errors.extend(validate_task(data, relative(repo, path), expected_status=status))
+                errors.extend(validate_task_repository_context(repo, data, relative(repo, path)))
                 errors.extend(dependency_findings(repo, data))
                 contract = data.get("execution_contract")
                 if isinstance(contract, dict) and isinstance(contract.get("phase_profile"), str):
@@ -1891,6 +1897,8 @@ def build_execution_context(repo: Path, task: dict[str, Any], *, phase: str = 'b
         context['behavior_review'] = behavior_review_context(
             task, vision, architecture, content_snapshot(repo, task)['digest'], phase=phase,
         )
+    if "repository_context" in task:
+        context["repository_context"] = select_repository_context(repo, task["repository_context"])
     return context
 
 
@@ -4336,6 +4344,14 @@ def apply_intake_contract(repo: Path, task: dict[str, Any], source: dict[str, An
         if errors:
             raise RepoLocalError("invalid dependencies: " + "; ".join(errors))
         task["dependencies"] = source["dependencies"]
+    if "repository_context" in source:
+        errors = validate_repository_context(source["repository_context"])
+        if errors:
+            raise RepoLocalError("invalid repository context: " + "; ".join(errors))
+        task["repository_context"] = source["repository_context"]
+        errors = validate_task_repository_context(repo, task, str(task.get("id") or "task"))
+        if errors:
+            raise RepoLocalError("invalid repository context: " + "; ".join(errors))
 
     ensure_intake_outcomes(task)
 
@@ -4384,6 +4400,8 @@ def cmd_task_create(args: argparse.Namespace) -> int:
             source["dependencies"] = json.loads(Path(args.dependencies).read_text())
         except (OSError, ValueError) as exc:
             raise RepoLocalError(f"invalid dependency file: {exc}") from exc
+    if getattr(args, "repository_context", ""):
+        source["repository_context"] = load_json(Path(args.repository_context))
     apply_intake_contract(repo, task, source)
     dependency_errors = dependency_findings(repo, task, candidates=[task])
     if dependency_errors:
@@ -5792,6 +5810,7 @@ def build_parser() -> argparse.ArgumentParser:
     task_create.add_argument("--verification", action="append", default=[])
     task_create.add_argument("--execution-contract", default="", help="JSON file: opt-in execution contract overrides")
     task_create.add_argument("--dependencies", default="", help="JSON array file of explicit dependency references")
+    task_create.add_argument("--repository-context", default="", help="JSON file: stable repository nodes, discovery queries and context budget")
     task_create.set_defaults(func=cmd_task_create)
     task_outcome = task_sub.add_parser("outcome", help="Record one requested-outcome disposition with evidence")
     task_outcome.add_argument("repo")

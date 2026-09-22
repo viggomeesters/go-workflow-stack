@@ -290,7 +290,51 @@
         "vision",
         "architecture_principles",
         "hierarchy"
-      ]
+      ],
+      "properties": {
+        "repository_context": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "authority",
+            "fresh",
+            "source_digest",
+            "map_digest",
+            "contract",
+            "nodes",
+            "edges",
+            "sources",
+            "truncated"
+          ],
+          "properties": {
+            "schema": {"const": "go-workflow.repository-context.v1"},
+            "authority": {"const": "derived_routing_context_not_source_of_truth"},
+            "fresh": {"const": true},
+            "source_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "map_digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            "contract": {"type": "object"},
+            "nodes": {"type": "array", "items": {"type": "object"}},
+            "edges": {"type": "array", "items": {"type": "object"}},
+            "sources": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["path", "sha256", "bytes", "language"]
+              }
+            },
+            "truncated": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["nodes", "edges"],
+              "properties": {
+                "nodes": {"type": "boolean"},
+                "edges": {"type": "boolean"}
+              }
+            }
+          }
+        }
+      }
     },
     "feedback": {
       "type": "object"

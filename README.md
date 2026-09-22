@@ -140,6 +140,7 @@ The apply command validates the paired template and then creates a project-speci
 - `agents sync <repo> [--apply]`: plan or safely install/repair the bounded root `AGENTS.md` gateway while preserving repository-specific instructions outside it.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `index build|status|query <repo>`: build the ignored, provider-free repository graph; prove its freshness; or select a bounded subgraph with exact path/symbol provenance. The optional committed `.go/repository-map.json` supplies stable application component IDs, while source and architecture remain authoritative.
+- `task create ... --repository-context context.json`: bind a task to stable map nodes and bounded discovery queries. Build, critic and repair receive the same fresh selected subgraph and hashes; legacy tasks receive no implicit graph context.
 - `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
 - `migrate <repo> [--apply]`: plan a versioned `.go` and root-gateway migration without writes, or explicitly apply and validate it.
 - `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.

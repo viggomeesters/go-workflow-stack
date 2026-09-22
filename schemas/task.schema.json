@@ -176,11 +176,71 @@
         }
       }
     },
+    "repository_context": {
+      "$ref": "#/$defs/repositoryContext"
+    },
     "execution_contract": {
       "$ref": "#/$defs/executionContract"
     }
   },
   "$defs": {
+    "repositoryContext": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "nodes",
+        "queries",
+        "max_nodes",
+        "max_edges",
+        "dependency_depth",
+        "include_tests",
+        "impact_policy"
+      ],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"
+          }
+        },
+        "queries": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          }
+        },
+        "max_nodes": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "max_edges": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "dependency_depth": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "include_tests": {
+          "type": "boolean"
+        },
+        "impact_policy": {
+          "enum": ["advisory", "strict"]
+        }
+      },
+      "anyOf": [
+        {"properties": {"nodes": {"minItems": 1}}},
+        {"properties": {"queries": {"minItems": 1}}}
+      ]
+    },
     "executionContract": {
       "type": "object",
       "additionalProperties": false,

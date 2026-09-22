@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "repository-intelligence-02-task-context",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Bind tasks to stable repository nodes and select bounded execution context",
   "description": "Extend task and worker-context contracts so work references stable repository-map node IDs and receives a fresh, token-bounded subgraph with provenance. Keep tasks declarative and avoid copying generated repository prose into canonical task state.",
   "scope": {
@@ -28,7 +28,13 @@
       "schemas/execution-context.schema.json",
       "tests/test_repository_context.py",
       "docs/repository-intelligence.md",
-      "README.md"
+      "README.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      ".go/project.json",
+      "release-pairings.json",
+      "CHANGELOG.md",
+      "docs/releases/v0.3.45.md"
     ]
   },
   "acceptance": [
@@ -45,10 +51,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-09-22T19:31:03+02:00",
+    "base_commit": "67749b3bcf5c5cba1c8463d5173eb11548f6cf37"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -79,6 +86,21 @@
       "requires": "done_with_required_release_evidence"
     }
   ],
+  "repository_context": {
+    "nodes": [
+      "workflow-runtime",
+      "contract-schemas"
+    ],
+    "queries": [
+      "execution context",
+      "repository context"
+    ],
+    "max_nodes": 80,
+    "max_edges": 160,
+    "dependency_depth": 2,
+    "include_tests": true,
+    "impact_policy": "strict"
+  },
   "outcome_tracking_version": 1,
   "intent_source": {
     "text": "Extend task and worker-context contracts so work references stable repository-map node IDs and receives a fresh, token-bounded subgraph with provenance. Keep tasks declarative and avoid copying generated repository prose into canonical task state.",

@@ -81,6 +81,42 @@ Queries are deterministic lexical routing aids. Results carry exact file,
 symbol, and line provenance where extraction supports it. A missing or stale
 graph fails with a rebuild instruction instead of returning outdated context.
 
+## Task-bound context
+
+A task can opt into repository intelligence with a strict
+`repository_context` contract:
+
+```json
+{
+  "repository_context": {
+    "nodes": ["api", "domain"],
+    "queries": ["session validation"],
+    "max_nodes": 80,
+    "max_edges": 160,
+    "dependency_depth": 2,
+    "include_tests": true,
+    "impact_policy": "strict"
+  }
+}
+```
+
+`nodes` resolve only against committed repository-map IDs. `queries` add
+bounded lexical discovery without storing generated prose in the task.
+`max_nodes` must be large enough for every directly requested node; those nodes
+are mandatory. The selector then follows intended dependencies, observed
+imports and containment up to the declared depth, and adds linked test suites
+when requested. Both nodes and edges stop at their declared budgets.
+
+Build, critic and repair contexts receive only this selected subgraph, its
+exact source hashes, map/source digests, freshness and authority statement.
+They never receive the whole cached graph. Missing maps, unknown stable IDs,
+missing graphs and stale graphs fail before worker dispatch with a rebuild or
+contract-repair instruction. Tasks without `repository_context` preserve the
+legacy execution context unchanged.
+
+To author the contract through the CLI, store the object in a JSON file and
+pass `task create ... --repository-context context.json`.
+
 ## Regeneration and portability
 
 Commit `.go/repository-map.json` and `.go/cache/.gitignore`; do not commit the

@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.44",
+  "current_stack_ref": "v0.3.45",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -278,6 +278,12 @@
       "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
       "template_ref": "v0.3.18",
       "note": "Repository intelligence foundation; template adoption remains backward compatible because the semantic map is optional."
+    },
+    {
+      "stack_ref": "v0.3.45",
+      "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
+      "template_ref": "v0.3.18",
+      "note": "Task-bound repository context; legacy tasks remain unchanged until they opt into repository_context."
     }
   ]
 }

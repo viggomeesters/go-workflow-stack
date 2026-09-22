@@ -21,6 +21,7 @@ from .state_io import atomic_json
 MAP_SCHEMA = "go-workflow.repository-map.v1"
 GRAPH_SCHEMA = "go-workflow.repository-graph.v1"
 GRAPH_RELATIVE_PATH = Path(".go/cache/repository-graph.json")
+CONTEXT_SCHEMA = "go-workflow.repository-context.v1"
 SOURCE_EXTENSIONS = {
     ".c", ".cc", ".clj", ".cpp", ".cs", ".dart", ".ex", ".exs", ".go",
     ".h", ".hpp", ".java", ".js", ".jsx", ".kt", ".kts", ".lua", ".m",
@@ -131,6 +132,71 @@ def validate_repository_map(value: Any, rel: str = ".go/repository-map.json", *,
         for item in overlays
     ):
         errors.append(f"{rel}: overlays must contain known node_id plus non-empty notes")
+    return errors
+
+
+def validate_repository_context(value: Any, rel: str = "repository_context") -> list[str]:
+    if not isinstance(value, dict):
+        return [f"{rel}: must be an object"]
+    required = {
+        "nodes", "queries", "max_nodes", "max_edges", "dependency_depth",
+        "include_tests", "impact_policy",
+    }
+    errors: list[str] = []
+    missing = sorted(required - set(value))
+    unknown = sorted(set(value) - required)
+    if missing:
+        errors.append(f"{rel}: missing properties: {', '.join(missing)}")
+    if unknown:
+        errors.append(f"{rel}: unknown properties: {', '.join(unknown)}")
+    nodes = value.get("nodes")
+    if not isinstance(nodes, list) or not all(
+        isinstance(node, str) and re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", node)
+        for node in nodes
+    ):
+        errors.append(f"{rel}: nodes must be stable node IDs")
+    elif len(nodes) != len(set(nodes)):
+        errors.append(f"{rel}: nodes must be unique")
+    queries = value.get("queries")
+    if not isinstance(queries, list) or not all(isinstance(query, str) and query.strip() for query in queries):
+        errors.append(f"{rel}: queries must be non-empty strings")
+    elif len(queries) != len(set(queries)):
+        errors.append(f"{rel}: queries must be unique")
+    if isinstance(nodes, list) and isinstance(queries, list) and not nodes and not queries:
+        errors.append(f"{rel}: at least one node or query is required")
+    max_nodes = value.get("max_nodes")
+    if type(max_nodes) is not int or not 1 <= max_nodes <= 500:
+        errors.append(f"{rel}: max_nodes must be between 1 and 500")
+    elif isinstance(nodes, list) and len(nodes) > max_nodes:
+        errors.append(f"{rel}: max_nodes cannot be smaller than directly requested nodes")
+    max_edges = value.get("max_edges")
+    if type(max_edges) is not int or not 0 <= max_edges <= 1000:
+        errors.append(f"{rel}: max_edges must be between 0 and 1000")
+    depth = value.get("dependency_depth")
+    if type(depth) is not int or not 0 <= depth <= 5:
+        errors.append(f"{rel}: dependency_depth must be between 0 and 5")
+    if type(value.get("include_tests")) is not bool:
+        errors.append(f"{rel}: include_tests must be a boolean")
+    if value.get("impact_policy") not in {"advisory", "strict"}:
+        errors.append(f"{rel}: impact_policy must be advisory or strict")
+    return errors
+
+
+def validate_task_repository_context(repo: Path, task: dict[str, Any], rel: str) -> list[str]:
+    if "repository_context" not in task:
+        return []
+    contract = task.get("repository_context")
+    errors = validate_repository_context(contract, f"{rel}: repository_context")
+    if errors:
+        return errors
+    try:
+        repository_map = load_repository_map(repo, required=True)
+    except RepositoryIndexError as exc:
+        return [f"{rel}: {exc}"]
+    known = {str(node["id"]) for node in (repository_map or {}).get("nodes", [])}
+    for node_id in contract["nodes"]:
+        if node_id not in known:
+            errors.append(f"{rel}: repository_context references unknown repository-map node {node_id!r}")
     return errors
 
 
@@ -480,4 +546,98 @@ def query_graph(repo: Path, query: str, *, limit: int = 20) -> dict[str, Any]:
         "nodes": selected,
         "edges": edges,
         "limit": limit,
+    }
+
+
+def select_repository_context(repo: Path, contract: dict[str, Any]) -> dict[str, Any]:
+    """Resolve one task contract to a deterministic, bounded fresh subgraph."""
+    findings = validate_repository_context(contract)
+    if findings:
+        raise RepositoryIndexError("invalid repository_context: " + "; ".join(findings))
+    repository_map = load_repository_map(repo, required=True)
+    known_map_nodes = {str(node["id"]) for node in (repository_map or {}).get("nodes", [])}
+    unknown = [node_id for node_id in contract["nodes"] if node_id not in known_map_nodes]
+    if unknown:
+        raise RepositoryIndexError("unknown repository-map node: " + ", ".join(unknown))
+    graph = load_graph(repo)
+    nodes_by_id = {str(node["id"]): node for node in graph["nodes"]}
+    max_nodes = int(contract["max_nodes"])
+    selected: dict[str, dict[str, Any]] = {}
+    queue: list[tuple[str, int]] = []
+
+    def add(node_id: str, depth: int = 0) -> bool:
+        if node_id in selected or node_id not in nodes_by_id or len(selected) >= max_nodes:
+            return False
+        selected[node_id] = nodes_by_id[node_id]
+        queue.append((node_id, depth))
+        return True
+
+    for node_id in contract["nodes"]:
+        add(f"component:{node_id}")
+
+    query_candidates: list[str] = []
+    for query in contract["queries"]:
+        result = query_graph(repo, query, limit=max_nodes)
+        candidates = [str(node["id"]) for node in result["nodes"]]
+        query_candidates.extend(node_id for node_id in candidates if node_id not in query_candidates)
+        if candidates:
+            add(candidates[0])
+
+    outgoing: dict[str, list[dict[str, str]]] = {}
+    incoming: dict[str, list[dict[str, str]]] = {}
+    for edge in graph["edges"]:
+        outgoing.setdefault(edge["source"], []).append(edge)
+        incoming.setdefault(edge["target"], []).append(edge)
+    for values in (*outgoing.values(), *incoming.values()):
+        values.sort(key=lambda edge: (edge["kind"], edge["source"], edge["target"]))
+
+    cursor = 0
+    while cursor < len(queue) and len(selected) < max_nodes:
+        node_id, depth = queue[cursor]
+        cursor += 1
+        neighbors: list[tuple[int, str, int]] = []
+        for edge in outgoing.get(node_id, []):
+            kind = edge["kind"]
+            if kind in {"depends_on", "imports"} and depth < contract["dependency_depth"]:
+                neighbors.append((0 if kind == "depends_on" else 3, edge["target"], depth + 1))
+            elif kind == "contains":
+                neighbors.append((2, edge["target"], depth))
+        if contract["include_tests"]:
+            for edge in incoming.get(node_id, []):
+                if edge["kind"] == "tests":
+                    neighbors.append((1, edge["source"], depth))
+        for _priority, target, target_depth in sorted(neighbors):
+            add(target, target_depth)
+            if len(selected) >= max_nodes:
+                break
+
+    for node_id in query_candidates:
+        if len(selected) >= max_nodes:
+            break
+        add(node_id)
+
+    selected_ids = set(selected)
+    edges = [
+        edge for edge in graph["edges"]
+        if edge["source"] in selected_ids and edge["target"] in selected_ids
+    ][: contract["max_edges"]]
+    selected_paths = {str(node.get("path")) for node in selected.values() if node.get("path")}
+    sources = [source for source in graph["sources"] if source["path"] in selected_paths]
+    return {
+        "schema": CONTEXT_SCHEMA,
+        "authority": "derived_routing_context_not_source_of_truth",
+        "fresh": True,
+        "source_digest": graph["source_digest"],
+        "map_digest": graph["map_digest"],
+        "contract": contract,
+        "nodes": [selected[node_id] for node_id in sorted(selected)],
+        "edges": edges,
+        "sources": sources,
+        "truncated": {
+            "nodes": len(selected) >= max_nodes and any(node_id not in selected for node_id in query_candidates),
+            "edges": len([
+                edge for edge in graph["edges"]
+                if edge["source"] in selected_ids and edge["target"] in selected_ids
+            ]) > contract["max_edges"],
+        },
     }

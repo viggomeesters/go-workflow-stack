@@ -6,11 +6,15 @@ module only projects eligible work and owns the campaign controller checkpoint.
 from __future__ import annotations
 
 from copy import copy
+import hashlib
 import json
+import os
 from pathlib import Path
+import socket
 import subprocess
 import time
 from typing import Any
+import uuid
 
 from .campaign_contracts import (
     campaign_findings,
@@ -18,7 +22,7 @@ from .campaign_contracts import (
     contract_digest,
 )
 from .task_state import open_task_records
-from .state_io import atomic_json, repository_lock
+from .state_io import atomic_json, repository_lock, _pid_alive
 
 
 class CampaignError(ValueError):
@@ -29,11 +33,13 @@ RUN_SCHEMA = "go-workflow.campaign-run.v1"
 RUN_STATUSES = {
     "running", "task_in_progress", "budget_exhausted", "no_eligible_tasks",
     "authority_required", "unsafe_repository", "unknown_external_effect",
+    "provider_backoff", "paused", "drained", "cancelled",
 }
 RUN_FIELDS = {
     "schema", "campaign_id", "project", "contract", "workspace_root", "status",
     "started_at", "updated_at", "current_task", "completed_tasks", "consumption",
-    "history", "stop",
+    "history", "stop", "controller", "dispatch", "control", "limits", "resources", "clock",
+    "provider", "failures",
 }
 
 
@@ -52,6 +58,7 @@ def _new_state(
     contract: dict[str, Any],
     contract_path: Path,
     workspace_root: Path,
+    args: Any,
 ) -> dict[str, Any]:
     digest = contract_digest(contract)
     directory = _run_directory(repo, contract["id"])
@@ -83,6 +90,22 @@ def _new_state(
             "attempts_started": 0,
             "tasks_completed": 0,
         },
+        "limits": {
+            "max_commands": max(int(getattr(args, "max_commands", 36) or 36), 1),
+            "max_repairs": max(int(getattr(args, "max_attempts", 5) or 5), 1),
+        },
+        "resources": {"commands_used": 0, "repair_attempts": 0},
+        "clock": {"active_since_epoch": None},
+        "provider": {
+            "task_id": None,
+            "model": None,
+            "failure_count": 0,
+            "not_before_epoch": None,
+        },
+        "controller": {"host": socket.gethostname(), "pid": os.getpid(), "nonce": uuid.uuid4().hex},
+        "dispatch": None,
+        "control": {"action": "run", "requested_at": created_at, "actor": str(getattr(args, "agent", "agent"))},
+        "failures": [],
         "history": [],
         "stop": None,
     }
@@ -93,16 +116,18 @@ def _load_or_create_state(
     contract: dict[str, Any],
     contract_path: Path,
     workspace_root: Path,
+    args: Any,
 ) -> tuple[Path, dict[str, Any]]:
     path = _run_directory(repo, contract["id"]) / "state.json"
     digest = contract_digest(contract)
     if not path.exists():
-        state = _new_state(repo, contract, contract_path, workspace_root)
+        state = _new_state(repo, contract, contract_path, workspace_root, args)
         atomic_json(path, state)
         return path, state
     state = _load_object(path, "campaign run state")
     if state.get("schema") != RUN_SCHEMA:
         raise CampaignError("campaign run state schema mismatch")
+    _upgrade_state(state, args)
     _validate_state(state)
     if state.get("campaign_id") != contract["id"] or state.get("project") != contract["project"]:
         raise CampaignError("campaign run identity changed")
@@ -122,7 +147,50 @@ def _load_or_create_state(
     frozen = _load_object(snapshot, "campaign contract snapshot")
     if contract_digest(frozen) != binding["sha256"]:
         raise CampaignError("campaign contract snapshot integrity failure: digest mismatch")
+    previous = state["controller"]
+    if state["dispatch"] is not None and previous["pid"] != os.getpid():
+        if previous["host"] != socket.gethostname():
+            raise CampaignError("campaign controller identity is unknown across hosts")
+        if _pid_alive(previous["pid"]):
+            raise CampaignError("previous campaign controller is still live; takeover refused")
+    if state["dispatch"] is not None:
+        state["history"].append({
+            "event": "campaign.dispatch_recovered",
+            "created_at": _now_iso(),
+            "task_id": state["dispatch"]["task_id"],
+            "stage": state["dispatch"]["stage"],
+        })
+    state["controller"] = {"host": socket.gethostname(), "pid": os.getpid(), "nonce": uuid.uuid4().hex}
     return path, state
+
+
+def _upgrade_state(state: dict[str, Any], args: Any) -> None:
+    """Add v0.3.37 supervision fields to a valid v0.3.36 checkpoint."""
+    consumption = state.get("consumption")
+    migrated_commands = 0
+    migrated_repairs = 0
+    if isinstance(consumption, dict):
+        migrated_commands = consumption.pop("commands_used", 0)
+        migrated_repairs = consumption.pop("repair_attempts", 0)
+    state.setdefault("limits", {
+        "max_commands": max(int(getattr(args, "max_commands", 36) or 36), 1),
+        "max_repairs": max(int(getattr(args, "max_attempts", 5) or 5), 1),
+    })
+    state.setdefault("resources", {
+        "commands_used": migrated_commands,
+        "repair_attempts": migrated_repairs,
+    })
+    state.setdefault("clock", {"active_since_epoch": None})
+    state.setdefault("provider", {
+        "task_id": None,
+        "model": None,
+        "failure_count": 0,
+        "not_before_epoch": None,
+    })
+    state.setdefault("controller", {"host": socket.gethostname(), "pid": os.getpid(), "nonce": uuid.uuid4().hex})
+    state.setdefault("dispatch", None)
+    state.setdefault("control", {"action": "run", "requested_at": _now_iso(), "actor": str(getattr(args, "agent", "agent"))})
+    state.setdefault("failures", [])
 
 
 def _validate_state(state: dict[str, Any]) -> None:
@@ -149,7 +217,7 @@ def _validate_state(state: dict[str, Any]) -> None:
         type(consumption.get("attempts_started")) is not int
         or type(consumption.get("tasks_completed")) is not int
         or type(consumption.get("active_wall_seconds")) not in (int, float)
-        or min(consumption["attempts_started"], consumption["tasks_completed"], consumption["active_wall_seconds"]) < 0
+        or min(consumption.values()) < 0
     ):
         raise CampaignError("campaign consumption checkpoint invalid")
     completed = state.get("completed_tasks")
@@ -168,6 +236,48 @@ def _validate_state(state: dict[str, Any]) -> None:
         raise CampaignError("campaign run state invalid: current task")
     if not isinstance(state.get("history"), list) or any(not isinstance(item, dict) for item in state["history"]):
         raise CampaignError("campaign run state invalid: history")
+    limits = state.get("limits")
+    if (not isinstance(limits, dict) or set(limits) != {"max_commands", "max_repairs"}
+            or any(type(limits.get(key)) is not int or limits[key] < 1 for key in limits)):
+        raise CampaignError("campaign run state invalid: frozen limits")
+    resources = state.get("resources")
+    if (not isinstance(resources, dict) or set(resources) != {"commands_used", "repair_attempts"}
+            or any(type(resources.get(key)) is not int or resources[key] < 0 for key in resources)):
+        raise CampaignError("campaign run state invalid: resource accounting")
+    clock = state.get("clock")
+    if (not isinstance(clock, dict) or set(clock) != {"active_since_epoch"}
+            or (clock["active_since_epoch"] is not None
+                and type(clock["active_since_epoch"]) not in (int, float))):
+        raise CampaignError("campaign run state invalid: durable wall clock")
+    provider = state.get("provider")
+    if (not isinstance(provider, dict)
+            or set(provider) != {"task_id", "model", "failure_count", "not_before_epoch"}
+            or (provider["task_id"] is not None and not isinstance(provider["task_id"], str))
+            or (provider["model"] is not None and (
+                not isinstance(provider["model"], dict)
+                or set(provider["model"]) != {"id", "effort"}
+                or any(not isinstance(value, str) or not value for value in provider["model"].values())
+            ))
+            or type(provider["failure_count"]) is not int or provider["failure_count"] < 0
+            or (provider["not_before_epoch"] is not None
+                and type(provider["not_before_epoch"]) not in (int, float))):
+        raise CampaignError("campaign run state invalid: provider backoff")
+    controller = state.get("controller")
+    if (not isinstance(controller, dict) or set(controller) != {"host", "pid", "nonce"}
+            or not isinstance(controller["host"], str) or type(controller["pid"]) is not int
+            or controller["pid"] < 1 or not isinstance(controller["nonce"], str) or not controller["nonce"]):
+        raise CampaignError("campaign run state invalid: controller identity")
+    dispatch = state.get("dispatch")
+    if dispatch is not None and (not isinstance(dispatch, dict)
+            or set(dispatch) != {"task_id", "stage", "nonce", "attempt", "started_at"}
+            or dispatch.get("stage") not in {"selected", "bound", "dispatched", "returned"}):
+        raise CampaignError("campaign run state invalid: dispatch checkpoint")
+    control = state.get("control")
+    if (not isinstance(control, dict) or set(control) != {"action", "requested_at", "actor"}
+            or control.get("action") not in {"run", "pause", "drain", "cancel"}):
+        raise CampaignError("campaign run state invalid: control request")
+    if not isinstance(state.get("failures"), list) or any(not isinstance(item, dict) for item in state["failures"]):
+        raise CampaignError("campaign run state invalid: failures")
     if any(not isinstance(state.get(key), str) or not state[key] for key in (
         "campaign_id", "project", "workspace_root", "started_at", "updated_at",
     )):
@@ -190,6 +300,18 @@ def _save_state(path: Path, state: dict[str, Any]) -> None:
     atomic_json(path, state)
 
 
+def _checkpoint_wall(state: dict[str, Any]) -> None:
+    started = state["clock"]["active_since_epoch"]
+    if started is not None:
+        state["consumption"]["active_wall_seconds"] += max(time.time() - started, 0.0)
+        state["clock"]["active_since_epoch"] = None
+
+
+def _start_wall(state: dict[str, Any]) -> None:
+    if state["clock"]["active_since_epoch"] is None:
+        state["clock"]["active_since_epoch"] = time.time()
+
+
 def _reconcile_completed_task(
     repo: Path,
     state_path: Path,
@@ -209,6 +331,13 @@ def _reconcile_completed_task(
     state["completed_tasks"].append(task_id)
     state["consumption"]["tasks_completed"] += 1
     state["current_task"] = None
+    state["dispatch"] = None
+    state["provider"] = {
+        "task_id": None,
+        "model": None,
+        "failure_count": 0,
+        "not_before_epoch": None,
+    }
     state["history"].append({
         "event": "campaign.task_reconciled",
         "created_at": _now_iso(),
@@ -226,6 +355,7 @@ def _stop(
     *,
     task_id: str | None = None,
 ) -> None:
+    _checkpoint_wall(state)
     state["status"] = condition
     state["stop"] = {"condition": condition, "reason": reason, "task_id": task_id}
     state["history"].append({
@@ -236,6 +366,58 @@ def _stop(
         "task_id": task_id,
     })
     _save_state(path, state)
+
+
+def _failure_record(task: dict[str, Any], task_result: dict[str, Any], previous: list[dict[str, Any]]) -> dict[str, Any]:
+    material = {
+        "task_id": task["id"],
+        "status": task_result.get("status"),
+        "summary": task_result.get("summary"),
+        "checks": task_result.get("checks") or [],
+    }
+    fingerprint = hashlib.sha256(json.dumps(material, sort_keys=True, default=str).encode()).hexdigest()
+    repeat = previous[-1].get("repeat_count", 0) + 1 if previous and previous[-1].get("fingerprint") == fingerprint else 1
+    return {
+        "task_id": task["id"],
+        "created_at": _now_iso(),
+        "fingerprint": fingerprint,
+        "repeat_count": repeat,
+        "strategy": "block_or_isolate_research" if repeat >= 2 else "re_approach",
+        "summary": str(task_result.get("summary") or task_result.get("status") or "task did not complete"),
+        "evidence": {
+            "status": task_result.get("status"),
+            "checks": task_result.get("checks") or [],
+            "commands_run": max(int(task_result.get("commands_run") or 0), 0),
+            "repair_attempts": max(int(task_result.get("repair_attempts") or 0), 0),
+        },
+    }
+
+
+def _temporary_provider_failure(task_result: dict[str, Any]) -> bool:
+    status = str(task_result.get("status") or "").lower()
+    summary = str(task_result.get("summary") or "").lower()
+    if status in {"provider_unavailable", "provider_temporary", "rate_limited"}:
+        return True
+    return "temporary provider" in summary or "provider rate limit" in summary
+
+
+def _task_model(task: dict[str, Any]) -> dict[str, str]:
+    model = ((task.get("execution_contract") or {}).get("model") or {})
+    if set(model) != {"id", "effort"} or any(not isinstance(value, str) or not value for value in model.values()):
+        raise CampaignError(f"campaign task lacks an exact model binding: {task['id']}")
+    return {"id": model["id"], "effort": model["effort"]}
+
+
+def _control_stop(state_path: Path, state: dict[str, Any], action: str, actor: str) -> tuple[str, str]:
+    status = {"pause": "paused", "drain": "drained", "cancel": "cancelled"}[action]
+    state["control"] = {"action": action, "requested_at": _now_iso(), "actor": actor}
+    reason = {
+        "pause": "Campaign paused at a durable boundary; no worker was dispatched.",
+        "drain": "Campaign drained at a durable boundary; no new task was dispatched.",
+        "cancel": "Campaign cancelled without terminating an unverified process; task/workspace state is preserved.",
+    }[action]
+    _stop(state_path, state, status, reason, task_id=state.get("current_task"))
+    return status, reason
 
 
 def _bound_task_args(
@@ -462,23 +644,59 @@ def execute_campaign(
         "commands_run": 0,
         "goal_verified": False,
     }
-    invocation_started = time.monotonic()
     with repository_lock(repo / ".go", "campaign-controller", timeout_seconds=0.1):
         state_path, state = _load_or_create_state(
-            repo, contract, contract_path, workspace_root,
+            repo, contract, contract_path, workspace_root, args,
         )
         _reconcile_completed_task(repo, state_path, state)
+        action = str(getattr(args, "campaign_action", "run") or "run")
+        if action in {"pause", "drain", "cancel"}:
+            status, reason = _control_stop(state_path, state, action, str(getattr(args, "agent", "agent")))
+            result.update(status=status, summary=reason, blocked_task=state.get("current_task"))
+            result["campaign_state"] = str(state_path.relative_to(repo))
+            api.write_latest_run_state(repo, repo / ".go", result, args, mode)
+            return 1, result
+        if action not in {"run", "resume"}:
+            raise CampaignError("unsupported campaign action")
+        not_before = state["provider"]["not_before_epoch"]
+        if not_before is not None and time.time() < not_before:
+            reason = "Temporary provider failure is in bounded backoff; exact model binding is preserved."
+            state["status"] = "provider_backoff"
+            state["stop"] = {
+                "condition": "provider_backoff",
+                "reason": reason,
+                "task_id": state["provider"]["task_id"],
+            }
+            _save_state(state_path, state)
+            result.update(
+                status="provider_backoff",
+                summary=reason,
+                blocked_task=state["provider"]["task_id"],
+                retry_not_before_epoch=not_before,
+                campaign_state=str(state_path.relative_to(repo)),
+            )
+            api.write_latest_run_state(repo, repo / ".go", result, args, mode)
+            return 1, result
+        if not_before is not None:
+            state["provider"]["not_before_epoch"] = None
+        _checkpoint_wall(state)
+        _start_wall(state)
+        state["control"] = {"action": "run", "requested_at": _now_iso(), "actor": str(getattr(args, "agent", "agent"))}
         state["status"] = "running"
         state["stop"] = None
         _save_state(state_path, state)
         while True:
-            elapsed = state["consumption"]["active_wall_seconds"] + (time.monotonic() - invocation_started)
+            active_since = state["clock"]["active_since_epoch"]
+            elapsed = state["consumption"]["active_wall_seconds"] + (
+                max(time.time() - active_since, 0.0) if active_since is not None else 0.0
+            )
             if (
                 elapsed >= budget["wall_seconds"]
                 or state["consumption"]["attempts_started"] >= budget["max_attempts"]
                 or state["consumption"]["tasks_completed"] >= budget["max_tasks"]
+                or state["resources"]["commands_used"] >= state["limits"]["max_commands"]
+                or state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"]
             ):
-                state["consumption"]["active_wall_seconds"] = elapsed
                 _stop(state_path, state, "budget_exhausted", "campaign-wide budget exhausted")
                 result.update(status="budget_exhausted", budget_exhausted=True)
                 break
@@ -486,9 +704,34 @@ def execute_campaign(
             projection, selected = plan_campaign(
                 repo, contract_path, api, previous_path=previous,
             )
+            no_progress_ids = {
+                item["task_id"] for item in state["failures"]
+                if item.get("repeat_count", 0) >= 2
+                and item.get("strategy") == "block_or_isolate_research"
+            }
+            if no_progress_ids and projection["selection"] == "next_open":
+                independent = [task for task in selected if task["id"] not in no_progress_ids]
+                for task in selected:
+                    if task["id"] in no_progress_ids:
+                        projection["skipped_tasks"].append({
+                            "task_id": task["id"],
+                            "findings": ["repeated evidence-identical failure requires a different strategy or bounded research"],
+                        })
+                selected = independent
+                projection["next_tasks"] = [task["id"] for task in selected]
+                if selected:
+                    projection["selection"] = "next_independent_after_no_progress"
             result["campaign"] = projection
             if not selected:
-                state["consumption"]["active_wall_seconds"] = elapsed
+                if no_progress_ids:
+                    blocked = sorted(no_progress_ids)[0]
+                    reason = (
+                        "Repeated evidence-identical failure requires a different strategy or bounded research; "
+                        "no eligible independent task remains."
+                    )
+                    _stop(state_path, state, "authority_required", reason, task_id=blocked)
+                    result.update(status="authority_required", summary=reason, blocked_task=blocked)
+                    break
                 _stop(
                     state_path,
                     state,
@@ -502,6 +745,17 @@ def execute_campaign(
                 break
 
             task = selected[0]
+            model = _task_model(task)
+            provider = state["provider"]
+            if provider["task_id"] == task["id"] and provider["model"] is not None and provider["model"] != model:
+                raise CampaignError("campaign task model changed during provider recovery; fallback refused")
+            if provider["task_id"] != task["id"]:
+                state["provider"] = {
+                    "task_id": task["id"],
+                    "model": model,
+                    "failure_count": 0,
+                    "not_before_epoch": None,
+                }
             state["current_task"] = task["id"]
             state["status"] = "task_in_progress"
             state["consumption"]["attempts_started"] += 1
@@ -511,6 +765,13 @@ def execute_campaign(
                 "task_id": task["id"],
                 "attempt": state["consumption"]["attempts_started"],
             })
+            state["dispatch"] = {
+                "task_id": task["id"],
+                "stage": "selected",
+                "nonce": uuid.uuid4().hex,
+                "attempt": state["consumption"]["attempts_started"],
+                "started_at": _now_iso(),
+            }
             _save_state(state_path, state)
             try:
                 task_args = _bound_task_args(
@@ -521,8 +782,20 @@ def execute_campaign(
                     workspace_root,
                     require_managed=getattr(execute_task, "__name__", "") == "execute_managed",
                 )
+                task_args.campaign_failed_proof = [
+                    item for item in state["failures"] if item.get("task_id") == task["id"]
+                ]
+                task_args.max_commands = min(
+                    max(int(task_args.max_commands), 1),
+                    state["limits"]["max_commands"] - state["resources"]["commands_used"],
+                )
+                task_args.max_attempts = min(
+                    max(int(task_args.max_attempts), 1),
+                    state["limits"]["max_repairs"] - state["resources"]["repair_attempts"],
+                )
+                state["dispatch"]["stage"] = "bound"
+                _save_state(state_path, state)
             except CampaignError as exc:
-                state["consumption"]["active_wall_seconds"] += time.monotonic() - invocation_started
                 _stop(state_path, state, "unsafe_repository", str(exc), task_id=task["id"])
                 result.update(
                     status="unsafe_repository",
@@ -532,17 +805,43 @@ def execute_campaign(
                     completed_tasks=list(state["completed_tasks"]),
                 )
                 break
+            state["dispatch"]["stage"] = "dispatched"
+            _save_state(state_path, state)
             code, task_result = execute_task(repo, task_args, mode, task, api)
-            result["commands_run"] += int(task_result.get("commands_run") or 0)
+            used_commands = max(int(task_result.get("commands_run") or 0), 0)
+            used_repairs = max(int(task_result.get("repair_attempts") or 0), 0)
+            result["commands_run"] += used_commands
+            state["resources"]["commands_used"] += used_commands
+            state["resources"]["repair_attempts"] += used_repairs
+            state["dispatch"]["stage"] = "returned"
             result["checks"].extend(task_result.get("checks") or [])
             completed = task_result.get("completed_tasks") or []
             successful = code == 0 and task_result.get("status") in {"task_complete", "done"} and task["id"] in completed
             if not successful:
-                state["consumption"]["active_wall_seconds"] += time.monotonic() - invocation_started
-                invocation_started = time.monotonic()
+                failure = _failure_record(task, task_result, state["failures"])
+                state["failures"].append(failure)
+                if _temporary_provider_failure(task_result):
+                    state["provider"]["failure_count"] += 1
+                    delay = min(2 ** (state["provider"]["failure_count"] - 1), 60)
+                    state["provider"]["not_before_epoch"] = time.time() + delay
+                    reason = f"Temporary provider failure; retry is bounded for {delay}s with the same model binding."
+                    _stop(state_path, state, "provider_backoff", reason, task_id=task["id"])
+                    result.update(
+                        task_result,
+                        status="provider_backoff",
+                        summary=reason,
+                        campaign=projection,
+                        completed_tasks=list(state["completed_tasks"]),
+                        blocked_task=task["id"],
+                        retry_not_before_epoch=state["provider"]["not_before_epoch"],
+                    )
+                    break
+                no_progress = failure["repeat_count"] >= 2
                 condition = (
                     "budget_exhausted"
                     if task_result.get("status") == "budget_exhausted"
+                    or state["resources"]["commands_used"] >= state["limits"]["max_commands"]
+                    or state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"]
                     else "unknown_external_effect"
                     if "external effect" in str(task_result.get("summary", "")).lower()
                     else "authority_required"
@@ -552,11 +851,39 @@ def execute_campaign(
                     if task_result.get("status") in {"safety_gate", "resume_gate"}
                     else "authority_required"
                 )
+                open_path = repo / ".go" / "tasks" / "open" / f"{task['id']}.json"
+                active_path = repo / ".go" / "tasks" / "active" / f"{task['id']}.json"
+                if no_progress and (open_path.is_file() or active_path.is_file()):
+                    if active_path.is_file():
+                        api.block_task_record(
+                            repo,
+                            repo / ".go",
+                            active_path,
+                            task,
+                            str(getattr(args, "agent", "agent")),
+                            "Repeated evidence-identical failure requires a different strategy or bounded research.",
+                            failure["evidence"]["checks"],
+                        )
+                    state["current_task"] = None
+                    state["dispatch"] = None
+                    state["status"] = "running"
+                    state["stop"] = None
+                    state["history"].append({
+                        "event": "campaign.no_progress_isolated",
+                        "created_at": _now_iso(),
+                        "task_id": task["id"],
+                        "fingerprint": failure["fingerprint"],
+                        "strategy": failure["strategy"],
+                    })
+                    _save_state(state_path, state)
+                    result["blocked_task"] = task["id"]
+                    continue
                 _stop(
                     state_path,
                     state,
                     condition,
-                    str(task_result.get("summary") or task_result.get("status") or "task did not complete"),
+                    ("No progress after repeated evidence-identical failure; block or isolate bounded research: "
+                     + failure["summary"]) if no_progress else failure["summary"],
                     task_id=task["id"],
                 )
                 result.update(task_result)
@@ -564,14 +891,23 @@ def execute_campaign(
                 result["campaign"] = projection
                 result["completed_tasks"] = list(state["completed_tasks"])
                 result["blocked_task"] = task["id"]
+                if no_progress:
+                    result["summary"] = state["stop"]["reason"]
                 break
 
             if task["id"] not in state["completed_tasks"]:
                 state["completed_tasks"].append(task["id"])
                 state["consumption"]["tasks_completed"] += 1
-            state["consumption"]["active_wall_seconds"] += time.monotonic() - invocation_started
-            invocation_started = time.monotonic()
+            _checkpoint_wall(state)
+            _start_wall(state)
             state["current_task"] = None
+            state["dispatch"] = None
+            state["provider"] = {
+                "task_id": None,
+                "model": None,
+                "failure_count": 0,
+                "not_before_epoch": None,
+            }
             state["status"] = "running"
             state["history"].append({
                 "event": "campaign.task_completed",

@@ -133,6 +133,10 @@
     "requirements": {
       "type": "array"
     },
+    "campaign_failures": {
+      "type": "array",
+      "items": {"type": "object"}
+    },
     "cleanup": {
       "type": "object"
     },

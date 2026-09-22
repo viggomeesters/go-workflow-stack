@@ -13,6 +13,8 @@ python3 cli/go.py validate /path/to/repo --campaign /path/to/revision-2.json \
   --previous-campaign /path/to/revision-1.json --json
 python3 cli/go.py auto /path/to/repo --campaign /path/to/contract.json \
   --campaign-workspace-root /path/to/workspaces --execute --json
+python3 cli/go.py auto /path/to/repo --campaign /path/to/contract.json \
+  --campaign-workspace-root /path/to/workspaces --execute --campaign-action pause --json
 ```
 
 Validation reads the canonical `.go` even when invoked in an owned task
@@ -127,6 +129,12 @@ completed task and stop, counts every task execution attempt, and counts unique
 completed tasks. The frozen contract digest prevents a retry from resetting
 consumption. A contract can permit more tasks than fit its budget; exhaustion
 stops with a durable resumable record rather than making the contract invalid.
+The first executable invocation also freezes its CLI command and repair limits.
+The state keeps those limits separate from cumulative command/repair usage, so
+a resume with larger flags cannot replenish either budget. An active wall-clock
+timestamp is saved before dispatch. Recovery conservatively charges all time
+since that timestamp when a controller died without clearing it; an outage can
+therefore exhaust the budget, but can never manufacture more wall time.
 
 `authority.release` names configured project release profiles and separately
 sets `allow_push`; an enabled grant requires its own source reference.
@@ -163,6 +171,35 @@ workspace-root or snapshot drift. `no_eligible_tasks` explicitly leaves
 `goal_verified: false`; a later goal audit owns that conclusion. There is no
 daemon, timer, parallel dispatch, hidden active-campaign pointer or new
 publication mechanism.
+
+The state also records controller host/PID/nonce and a dispatch intent through
+`selected`, `bound`, `dispatched`, and `returned`. A successor repeats the exact
+pending task only after the old local PID is dead; a live local owner or unknown
+remote-host owner blocks takeover. Managed-run process-group checks remain the
+authority for a started worker. Completed managed work is reconciled from its
+done task and `phase=complete` checkpoint, never inferred from a lost return.
+Raw failed checks remain in managed evidence and a bounded campaign failure
+record is supplied to the next worker/critic as feedback.
+
+Temporary provider failures stop in `provider_backoff` with an exponentially
+bounded 1–60 second retry timestamp. The task's exact model/effort pair is saved
+and any change during recovery is rejected; the controller does not fall back
+to another model. Two consecutive evidence-identical failures mark the task as
+no-progress and require a different repair strategy or bounded research. An
+open task in that state is isolated; an active task is moved to the canonical
+blocked queue while its managed checkpoint, raw evidence, and workspace remain
+intact. Only other tasks that independently pass the normal dependency and
+readiness gates may run. If none remain, the precise blocker is retained as
+`authority_required`.
+
+`--campaign-action pause`, `drain`, and `cancel` are durable boundary actions.
+They acquire the single controller lock, dispatch no new work, preserve task and
+workspace state, and record distinct `paused`, `drained`, or `cancelled` stops.
+They never kill an unverified PID. If a managed worker is still live, its
+existing ownership checks prevent the control action from stealing or racing
+that process; external-effect intents still require readback reconciliation.
+The generated resume command deliberately omits the one-shot control action and
+therefore resumes normal execution instead of replaying a pause or cancel.
 
 ## Governing decision and adoption
 

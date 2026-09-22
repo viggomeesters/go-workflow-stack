@@ -40,13 +40,17 @@ def validate_state(value):
     arrays = {'checks', 'phase_evidence', 'budgets', 'history', 'requirements'}
     required = strings | objects | arrays | {'schema', 'phase', 'attempt', 'check_index', 'worker_group', 'inflight'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd', 'publication'}
+            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd', 'publication', 'campaign_failures'}
             or value['schema'] != SCHEMA
             or value['phase'] not in {'setup', 'build', 'release_prepare', 'verify', 'critic', 'repair', 'release', 'cleanup', 'complete'}
             or any(not isinstance(value[name], str) or not value[name] for name in strings)
             or any(not isinstance(value[name], dict) for name in objects)
             or any(not isinstance(value[name], list) for name in arrays)):
         raise RunStateError('Invalid managed run state shape')
+    if ('campaign_failures' in value and (
+            not isinstance(value['campaign_failures'], list)
+            or any(not isinstance(item, dict) for item in value['campaign_failures']))):
+        raise RunStateError('Invalid campaign failure proof')
     for field, minimum in [('attempt', 1), ('check_index', 0)]:
         if type(value[field]) is not int or value[field] < minimum: raise RunStateError('Invalid run counter: ' + field)
     owner = value['controller']
@@ -350,7 +354,8 @@ def completion_status(control):
 def execute_managed(control, args, mode, task, api):
     task_id = task['id']
     result = {'schema': 'go-workflow.auto-run-result.v1', 'mode': mode, 'repo': str(control),
-              'completed_tasks': [], 'blocked_task': None, 'checks': [], 'commands_run': 0}
+              'completed_tasks': [], 'blocked_task': None, 'checks': [], 'commands_run': 0,
+              'repair_attempts': 0}
     try:
         with repository_lock(control / '.go', 'managed-run-' + task_id, timeout_seconds=0.1):
             return _execute_managed(control, args, task_id, api, result)
@@ -385,6 +390,11 @@ def _execute_managed(control, args, task_id, api, result):
             state = session.load()
             require_stopped(state)
             state['controller'] = {'host': socket.gethostname(), 'pid': os.getpid()}
+            campaign_failures = getattr(args, 'campaign_failed_proof', [])
+            if campaign_failures:
+                if not isinstance(campaign_failures, list) or any(not isinstance(item, dict) for item in campaign_failures):
+                    raise RunStateError('Invalid campaign failure proof')
+                state['campaign_failures'] = deepcopy(campaign_failures)
             if state['inflight']: state['inflight']['nonce'] = 'retired-' + uuid.uuid4().hex
             atomic_json(state_path(control, task_id), state)
     else:
@@ -406,10 +416,14 @@ def _execute_managed(control, args, task_id, api, result):
         record = {'path': str(Path(args.workspace_path).resolve()), 'branch': args.workspace_branch,
                   'base_branch': args.base_branch, 'base_commit': args.base_commit}
         models = freeze_selection(control, task)
+        campaign_failures = getattr(args, 'campaign_failed_proof', [])
+        if not isinstance(campaign_failures, list) or any(not isinstance(item, dict) for item in campaign_failures):
+            raise RunStateError('Invalid campaign failure proof')
         state = {'schema': SCHEMA, 'task_id': task_id, 'project': task['project'], 'control_repo': str(control),
                  'owner': args.agent, 'run_id': args.run_id, 'workspace': record, 'phase': 'setup',
                  'attempt': 1, 'check_index': 0, 'checks': [], 'phase_evidence': [], 'effects': {},
                  'budgets': [], 'history': [], 'requirements': task.get('requested_outcomes', []),
+                 'campaign_failures': deepcopy(campaign_failures),
                  'models': models, 'task_hash': json_hash(protected_task(task)),
                  'code': {},
                  'publication': {'profile': publisher.publication_profile(control, task) if publisher.configured(control, task) else None,
@@ -569,7 +583,11 @@ def _execute_managed(control, args, task_id, api, result):
                             output['verification_source'] = source_proof
                             output['code_digest'] = json_hash(before)
             else:
-                feedback = {'checks': state['checks'], 'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {}}
+                feedback = {
+                    'checks': state['checks'],
+                    'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {},
+                    'campaign_failures': state.get('campaign_failures', []),
+                }
                 if phase == 'critic':
                     output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback, publication_pending=publishing)
                 else:
@@ -601,6 +619,7 @@ def _execute_managed(control, args, task_id, api, result):
         else:
             changes.update(phase='repair', attempt=state['attempt'] + 1)
         result['commands_run'] += 1
+        if phase == 'repair': result['repair_attempts'] += 1
         state['budgets'][-1]['commands_used'] = result['commands_run']
         changes['budgets'] = state['budgets']
         session.update(**changes)

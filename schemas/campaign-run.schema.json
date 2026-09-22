@@ -16,6 +16,14 @@
     "current_task",
     "completed_tasks",
     "consumption",
+    "limits",
+    "resources",
+    "clock",
+    "provider",
+    "controller",
+    "dispatch",
+    "control",
+    "failures",
     "history",
     "stop"
   ],
@@ -43,7 +51,11 @@
         "no_eligible_tasks",
         "authority_required",
         "unsafe_repository",
-        "unknown_external_effect"
+        "unknown_external_effect",
+        "provider_backoff",
+        "paused",
+        "drained",
+        "cancelled"
       ]
     },
     "started_at": {"type": "string", "minLength": 1},
@@ -69,6 +81,129 @@
         "tasks_completed": {"type": "integer", "minimum": 0}
       }
     },
+    "limits": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["max_commands", "max_repairs"],
+      "properties": {
+        "max_commands": {"type": "integer", "minimum": 1},
+        "max_repairs": {"type": "integer", "minimum": 1}
+      }
+    },
+    "resources": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["commands_used", "repair_attempts"],
+      "properties": {
+        "commands_used": {"type": "integer", "minimum": 0},
+        "repair_attempts": {"type": "integer", "minimum": 0}
+      }
+    },
+    "clock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["active_since_epoch"],
+      "properties": {
+        "active_since_epoch": {
+          "anyOf": [{"type": "number"}, {"type": "null"}]
+        }
+      }
+    },
+    "provider": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["task_id", "model", "failure_count", "not_before_epoch"],
+      "properties": {
+        "task_id": {
+          "anyOf": [
+            {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+            {"type": "null"}
+          ]
+        },
+        "model": {
+          "anyOf": [
+            {"type": "null"},
+            {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["id", "effort"],
+              "properties": {
+                "id": {"type": "string", "minLength": 1},
+                "effort": {"type": "string", "minLength": 1}
+              }
+            }
+          ]
+        },
+        "failure_count": {"type": "integer", "minimum": 0},
+        "not_before_epoch": {
+          "anyOf": [{"type": "number"}, {"type": "null"}]
+        }
+      }
+    },
+    "controller": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["host", "pid", "nonce"],
+      "properties": {
+        "host": {"type": "string", "minLength": 1},
+        "pid": {"type": "integer", "minimum": 1},
+        "nonce": {"type": "string", "minLength": 1}
+      }
+    },
+    "dispatch": {
+      "anyOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["task_id", "stage", "nonce", "attempt", "started_at"],
+          "properties": {
+            "task_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+            "stage": {"enum": ["selected", "bound", "dispatched", "returned"]},
+            "nonce": {"type": "string", "minLength": 1},
+            "attempt": {"type": "integer", "minimum": 1},
+            "started_at": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "control": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["action", "requested_at", "actor"],
+      "properties": {
+        "action": {"enum": ["run", "pause", "drain", "cancel"]},
+        "requested_at": {"type": "string", "minLength": 1},
+        "actor": {"type": "string", "minLength": 1}
+      }
+    },
+    "failures": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["task_id", "created_at", "fingerprint", "repeat_count", "strategy", "summary", "evidence"],
+        "properties": {
+          "task_id": {"type": "string", "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$"},
+          "created_at": {"type": "string", "minLength": 1},
+          "fingerprint": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+          "repeat_count": {"type": "integer", "minimum": 1},
+          "strategy": {"enum": ["re_approach", "block_or_isolate_research"]},
+          "summary": {"type": "string", "minLength": 1},
+          "evidence": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["status", "checks", "commands_run", "repair_attempts"],
+            "properties": {
+              "status": {},
+              "checks": {"type": "array"},
+              "commands_run": {"type": "integer", "minimum": 0},
+              "repair_attempts": {"type": "integer", "minimum": 0}
+            }
+          }
+        }
+      }
+    },
     "history": {
       "type": "array",
       "items": {"type": "object"}
@@ -87,7 +222,11 @@
                 "no_eligible_tasks",
                 "authority_required",
                 "unsafe_repository",
-                "unknown_external_effect"
+                "unknown_external_effect",
+                "provider_backoff",
+                "paused",
+                "drained",
+                "cancelled"
               ]
             },
             "reason": {"type": "string", "minLength": 1},

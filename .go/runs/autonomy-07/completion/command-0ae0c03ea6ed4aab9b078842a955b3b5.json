@@ -1,0 +1,41 @@
+{
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+  "content_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+  "command": "git diff --check",
+  "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-0w6dbf9v/candidate",
+  "elapsed_seconds": 1.5730885840021074,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "candidate_digest": "f1a614ad0e26797fef5ad26edc4118d27fa3b364196d1a2051599219f1765e88",
+    "tracked_content_sha256": "bb301a9a5485252118422da600dea458280938dcb3f990cb18eeb8edcafad673",
+    "changed_files_sha256": "4bad7ba76fa20601efbaff769365ebb1ead114152695dcc32b920c6a1c194a02",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "README.md",
+      "docs/releases/v0.3.41.md",
+      "docs/task-release-contract.md",
+      "docs/task-workspaces.md",
+      "go_workflow/campaign.py",
+      "go_workflow/campaign_delivery.py",
+      "go_workflow/cli.py",
+      "go_workflow/completion.py",
+      "go_workflow/constants.py",
+      "go_workflow/run_state.py",
+      "go_workflow/worktrees.py",
+      "pyproject.toml",
+      "release-pairings.json",
+      "schemas/task-delivery-report.schema.json",
+      "schemas/workspace-state.schema.json",
+      "tests/test_autonomy_delivery.py"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

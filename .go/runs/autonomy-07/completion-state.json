@@ -1,0 +1,211 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "autonomy-07-20260922",
+  "workspace": {
+    "task_id": "autonomy-07",
+    "owner": "codex-astra-high",
+    "run_id": "autonomy-07-20260922",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-07",
+    "branch": "codex/autonomy-07",
+    "base_branch": "main",
+    "base_commit": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+    "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+    "generation": "e9a3595a60204e6399cf641093229829",
+    "state": "ready"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_delivery.py tests/test_abc_release.py tests/test_abc_deployment.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-jwq7u41p/candidate",
+        "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-01e78197d0974866ae8478b36d4f427a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-01e78197d0974866ae8478b36d4f427a.json",
+        "sha256": "fbf7faf8521070d9124f98a183b0d9a1a53b6cf0b255f79d69d8caa33598431f"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-olpbizcf/candidate",
+        "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-9deb283ef659454da33b93f4395340ee.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-9deb283ef659454da33b93f4395340ee.json",
+        "sha256": "9a81b79b9e814c0a6b6f3a5a656f2642052719bac52f30f3d84ed5b0342dd6fc"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-xem1je6o/candidate",
+        "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-370cb5a044c045a888683f639de28fc6.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-370cb5a044c045a888683f639de28fc6.json",
+        "sha256": "babee47889c50c6bb7e9c84e16efbea9cae44d235b145fb506767340068c7985"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-0w6dbf9v/candidate",
+        "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-0ae0c03ea6ed4aab9b078842a955b3b5.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-0ae0c03ea6ed4aab9b078842a955b3b5.json",
+        "sha256": "259d170e9e3d393b703f9ac7412e2c4a54d8a92f4d89c4762b9720a65e9d6743"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Each independently shippable release-required task performs scoped commit/push, required tag/release/deployment and exact remote/live readback before done. Honor explicit no-release policies; do not invent targets, repeat a deployment or wait for unrelated research.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "One release owner retains durable intent/reservation until verified readback or proven safe abort. Lost acknowledgements trigger observation before retry; unknown effects block the publication channel.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Preserve unrelated dirt, local saves, unregistered branches/worktrees and restricted local artifacts. Stage only owned changes, retain recoverable work, and verify cleanup/remote parity without force-reset, broad git add or force-push.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Distinguish product revisions from workflow/checkpoint commits; metadata-only closure must not redeploy. A remote/base advance requires controlled reconciliation and fresh applicable evidence, with conflict repair bounded by scope.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Expose exact remaining Git/release blockers to the campaign; a task completed locally but not delivered must never be reported live.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R6",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "code": {},
+  "execution_cwd": "/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-0w6dbf9v/candidate",
+  "controller": {
+    "host": "mac.home",
+    "pid": 48665
+  },
+  "worker_group": null,
+  "inflight": null
+}

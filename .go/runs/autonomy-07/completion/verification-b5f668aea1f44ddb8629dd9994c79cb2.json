@@ -1,0 +1,124 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+  "content_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_delivery.py tests/test_abc_release.py tests/test_abc_deployment.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-bthe3pcr/candidate",
+        "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-26adc55a45bb41cc92e52c019c8dfb75.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-26adc55a45bb41cc92e52c019c8dfb75.json",
+        "sha256": "fb0ec1ebfb6aa9a474dbb0f58ecf84f67f6557149a1f453db96aba8a4c25e410"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-rentoud5/candidate",
+        "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-c4655739386944bba82bc8918ec3173f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-c4655739386944bba82bc8918ec3173f.json",
+        "sha256": "b8e5f4c64b5c022282992202db75be7a26dcf6ac8e6564ef21039382840a4132"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-k0ssmwy8/candidate",
+        "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-f662ca87117149a3aaad397cc2d44ca7.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-f662ca87117149a3aaad397cc2d44ca7.json",
+        "sha256": "017ac53b2d068880d36702e6561cdaa521ade220dbf1f4293b2b19367df53d41"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-07",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5",
+          "R6"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/go-managed-verify-95la9y40/candidate",
+        "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+        "worktree_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-07/completion/command-24c057c5c9b04264bbc53666d7f7a949.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-07/completion/command-24c057c5c9b04264bbc53666d7f7a949.json",
+        "sha256": "10b53a9c51ae2ea098ba86d781d2acfcac90e257d0e803c38ab137112eb64da1"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

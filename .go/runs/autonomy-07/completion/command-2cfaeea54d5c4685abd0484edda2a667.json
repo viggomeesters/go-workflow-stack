@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+  "content_digest": "59777d77bb66eeec02002fce626a298ae5daf473a1d55796d8c5a0a5bad80872",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-07",
+  "elapsed_seconds": 2.163802666007541,
+  "returncode": 0,
+  "stdout": "ok: /Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-07/.go\n",
+  "stderr": "",
+  "timed_out": false
+}

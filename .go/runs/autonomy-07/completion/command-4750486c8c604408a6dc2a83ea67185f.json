@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+  "content_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+  "command": "git diff --check",
+  "cwd": "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-07",
+  "elapsed_seconds": 0.473297833930701,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

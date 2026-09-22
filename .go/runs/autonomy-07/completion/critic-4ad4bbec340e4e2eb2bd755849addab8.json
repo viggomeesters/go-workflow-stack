@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "status": "passed",
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+  "content_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Hardening recheck passed. Campaign delivery truth now requires validated task, managed-run, workspace, publication and applicable deployment evidence before a managed task is counted. Local completion and source-only publication cannot become a live claim. Publisher intent/reservation and observe-before-retry remain the sole effect owner. Checkpoint-only closure is recognized by the existing operationally filtered product snapshot without republishing. Linear base reconciliation preserves both histories, disables hooks, touches one registered clean workspace, aborts conflicts back to the prior head, rejects existing publication intent and invalidates prior verification/critic evidence. Malformed checkpoints fail unsafe. Explicit no-release policy remains effect-free. The content-bound collector now runs registered-workspace checks in an evidence-identical unregistered clone, preserving the worker guard. Focused, campaign/recovery, compatibility, make/validate/diff and non-Linux smoke evidence are green; Linux memfd release validation remains the release gate.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/releases/v0.3.41.md",
+    "docs/task-release-contract.md",
+    "docs/task-workspaces.md",
+    "go_workflow/campaign.py",
+    "go_workflow/campaign_delivery.py",
+    "go_workflow/cli.py",
+    "go_workflow/completion.py",
+    "go_workflow/constants.py",
+    "go_workflow/run_state.py",
+    "go_workflow/worktrees.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "schemas/task-delivery-report.schema.json",
+    "schemas/workspace-state.schema.json",
+    "tests/test_autonomy_delivery.py"
+  ]
+}

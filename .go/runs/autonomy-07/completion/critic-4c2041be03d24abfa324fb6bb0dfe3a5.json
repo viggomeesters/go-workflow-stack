@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "status": "passed",
+  "task_id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "contract_digest": "d3c1f944f564a79117abe80c89a68b5856715d0f454e924712ae2c4590132038",
+  "revision": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+  "content_digest": "512ce8ea1c72e9ab99b76ac7e67ee316a21b433d90fec9edc4a7ecac4e0dfcf0",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Final hardening review passed for the exact committed candidate. Campaign delivery remains fail-closed across local completion, malformed checkpoints, lost acknowledgements, publication ownership, explicit no-release policy, checkpoint-only branch advances, deployment proof and exact blockers. History-preserving base reconciliation is bounded to one clean registered workspace, rejects publication in progress, disables hooks, aborts conflicts back to the original head and invalidates stale evidence. Verification now runs in an evidence-identical unregistered checkout so repository-generating checks do not weaken the registered-worker guard. The exact candidate passed 69 release/deployment/workspace tests, 31 campaign/recovery tests, 155 compatibility tests with one intended skip, the canonical make/validate/diff collector, and the previously recorded neutral-clone smoke pass. No blocking finding remains; Linux release validation and immutable remote readback remain publication gates.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/releases/v0.3.41.md",
+    "docs/task-release-contract.md",
+    "docs/task-workspaces.md",
+    "go_workflow/campaign.py",
+    "go_workflow/campaign_delivery.py",
+    "go_workflow/cli.py",
+    "go_workflow/completion.py",
+    "go_workflow/constants.py",
+    "go_workflow/run_state.py",
+    "go_workflow/worktrees.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "schemas/task-delivery-report.schema.json",
+    "schemas/workspace-state.schema.json",
+    "tests/test_autonomy_delivery.py"
+  ]
+}

@@ -1,0 +1,300 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-07",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Keep Git and publication clean across autonomous tasks",
+  "description": "Connect serial campaign transitions to existing verified publisher and cleanup, including changed remote bases and checkpoint-only commits, without making unrelated work wait for one final batch release. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/campaign*.py",
+      "go_workflow/release.py",
+      "go_workflow/completion.py",
+      "go_workflow/worktrees.py",
+      "go_workflow/run_state.py",
+      "go_workflow/cli.py",
+      "schemas/**",
+      "tests/test_autonomy_delivery.py",
+      "tests/test_abc_release.py",
+      "tests/test_abc_deployment.py",
+      "docs/task-release-contract.md",
+      "docs/task-workspaces.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-07/**"
+    ]
+  },
+  "acceptance": [
+    "Each independently shippable release-required task performs scoped commit/push, required tag/release/deployment and exact remote/live readback before done. Honor explicit no-release policies; do not invent targets, repeat a deployment or wait for unrelated research.",
+    "One release owner retains durable intent/reservation until verified readback or proven safe abort. Lost acknowledgements trigger observation before retry; unknown effects block the publication channel.",
+    "Preserve unrelated dirt, local saves, unregistered branches/worktrees and restricted local artifacts. Stage only owned changes, retain recoverable work, and verify cleanup/remote parity without force-reset, broad git add or force-push.",
+    "Distinguish product revisions from workflow/checkpoint commits; metadata-only closure must not redeploy. A remote/base advance requires controlled reconciliation and fresh applicable evidence, with conflict repair bounded by scope.",
+    "Expose exact remaining Git/release blockers to the campaign; a task completed locally but not delivered must never be reported live.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_delivery.py tests/test_abc_release.py tests/test_abc_deployment.py tests/test_abc_worktrees.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T12:45:35+02:00",
+    "base_commit": "1d5eb181c54af998538a397d4ea9168e4a509e4c"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T13:58:33+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json",
+      "transaction_id": "71eee4a5728b45519ff5b82d615f3fa0",
+      "delivery": {
+        "delivery_id": "autonomy-first-v9",
+        "html": ".go/deliveries/autonomy-first-v9/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v9/manifest.json",
+        "source_sha256": "17f6366893b0e634e0e70622a9a39314580a1376eb05cab981a3ed7b7cdc6bca",
+        "html_sha256": "c6e00fb17c05ab30a4107d78bbe41756873e4999164e85058a9ae0de8c48919a"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T13:58:33+02:00",
+      "task_id": "autonomy-07",
+      "agent": "codex-astra-high",
+      "summary": "summary=R1-R6 verified with fail-closed delivery reporting, history-preserving reconciliation and immutable v0.3.41 readback; verification_command=declared four-command task gate plus Linux release-check 0.3.41 --validate-existing; verification_result=passed: 69 release/deployment/workspace, 31 campaign/recovery, make check, validate, diff-check, 156 compatibility, 197 smoke, template pairing, standalone install; critic=passed same-agent hardening recheck with no blocking findings; runtime=Codex desktop; model=gpt-6-astra high; billing_mode=subscription; self_reflect=process miss found — stale checkpoint intent overrode newer Go authority. Selfimprove applied to go/checkpoint skills and learning log; readback verified.",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/runs/events.jsonl",
+        ".go/tasks/open/autonomy-07.json",
+        ".go/runs/autonomy-07/completion-state.json",
+        ".go/runs/autonomy-07/completion/command-01e78197d0974866ae8478b36d4f427a.json",
+        ".go/runs/autonomy-07/completion/command-0ae0c03ea6ed4aab9b078842a955b3b5.json",
+        ".go/runs/autonomy-07/completion/command-19165f4751da4656b0b86058df914638.json",
+        ".go/runs/autonomy-07/completion/command-24c057c5c9b04264bbc53666d7f7a949.json",
+        ".go/runs/autonomy-07/completion/command-26adc55a45bb41cc92e52c019c8dfb75.json",
+        ".go/runs/autonomy-07/completion/command-2cfaeea54d5c4685abd0484edda2a667.json",
+        ".go/runs/autonomy-07/completion/command-370cb5a044c045a888683f639de28fc6.json",
+        ".go/runs/autonomy-07/completion/command-4750486c8c604408a6dc2a83ea67185f.json",
+        ".go/runs/autonomy-07/completion/command-56b67555caed4c1a9a697a9005f978ea.json",
+        ".go/runs/autonomy-07/completion/command-6227a9a3954044d6a26f3bdf9d090829.json",
+        ".go/runs/autonomy-07/completion/command-78d3d9534bb44374b14c26cc6f345250.json",
+        ".go/runs/autonomy-07/completion/command-8055c0d038c342dc8e732f9e82799757.json",
+        ".go/runs/autonomy-07/completion/command-87e82c6f046e49ee88c251508019ec82.json",
+        ".go/runs/autonomy-07/completion/command-9deb283ef659454da33b93f4395340ee.json",
+        ".go/runs/autonomy-07/completion/command-c4655739386944bba82bc8918ec3173f.json",
+        ".go/runs/autonomy-07/completion/command-f662ca87117149a3aaad397cc2d44ca7.json",
+        ".go/runs/autonomy-07/completion/critic-4ad4bbec340e4e2eb2bd755849addab8.json",
+        ".go/runs/autonomy-07/completion/critic-4c2041be03d24abfa324fb6bb0dfe3a5.json",
+        ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json",
+        ".go/runs/autonomy-07/completion/verification-3df785bf4e004691b85676e2d14555ad.json",
+        ".go/runs/autonomy-07/completion/verification-3e7c52c56ceb4064b7b7927b3ec32a7c.json",
+        ".go/runs/autonomy-07/completion/verification-5490e4789ecb4952b704c277e423f767.json",
+        ".go/runs/autonomy-07/completion/verification-b5f668aea1f44ddb8629dd9994c79cb2.json",
+        ".go/runs/autonomy-07/critic-review-final.json",
+        ".go/runs/autonomy-07/publication-process.json",
+        ".go/tasks/active/autonomy-07.json",
+        ".go/workspaces/autonomy-07.json",
+        "uv.lock"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "1d5eb181c54af998538a397d4ea9168e4a509e4c",
+        "observed_head_commit": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e"
+      },
+      "verification": {
+        "command": "declared four-command task gate plus Linux release-check 0.3.41 --validate-existing",
+        "result": "passed: 69 release/deployment/workspace, 31 campaign/recovery, make check, validate, diff-check, 156 compatibility, 197 smoke, template pairing, standalone install"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent hardening recheck with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-04",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-06",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Connect serial campaign transitions to existing verified publisher and cleanup, including changed remote bases and checkpoint-only commits, without making unrelated work wait for one final batch release. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "5f4a029079d4c21b37c37d679c7210475da65f747856392c47f444d0722ca884",
+    "source_ref": "repo-local-intake:autonomy-07"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Each independently shippable release-required task performs scoped commit/push, required tag/release/deployment and exact remote/live readback before done. Honor explicit no-release policies; do not invent targets, repeat a deployment or wait for unrelated research.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "One release owner retains durable intent/reservation until verified readback or proven safe abort. Lost acknowledgements trigger observation before retry; unknown effects block the publication channel.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/critic-4c2041be03d24abfa324fb6bb0dfe3a5.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Preserve unrelated dirt, local saves, unregistered branches/worktrees and restricted local artifacts. Stage only owned changes, retain recoverable work, and verify cleanup/remote parity without force-reset, broad git add or force-push.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/critic-4c2041be03d24abfa324fb6bb0dfe3a5.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Distinguish product revisions from workflow/checkpoint commits; metadata-only closure must not redeploy. A remote/base advance requires controlled reconciliation and fresh applicable evidence, with conflict repair bounded by scope.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/verification-3df785bf4e004691b85676e2d14555ad.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Expose exact remaining Git/release blockers to the campaign; a task completed locally but not delivered must never be reported live.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/verification-3df785bf4e004691b85676e2d14555ad.json"
+        }
+      ]
+    },
+    {
+      "id": "R6",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T13:55:31+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-07/completion/verification-3df785bf4e004691b85676e2d14555ad.json",
+      "sha256": "2456abeac60d37b24702178c4525acad96e68e1a4b1aaec3a6e0fd4594e0cbd3"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-07/completion/critic-4c2041be03d24abfa324fb6bb0dfe3a5.json",
+      "sha256": "c540129f39bdad6031afc8dd7e434933e5a13a6c26ab55b4851adece5597174a"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json",
+      "sha256": "0e6e640368e89a6c4b86f992592175ecb5f2d838f3396c3be3ee0680e1406fca"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-07",
+    "project": "go-workflow-stack",
+    "commit": "8317e8b6ede97c9ed41f72cec2d609bc7f991a6e",
+    "tag": "v0.3.41",
+    "evidence": [
+      ".go/runs/autonomy-07/completion/release-f54eb2eca739478e906b74c56ffdd281.json"
+    ]
+  }
+}

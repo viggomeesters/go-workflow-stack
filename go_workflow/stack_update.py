@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from .state_io import atomic_json, repository_lock
+from .agents_gateway import AgentsGatewayError, apply_agents_gateway, plan_agents_gateway, restore_agents_gateway
 
 STACK_UPDATE_SCHEMA = "go-workflow.stack-update-plan.v1"
 ROLLBACK_SCHEMA = "go-workflow.stack-update-rollback.v1"
@@ -130,6 +131,26 @@ def _preview_compatibility(repo: Path, stack_repo: Path, commit: str,
         environment = {key: value for key, value in os.environ.items()
                        if key not in {'GO_STACK', 'GO_STACK_ALLOW_DEV', 'PYTHONPATH'} and not key.startswith('GIT_')}
         environment['PYTHONDONTWRITEBYTECODE'] = '1'
+        # A target runtime that introduces or upgrades the root gateway must be
+        # able to prove the resulting contract before the real repository is
+        # touched. Copy existing instructions, then let that exact runtime
+        # perform the same bounded repair it will require after update.
+        target_has_gateway = (runtime / 'go_workflow/agents_gateway.py').is_file()
+        for original, destination in locations.items():
+            variants = [entry for entry in original.iterdir() if entry.name.casefold() == 'agents.md']
+            if len(variants) == 1 and variants[0].is_file() and not variants[0].is_symlink():
+                shutil.copy2(variants[0], destination / variants[0].name)
+            if not target_has_gateway:
+                continue
+            synchronized = subprocess.run(
+                [sys.executable, '-I', str(entry), 'agents', 'sync', str(destination), '--apply', '--json'],
+                cwd=destination, env=environment, capture_output=True, text=True, timeout=60,
+            )
+            if synchronized.returncode:
+                raise StackUpdateError(
+                    'Target runtime cannot synchronize root AGENTS.md: '
+                    + (synchronized.stderr.strip() or synchronized.stdout.strip())
+                )
         snapshot_before = {path: workflow_inventory(path) for path in locations.values()}
         result = subprocess.run([sys.executable, '-I', str(entry), 'validate', str(snapshot)],
                                 cwd=snapshot, env=environment, capture_output=True, text=True, timeout=60)
@@ -187,9 +208,18 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         raise StackUpdateError(
             f"stack ref {to_ref} supports contract {runtime_contract}, project requires {project_contract}"
         )
-    up_to_date = project.get("required_stack_version") == version and project.get("stack_ref") == to_ref
+    try:
+        gateway = plan_agents_gateway(repo)
+    except AgentsGatewayError as exc:
+        raise StackUpdateError(str(exc)) from exc
+    gateway_summary = {key: value for key, value in gateway.items() if key not in {'before', 'after'}}
+    project_up_to_date = project.get("required_stack_version") == version and project.get("stack_ref") == to_ref
+    up_to_date = project_up_to_date and gateway['action'] == 'none'
     after = dict(project)
     after.update({"required_stack_version": version, "stack_ref": to_ref})
+    changes = [] if project_up_to_date else [".go/project.json:required_stack_version", ".go/project.json:stack_ref"]
+    if gateway['action'] != 'none':
+        changes.append('AGENTS.md:bounded-go-gateway')
     return {
         "schema": STACK_UPDATE_SCHEMA,
         "mode": "dry_run",
@@ -204,7 +234,8 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         "project_contract_version": project_contract,
         "lifecycle_policy_migrated": False,
         "up_to_date": up_to_date,
-        "changes": [] if up_to_date else [".go/project.json:required_stack_version", ".go/project.json:stack_ref"],
+        "changes": changes,
+        "agents_gateway": gateway_summary,
         "before_project": project,
         "after_project": after,
         "compatibility": preview_compatibility(repo, stack_repo, resolved.stdout.strip(), after),
@@ -229,6 +260,7 @@ def apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
         fresh = plan_stack_update(repo, Path(plan['stack_repo']), plan['to_ref'])
         fields = ('repo', 'to_ref', 'to_version', 'resolved_commit', 'before_project', 'after_project')
         if (any(plan.get(key) != fresh[key] for key in fields)
+                or plan.get('agents_gateway') != fresh.get('agents_gateway')
                 or plan['compatibility'].get('source_digest') != fresh['compatibility']['source_digest']):
             raise StackUpdateError('Workflow, target or preview changed; replan before applying')
         if fresh['compatibility']['status'] != 'passed':
@@ -255,13 +287,19 @@ def _apply_stack_update(repo: Path, plan: dict[str, Any]) -> dict[str, Any]:
         "before_project": plan["before_project"],
         "after_project": plan["after_project"],
     }
+    gateway = plan_agents_gateway(repo)
+    rollback['before_agents'] = gateway['before']
+    rollback['before_agents_path'] = gateway['source_path']
+    rollback['after_agents_sha256'] = gateway['after_sha256']
     atomic_json(rollback_path, rollback)
     try:
         atomic_json(repo / ".go" / "project.json", plan["after_project"])
+        apply_agents_gateway(repo, gateway)
         rollback["status"] = "applied"
         atomic_json(rollback_path, rollback)
     except BaseException:
         atomic_json(repo / ".go" / "project.json", plan["before_project"])
+        restore_agents_gateway(repo, gateway)
         rollback["status"] = "rolled_back"
         atomic_json(rollback_path, rollback)
         raise
@@ -289,4 +327,9 @@ def rollback_stack_update(repo: Path, rollback_record: str) -> None:
         if data['status'] == 'rolled_back' and current != before:
             raise StackUpdateError('Project advanced after recorded rollback')
         if current != before: atomic_json(repo / '.go/project.json', before)
+        if 'before_agents' in data:
+            restore_agents_gateway(repo, {
+                'before': data.get('before_agents'),
+                'source_path': data.get('before_agents_path'),
+            })
         data['status'] = 'rolled_back'; atomic_json(path, data)

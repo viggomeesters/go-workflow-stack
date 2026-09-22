@@ -12,6 +12,13 @@ Apply only after reviewing that plan:
 ./go stack update --to v0.3.8 --apply --json
 ```
 
+The target runtime validates a candidate root `AGENTS.md` gateway in its isolated
+snapshot before changing the project. Apply updates the immutable pin and bounded
+gateway as one recoverable operation. Even when the pin is already current, a
+missing or stale gateway makes the operation an applied repair rather than a
+no-op. Rollback restores both the former project contract and the original root
+instruction bytes/casing.
+
 An applied update atomically replaces `.go/project.json` and writes `.go/updates/<update>.json` first. That record contains the before and after project objects, the resolved stack commit, and rollback status. Missing tags, moving branch names, tag/version mismatches, and runtimes older than the project's contract version fail before project state changes.
 
 The command resolves tags from the local stack checkout by default. Fetch the intended release tag into that checkout first, or pass a different trusted checkout with `--stack-repo`.

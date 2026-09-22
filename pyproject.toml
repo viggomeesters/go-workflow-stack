@@ -19,6 +19,7 @@ include = ["go_workflow*"]
 
 [tool.setuptools.data-files]
 "." = ["release-pairings.json"]
+"fixtures/minimal" = ["fixtures/minimal/AGENTS.md"]
 "schemas" = ["schemas/*.json"]
 "fixtures/minimal/.go" = [
   "fixtures/minimal/.go/architecture-principles.json",

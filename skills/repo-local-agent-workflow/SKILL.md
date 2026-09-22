@@ -12,7 +12,7 @@ metadata:
 
 ## Overview
 
-Use this skill when Viggo is designing or implementing a self-contained agent workflow contract inside each project repository. Repository execution requires repo-local `.go` state and fails closed when that contract is absent.
+Use this skill when Viggo is designing or implementing a self-contained agent workflow contract inside each project repository. Repository execution requires repo-local `.go` state plus an exact-case root `AGENTS.md` gateway and fails closed when either contract is absent or stale.
 
 The current source split is concrete:
 
@@ -20,6 +20,7 @@ The current source split is concrete:
 go-workflow-stack      = reusable tooling, schemas, validators, fixtures, and this skill
 go-project-template   = copyable starter `.go/` project-state repository
 real project repo      = owns its own `.go/` vision/principles/hierarchy/tasks/evidence
+root AGENTS.md         = mandatory gateway into `.go`; repository-specific rules remain outside its managed block
 vault / Life OS        = memory, reflection, routing, optional index; not execution SSOT
 ```
 
@@ -44,6 +45,13 @@ Separate these layers explicitly:
 | Hermes/Bertus skills | Hermes runtime symlinks | operating procedure and routing |
 
 The stack can be centralized; project execution state should be clone-local.
+
+Root `AGENTS.md` is a required discovery layer, not a second state store. Validate
+its exact casing and bounded managed block. Repair it with
+`go-workflow agents sync <repo> --apply`; never overwrite instructions outside
+the markers. `init`, `adopt`, `spike`, ordinary migration, and stack update all
+converge on the same repair primitive. Nested instruction files may add local
+constraints but cannot redirect the repository away from `.go`.
 
 ## Default repo-local contract
 

@@ -228,6 +228,7 @@ def guard_workspace_command(args):
                  'cmd_recommendation_status', 'cmd_context_verify', 'cmd_onboarding_plan', 'cmd_pairing'}
     name = args.func.__name__
     if name in read_only or (name == 'cmd_workspace_operation' and args.workspace_operation == 'status'): return
+    if name == 'cmd_agents_sync' and not getattr(args, 'apply', False): return
     if name == 'cmd_managed_worker_enter' and getattr(args, 'task_id', None) == record['task_id']:
         if args.owner == record['owner'] and args.run_id == record['run_id']: return
     if name == 'cmd_task_outcome' and getattr(args, 'task_id', None) == record['task_id']:

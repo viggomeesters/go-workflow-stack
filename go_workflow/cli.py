@@ -57,6 +57,13 @@ from go_workflow.task_state import open_task_records, pending_review_task_ids as
 from go_workflow.task_state import unfinished_task_ids as task_state_unfinished_task_ids
 from go_workflow.stack_update import StackUpdateError, apply_stack_update, latest_stack_ref, plan_stack_update, rollback_stack_update
 from go_workflow.state_io import StateLockError, append_jsonl_locked, atomic_json, atomic_move_json, atomic_write_text, remove_jsonl_events_locked, repository_lock
+from go_workflow.agents_gateway import (
+    AgentsGatewayError,
+    apply_agents_gateway,
+    plan_agents_gateway,
+    restore_agents_gateway,
+    validate_agents_gateway,
+)
 from go_workflow.hermes_proof import validate_live_hermes_proof, verify_live_hermes_evidence
 from go_workflow.runtime_identity import resolve_runtime_identity
 from go_workflow.architecture import (
@@ -525,6 +532,7 @@ def validate_repo(repo: Path, *, skip_lifecycle_migration: bool = False) -> list
     errors: list[str] = []
     if not root.is_dir():
         return [f"missing .go directory: {root}"]
+    errors.extend(validate_agents_gateway(repo))
     if not skip_lifecycle_migration:
         from go_workflow.migrations import pending_lifecycle_findings
         errors.extend(pending_lifecycle_findings(repo))
@@ -1162,6 +1170,7 @@ def cmd_adopt(args: argparse.Namespace) -> int:
     dump_json(root / "hierarchy.json", parse_hierarchy(args.feature_group or [], args.feature or [], project_id))
     for jsonl in [root / "runs" / "events.jsonl", root / "evidence" / "events.jsonl", root / "decisions" / "events.jsonl"]:
         jsonl.touch(exist_ok=True)
+    apply_agents_gateway(repo)
     errors = validate_repo(repo)
     if errors:
         for error in errors:
@@ -1231,7 +1240,9 @@ def cmd_spike(args: argparse.Namespace) -> int:
         dump_json(root / "hierarchy.json", parse_hierarchy(epics, [], project_id))
         for jsonl in [root / "runs" / "events.jsonl", root / "evidence" / "events.jsonl", root / "decisions" / "events.jsonl"]:
             jsonl.touch(exist_ok=True)
+        apply_agents_gateway(repo)
     else:
+        apply_agents_gateway(repo)
         errors = validate_repo(repo)
         if errors:
             raise RepoLocalError("existing .go state is invalid:\n- " + "\n- ".join(errors))
@@ -4445,6 +4456,7 @@ def cmd_init(args: argparse.Namespace) -> int:
     lifecycle = scaffold_lifecycle_settings(repo, args)
     repo.mkdir(parents=True, exist_ok=True)
     copy_fixture_init(repo, force=args.force)
+    apply_agents_gateway(repo)
     if lifecycle is not None:
         root = go_root(repo)
         dump_json(root / 'project.json', scaffold_project(load_json(root / 'project.json'), lifecycle))
@@ -4485,6 +4497,16 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         )
     except ValueError as exc:
         raise RepoLocalError(str(exc)) from exc
+    try:
+        gateway_plan = plan_agents_gateway(repo)
+    except AgentsGatewayError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    if gateway_plan["action"] != "none":
+        plan["changes"].append({
+            "path": "AGENTS.md",
+            "operations": [f"{gateway_plan['action']} bounded repository-local Go gateway"],
+        })
+        plan["write_required"] = True
     if args.apply and plan["changes"]:
         project_path = root / "project.json"
         hierarchy_path = root / "hierarchy.json"
@@ -4492,10 +4514,12 @@ def cmd_migrate(args: argparse.Namespace) -> int:
         before_hierarchy = hierarchy_path.read_text(encoding="utf-8")
         dump_json(project_path, documents["project.json"])
         dump_json(hierarchy_path, documents["hierarchy.json"])
+        apply_agents_gateway(repo, gateway_plan)
         errors = validate_repo(repo)
         if errors:
             atomic_write_text(project_path, before_project)
             atomic_write_text(hierarchy_path, before_hierarchy)
+            restore_agents_gateway(repo, gateway_plan)
             raise RepoLocalError("migration produced an invalid contract:\n- " + "\n- ".join(errors))
         plan["applied"] = True
         append_jsonl(
@@ -4516,6 +4540,22 @@ def cmd_migrate(args: argparse.Namespace) -> int:
             print(f"- {change['path']}: " + "; ".join(change["operations"]))
         if not plan["changes"]:
             print("- no changes")
+    return 0
+
+
+def cmd_agents_sync(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    try:
+        plan = plan_agents_gateway(repo)
+        result = apply_agents_gateway(repo, plan) if args.apply else {
+            key: value for key, value in plan.items() if key not in {"before", "after"}
+        }
+    except AgentsGatewayError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"AGENTS.md gateway {result['mode']}: {result['action']}")
     return 0
 
 
@@ -5758,6 +5798,13 @@ def build_parser() -> argparse.ArgumentParser:
     architecture_waiver_close.add_argument("--reason", required=True)
     architecture_waiver_close.add_argument("--actor", required=True)
     architecture_waiver_close.set_defaults(func=cmd_architecture_waiver_close)
+    agents = sub.add_parser("agents", help="Inspect or safely synchronize the root AGENTS.md .go gateway")
+    agents_sub = agents.add_subparsers(dest="agents_command", required=True)
+    agents_sync = agents_sub.add_parser("sync", help="Plan or apply the bounded root AGENTS.md gateway")
+    agents_sync.add_argument("repo", nargs="?", default=".")
+    agents_sync.add_argument("--apply", action="store_true", help="write the bounded gateway; default is dry-run")
+    agents_sync.add_argument("--json", action="store_true")
+    agents_sync.set_defaults(func=cmd_agents_sync)
     migrate = sub.add_parser("migrate", help="Plan or explicitly apply versioned .go contract migrations")
     migrate.add_argument("repo", nargs="?", default=".")
     migrate.add_argument("--apply", action="store_true", help="write the proposed migration; default is dry-run")

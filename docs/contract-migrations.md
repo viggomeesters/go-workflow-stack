@@ -9,6 +9,12 @@ python3 cli/go.py migrate . --json
 python3 cli/go.py migrate . --apply --json
 ```
 
+The migration plan also audits the required exact-case root `AGENTS.md` gateway.
+When missing or stale, the dry-run lists `AGENTS.md`; apply installs or replaces
+only the bounded managed block and preserves repository-specific instructions
+outside it. Ambiguous marker pairs fail before writes. See
+[`agents-gateway.md`](agents-gateway.md).
+
 The dry-run returns `go-workflow.migration-plan.v1` with exact paths and operations. `--apply` writes only the proposed project and hierarchy documents, validates the complete `.go` contract, records a migration event, and is idempotent.
 
 Version 2 adds:

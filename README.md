@@ -34,7 +34,7 @@ For the full practical architecture and application flow, see [`docs/practical-a
 Bounded multi-task authority and outcome traceability are specified in [`docs/autonomous-campaign.md`](docs/autonomous-campaign.md). Validation never grants execution or treats an empty queue as achieved product behavior.
 Substantial rough requests can use [bounded semantic intake](docs/autonomous-intake.md) to assess current code/tasks/decisions through a read-only model adapter before reusing, updating, or creating executable work.
 
-Routing rule: a target repo must own a valid `.go/project.json` before workflow execution starts. Repositories without that contract fail closed and must use `adopt` or `spike`; a vault is never an execution fallback.
+Routing rule: a target repo must own a valid `.go/project.json` and an exact-case root `AGENTS.md` gateway before workflow execution starts. Repositories without `.go` must use `adopt` or `spike`; repositories with `.go` but a missing/stale gateway use `agents sync . --apply`. A vault is never an execution fallback. See the [root gateway contract](docs/agents-gateway.md).
 
 ## Practical architecture in one minute
 
@@ -135,12 +135,13 @@ The apply command validates the paired template and then creates a project-speci
 - `task create <repo> ... --shareable-delivery auto|required|none`: control the approval-time shareable-delivery gate; `auto` is the default substantial-task policy.
 - `task outcome <repo> --task-id <id> --outcome R1 --status verified|blocked|rejected --evidence <proof>`: close one requested outcome. Tracked tasks cannot finish until every R# has a terminal disposition and non-empty evidence; autonomous execution returns `blocked` and leaves the task active when closure is incomplete.
 - `adopt <repo>`: create real repo-local `.go/` project, principles, vision, and hierarchy state from CLI arguments.
+- `agents sync <repo> [--apply]`: plan or safely install/repair the bounded root `AGENTS.md` gateway while preserving repository-specific instructions outside it.
 - `status <repo> [--json]`: summarize route, project, task counts, next work, and dirty state.
 - `doctor <repo> --platform wsl --agent hermes`: verify Python 3.11+, Git, Bash, Make, uv, agent availability, `.go` validity, and the project's minimum stack-version contract.
-- `migrate <repo> [--apply]`: plan a versioned `.go` migration without writes, or explicitly apply and validate it.
+- `migrate <repo> [--apply]`: plan a versioned `.go` and root-gateway migration without writes, or explicitly apply and validate it.
 - `adapter validate-result <result.json> --phase <phase>`: fail-closed validation for the shared Codex/Hermes/custom adapter result protocol.
 - `proof validate <proof.json> [--evidence-root dir] [--copy-to path]`: validate live Hermes evidence, optionally recompute raw-result hashes, and copy only after all proof gates pass.
-- `stack update <repo> (--to vX.Y.Z | --latest) [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply atomically with rollback data only when explicitly requested. `--latest` selects the highest annotated stable tag; applying an already-current pin is a no-op.
+- `stack update <repo> (--to vX.Y.Z | --latest) [--apply]`: resolve and verify an immutable stack tag, show a dry-run by default, and apply the pin plus required root gateway atomically with rollback data only when explicitly requested. `--latest` selects the highest annotated stable tag; a current pin is a no-op only when the gateway is current too.
 - `epic create <repo> --title <text>`: create an epic-lite work package in `hierarchy.json`.
 - `task create <repo> --summary <text> [--epic epic-id | --feature epic.feature]`: create an open repo-local task and optionally attach it to an epic or feature.
 - `decision create <repo> --title <text> --context <text> --decision <text>`: append an ADR-lite `decision.recorded` event.
@@ -158,6 +159,7 @@ The apply command validates the paired template and then creates a project-speci
 ## Contract
 
 ```text
+AGENTS.md                 # required root discovery/execution gateway; custom rules may surround its managed block
 .go/
   project.json
   architecture-principles.json

@@ -147,7 +147,8 @@ Arbitrary agent text or arbitrary `path` fields are not promoted into authority.
 Optional task `context_files` and `skill_files` select repo-relative files, as
 lists or maps from `build`/`critic`/`repair` to lists. Only the current phase's
 selection is loaded; global skill folders and the entire read scope are not
-implicitly copied. Repository AGENTS.md is included when present. Optional
+implicitly copied. The required root `AGENTS.md` gateway is included; validation
+fails before adapter execution when it is missing or stale. Optional
 `notepad_path` is supplementary explanation and cannot override structured
 state or proof. Escaping/missing references are rejected. Individual selected
 files, changed-file captures and snapshot JSON have an explicit 16 MiB limit;

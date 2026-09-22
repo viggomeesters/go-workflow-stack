@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.39 — mandatory root AGENTS.md gateway
+
+- Require an exact-case root `AGENTS.md` whenever repository-local `.go/` state exists.
+- Install or safely repair a bounded gateway block through init, adopt, spike, migration and stack update while preserving custom instructions, newline bytes and file mode.
+- Validate the gateway in exact-target update previews, restore it on rollback, and ship the matching template gateway in v0.3.18.
+
 ## 0.3.38 — grounded outcome behavior review
 
 - Carry exact original R# outcomes, governing product goals and explained applicable architecture into fresh critic context.

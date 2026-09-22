@@ -4205,6 +4205,7 @@ def cmd_template_check(args: argparse.Namespace) -> int:
             env = template_check_environment(os.environ, STACK_ROOT)
             executed = subprocess.run(
                 [sys.executable, str(Path(__file__).resolve()), "auto", str(clone), "--max-tasks", "1", "--max-attempts", "1", "--execute", "--agent", "template-check", "--json"],
+                cwd=clone,
                 env=env,
                 text=True,
                 capture_output=True,

@@ -224,6 +224,7 @@ def guard_workspace_command(args):
     if record is None: return
     read_only = {'cmd_version', 'cmd_status', 'cmd_readback', 'cmd_route', 'cmd_router',
                  'cmd_validate', 'cmd_next', 'cmd_doctor', 'cmd_agent_check', 'cmd_dirty_check',
+                 'cmd_template_check',
                  'cmd_architecture_validate', 'cmd_architecture_readback', 'cmd_architecture_status',
                  'cmd_recommendation_status', 'cmd_context_verify', 'cmd_onboarding_plan', 'cmd_pairing'}
     name = args.func.__name__

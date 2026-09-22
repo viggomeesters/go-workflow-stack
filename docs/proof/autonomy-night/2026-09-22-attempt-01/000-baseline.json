@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "-m",
+    "pytest",
+    "tests/test_notes.py",
+    "-q",
+    "-k",
+    "normalize"
+  ],
+  "returncode": 2,
+  "stdout": "\n==================================== ERRORS ====================================\n_____________________ ERROR collecting tests/test_notes.py _____________________\nImportError while importing test module '/private/tmp/go-autonomy-night-20260922-live1/project/tests/test_notes.py'.\nHint: make sure your test modules/packages have valid Python names.\nTraceback:\n/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/importlib/__init__.py:88: in import_module\n    return _bootstrap._gcd_import(name[level:], package, level)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\ntests/test_notes.py:1: in <module>\n    from notes import normalize_notes, render_report\nE   ImportError: cannot import name 'render_report' from 'notes' (/private/tmp/go-autonomy-night-20260922-live1/project/notes.py)\n=========================== short test summary info ============================\nERROR tests/test_notes.py\n!!!!!!!!!!!!!!!!!!!! Interrupted: 1 error during collection !!!!!!!!!!!!!!!!!!!!\n1 error in 0.04s\n",
+  "stderr": "",
+  "elapsed_seconds": 0.231
+}

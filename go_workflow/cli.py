@@ -36,7 +36,7 @@ if str(STACK_ROOT) not in sys.path:
 
 from go_workflow.execution_contracts import (dependency_findings, resolve_execution_contract, validate_dependencies, validate_execution_contract, validate_phase_profiles, validate_verification_evidence)
 from go_workflow.constants import CURRENT_CONTRACT_VERSION, STACK_REF, STACK_VERSION
-from go_workflow.task_design import review_contract
+from go_workflow.task_design import behavior_review_context, behavior_review_required, review_contract, validate_behavior_review
 from go_workflow.intake import (RECORD_SCHEMA as INTAKE_RECORD_SCHEMA, prepare_request, record_path,
                                 validate_assessment, validate_record as validate_intake_record)
 from go_workflow.migrations import plan_contract_migration
@@ -376,6 +376,10 @@ def validate_task(data: dict[str, Any], rel: str, expected_status: str | None = 
                     require(isinstance(outcome.get("evidence"), list), errors, f"{rel}: outcome {index} evidence must be a list")
         if expected_status == "done":
             errors.extend(f"{rel}: {finding}" for finding in outcome_completion_findings(data))
+    if 'behavior_review_version' in data:
+        require(data.get('behavior_review_version') == 1, errors, f'{rel}: behavior_review_version must be 1')
+        require(data.get('outcome_tracking_version') == 1, errors,
+                f'{rel}: behavior_review_version requires outcome_tracking_version 1')
     return errors
 
 
@@ -1835,20 +1839,28 @@ def format_hook_command(command: str, repo: Path, task: dict[str, Any], attempt:
     return rendered
 
 
-def build_execution_context(repo: Path, task: dict[str, Any]) -> dict[str, Any]:
+def build_execution_context(repo: Path, task: dict[str, Any], *, phase: str = 'build') -> dict[str, Any]:
     root = go_root(repo)
-    return {
+    architecture = resolve_applicable_architecture(root, task)
+    vision = load_json(root / "vision.json")
+    from go_workflow.completion import content_snapshot
+    context = {
         "schema": "go-workflow.execution-context.v1",
         "project": load_json(root / "project.json"),
-        "vision": load_json(root / "vision.json"),
+        "vision": vision,
         "architecture_principles": load_json(root / "architecture-principles.json"),
         "hierarchy": load_json(root / "hierarchy.json"),
         "task": task,
         "recent_evidence": load_jsonl_events(root / "evidence" / "events.jsonl", limit=10),
         "recent_decisions": load_jsonl_events(root / "decisions" / "events.jsonl", limit=10),
-        "applicable_architecture": resolve_applicable_architecture(root, task),
+        "applicable_architecture": architecture,
         "task_design_review": review_contract(),
     }
+    if task.get('outcome_tracking_version') == 1:
+        context['behavior_review'] = behavior_review_context(
+            task, vision, architecture, content_snapshot(repo, task)['digest'], phase=phase,
+        )
+    return context
 
 
 def run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: int, strategy: str, hook: str, timeout_seconds: int = 900, require_protocol: bool = False, feedback: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -1883,7 +1895,7 @@ def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: i
                 "status": "blocked", "summary": str(exc), "hook": hook,
                 "command": rendered, "returncode": 78, "stdout": "", "stderr": str(exc),
                 "timed_out": False}
-    context = build_execution_context(repo, task)
+    context = build_execution_context(repo, task, phase=hook)
     context_ref = (create_snapshot(repo, task, hook, attempt, strategy, context, feedback=feedback)
                    if registered_workspace(repo) is not None and require_protocol else None)
     request = build_adapter_request(repo, task, context, hook, attempt, strategy, context_ref=context_ref)
@@ -1927,6 +1939,12 @@ def _run_hook_command(repo: Path, command: str, task: dict[str, Any], attempt: i
     if model_selection is not None:
         completed, turns = codex_stream_payload(completed)
     result = normalize_adapter_result(hook, rendered, completed, require_protocol=require_protocol)
+    if hook == 'critic' and task.get('outcome_tracking_version') == 1 and (
+            behavior_review_required(task) or result.get('behavior_review') is not None):
+        review_errors = validate_behavior_review(repo, task, context['behavior_review'], result.get('behavior_review'))
+        if review_errors:
+            result.update(status='failure', returncode=result.get('returncode') or 65,
+                          summary='invalid behavioral critic result: ' + '; '.join(review_errors))
     if context_ref is not None:
         result['context_ref'] = context_ref
         result['process_result_ref'] = {'path': str(result_path), 'sha256': hashlib.sha256(result_path.read_bytes()).hexdigest()}
@@ -2337,6 +2355,7 @@ def run_default_critic_agent(
         "Review the current repository result for task {task_id} against GO_CONTEXT_JSON, including vision, architecture principles, acceptance, verification, scope, and diff. If GO_CONTEXT_PATH exists, verify with GO_CONTEXT_VERIFY_COMMAND and read that snapshot and its raw evidence.",
         "Do not edit files.",
         "Apply task_design_review.critic from the verified context and cite actual inspected evidence for your verdict.",
+        "When behavior_review is present in the verified context, emit a matching go-workflow.behavior-review.v1 object in the adapter result. Cover each original R# exactly once; bind inspected evidence to the task, requirement, candidate and context digests. A passed outcome needs current behavior_proof bytes. A blocked outcome needs an actionable repair limited to the original scope and declared checks. Use pending_downstream only for controller-owned publication still pending.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
     if publication_pending:

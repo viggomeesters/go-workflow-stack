@@ -56,6 +56,12 @@ def validate_adapter_result(data: dict[str, Any], expected_phase: str | None = N
         errors.append("summary must be a non-empty string")
     if "model_selection" in data and not worker_payload:
         errors.extend(validate_model_selection(data["model_selection"]))
+    if "behavior_review" in data:
+        review = data["behavior_review"]
+        if not isinstance(review, dict) or review.get("schema") != "go-workflow.behavior-review.v1":
+            errors.append("behavior_review must use go-workflow.behavior-review.v1")
+        if data.get("phase") != "critic":
+            errors.append("behavior_review is only valid for the critic phase")
     return errors
 
 

@@ -131,6 +131,18 @@ The runtime carries the same rubric in `task_design_review`; it is instructions,
 not an automatically granted readiness verdict. See `docs/task-design-readiness.md`
 for the audit, compatibility boundary and paired examples.
 
+For outcome-tracked work, the critic also receives `behavior_review`: exact governing
+goals, explained applicable architecture references, original R# text, the current
+candidate digest and a fresh context digest. Return a versioned behavior review that
+binds every passed R# to hashed inspected bytes. Plans, unrelated green checks,
+stale captures and unreproduced claims are not behavior proof. A blocked result must
+name bounded repairs inside the original scope and checks without changing acceptance.
+Do not require future publication receipts during the pre-publication critic; the
+controller's final lifecycle gate remains responsible for those receipts. Full rules
+and examples are in `docs/autonomy-evidence.md`. Set `behavior_review_version: 1`
+on the task to make this strict result a completion gate; explicit adoption preserves
+historical task/review bytes and lets custom adapters migrate deliberately.
+
 ## Bounded semantic intake
 
 For a substantial or unclear rough request, use `intake explore` before claim

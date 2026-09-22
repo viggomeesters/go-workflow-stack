@@ -32,7 +32,7 @@ accepting labels or provider stubs as completion.
 This remains a deterministic orchestration proof. Its worker implements the
 native adapter protocol without calling a live model, and its Git remote is
 local. It does not prove overnight wall-clock reliability, hosted-provider
-availability, general model quality, real consumer mutations or GitHub Actions.
+availability, general model quality, real consumer mutations or hosted CI.
 
 
 ## A/B/C campaign (v0.3.26)
@@ -158,4 +158,4 @@ The honest claim is:
 - Real-world large-repo performance still depends on adapter quality, test quality, and task scope quality.
 - Adapter selection and the deep-critic protocol are covered with deterministic CLI fixtures; a campaign against a real model remains deliberately unclaimed.
 - Campaign completion proves the bounded adopted goal, not every continuing idea in the product vision.
-- The deterministic end-to-end campaign uses local bare remotes and performs no hosted release, production deployment, consumer mutation or GitHub Actions run.
+- The deterministic end-to-end campaign uses local bare remotes and performs no hosted release, production deployment, consumer mutation or hosted CI run.

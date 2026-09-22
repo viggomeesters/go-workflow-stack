@@ -22,6 +22,7 @@ MAP_SCHEMA = "go-workflow.repository-map.v1"
 GRAPH_SCHEMA = "go-workflow.repository-graph.v1"
 GRAPH_RELATIVE_PATH = Path(".go/cache/repository-graph.json")
 CONTEXT_SCHEMA = "go-workflow.repository-context.v1"
+BLAST_SCHEMA = "go-workflow.repository-blast.v1"
 SOURCE_EXTENSIONS = {
     ".c", ".cc", ".clj", ".cpp", ".cs", ".dart", ".ex", ".exs", ".go",
     ".h", ".hpp", ".java", ".js", ".jsx", ".kt", ".kts", ".lua", ".m",
@@ -332,12 +333,14 @@ def build_graph(repo: Path, *, write: bool = True) -> dict[str, Any]:
     sources: list[dict[str, Any]] = []
     component_ids: set[str] = set()
     pending_imports: list[tuple[str, str]] = []
+    path_components: dict[str, str] = {}
 
     for path in paths:
         data = (repo / path).read_bytes()
         sha256 = digest_bytes(data)
         language = _language(path)
         component_id, component_source = component_for(path, repository_map)
+        path_components[path] = component_id
         component_ids.add(component_id)
         node_id = f"test:{path}" if _is_test(path) else f"file:{path}"
         sources.append({"path": path, "sha256": sha256, "bytes": len(data), "language": language})
@@ -385,7 +388,7 @@ def build_graph(repo: Path, *, write: bool = True) -> dict[str, Any]:
             edges.append({
                 "source": f"component:{component_id}",
                 "target": f"component:{dependency}",
-                "kind": "depends_on",
+                "kind": "intended_depends_on",
             })
         for test_suite in node.get("tests", []):
             edges.append({
@@ -399,6 +402,14 @@ def build_graph(repo: Path, *, write: bool = True) -> dict[str, Any]:
             source_id = f"test:{source_path}" if _is_test(source_path) else f"file:{source_path}"
             target_id = f"test:{target}" if _is_test(target) else f"file:{target}"
             edges.append({"source": source_id, "target": target_id, "kind": "imports"})
+            source_component = path_components[source_path]
+            target_component = path_components[target]
+            if source_component != target_component:
+                edges.append({
+                    "source": f"component:{source_component}",
+                    "target": f"component:{target_component}",
+                    "kind": "observed_depends_on",
+                })
 
     nodes.sort(key=lambda item: item["id"])
     edges = sorted({(edge["source"], edge["target"], edge["kind"]) for edge in edges})
@@ -598,8 +609,8 @@ def select_repository_context(repo: Path, contract: dict[str, Any]) -> dict[str,
         neighbors: list[tuple[int, str, int]] = []
         for edge in outgoing.get(node_id, []):
             kind = edge["kind"]
-            if kind in {"depends_on", "imports"} and depth < contract["dependency_depth"]:
-                neighbors.append((0 if kind == "depends_on" else 3, edge["target"], depth + 1))
+            if kind in {"intended_depends_on", "observed_depends_on", "imports"} and depth < contract["dependency_depth"]:
+                neighbors.append((0 if kind.endswith("depends_on") else 3, edge["target"], depth + 1))
             elif kind == "contains":
                 neighbors.append((2, edge["target"], depth))
         if contract["include_tests"]:
@@ -640,4 +651,170 @@ def select_repository_context(repo: Path, contract: dict[str, Any]) -> dict[str,
                 if edge["source"] in selected_ids and edge["target"] in selected_ids
             ]) > contract["max_edges"],
         },
+    }
+
+
+def _git_changed_paths(repo: Path, base: str, head: str = "WORKTREE") -> list[str]:
+    verify = subprocess.run(
+        ["git", "rev-parse", "--verify", f"{base}^{{commit}}"],
+        cwd=repo, text=True, capture_output=True, check=False,
+    )
+    if verify.returncode != 0:
+        raise RepositoryIndexError(f"unknown base revision: {base}")
+    if head == "WORKTREE":
+        command = ["git", "diff", "--name-only", "-z", base, "--"]
+    else:
+        verify_head = subprocess.run(
+            ["git", "rev-parse", "--verify", f"{head}^{{commit}}"],
+            cwd=repo, text=True, capture_output=True, check=False,
+        )
+        if verify_head.returncode != 0:
+            raise RepositoryIndexError(f"unknown head revision: {head}")
+        command = ["git", "diff", "--name-only", "-z", base, head, "--"]
+    result = subprocess.run(command, cwd=repo, text=True, capture_output=True, check=False)
+    if result.returncode != 0:
+        raise RepositoryIndexError(result.stderr.strip() or "could not calculate changed paths")
+    paths = {item for item in result.stdout.split("\0") if item and not item.startswith(".go/")}
+    if head == "WORKTREE":
+        untracked = subprocess.run(
+            ["git", "ls-files", "--others", "--exclude-standard", "-z", "--"],
+            cwd=repo, text=True, capture_output=True, check=False,
+        )
+        if untracked.returncode != 0:
+            raise RepositoryIndexError(untracked.stderr.strip() or "could not inspect untracked paths")
+        paths.update(item for item in untracked.stdout.split("\0") if item and not item.startswith(".go/"))
+    return sorted(paths)
+
+
+def repository_blast(
+    repo: Path,
+    *,
+    base: str,
+    head: str = "WORKTREE",
+    max_nodes: int = 200,
+    task: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    """Trace a Git change through the fresh derived graph without changing authority."""
+    repo = repo.resolve()
+    if not 1 <= max_nodes <= 500:
+        raise RepositoryIndexError("max_nodes must be between 1 and 500")
+    graph = load_graph(repo)
+    changed_paths = _git_changed_paths(repo, base, head)
+    nodes_by_id = {str(node["id"]): node for node in graph["nodes"]}
+    changed_nodes = sorted(
+        (node for node in graph["nodes"] if node.get("path") in changed_paths),
+        key=lambda node: str(node["id"]),
+    )
+    changed_ids = {str(node["id"]) for node in changed_nodes}
+    represented_paths = {str(node.get("path")) for node in changed_nodes if node.get("path")}
+    unexpected_scope = sorted(set(changed_paths) - represented_paths)
+
+    incoming: dict[str, list[dict[str, str]]] = {}
+    outgoing: dict[str, list[dict[str, str]]] = {}
+    for edge in graph["edges"]:
+        incoming.setdefault(edge["target"], []).append(edge)
+        outgoing.setdefault(edge["source"], []).append(edge)
+    for values in (*incoming.values(), *outgoing.values()):
+        values.sort(key=lambda edge: (edge["kind"], edge["source"], edge["target"]))
+
+    selected = set(changed_ids)
+    queue = sorted(changed_ids)
+    cursor = 0
+    reverse_kinds = {"contains", "imports", "observed_depends_on", "intended_depends_on", "tests"}
+    while cursor < len(queue) and len(selected) < max_nodes:
+        node_id = queue[cursor]
+        cursor += 1
+        neighbors = [edge["source"] for edge in incoming.get(node_id, []) if edge["kind"] in reverse_kinds]
+        if nodes_by_id[node_id].get("kind") == "component":
+            neighbors.extend(edge["target"] for edge in outgoing.get(node_id, []) if edge["kind"] == "contains")
+        for neighbor in sorted(set(neighbors)):
+            if neighbor not in selected and len(selected) < max_nodes:
+                selected.add(neighbor)
+                queue.append(neighbor)
+
+    impacted_ids = sorted(selected - changed_ids)
+    impacted_nodes = [nodes_by_id[node_id] for node_id in impacted_ids]
+    recommended_tests = sorted(
+        (nodes_by_id[node_id] for node_id in selected if nodes_by_id[node_id].get("kind") == "test"),
+        key=lambda node: str(node["id"]),
+    )
+
+    intended = {
+        (edge["source"].removeprefix("component:"), edge["target"].removeprefix("component:"))
+        for edge in graph["edges"] if edge["kind"] == "intended_depends_on"
+    }
+    observed = {
+        (edge["source"].removeprefix("component:"), edge["target"].removeprefix("component:"))
+        for edge in graph["edges"] if edge["kind"] == "observed_depends_on"
+    }
+    architecture_drift = {
+        "authority": "comparison_only_no_automatic_rewrite",
+        "missing_intended_dependencies": [
+            {"source": source, "target": target} for source, target in sorted(intended - observed)
+        ],
+        "unexpected_observed_dependencies": [
+            {"source": source, "target": target} for source, target in sorted(observed - intended)
+        ],
+    }
+
+    conformance = None
+    if task is not None and task.get("repository_context") is not None:
+        contract = task["repository_context"]
+        findings = validate_repository_context(contract)
+        if findings:
+            raise RepositoryIndexError("invalid task repository_context: " + "; ".join(findings))
+        declared = set(contract["nodes"])
+        repository_map = load_repository_map(repo, required=True)
+        scoped_patterns = [
+            str(pattern) for pattern in task.get("scope", {}).get("modify", [])
+            if isinstance(pattern, str)
+        ]
+        path_components = {
+            path: component_for(path, repository_map)[0] for path in changed_paths
+        }
+        actual = {
+            str(node["component"]) for node in changed_nodes
+            if node.get("component") and not str(node["component"]).startswith("inferred:")
+        }
+        actual.update(
+            component for component in path_components.values()
+            if not component.startswith("inferred:")
+        )
+        task_unexpected_scope = sorted(
+            path for path in unexpected_scope
+            if path_components[path] not in declared
+            and not any(_matches(path, pattern) for pattern in scoped_patterns)
+        )
+        impacted_components = {
+            str(node["id"]).removeprefix("component:")
+            for node in impacted_nodes if node.get("kind") == "component"
+        }
+        missing = sorted(actual - declared)
+        conformance = {
+            "policy": contract["impact_policy"],
+            "status": "findings" if missing or task_unexpected_scope else "passed",
+            "declared_nodes": sorted(declared),
+            "actual_changed_components": sorted(actual),
+            "impacted_components": sorted(impacted_components),
+            "missing_declarations": missing,
+            "unexpected_scope": task_unexpected_scope,
+        }
+
+    return {
+        "schema": BLAST_SCHEMA,
+        "authority": "derived_advisory_evidence_not_source_of_truth",
+        "fresh": True,
+        "base": base,
+        "head": head,
+        "changed_paths": changed_paths,
+        "changed_nodes": changed_nodes,
+        "impacted_nodes": impacted_nodes,
+        "recommended_tests": recommended_tests,
+        "truncated": len(selected) >= max_nodes and cursor < len(queue),
+        "conformance": conformance,
+        "architecture_drift": architecture_drift,
+        "limitations": [
+            "Changed paths that use an unsupported or excluded language are reported as unexpected scope.",
+            "Dynamic and runtime-only dependencies may be absent from the derived graph.",
+        ],
     }

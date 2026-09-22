@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.45",
+  "current_stack_ref": "v0.3.46",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -284,6 +284,12 @@
       "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
       "template_ref": "v0.3.18",
       "note": "Task-bound repository context; legacy tasks remain unchanged until they opt into repository_context."
+    },
+    {
+      "stack_ref": "v0.3.46",
+      "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
+      "template_ref": "v0.3.18",
+      "note": "Repository blast-radius and conformance reporting; template compatibility remains unchanged because indexing is opt-in."
     }
   ]
 }

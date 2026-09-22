@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "go-workflow.repository-blast.v1",
+  "title": "Derived Go Repository Blast Report",
+  "type": "object",
+  "required": [
+    "schema", "authority", "fresh", "base", "head", "changed_paths",
+    "changed_nodes", "impacted_nodes", "recommended_tests", "truncated",
+    "conformance", "architecture_drift", "limitations"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schema": {"const": "go-workflow.repository-blast.v1"},
+    "authority": {"const": "derived_advisory_evidence_not_source_of_truth"},
+    "fresh": {"const": true},
+    "base": {"type": "string", "minLength": 1},
+    "head": {"type": "string", "minLength": 1},
+    "changed_paths": {"type": "array", "items": {"type": "string"}},
+    "changed_nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+    "impacted_nodes": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+    "recommended_tests": {"type": "array", "items": {"$ref": "#/$defs/node"}},
+    "truncated": {"type": "boolean"},
+    "conformance": {"type": ["object", "null"]},
+    "architecture_drift": {
+      "type": "object",
+      "required": ["authority", "missing_intended_dependencies", "unexpected_observed_dependencies"]
+    },
+    "limitations": {"type": "array", "items": {"type": "string", "minLength": 1}}
+  },
+  "$defs": {
+    "node": {
+      "type": "object",
+      "required": ["id", "kind"],
+      "properties": {
+        "id": {"type": "string", "minLength": 1},
+        "kind": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}

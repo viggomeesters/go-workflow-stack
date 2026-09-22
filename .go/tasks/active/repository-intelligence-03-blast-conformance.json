@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "repository-intelligence-03-blast-conformance",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "active",
   "summary": "Verify blast radius and expose architecture-to-code drift",
   "description": "Complete repository intelligence with local diff impact, test recommendations and conformance reporting. Compare declared task nodes and intended component dependencies with the observed fresh graph, without GitHub Actions or automatic architecture rewrites.",
   "scope": {
@@ -25,9 +25,16 @@
       "go_workflow/completion.py",
       "go_workflow/cli.py",
       "schemas/task.schema.json",
+      "schemas/repository-blast.schema.json",
       "tests/test_repository_blast.py",
       "docs/repository-intelligence.md",
-      "README.md"
+      "README.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      ".go/project.json",
+      "release-pairings.json",
+      "CHANGELOG.md",
+      "docs/releases/v0.3.46.md"
     ]
   },
   "acceptance": [
@@ -44,10 +51,11 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-09-22T19:49:51+02:00",
+    "base_commit": "d492b86ffa8e219c2882e8b068c9d0d326fd3b86"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
   "evidence": [],
@@ -140,5 +148,21 @@
     ],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "repository_context": {
+    "nodes": [
+      "workflow-runtime",
+      "contract-schemas",
+      "test-suite",
+      "operator-guides"
+    ],
+    "queries": [
+      "repository blast conformance architecture drift"
+    ],
+    "max_nodes": 120,
+    "max_edges": 240,
+    "dependency_depth": 2,
+    "include_tests": true,
+    "impact_policy": "strict"
   }
 }

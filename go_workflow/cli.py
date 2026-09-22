@@ -72,6 +72,7 @@ from go_workflow.repository_index import (
     build_graph,
     index_status,
     query_graph,
+    repository_blast,
     select_repository_context,
     validate_repository_map,
     validate_repository_context,
@@ -4212,6 +4213,30 @@ def cmd_index_query(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_index_blast(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    task = None
+    if args.task_id:
+        _path, task = find_task(go_root(repo), args.task_id)
+    result = repository_blast(
+        repo,
+        base=args.base,
+        head=args.head,
+        max_nodes=args.max_nodes,
+        task=task,
+    )
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"changed_paths: {len(result['changed_paths'])}")
+        print(f"impacted_nodes: {len(result['impacted_nodes'])}")
+        print(f"recommended_tests: {len(result['recommended_tests'])}")
+        if result["conformance"]:
+            print(f"conformance: {result['conformance']['status']}")
+    conformance = result.get("conformance")
+    return 1 if conformance and conformance["policy"] == "strict" and conformance["status"] == "findings" else 0
+
+
 def template_check_environment(source: dict[str, str], stack_root: Path) -> dict[str, str]:
     env = source.copy()
     if is_git_checkout(stack_root):
@@ -5753,6 +5778,14 @@ def build_parser() -> argparse.ArgumentParser:
     index_query.add_argument("--limit", type=int, default=20)
     index_query.add_argument("--json", action="store_true")
     index_query.set_defaults(func=cmd_index_query)
+    index_blast = index_sub.add_parser("blast", help="Trace changed files through reverse dependencies and task scope")
+    index_blast.add_argument("repo", nargs="?", default=".")
+    index_blast.add_argument("--base", required=True)
+    index_blast.add_argument("--head", default="WORKTREE")
+    index_blast.add_argument("--task-id")
+    index_blast.add_argument("--max-nodes", type=int, default=200)
+    index_blast.add_argument("--json", action="store_true")
+    index_blast.set_defaults(func=cmd_index_blast)
     template_check = sub.add_parser("template-check", help="Validate a go-project-template checkout against this stack")
     template_check.add_argument("template_repo", nargs="?", default="../go-project-template")
     template_check.add_argument("--json", action="store_true")

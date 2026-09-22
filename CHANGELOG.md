@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.46 — repository impact and conformance
+
+- Trace a Git diff through bounded reverse dependency and containment edges to exact changed nodes, impacted nodes, and recommended tests.
+- Compare actual changes with a task's advisory or strict `repository_context`, including explicit unsupported and unexpected scope.
+- Expose intended-versus-observed component dependency drift without rewriting the committed map or accepted architecture.
+- Fail closed on missing or stale graphs and keep all analysis local, deterministic, provider-free, and schema-backed.
+
 ## 0.3.45 — task-bound repository context
 
 - Let tasks bind stable repository-map nodes, bounded lexical queries, dependency depth, test inclusion and advisory/strict impact policy.

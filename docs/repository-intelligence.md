@@ -117,6 +117,28 @@ legacy execution context unchanged.
 To author the contract through the CLI, store the object in a JSON file and
 pass `task create ... --repository-context context.json`.
 
+## Blast radius and conformance
+
+Compare a Git baseline with the current worktree and follow reverse dependency,
+containment, and test-ownership edges through the fresh graph:
+
+```bash
+python3 cli/go.py index blast . --base HEAD~1 --max-nodes 200 --json
+```
+
+Add `--task-id <id>` to compare the result with that task's
+`repository_context`. An advisory policy returns findings in JSON without
+blocking; a strict policy exits non-zero when changed components were not
+declared or changed paths use an unsupported or excluded language. The result
+keeps changed nodes, transitively impacted nodes, and recommended tests
+separate, with exact paths and symbol line ranges where available.
+
+The same report compares durable `depends_on` declarations with component
+dependencies observed from resolvable Python imports. Missing intended and
+unexpected observed edges are drift signals only: neither result rewrites the
+repository map or accepted architecture. A missing or stale graph fails closed,
+and bounded traversal states when it was truncated.
+
 ## Regeneration and portability
 
 Commit `.go/repository-map.json` and `.go/cache/.gitignore`; do not commit the

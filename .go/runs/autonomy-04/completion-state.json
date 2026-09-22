@@ -1,0 +1,181 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "autonomy-04",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "verify-240a6cc640d8447eabc73c7652cfa86a",
+  "workspace": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_recovery.py tests/test_abc_resume.py tests/test_abc_context.py -q -p no:cacheprovider",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+        "worktree_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-04/completion/command-c53dbdd2fdc24acc9674479810bafbd9.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-04/completion/command-c53dbdd2fdc24acc9674479810bafbd9.json",
+        "sha256": "343d367b53de4c972b2383618a52d071bedf00f19d0a016ad35e41224c1fe639"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+        "worktree_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-04/completion/command-53127b97826e4166ade5e62fdca50a9d.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-04/completion/command-53127b97826e4166ade5e62fdca50a9d.json",
+        "sha256": "f32be5b3fd63a6b0760cc938803cec8aeba0f6d0f8fa84943dbda78e2eada058"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+        "worktree_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-04/completion/command-87c852b85f514e3a996803ce6d8b7fee.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-04/completion/command-87c852b85f514e3a996803ce6d8b7fee.json",
+        "sha256": "83ed47dcc4bd9292c2ae8c2f634c789af56ac10005207f77052b7bde0abde5d7"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "autonomy-04",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+        "revision": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+        "worktree_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/autonomy-04/completion/command-a59c0effff934a8994ad22824e1a7795.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/autonomy-04/completion/command-a59c0effff934a8994ad22824e1a7795.json",
+        "sha256": "707baaaf85b4deca49c6844a12c24c3ec9113b70d18a6c2be26f4449356e16cd"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "Injected controller death before/after dispatch, during checks and between tasks recovers the exact pending stage; a live orphan or unknown process identity cannot authorize a second writer. Preserve task files and raw failed attempts.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Campaign walltime/command budgets and repair limits persist across resume. No silent budget replenishment or model fallback; temporary provider failures use bounded backoff and unchanged model binding.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "Detect repeated no-progress attempts from inspected evidence rather than merely retrying the same prompt. Within mandate, change repair strategy or isolate research; otherwise record a precise blocker and proceed only with eligible independent tasks.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "Pause/drain/cancel have explicit effects; stop only owned processes, preserve work and reconcile started external effects. New workers get canonical current task/architecture and relevant failed proof, not an assumed surviving transcript.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "dcf0f7d44e0c487a8ca1e919527ef12f6a11e7820eb287362c45b3f445dadac3",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "mac.home",
+    "pid": 16482
+  },
+  "worker_group": null,
+  "inflight": null
+}

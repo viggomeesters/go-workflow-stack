@@ -1,0 +1,259 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-04",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Recover interrupted campaigns within a persistent budget",
+  "description": "Extend campaign supervision with durable dispatch/checkpoints, process ownership, finite repair attempts, context refresh and cumulative budgets across process restarts. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/campaign*.py",
+      "go_workflow/run_state.py",
+      "go_workflow/state_io.py",
+      "go_workflow/cli.py",
+      "schemas/**",
+      "tests/test_autonomy_recovery.py",
+      "tests/test_abc_resume.py",
+      "docs/state-safety.md",
+      "docs/autonomous-campaign.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-04/**"
+    ]
+  },
+  "acceptance": [
+    "Injected controller death before/after dispatch, during checks and between tasks recovers the exact pending stage; a live orphan or unknown process identity cannot authorize a second writer. Preserve task files and raw failed attempts.",
+    "Campaign walltime/command budgets and repair limits persist across resume. No silent budget replenishment or model fallback; temporary provider failures use bounded backoff and unchanged model binding.",
+    "Detect repeated no-progress attempts from inspected evidence rather than merely retrying the same prompt. Within mandate, change repair strategy or isolate research; otherwise record a precise blocker and proceed only with eligible independent tasks.",
+    "Pause/drain/cancel have explicit effects; stop only owned processes, preserve work and reconcile started external effects. New workers get canonical current task/architecture and relevant failed proof, not an assumed surviving transcript.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_recovery.py tests/test_abc_resume.py tests/test_abc_context.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T09:06:44+02:00",
+    "base_commit": "9b30a2baff8e188fc5a0f9c0b87a6a5fcce8fcba"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T10:15:24+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": ".go/runs/autonomy-04/completion/critic-cd3e8fe9344f4090b9cc8a6eb894b327.json",
+      "transaction_id": "8bec27d1d7ea4a90aa4344f4f4cc047d",
+      "delivery": {
+        "delivery_id": "autonomy-first-v5",
+        "html": ".go/deliveries/autonomy-first-v5/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v5/manifest.json",
+        "source_sha256": "61ece0e24b0164ed070582cf4dae6cc8282400ae0b8bdb6280899d413d81e6d1",
+        "html_sha256": "23b19ea9d95b1297766bc481ca29c1cb76c4b651913211bb8adf10f5ee613a40"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T10:15:15+02:00",
+      "task_id": "autonomy-04",
+      "agent": "codex-astra-high",
+      "summary": "verification_command=task verification + Linux release-check v0.3.37; verification_result=passed (36 targeted, 156 compatibility, 197 smoke, template and uv tool); critic=passed content-bound adversarial review; runtime=codex; model=gpt-6-astra high; billing_mode=subscription; changed_files=.go/project.json,CHANGELOG.md,docs/autonomous-campaign.md,docs/releases/v0.3.37.md,docs/state-safety.md,go_workflow/campaign.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/run_state.py,pyproject.toml,release-pairings.json,schemas/campaign-run.schema.json,schemas/run-state.schema.json,tests/test_autonomy_recovery.py",
+      "changed_files": [
+        ".go/project.json",
+        "CHANGELOG.md",
+        "docs/autonomous-campaign.md",
+        "docs/releases/v0.3.37.md",
+        "docs/state-safety.md",
+        "go_workflow/campaign.py",
+        "go_workflow/cli.py",
+        "go_workflow/constants.py",
+        "go_workflow/run_state.py",
+        "pyproject.toml",
+        "release-pairings.json",
+        "schemas/campaign-run.schema.json",
+        "schemas/run-state.schema.json",
+        "tests/test_autonomy_recovery.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "9b30a2baff8e188fc5a0f9c0b87a6a5fcce8fcba",
+        "observed_head_commit": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff"
+      },
+      "verification": {
+        "command": "task verification + Linux release-check v0.3.37",
+        "result": "passed (36 targeted, 156 compatibility, 197 smoke, template and uv tool)"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "codex",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed content-bound adversarial review",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-03",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Extend campaign supervision with durable dispatch/checkpoints, process ownership, finite repair attempts, context refresh and cumulative budgets across process restarts. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "34681bd846380bb10aefede89f9bccddef1209615ef5bea7aaed3bf7f7b5c149",
+    "source_ref": "repo-local-intake:autonomy-04"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "Injected controller death before/after dispatch, during checks and between tasks recovers the exact pending stage; a live orphan or unknown process identity cannot authorize a second writer. Preserve task files and raw failed attempts.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T10:13:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-04/completion/verification-af4a5d0e297c46e585f3f2a26c88ef29.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Campaign walltime/command budgets and repair limits persist across resume. No silent budget replenishment or model fallback; temporary provider failures use bounded backoff and unchanged model binding.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T10:13:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-04/completion/verification-af4a5d0e297c46e585f3f2a26c88ef29.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Detect repeated no-progress attempts from inspected evidence rather than merely retrying the same prompt. Within mandate, change repair strategy or isolate research; otherwise record a precise blocker and proceed only with eligible independent tasks.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T10:13:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-04/completion/verification-af4a5d0e297c46e585f3f2a26c88ef29.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "Pause/drain/cancel have explicit effects; stop only owned processes, preserve work and reconcile started external effects. New workers get canonical current task/architecture and relevant failed proof, not an assumed surviving transcript.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T10:13:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-04/completion/verification-af4a5d0e297c46e585f3f2a26c88ef29.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T10:13:32+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-04/completion/release-20144116f2ca48038e42c872aef77004.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-04/completion/verification-af4a5d0e297c46e585f3f2a26c88ef29.json",
+      "sha256": "86cc92c442725bdcf058e242a6d78d3ecd63708b5590259f76c1ccbeb126e25e"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-04/completion/critic-cd3e8fe9344f4090b9cc8a6eb894b327.json",
+      "sha256": "5e9fd1681bdda1a88ca54863b63dcf7619550d342c3b46b7c464fa5a48f9de61"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-04/completion/release-20144116f2ca48038e42c872aef77004.json",
+      "sha256": "bc9779a568f7432a514aed07a4b8a991aa3ee2053b9744c37c8737269e6a005a"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-04",
+    "project": "go-workflow-stack",
+    "commit": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+    "tag": "v0.3.37",
+    "evidence": [
+      ".go/runs/autonomy-04/completion/release-20144116f2ca48038e42c872aef77004.json"
+    ]
+  }
+}

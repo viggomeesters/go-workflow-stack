@@ -1,0 +1,29 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "autonomy-04",
+  "project": "go-workflow-stack",
+  "contract_digest": "dcf0f7d44e0c487a8ca1e919527ef12f6a11e7820eb287362c45b3f445dadac3",
+  "revision": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+  "content_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Adversarial recheck covered crash windows, live-owner refusal, durable wall/command/repair accounting, exact-model provider backoff, no-progress isolation with independent continuation, control boundaries, schema migration, release pairing, and final remote readback. The controller clears reconciled dispatch ownership, preserves managed/raw failure evidence, and introduces no parallel writer or silent budget/model expansion.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "docs/autonomous-campaign.md",
+    "docs/releases/v0.3.37.md",
+    "docs/state-safety.md",
+    "go_workflow/campaign.py",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/run_state.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "schemas/campaign-run.schema.json",
+    "schemas/run-state.schema.json",
+    "tests/test_autonomy_recovery.py"
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "schema": "go-workflow.release-evidence.v1",
+  "status": "verified",
+  "task_id": "autonomy-04",
+  "project": "go-workflow-stack",
+  "contract_digest": "dcf0f7d44e0c487a8ca1e919527ef12f6a11e7820eb287362c45b3f445dadac3",
+  "content_digest": "5378c1ff23afeaefbf3d99bd602a497d882e6a33d6c5585099dedd37dd55b0d8",
+  "profile": {
+    "name": "github-release",
+    "provider": "github-release",
+    "remote": "origin",
+    "branch": "main",
+    "repository": "viggomeesters/go-workflow-stack"
+  },
+  "remote_url": "https://github.com/viggomeesters/go-workflow-stack.git",
+  "tag": "v0.3.37",
+  "commit": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+  "tag_object": "2d7267927bea6c4cfcfe56e7ecf5ad939478a04a",
+  "branch_commit": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+  "refs": {
+    "refs/heads/main": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff",
+    "refs/tags/v0.3.37": "2d7267927bea6c4cfcfe56e7ecf5ad939478a04a",
+    "refs/tags/v0.3.37^{}": "395992f79ddae1b13309b4eaf9dfcef00cdf12ff"
+  },
+  "publication": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-22T08:05:59Z",
+    "tagName": "v0.3.37",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.37"
+  },
+  "observed_at": "2026-09-22T08:13:07.870289+00:00"
+}

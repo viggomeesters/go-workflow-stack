@@ -1,0 +1,78 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "autonomy-first-v5",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "autonomy-first",
+    "title": "Betrouwbare autonomie van opdracht tot geleverde uitkomst"
+  },
+  "release": {
+    "version": 5,
+    "status": "released",
+    "created_at": "2026-09-22T10:15:26+02:00",
+    "supersedes": "autonomy-first-v4"
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "blocked"
+  },
+  "sections": {
+    "summary": "Planning only: bounded serial campaigns with vision/architecture traceability, recovery, truthful outcome proof and complete per-task delivery. Parallel work deferred.",
+    "delivered_scope": [
+      "Define bounded run authority and outcome traceability",
+      "Turn rough requests into evidence-backed executable work",
+      "Continue a bounded serial campaign across task releases",
+      "Recover interrupted campaigns within a persistent budget",
+      "Isolate managed verification without weakening worker guards",
+      "Make the pinned-runtime bootstrap test hermetic"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Define bounded run authority and outcome traceability",
+        "summary": "changed_files=.go/architecture/briefs/autonomous-campaign.json,.go/decisions/events.jsonl,.go/project.json,CHANGELOG.md,README.md,docs/architecture-lane.md,docs/autonomous-campaign.md,docs/releases/v0.3.34.md,docs/task-workspaces.md,go_workflow/campaign_contracts.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/execution_context.py,go_workflow/run_state.py,pyproject.toml,release-pairings.json,schemas/campaign-contract.schema.json,tests/test_abc_resume.py,tests/test_autonomy_contracts.py,tests/test_smoke.py; verification_command=declared content-bound verification in clean clone; verification_result=passed focused contracts plus make check plus validate plus diff check; critic=passed same-agent adversarial review covering every changed product path; architecture_conformance=passed architecture-lane-governance; requested_outcomes=R1,R2,R3,R4 verified; runtime=Codex desktop; model=user-selected gpt-6-astra high (effective identity unconfirmed); billing_mode=subscription; release=v0.3.34 f6d29e0bc72fe36af122bc0debb8856806fb38fb https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.34; remote_readback=origin/main and annotated v0.3.34 resolve to f6d29e0; preserved_user_dirt=uv.lock excluded"
+      },
+      {
+        "label": "Turn rough requests into evidence-backed executable work",
+        "summary": "changed_files=.go/project.json,CHANGELOG.md,README.md,docs/autonomous-intake.md,docs/releases/v0.3.35.md,go_workflow/cli.py,go_workflow/constants.py,go_workflow/intake.py,pyproject.toml,release-pairings.json,schemas/intake-assessment.schema.json,skills/repo-local-agent-workflow/SKILL.md,tests/test_autonomy_intake.py; verification_command=44 focused tests, isolated make check, candidate and tagged Linux release gates; verification_result=44 passed; Linux compatibility 156 passed; Linux smoke 197 passed; template pairing and standalone distribution passed; critic=passed same-agent content-bound review with no blocking findings; runtime=Codex desktop plus ephemeral Lima Ubuntu; model=requested gpt-6-astra high, effective identity unconfirmed; billing_mode=subscription; release=v0.3.35 31b5266807da14481415b62a337b5f2ca55955ce https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.35; Self-reflect: process miss found — completion proof was captured after integration. Selfimprove applied to /Users/viggomeesters/.codex/skills/go-goal/SKILL.md; verification readback lines 11-15."
+      },
+      {
+        "label": "Continue a bounded serial campaign across task releases",
+        "summary": "verification=.go/runs/autonomy-03/completion/verification-1c616c45abbb40d6ad8ce88adad78e65.json; critic=.go/runs/autonomy-03/completion/critic-a369c44fad4b4190ae993c13ff308809.json; release=.go/runs/autonomy-03/completion/release-cfff6470000f4001aa51411937da5a7b.json; self-reflect=.go/evidence/autonomy-03/self-reflect.json; remote=https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.36"
+      },
+      {
+        "label": "Recover interrupted campaigns within a persistent budget",
+        "summary": "verification_command=task verification + Linux release-check v0.3.37; verification_result=passed (36 targeted, 156 compatibility, 197 smoke, template and uv tool); critic=passed content-bound adversarial review; runtime=codex; model=gpt-6-astra high; billing_mode=subscription; changed_files=.go/project.json,CHANGELOG.md,docs/autonomous-campaign.md,docs/releases/v0.3.37.md,docs/state-safety.md,go_workflow/campaign.py,go_workflow/cli.py,go_workflow/constants.py,go_workflow/run_state.py,pyproject.toml,release-pairings.json,schemas/campaign-run.schema.json,schemas/run-state.schema.json,tests/test_autonomy_recovery.py"
+      },
+      {
+        "label": "Isolate managed verification without weakening worker guards",
+        "summary": "changed_files=docs/task-workspaces.md,go_workflow/execution_context.py,go_workflow/run_state.py,tests/test_abc_resume.py; verification_command=50 focused managed-workspace tests plus make check in evidence-identical isolated clone, repo validate, git diff --check; verification_result=passed; critic=passed root recheck confirmed candidate-byte binding and unchanged registered-workspace guard; runtime=Codex desktop; model=Codex executor with effective identity unconfirmed; billing_mode=unknown"
+      },
+      {
+        "label": "Make the pinned-runtime bootstrap test hermetic",
+        "summary": "changed_files=tests/test_smoke.py; verification_command=GIT_CONFIG_GLOBAL=/dev/null pytest focused plus scripts/release-check.sh 0.3.34 --allow-candidate on WSL2; verification_result=2 focused passed, compatibility 156 passed, smoke 197 passed, template pairing and standalone distribution passed; critic=passed: exact diff review confirms production bootstrap unchanged and negative wrong-commit case remains green; runtime=codex; billing_mode=subscription"
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Review actual product behavior against original outcomes",
+      "Prove campaign goals and produce an auditable handoff",
+      "Keep Git and publication clean across autonomous tasks",
+      "Exercise the full autonomous journey with injected failures",
+      "Prove an unattended multi-task night run with real workers"
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "61ece0e24b0164ed070582cf4dae6cc8282400ae0b8bdb6280899d413d81e6d1",
+    "html_sha256": "23b19ea9d95b1297766bc481ca29c1cb76c4b651913211bb8adf10f5ee613a40"
+  }
+}

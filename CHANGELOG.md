@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.36 — durable serial campaign continuation
+
+- Execute an explicit campaign allowlist serially through the existing managed task, workspace, completion and release lifecycle.
+- Resume active work and pending cleanup before deterministically selecting the next independent eligible task.
+- Freeze the campaign revision and workspace root, persist cumulative wall/task/attempt consumption, and reject corrupt or drifting checkpoints.
+- Preserve exact release/deployment authority, including deployment-target non-escalation and truthful authority/safety/effect stops.
+- Reconcile injected process loss after authoritative task completion and emit a portable campaign-bound resume command.
+
 ## 0.3.35 — evidence-backed autonomous intake
 
 - Turn a rough request into versioned, source-bound model assessment before task materialization.

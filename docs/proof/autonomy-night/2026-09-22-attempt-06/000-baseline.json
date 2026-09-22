@@ -1,0 +1,15 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "-m",
+    "pytest",
+    "tests/test_notes.py",
+    "-q",
+    "-k",
+    "normalize"
+  ],
+  "returncode": 1,
+  "stdout": "F                                                                        [100%]\n=================================== FAILURES ===================================\n__________ test_normalize_notes_strips_blanks_and_stably_deduplicates __________\n\n    def test_normalize_notes_strips_blanks_and_stably_deduplicates():\n>       assert notes.normalize_notes([' alpha ', '', 'beta', 'alpha', '  ']) == ['alpha', 'beta']\nE       AssertionError: assert [' alpha ', '...'alpha', '  '] == ['alpha', 'beta']\nE         \nE         At index 0 diff: ' alpha ' != 'alpha'\nE         Left contains 3 more items, first extra item: 'beta'\nE         Use -v to get more diff\n\ntests/test_notes.py:5: AssertionError\n=========================== short test summary info ============================\nFAILED tests/test_notes.py::test_normalize_notes_strips_blanks_and_stably_deduplicates\n1 failed, 2 deselected in 0.02s\n",
+  "stderr": "",
+  "elapsed_seconds": 0.162
+}

@@ -146,6 +146,16 @@ def test_intake_cannot_broaden_frozen_execution_boundaries(tmp_path):
     assert result["removed_verification"]["normalize-notes"] == ["Verify the behavior by inspection."]
 
 
+def test_resume_wait_has_no_delay_without_live_worker_groups(tmp_path):
+    campaign = load(CAMPAIGN_PATH, "autonomy_live_campaign_drain")
+    repo = tmp_path / "repo"
+    write_json(repo / ".go/runs/task/run-state.json", {"worker_group": None})
+
+    elapsed = campaign.wait_for_worker_groups(repo, timeout_seconds=0.1)
+
+    assert elapsed < 0.1
+
+
 def test_checker_accepts_content_bound_raw_process_and_remote_evidence(tmp_path):
     checker = load(CHECKER_PATH, "autonomy_live_checker")
     proof = valid_proof(tmp_path)

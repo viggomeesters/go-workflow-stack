@@ -1,0 +1,33 @@
+{
+  "argv": [
+    "/opt/homebrew/opt/python@3.14/bin/python3.14",
+    "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-09/cli/go.py",
+    "auto",
+    "/private/tmp/go-autonomy-night-20260922-live6/project",
+    "--campaign",
+    "/private/tmp/go-autonomy-night-20260922-live6/campaign.json",
+    "--campaign-workspace-root",
+    "/private/tmp/go-autonomy-night-20260922-live6/workspaces",
+    "--execute",
+    "--agent",
+    "autonomy-live-controller",
+    "--executor-agent",
+    "codex",
+    "--max-commands",
+    "100",
+    "--max-minutes",
+    "60",
+    "--max-attempts",
+    "4",
+    "--command-timeout-seconds",
+    "900",
+    "--ship-policy",
+    "push",
+    "--allow-push",
+    "--json"
+  ],
+  "returncode": 1,
+  "stdout": "{\n  \"schema\": \"go-workflow.auto-run-result.v1\",\n  \"mode\": \"go-auto\",\n  \"repo\": \"/private/tmp/go-autonomy-night-20260922-live6/project\",\n  \"status\": \"authority_required\",\n  \"completed_tasks\": [\n    \"normalize-notes\"\n  ],\n  \"blocked_task\": \"render-report\",\n  \"checks\": [],\n  \"commands_run\": 0,\n  \"goal_verified\": false,\n  \"campaign\": {\n    \"schema\": \"go-workflow.campaign-plan.v1\",\n    \"id\": \"synthetic-notes-night-20260922\",\n    \"project\": \"autonomy-live-notes\",\n    \"revision\": 1,\n    \"contract_sha256\": \"7b40fe81d30c41a5706c03f69efaca3246b2fad9547796263b399161fb8b29be\",\n    \"contract_path\": \"/private/tmp/go-autonomy-night-20260922-live6/campaign.json\",\n    \"next_tasks\": [\n      \"render-report\"\n    ],\n    \"selection\": \"resume_active\",\n    \"skipped_tasks\": [],\n    \"stop_semantics\": \"no_eligible_tasks_is_not_goal_verified\"\n  },\n  \"repair_attempts\": 0,\n  \"summary\": \"Previous worker process group is still live; preserve its workspace\",\n  \"delivery\": {\n    \"schema\": \"go-workflow.task-delivery-report.v1\",\n    \"task_id\": \"render-report\",\n    \"release_policy\": \"required\",\n    \"delivered\": false,\n    \"reported_live\": false,\n    \"head_relation\": \"not_applicable\",\n    \"publication\": {\n      \"status\": \"not_applicable\",\n      \"commit\": null,\n      \"tag\": null\n    },\n    \"workspace_state\": \"ready\",\n    \"blockers\": [\n      {\n        \"code\": \"task_not_approved_done\",\n        \"message\": \"Task is not completed and approved.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"managed_checkpoint_incomplete\",\n        \"message\": \"Managed task checkpoint is build, not complete.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"workspace_cleanup_pending\",\n        \"message\": \"Workspace state is ready; verified cleanup is still required.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"release_receipt_missing\",\n        \"message\": \"Verified release receipt is missing or invalid.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"release_checkpoint_missing\",\n        \"message\": \"Durable publisher checkpoint is missing.\",\n        \"condition\": \"authority_required\"\n      }\n    ],\n    \"stop_condition\": \"authority_required\"\n  },\n  \"campaign_state\": \".go/runs/campaigns/synthetic-notes-night-20260922/state.json\"\n}\n",
+  "stderr": "",
+  "elapsed_seconds": 0.079
+}

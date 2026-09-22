@@ -1,0 +1,26 @@
+{
+  "schema": "go-workflow.autonomy-live-attempt.v1",
+  "status": "failed",
+  "started_at": "2026-09-22T13:59:44.050721Z",
+  "finished_at": "2026-09-22T14:03:32.449474Z",
+  "elapsed_seconds": 228.399,
+  "commands": {
+    "baseline": {
+      "path": "000-baseline.json",
+      "sha256": "aa7dbe0767bc324876fb96562d45ffde15add9a4a1e4f661c3dc004b6b079e97"
+    },
+    "intake": {
+      "path": "001-intake.json",
+      "sha256": "f9b6ef4477e428f458f35c8549877a4524451b51401850fcc8dedd894367cf94"
+    },
+    "initial_controller": {
+      "path": "002-controller-initial.json",
+      "sha256": "b4d977853518c972b99b7a88ea6e1484d410d7269837e4ae185b419878fc003e"
+    },
+    "resume_controller": {
+      "path": "003-controller-resume.json",
+      "sha256": "ba823bba8a2811079f9f9cbf2ac47a6396f41b490490b461c9c61174ead5cf57"
+    }
+  },
+  "error": "resumed controller failed: {\n  \"schema\": \"go-workflow.auto-run-result.v1\",\n  \"mode\": \"go-auto\",\n  \"repo\": \"/private/tmp/go-autonomy-night-20260922-live6/project\",\n  \"status\": \"authority_required\",\n  \"completed_tasks\": [\n    \"normalize-notes\"\n  ],\n  \"blocked_task\": \"render-report\",\n  \"checks\": [],\n  \"commands_run\": 0,\n  \"goal_verified\": false,\n  \"campaign\": {\n    \"schema\": \"go-workflow.campaign-plan.v1\",\n    \"id\": \"synthetic-notes-night-20260922\",\n    \"project\": \"autonomy-live-notes\",\n    \"revision\": 1,\n    \"contract_sha256\": \"7b40fe81d30c41a5706c03f69efaca3246b2fad9547796263b399161fb8b29be\",\n    \"contract_path\": \"/private/tmp/go-autonomy-night-20260922-live6/campaign.json\",\n    \"next_tasks\": [\n      \"render-report\"\n    ],\n    \"selection\": \"resume_active\",\n    \"skipped_tasks\": [],\n    \"stop_semantics\": \"no_eligible_tasks_is_not_goal_verified\"\n  },\n  \"repair_attempts\": 0,\n  \"summary\": \"Previous worker process group is still live; preserve its workspace\",\n  \"delivery\": {\n    \"schema\": \"go-workflow.task-delivery-report.v1\",\n    \"task_id\": \"render-report\",\n    \"release_policy\": \"required\",\n    \"delivered\": false,\n    \"reported_live\": false,\n    \"head_relation\": \"not_applicable\",\n    \"publication\": {\n      \"status\": \"not_applicable\",\n      \"commit\": null,\n      \"tag\": null\n    },\n    \"workspace_state\": \"ready\",\n    \"blockers\": [\n      {\n        \"code\": \"task_not_approved_done\",\n        \"message\": \"Task is not completed and approved.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"managed_checkpoint_incomplete\",\n        \"message\": \"Managed task checkpoint is build, not complete.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"workspace_cleanup_pending\",\n        \"message\": \"Workspace state is ready; verified cleanup is still required.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"release_receipt_missing\",\n        \"message\": \"Verified release receipt is missing or invalid.\",\n        \"condition\": \"authority_required\"\n      },\n      {\n        \"code\": \"release_checkpoint_missing\",\n        \"message\": \"Durable publisher checkpoint is missing.\",\n        \"condition\": \"authority_required\"\n      }\n    ],\n    \"stop_condition\": \"authority_required\"\n  },\n  \"campaign_state\": \".go/runs/campaigns/synthetic-notes-night-20260922/state.json\"\n}\n"
+}

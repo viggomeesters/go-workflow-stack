@@ -414,6 +414,28 @@ def _usage_records(repo: Path) -> list[dict]:
     return records
 
 
+def wait_for_worker_groups(repo: Path, *, timeout_seconds: float = 60.0) -> float:
+    """Wait until process groups recorded by an interrupted controller have exited."""
+    started = time.monotonic()
+    deadline = started + timeout_seconds
+    while True:
+        live: list[int] = []
+        for path in (repo / ".go/runs").glob("*/run-state.json"):
+            try:
+                group = json.loads(path.read_text(encoding="utf-8")).get("worker_group")
+                if type(group) is not int or group <= 0:
+                    continue
+                os.killpg(group, 0)
+                live.append(group)
+            except (ProcessLookupError, PermissionError, ValueError, OSError):
+                continue
+        if not live:
+            return time.monotonic() - started
+        if time.monotonic() >= deadline:
+            raise RuntimeError(f"interrupted worker process groups did not stop: {sorted(set(live))}")
+        time.sleep(1)
+
+
 def run_live(prepared: dict, *, proof_dir: Path) -> dict:
     proof_dir = Path(proof_dir).resolve()
     if proof_dir.exists():
@@ -498,6 +520,7 @@ def run_live(prepared: dict, *, proof_dir: Path) -> dict:
         if not interrupted or initial.returncode in {0, None}:
             raise RuntimeError("controller was not automatically interrupted after the first remote release")
 
+        drain_elapsed = wait_for_worker_groups(repo)
         remaining = max(60, int(deadline - time.monotonic()))
         resumed, elapsed = _run(controller_args, cwd=repo, env=env, timeout=remaining)
         commands["resume_controller"] = _raw(
@@ -546,7 +569,8 @@ def run_live(prepared: dict, *, proof_dir: Path) -> dict:
             "intake_boundary": intake_boundary,
             "commands": commands,
             "interruption": {"kind": "SIGTERM", "automatic": True, "after_remote_tag": first_tag,
-                             "initial_returncode": initial.returncode},
+                             "initial_returncode": initial.returncode,
+                             "worker_drain_seconds": round(drain_elapsed, 3)},
             "fault": {"kind": "real_seeded_bug", "baseline_failed": True, "final_passed": True},
             "workers": [{"task_id": item["task_id"], "adapter": "codex",
                          "model": item["id"], "effort": item["effort"]} for item in pilot["models"]],

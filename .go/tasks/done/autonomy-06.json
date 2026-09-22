@@ -1,0 +1,265 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "autonomy-06",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Prove campaign goals and produce an auditable handoff",
+  "description": "Add a bounded-goal completion audit and compact run report that distinguish task completion, delivered user outcomes, deferred work and the continuing product vision. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+  "scope": {
+    "read": [
+      "**"
+    ],
+    "modify": [
+      "go_workflow/campaign*.py",
+      "go_workflow/completion.py",
+      "go_workflow/cli.py",
+      "schemas/**",
+      "tests/test_autonomy_goal_audit.py",
+      "fixtures/autonomy-goal-audit/**",
+      "docs/autonomy-evidence.md",
+      "docs/autonomy-benchmark.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "README.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      ".go/project.json",
+      ".go/evidence/autonomy-06/**"
+    ]
+  },
+  "acceptance": [
+    "An empty queue plus declared success_metrics cannot prove success. Audit every adopted goal outcome against current product evidence and relevant architecture conformance; distinguish achieved, partial, blocked and explicitly excluded outcomes.",
+    "Discover missing work only within the original mandate and bounded follow-up allowance; deduplicate it. Broader vision ideas remain proposals and cannot expand the night run indefinitely.",
+    "Morning/readback report links original request, decisions, tasks, commits, tested candidates, releases/deployments and exact live receipts; clearly distinguishes live, locally verified, pending and user decisions.",
+    "All execution entrypoints used for campaign completion apply the same outcome audit. Invalidated or absent evidence fails completion; historical task records are not reinterpreted as fresh proof.",
+    "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake."
+  ],
+  "verification": [
+    "uv run --no-project --python 3.12 --with 'pytest>=8,<9' --with 'jsonschema>=4.23' python -m pytest tests/test_autonomy_goal_audit.py tests/test_abc_completion.py tests/test_autonomy_campaign.py -q -p no:cacheprovider",
+    "make check",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T12:01:08+02:00",
+    "base_commit": "5e1d25542d3658a8c3d40b2f69fa996dbbd7ef88"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T12:44:24+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Outcome audit behavior, evidence binding, architecture conformance, v0.3.40 tag/GitHub publication and official-origin Linux readback verified.",
+      "transaction_id": "dcdc168affea43fc81737c864975de9f",
+      "delivery": {
+        "delivery_id": "autonomy-first-v8",
+        "html": ".go/deliveries/autonomy-first-v8/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v8/manifest.json",
+        "source_sha256": "58de85face679a7f56a2ab95fc3249906027ff998f98e58aea590ea1aeabc144",
+        "html_sha256": "d4eb2b1bd6ad4bbefd5499b4f01d6e72873392acb0f39d368f0c183d634145e0"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T12:44:17+02:00",
+      "task_id": "autonomy-06",
+      "agent": "codex-astra-high",
+      "summary": "summary=R1-R5 verified with bounded goal-audit and official release readback; verification_command=declared four-command task gate plus Linux release-check 0.3.40 --validate-existing; verification_result=passed: 42 targeted, make check, validate, diff-check, 156 compatibility, 197 smoke, template pairing, standalone install; critic=passed same-agent recheck with no blocking findings; runtime=Codex desktop; model=gpt-6-astra high; billing_mode=subscription",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/evidence/events.jsonl",
+        ".go/runs/events.jsonl",
+        ".go/tasks/open/autonomy-06.json",
+        ".go/runs/autonomy-06/completion-state.json",
+        ".go/runs/autonomy-06/completion/command-42892cb3854841c984624de40271cf2f.json",
+        ".go/runs/autonomy-06/completion/command-4c52e664ffa94a90bfceb1931d72a5d6.json",
+        ".go/runs/autonomy-06/completion/command-bc3fe6dcc4af4191b6a60d6251d79fd7.json",
+        ".go/runs/autonomy-06/completion/command-e6489f4c789f4a959c675b6a2f128146.json",
+        ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json",
+        ".go/runs/autonomy-06/completion/release-e61485dcb8754a89a070d32437d3c29d.json",
+        ".go/runs/autonomy-06/completion/verification-59537b36db2d4ac49f4dd91f3596889e.json",
+        ".go/runs/autonomy-06/publication-process.json",
+        ".go/tasks/active/autonomy-06.json",
+        ".go/workspaces/autonomy-06.json",
+        "uv.lock"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "5e1d25542d3658a8c3d40b2f69fa996dbbd7ef88",
+        "observed_head_commit": "cd7788bdb57287dc5cb818fd81da39f95718b009"
+      },
+      "verification": {
+        "command": "declared four-command task gate plus Linux release-check 0.3.40 --validate-existing",
+        "result": "passed: 42 targeted, make check, validate, diff-check, 156 compatibility, 197 smoke, template pairing, standalone install"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "Codex desktop",
+        "model": "gpt-6-astra high",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Codex desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra high",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed same-agent recheck with no blocking findings",
+        "skip_reason": null
+      }
+    }
+  ],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-astra",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "base_branch": "main",
+      "control_state": "repo_local_single_writer"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-03",
+      "requires": "done_with_required_release_evidence"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "autonomy-05",
+      "requires": "done_with_required_release_evidence"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Add a bounded-goal completion audit and compact run report that distinguish task completion, delivered user outcomes, deferred work and the continuing product vision. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
+    "sha256": "0f4dd641028667efaf2f7f46ab029f2d81c9d26da5fca16a3e9ac35d12ea3cd9",
+    "source_ref": "repo-local-intake:autonomy-06"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "An empty queue plus declared success_metrics cannot prove success. Audit every adopted goal outcome against current product evidence and relevant architecture conformance; distinguish achieved, partial, blocked and explicitly excluded outcomes.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Discover missing work only within the original mandate and bounded follow-up allowance; deduplicate it. Broader vision ideas remain proposals and cannot expand the night run indefinitely.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Morning/readback report links original request, decisions, tasks, commits, tested candidates, releases/deployments and exact live receipts; clearly distinguishes live, locally verified, pending and user decisions.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "All execution entrypoints used for campaign completion apply the same outcome audit. Invalidated or absent evidence fails completion; historical task records are not reinterpreted as fresh proof.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:43:41+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/release-e61485dcb8754a89a070d32437d3c29d.json"
+        }
+      ]
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [],
+    "conformance_required": true,
+    "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-06/completion/verification-59537b36db2d4ac49f4dd91f3596889e.json",
+      "sha256": "7aae47546ba9d2ff4bcd9d6a7c9093755642f541ba7057e848083026d1926d17"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json",
+      "sha256": "a12e05b86b539ba61a4e044b6285dac54558cce382cc0f30cf1898dceb1387e1"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-06/completion/release-e61485dcb8754a89a070d32437d3c29d.json",
+      "sha256": "b1ddf914e1c6b0673ef2475304cc16b320f25797b262f52208e9bae6f390e91e"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-06",
+    "project": "go-workflow-stack",
+    "commit": "cd7788bdb57287dc5cb818fd81da39f95718b009",
+    "tag": "v0.3.40",
+    "evidence": [
+      ".go/runs/autonomy-06/completion/release-e61485dcb8754a89a070d32437d3c29d.json"
+    ]
+  }
+}

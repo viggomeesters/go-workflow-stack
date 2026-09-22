@@ -1,0 +1,30 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "status": "passed",
+  "task_id": "autonomy-06",
+  "project": "go-workflow-stack",
+  "contract_digest": "26bea3f206856b316f954dbbe611c7e0f2b3234b14fbd758bdad05a93b813d64",
+  "revision": "cd7788bdb57287dc5cb818fd81da39f95718b009",
+  "content_digest": "288440e1f8049d2ab2a59f34e7243aa2b509aeb26768e4df9afbd6054426f016",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Rechecked the shared completion path against the frozen campaign mandate. The controller cannot convert queue exhaustion into success; every mapped R# must have opted-in current lifecycle proof, applicable architecture conformance, and every required evidence kind. Live outcomes resolve and report the exact deployment receipt rather than a release alias. Follow-up proposals are deterministic, deduplicated, capped by each declared allowance, and ignore broader vision proposals. The report preserves original intent, decisions, tasks, tested candidate identities, releases, live receipts and pending classifications. Invalid contract identities fail before path construction or writes. Targeted tests cover achieved, partial, blocked, excluded/history, bounded follow-up, shared controller use, invalidated proof and traversal-safe failure; declared verification and clean-clone make check pass.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/autonomy-benchmark.md",
+    "docs/autonomy-evidence.md",
+    "docs/releases/v0.3.40.md",
+    "go_workflow/campaign.py",
+    "go_workflow/campaign_audit.py",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "schemas/campaign-goal-audit.schema.json",
+    "schemas/campaign-run.schema.json",
+    "tests/test_autonomy_goal_audit.py"
+  ]
+}

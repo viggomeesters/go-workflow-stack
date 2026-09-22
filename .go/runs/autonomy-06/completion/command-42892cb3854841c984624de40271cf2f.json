@@ -1,0 +1,14 @@
+{
+  "task_id": "autonomy-06",
+  "project": "go-workflow-stack",
+  "contract_digest": "26bea3f206856b316f954dbbe611c7e0f2b3234b14fbd758bdad05a93b813d64",
+  "revision": "cd7788bdb57287dc5cb818fd81da39f95718b009",
+  "content_digest": "288440e1f8049d2ab2a59f34e7243aa2b509aeb26768e4df9afbd6054426f016",
+  "command": "git diff --check",
+  "cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "elapsed_seconds": 0.34733750007580966,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

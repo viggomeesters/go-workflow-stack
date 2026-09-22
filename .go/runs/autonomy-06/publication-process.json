@@ -1,0 +1,106 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "autonomy-06",
+  "project": "go-workflow-stack",
+  "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "owner": "codex-astra-high",
+  "run_id": "autonomy-06-20260922",
+  "workspace": {
+    "task_id": "autonomy-06",
+    "owner": "codex-astra-high",
+    "run_id": "autonomy-06-20260922",
+    "control_repo": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "path": "/Users/viggomeesters/Documents/Codex/2026-09-22/autonomy/work/autonomy-06",
+    "branch": "codex/autonomy-06",
+    "base_branch": "main",
+    "base_commit": "5e1d25542d3658a8c3d40b2f69fa996dbbd7ef88",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/Users/viggomeesters/Dev/go-workflow-stack/.git",
+    "repository_id": "51c2a12a0f224916b1585e3dfe1bf86f",
+    "generation": "9fbcd7d830184738b0de51c5e1ac89ad",
+    "state": "integrated",
+    "integration": {
+      "workspace_head": "cd7788bdb57287dc5cb818fd81da39f95718b009",
+      "integrated_commit": "cd7788bdb57287dc5cb818fd81da39f95718b009"
+    }
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "An empty queue plus declared success_metrics cannot prove success. Audit every adopted goal outcome against current product evidence and relevant architecture conformance; distinguish achieved, partial, blocked and explicitly excluded outcomes.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R2",
+      "text": "Discover missing work only within the original mandate and bounded follow-up allowance; deduplicate it. Broader vision ideas remain proposals and cannot expand the night run indefinitely.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R3",
+      "text": "Morning/readback report links original request, decisions, tasks, commits, tested candidates, releases/deployments and exact live receipts; clearly distinguishes live, locally verified, pending and user decisions.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R4",
+      "text": "All execution entrypoints used for campaign completion apply the same outcome audit. Invalidated or absent evidence fails completion; historical task records are not reinterpreted as fresh proof.",
+      "source": "intake_acceptance",
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T12:36:37+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-06/completion/critic-16973ad5e6f844018c0b9044bba57f0d.json"
+        }
+      ]
+    },
+    {
+      "id": "R5",
+      "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "26bea3f206856b316f954dbbe611c7e0f2b3234b14fbd758bdad05a93b813d64",
+  "code": {},
+  "execution_cwd": "/Users/viggomeesters/Dev/go-workflow-stack",
+  "controller": {
+    "host": "mac.home",
+    "pid": 27541
+  },
+  "worker_group": null,
+  "inflight": null
+}

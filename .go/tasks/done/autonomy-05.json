@@ -5,7 +5,7 @@
   "shareable_delivery": "auto",
   "id": "autonomy-05",
   "project": "go-workflow-stack",
-  "status": "open",
+  "status": "done",
   "summary": "Review actual product behavior against original outcomes",
   "description": "Strengthen author/critic proof selection and result review so tests, runtime/browser/visual/audio evidence establish the requested behavior; build on v0.3.33 readiness and existing R# completion. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
   "scope": {
@@ -48,13 +48,76 @@
     "git diff --check"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex-astra-high",
+    "claimed_at": "2026-09-22T10:18:19+02:00",
+    "base_commit": "268d265df2a136f058061bb21bffedc8989cd224"
   },
-  "work_status": "pending",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-22T11:10:10+02:00",
+      "agent": "codex-astra-high",
+      "status": "approved",
+      "evidence": "Grounded R1-R5 behavior review, content-bound checks, Linux candidate/final gates, v0.3.38 GitHub publication and remote readback passed.",
+      "transaction_id": "5a8c1b9bf6ba452f98dbe4cf50bef181",
+      "delivery": {
+        "delivery_id": "autonomy-first-v6",
+        "html": ".go/deliveries/autonomy-first-v6/index.html",
+        "manifest": ".go/deliveries/autonomy-first-v6/manifest.json",
+        "source_sha256": "050c1e35902cf7bc09066f1899bd7808620b84725701160b49ade46d73e6a4de",
+        "html_sha256": "ef786f665301764502d764493252e56fe0b6b0224b7222b37fc366c79d968b67"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-22T11:10:04+02:00",
+      "task_id": "autonomy-05",
+      "agent": "codex-astra-high",
+      "summary": "changed_files=go_workflow/task_design.py,go_workflow/completion.py,go_workflow/cli.py,go_workflow/adapter_protocol.py,schemas/behavior-review.schema.json,tests/test_autonomy_outcomes.py,docs/autonomy-evidence.md; verification_command=declared content-bound verification plus local Linux release gate; verification_result=passed; critic=passed grounded R1-R5 review; runtime=codex-desktop; model=gpt-6-astra; billing_mode=subscription",
+      "changed_files": [
+        "go_workflow/task_design.py",
+        "go_workflow/completion.py",
+        "go_workflow/cli.py",
+        "go_workflow/adapter_protocol.py",
+        "schemas/behavior-review.schema.json",
+        "tests/test_autonomy_outcomes.py",
+        "docs/autonomy-evidence.md"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "268d265df2a136f058061bb21bffedc8989cd224",
+        "observed_head_commit": "a4ab18b622ba4cf8ff742672becfd89bfb93e59d"
+      },
+      "verification": {
+        "command": "declared content-bound verification plus local Linux release gate",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex-astra-high",
+        "runtime": "codex-desktop",
+        "model": "gpt-6-astra",
+        "billing_mode": "subscription"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "codex-desktop",
+        "billing_mode": "subscription",
+        "owner": "codex-astra-high",
+        "model": "gpt-6-astra",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed grounded R1-R5 review",
+        "skip_reason": null
+      }
+    }
+  ],
   "execution_contract": {
     "schema": "go-workflow.execution-contract.v1",
     "task_kind": "product",
@@ -85,6 +148,7 @@
     }
   ],
   "outcome_tracking_version": 1,
+  "behavior_review_version": 1,
   "intent_source": {
     "text": "Strengthen author/critic proof selection and result review so tests, runtime/browser/visual/audio evidence establish the requested behavior; build on v0.3.33 readiness and existing R# completion. Scope and mandate: .go/plans/autonomy-first.json. Reuse released ABC/advice/readiness behavior; implement only this delta.",
     "sha256": "3ead43be63e53d6288026d42adbeadf04ef0549a30a08a69e81e663767cf7720",
@@ -95,36 +159,66 @@
       "id": "R1",
       "text": "Carry exact applicable product goals, architecture references and original R# to a fresh read-only critic context. Explain applicability; do not require architecture ceremony or visual evidence for unrelated tiny changes.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:08:19+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-05/completion/critic-da429ed7239e48f9a87a4ae3b3dd979c.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Reject preparation documents substituted for delivered behavior, stale screenshots/results, unreproduced fixes and unsupported completion claims even when structural validation and unrelated tests pass.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:08:19+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-05/completion/critic-da429ed7239e48f9a87a4ae3b3dd979c.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "Each relevant check/result binds task, requirement, candidate/context and inspected source/artifact. Changed relevant content invalidates proof. Pair good/bad realistic examples and record grounded review, not a semantic pass boolean inferred from keywords.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:08:19+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-05/completion/critic-da429ed7239e48f9a87a4ae3b3dd979c.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "Failed behavioral review returns bounded actionable repair within original scope. Do not rewrite acceptance to manufacture green or require downstream publication receipts in the pre-publication critic.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:08:19+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-05/completion/critic-da429ed7239e48f9a87a4ae3b3dd979c.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "Complete this independently shippable stack change with content-bound checks/critic, scoped commit/push, immutable release and remote readback; preserve user dirt and historical evidence. Current request authorizes planning only; no execution or publication starts during intake.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-22T11:08:19+02:00",
+          "agent": "codex-astra-high",
+          "summary": ".go/runs/autonomy-05/completion/release-693d62c4fb654c29a3718028737690c0.json"
+        }
+      ]
     }
   ],
   "architecture": {
@@ -136,5 +230,31 @@
     "decision_ids": [],
     "conformance_required": true,
     "human_gate": "none"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/autonomy-05/completion/verification-09023aedb93b4a7aa89a025fe711e7e0.json",
+      "sha256": "e840b644a3751b4755f515685c0371a6c81748456717be40669d35bae224d639"
+    },
+    "critic": {
+      "path": ".go/runs/autonomy-05/completion/critic-da429ed7239e48f9a87a4ae3b3dd979c.json",
+      "sha256": "252097de4618be212c3845e111282dc4751a5f7429858ffbf68d71ad11eefa99"
+    },
+    "release": {
+      "path": ".go/runs/autonomy-05/completion/release-693d62c4fb654c29a3718028737690c0.json",
+      "sha256": "cdc9dedcc07c7911480be7566bdf9b876c4836432739d5b10988844c29eadc9a"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "autonomy-05",
+    "project": "go-workflow-stack",
+    "commit": "a4ab18b622ba4cf8ff742672becfd89bfb93e59d",
+    "tag": "v0.3.38",
+    "evidence": [
+      ".go/runs/autonomy-05/completion/release-693d62c4fb654c29a3718028737690c0.json"
+    ]
   }
 }

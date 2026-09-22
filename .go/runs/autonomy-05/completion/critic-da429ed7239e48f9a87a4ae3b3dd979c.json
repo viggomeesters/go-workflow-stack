@@ -1,0 +1,125 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "autonomy-05",
+  "project": "go-workflow-stack",
+  "contract_digest": "2000cf30450a941d5abc2aa7c327749874e4210b461b443120cb0300c695ab5f",
+  "revision": "a4ab18b622ba4cf8ff742672becfd89bfb93e59d",
+  "content_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+  "status": "passed",
+  "reviewer": "codex-astra-high",
+  "review_mode": "same_agent",
+  "summary": "Rechecked the final v0.3.38 candidate against the five original outcomes. The strict review context is proportional, bad proof classes fail closed, current evidence is identity-bound, and blocked feedback is constrained. Publication remains a downstream controller gate.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "README.md",
+    "docs/autonomy-evidence.md",
+    "docs/releases/v0.3.38.md",
+    "docs/task-design-readiness.md",
+    "fixtures/autonomy-outcomes/reviews.json",
+    "go_workflow/adapter_protocol.py",
+    "go_workflow/cli.py",
+    "go_workflow/completion.py",
+    "go_workflow/constants.py",
+    "go_workflow/task_design.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "schemas/agent-adapter-result.schema.json",
+    "schemas/behavior-review.schema.json",
+    "schemas/task.schema.json",
+    "skills/repo-local-agent-workflow/SKILL.md",
+    "tests/test_abc_completion.py",
+    "tests/test_autonomy_outcomes.py"
+  ],
+  "behavior_review": {
+    "schema": "go-workflow.behavior-review.v1",
+    "task_id": "autonomy-05",
+    "context_digest": "9d6b0f6b72946d0e5fef2ee2752259da61cf90c78696575d47b35fdb2d4eda4b",
+    "candidate_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+    "acceptance_digest": "6c87a4c84056d263f5abeaffd46b04f28b3921c012870076a48445063376b73e",
+    "status": "passed",
+    "publication_pending": true,
+    "outcomes": [
+      {
+        "requirement_id": "R1",
+        "status": "passed",
+        "rationale": "The final implementation carries exact original outcomes plus sourced, applicability-explained project goals and material architecture references; none/local unreferenced tasks receive an empty architecture list and relevance-only media policy.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "go_workflow/task_design.py",
+            "sha256": "f356a6dd3de503516fcb547e9311ae3689982901e271b5fa8cb91d61b62b3346",
+            "task_id": "autonomy-05",
+            "requirement_id": "R1",
+            "candidate_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+            "context_digest": "9d6b0f6b72946d0e5fef2ee2752259da61cf90c78696575d47b35fdb2d4eda4b",
+            "observation": "Inspected behavior_review_context selection, exact source references, applicability reasons and proportional architecture/media policy."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R2",
+        "status": "passed",
+        "rationale": "The realistic negative corpus and runtime validator reject preparation-only, stale-candidate, unrelated-green and unreproduced-claim evidence even when its surrounding result claims success.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "fixtures/autonomy-outcomes/reviews.json",
+            "sha256": "db847dfde0b96894642049065e29a52295dc9b8438533fa61cea84f74724de9a",
+            "task_id": "autonomy-05",
+            "requirement_id": "R2",
+            "candidate_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+            "context_digest": "9d6b0f6b72946d0e5fef2ee2752259da61cf90c78696575d47b35fdb2d4eda4b",
+            "observation": "Inspected all four bad-proof examples exercised by the passing targeted suite."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R3",
+        "status": "passed",
+        "rationale": "The published review contract requires task, R#, candidate, context, inspected path/hash and observation; runtime recomputes bytes and candidate identity rather than deriving a verdict from keywords.",
+        "evidence": [
+          {
+            "kind": "source",
+            "role": "behavior_proof",
+            "path": "schemas/behavior-review.schema.json",
+            "sha256": "b8ae8bf0a53d05cb3fb93e22b9a89e15f879b7ab5c807e6d865492699b3fac38",
+            "task_id": "autonomy-05",
+            "requirement_id": "R3",
+            "candidate_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+            "context_digest": "9d6b0f6b72946d0e5fef2ee2752259da61cf90c78696575d47b35fdb2d4eda4b",
+            "observation": "Inspected the versioned schema fields and confirmed runtime tests invalidate changed relevant content."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R4",
+        "status": "passed",
+        "rationale": "Blocked outcomes require action, original-scope paths, declared checks and the unchanged acceptance digest; pending downstream status is allowed only with a required release and does not ask the pre-publication critic for future receipts.",
+        "evidence": [
+          {
+            "kind": "test_result",
+            "role": "behavior_proof",
+            "path": "tests/test_autonomy_outcomes.py",
+            "sha256": "580cb6cd3177e2c2449cd54a694074f0bfd5478108715d28bc7ab219485abb68",
+            "task_id": "autonomy-05",
+            "requirement_id": "R4",
+            "candidate_digest": "379ab7ab0e09380e6e4860147b60251372f18d98dc3982bf3d88d84704231f5e",
+            "context_digest": "9d6b0f6b72946d0e5fef2ee2752259da61cf90c78696575d47b35fdb2d4eda4b",
+            "observation": "Inspected and ran bounded-repair, acceptance-binding, native-adapter and pre-publication behavior tests in the 56-test green gate."
+          }
+        ]
+      },
+      {
+        "requirement_id": "R5",
+        "status": "pending_downstream",
+        "rationale": "The versioned candidate and content-bound checks are ready; tag, push, GitHub release and remote readback are deliberately left to the controller after this pre-publication critic.",
+        "evidence": []
+      }
+    ],
+    "repairs": []
+  }
+}

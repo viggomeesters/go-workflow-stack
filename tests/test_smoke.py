@@ -1392,7 +1392,7 @@ def test_auto_execute_claims_verifies_finishes_and_reflects(tmp_path: Path):
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "verify-only", "--summary", "Verify only", "--epic", "workflow", "--acceptance", "Verification command prints verified and exits zero", "--verification", "python3 -c \"print('verified')\"")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
 
     executed = run_go("auto", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
@@ -1421,7 +1421,7 @@ def test_auto_execute_failure_records_critic_attempt_before_blocking(tmp_path: P
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "failing", "--summary", "Failing", "--epic", "workflow", "--acceptance", "The failing verification is recorded with critic evidence", "--verification", "python3 -c \"import sys; sys.exit(7)\"")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
 
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
@@ -1523,7 +1523,7 @@ def test_executor_adapter_receives_vision_principles_hierarchy_and_task_context(
         "--verification", verify,
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed context", "-q"], cwd=repo, check=True)
     repair = "python3 -c \"import os; from pathlib import Path; Path('context.json').write_text(os.environ['GO_CONTEXT_JSON'], encoding='utf-8')\""
 
@@ -1550,7 +1550,7 @@ def test_go_loop_writes_resume_state_and_can_local_commit_ship(tmp_path: Path):
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "ship-me", "--summary", "Ship me", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'print(7)'")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed ship state", "-q"], cwd=repo, check=True)
 
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--ship-policy", "local-commit", "--json")
@@ -1578,7 +1578,7 @@ def test_go_loop_push_records_commit_target_and_remote_readback_in_done_evidence
         "--verification", "test -f shipped.txt",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "seed push provenance", "-q",
@@ -1711,7 +1711,7 @@ def test_blocked_ship_keeps_verified_task_active(tmp_path: Path):
         "--verification", "python3 -c 'print(7)'",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed blocked ship", "-q"], cwd=repo, check=True)
 
     executed = run_go(
@@ -1745,7 +1745,7 @@ def test_failed_local_commit_restores_verified_task_to_active(tmp_path: Path):
         "--verification", "python3 -c 'print(7)'",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed failed commit", "-q"], cwd=repo, check=True)
     hooks = repo / ".hooks"
     hooks.mkdir()
@@ -1930,7 +1930,7 @@ def test_no_diff_rejects_clean_committed_product_changes_since_claim(tmp_path: P
         "--verification", "test -f proof.txt",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "seed claim base", "-q",
@@ -1970,7 +1970,7 @@ def test_no_diff_fails_closed_when_claim_base_provenance_is_missing(tmp_path: Pa
         "--epic", "workflow", "--acceptance", "no_diff requires provenance", "--verification", "true",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "seed missing base", "-q",
@@ -2001,7 +2001,7 @@ def test_no_diff_fails_closed_when_task_claim_base_disagrees_with_claim_event(tm
         "--epic", "workflow", "--acceptance", "claim provenance must agree", "--verification", "true",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "seed claim mismatch", "-q",
@@ -2041,7 +2041,7 @@ def test_no_diff_fails_closed_when_claim_base_is_not_an_ancestor(tmp_path: Path)
         "--epic", "workflow", "--acceptance", "claim base must precede HEAD", "--verification", "true",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "seed nonancestor", "-q",
@@ -2112,7 +2112,7 @@ def test_agent_mode_task_selects_safe_default_codex_executor(tmp_path: Path):
         "--acceptance", "The selected coding agent creates built.txt", "--verification", "test -f built.txt",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed default agent", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
@@ -2256,7 +2256,7 @@ def test_go_loop_blocks_repair_agent_when_binary_missing(tmp_path: Path):
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "needs-agent", "--summary", "Needs agent", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'import sys; sys.exit(1)'")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed missing agent", "-q"], cwd=repo, check=True)
 
     if json.loads(run_go("agent-check", "--agent", "codex", "--json").stdout)["agents"][0]["available"]:
@@ -2485,7 +2485,7 @@ def test_native_codex_adapter_quotes_metacharacter_repository_path(tmp_path: Pat
         "--acceptance", "built.txt exists", "--verification", "test -f built.txt",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["PATH"] = str(bin_dir) + os.pathsep + env.get("PATH", "")
@@ -2770,7 +2770,7 @@ def test_hard_command_budget_stops_before_second_command(tmp_path: Path):
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "budget-task", "--summary", "Budget task", "--epic", "workflow", "--acceptance", "Commands are budgeted", "--verification", "python3 -c 'print(1)'", "--verification", "python3 -c 'print(2)'")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed budget", "-q"], cwd=repo, check=True)
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-commands", "1", "--execute", "--agent", "pytest", "--json")
     assert executed.returncode == 0
@@ -2790,7 +2790,7 @@ def test_verification_command_timeout_stops_hung_task(tmp_path: Path):
         "--acceptance", "Hung verification is terminated and reported", "--verification", "python3 -c 'import time; time.sleep(30)'",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed timeout", "-q"], cwd=repo, check=True)
 
     executed = run_go(
@@ -2836,7 +2836,7 @@ def test_latest_resume_command_preserves_effective_flags(tmp_path: Path):
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "resume-task", "--summary", "Resume task", "--epic", "workflow", "--acceptance", "Verification passes", "--verification", "python3 -c 'print(1)'")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed resume", "-q"], cwd=repo, check=True)
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "4", "--max-commands", "5", "--execute", "--agent", "pytest", "--semantic-critic", "--followup-on-block", "--ship-policy", "none", "--json")
     assert executed.returncode == 0, executed.stderr + executed.stdout
@@ -2861,7 +2861,7 @@ def test_executor_agent_environment_default_is_persisted(tmp_path: Path):
         "--acceptance", "Verification succeeds without invoking an agent", "--verification", "python3 -c 'print(1)'",
     )
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed executor env", "-q"], cwd=repo, check=True)
     env = os.environ.copy()
     env["GO_EXECUTOR_AGENT"] = "hermes"
@@ -2897,7 +2897,7 @@ def test_resume_command_uses_relocated_stack_runtime(tmp_path: Path):
             "--acceptance", f"{task_id} verification succeeds", "--verification", "python3 -c 'print(1)'",
         )
         assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed portable resume", "-q"], cwd=repo, check=True)
     first = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
     assert first.returncode == 0, first.stderr + first.stdout
@@ -3458,7 +3458,7 @@ def test_concurrent_claims_have_exactly_one_winner(tmp_path: Path):
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
     task = run_go("task", "create", str(repo), "--id", "one", "--summary", "One", "--epic", "workflow")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed", "-q"], cwd=repo, check=True)
     command = [sys.executable, str(ROOT / "cli" / "go.py"), "claim", "one", "--repo", str(repo), "--allow-dirty"]
     first = subprocess.Popen(command + ["--agent", "first"], text=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -4523,7 +4523,7 @@ def test_go_loop_contract_gate_rejects_generic_acceptance_before_claim(tmp_path:
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
     task = run_go("task", "create", str(repo), "--id", "vague-task", "--summary", "Vague task", "--epic", "workflow", "--verification", "python3 -c 'print(1)'")
     assert task.returncode == 0, task.stderr + task.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed semantic critic state", "-q"], cwd=repo, check=True)
 
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
@@ -4545,7 +4545,7 @@ def test_auto_execute_continues_across_multiple_tasks(tmp_path: Path):
     second = run_go("task", "create", str(repo), "--id", "second", "--summary", "Second", "--epic", "workflow", "--acceptance", "Second verification prints second and exits zero", "--verification", "python3 -c \"print('second')\"")
     assert first.returncode == 0, first.stderr + first.stdout
     assert second.returncode == 0, second.stderr + second.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
 
     executed = run_go("auto", str(repo), "--max-tasks", "2", "--execute", "--agent", "pytest", "--json")
@@ -4571,7 +4571,7 @@ def test_go_loop_reports_task_budget_exhaustion_when_open_work_remains(tmp_path:
             "--acceptance", f"{task_id.title()} verification exits zero", "--verification", "python3 -c 'print(1)'",
         )
         assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed bounded loop", "-q"], cwd=repo, check=True)
 
     executed = run_go(
@@ -4597,7 +4597,7 @@ def test_go_loop_does_not_report_done_while_blocked_tasks_remain(tmp_path: Path)
         "--acceptance", "The failing task remains visible to goal completion", "--verification", "python3 -c 'import sys; sys.exit(9)'",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed blocked goal", "-q"], cwd=repo, check=True)
     first = run_go("go-loop", str(repo), "--max-tasks", "1", "--max-attempts", "1", "--execute", "--agent", "pytest", "--json")
     assert first.returncode == 1
@@ -4626,7 +4626,7 @@ def test_goal_completion_runs_project_verification_after_tasks_finish(tmp_path: 
         "--acceptance", "The focused task verification exits zero", "--verification", "python3 -c 'print(1)'",
     )
     assert created.returncode == 0, created.stderr + created.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed goal verification", "-q"], cwd=repo, check=True)
 
     executed = run_go("go-loop", str(repo), "--max-tasks", "1", "--execute", "--agent", "pytest", "--json")
@@ -4786,7 +4786,7 @@ def test_bare_go_dry_run_does_not_create_task_from_intent_without_write(tmp_path
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopt = run_go("adopt", str(repo), "--project-id", "bare", "--name", "Bare")
     assert adopt.returncode == 0, adopt.stderr + adopt.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run(["git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com", "commit", "-m", "seed go state", "-q"], cwd=repo, check=True)
 
     # The adopted repo has no executable open tasks; bare go JSON inspection must not mutate state.
@@ -5305,7 +5305,7 @@ def test_go_intent_links_exact_source_and_manual_finish_requires_all_outcomes(tm
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "outcome-finish", "--name", "Outcome Finish")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "track workflow baseline", "-q",
@@ -5362,7 +5362,7 @@ def test_manual_finish_rejects_missing_attribution_fields(tmp_path: Path):
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "finish-attribution", "--name", "Finish Attribution")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "track workflow baseline", "-q",
@@ -5410,7 +5410,7 @@ def test_finish_usage_attribution_distinguishes_subscription_from_invoice_cost(t
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "usage-attribution", "--name", "Usage Attribution")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "track workflow baseline", "-q",
@@ -5449,7 +5449,7 @@ def test_completed_work_requires_explicit_review_approval_and_needs_fix_preserve
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "review-lifecycle", "--name", "Review Lifecycle")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "track workflow state", "-q",
@@ -5554,7 +5554,7 @@ def test_go_loop_blocks_goal_completion_when_an_earlier_manual_finish_still_need
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
     adopted = run_go("adopt", str(repo), "--project-id", "pending-review-goal", "--name", "Pending Review Goal")
     assert adopted.returncode == 0, adopted.stderr + adopted.stdout
-    subprocess.run(["git", "add", ".go"], cwd=repo, check=True)
+    subprocess.run(["git", "add", ".go", "AGENTS.md"], cwd=repo, check=True)
     subprocess.run([
         "git", "-c", "user.name=Pytest", "-c", "user.email=pytest@example.com",
         "commit", "-m", "track workflow baseline", "-q",

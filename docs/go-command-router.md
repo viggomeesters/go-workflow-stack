@@ -27,6 +27,20 @@ The router reports `public_command`, `selected_route`, and
 primitive. A coding agent continues with that primitive; Viggo should not have
 to type `go-plan`, `go-goal`, or `go-loop` as a second command.
 
+## Intent authority
+
+The router distinguishes execution authority from the route selected for a valid
+repository. A direct Dutch imperative such as “Los het probleem duurzaam op”
+is execution-authorized (`authority_source: imperative`); when open tasks exist,
+it routes to `goal` and recommends `auto`. Questions remain advisory; ambiguous
+subject-question forms such as “Los je … op?” and direct-object forms ending in
+`?` are not treated as commands. Only simple positive direct-object `los … op`
+forms are recognized. Negation (`niet`, `nooit`, or “onder geen beding”) and
+compound/contrast clauses (including `en`/`én`, `maar`, or `of`) stay
+non-executing; restate them as a simple positive command. Explicit advice/read-only
+or plan-only wording keeps precedence over imperative verbs. Add a regression test
+before recognizing another imperative form.
+
 ## Quick use
 
 Ask the router what it would do:

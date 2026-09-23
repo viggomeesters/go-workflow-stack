@@ -1,0 +1,131 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "auto",
+  "id": "dutch-imperative-go-authority",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Classify explicit Dutch imperatives as execution-authorized",
+  "description": "The public Go router recognizes several Dutch and English imperatives but misses “los”. As a result, an explicit order such as “Los het probleem duurzaam op” is downgraded to advice. Add regression coverage and documentation for this Dutch imperative while preserving explicit advice/read-only/plan precedence.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/vision.json",
+      ".go/architecture-principles.json",
+      ".go/hierarchy.json",
+      "go_workflow/routing.py",
+      "tests/test_smoke.py",
+      "docs/go-command-router.md",
+      "CHANGELOG.md"
+    ],
+    "modify": [
+      ".go/tasks/{state}/dutch-imperative-go-authority.json",
+      ".go/hierarchy.json",
+      ".go/runs/**",
+      ".go/evidence/**",
+      "go_workflow/routing.py",
+      "tests/test_smoke.py",
+      "docs/go-command-router.md",
+      "CHANGELOG.md"
+    ]
+  },
+  "acceptance": [
+    "“Los het probleem duurzaam op” returns execute authority from imperative source, selects route goal on a valid repo with open work, and authorizes implementation.",
+    "Dutch advisory questions remain advice; explicit read-only and plan-only wording still overrides imperative verbs.",
+    "The public router recommendation preserves selected route and authority fields, and the Dutch imperative is documented in the router contract.",
+    "Negative Dutch forms with `niet`, `nooit`, or `onder geen beding`, and compound/contrast forms with conjunctions such as `en`/`én`, remain non-executing; restate them as a simple positive direct-object command ending in `op`."
+  ],
+  "verification": [
+    "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest tests/test_smoke.py -q -k \"authority or routing or dutch\"",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-23T21:54:43+02:00",
+    "base_commit": "b0909a91a7d95f7e46c15f4e48cfeada09227205"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-23T23:39:00+02:00",
+      "agent": "hermes-devil-review",
+      "status": "approved",
+      "evidence": "Independent devil review PASS A on final classifier: direct command authorized; question, negation, compound and contrast probes blocked; 11 focused tests pass; architecture scopes conformant.",
+      "transaction_id": "35b2ded7f05a4cfc9726c781ff66e371",
+      "delivery": {
+        "delivery_id": "complete-advice-to-outcome-model-v1",
+        "html": ".go/deliveries/complete-advice-to-outcome-model-v1/index.html",
+        "manifest": ".go/deliveries/complete-advice-to-outcome-model-v1/manifest.json",
+        "source_sha256": "c97bf222b378644196acce3713de96891573403c17966134df4779a59474eeb7",
+        "html_sha256": "9c8c929cca4e970e6138d82c1831215d6037a656420abea04ffbd3be3a2ff848"
+      }
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-23T23:37:48+02:00",
+      "task_id": "dutch-imperative-go-authority",
+      "agent": "hermes",
+      "summary": "verification_command=PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest tests/test_smoke.py -q -k \"authority or routing or dutch\"; verification_result=11 passed; make_check=passed; repo_validation=passed; git_diff_check=passed; critic=PASS independent devil review of final authority boundary; architecture_conformance=passed for autonomous-campaign and architecture-lane-governance; route_readback=exact imperative selected goal and recommended auto with execution authority; full_smoke_probe=196 passed, 9 failed on exact runtime provenance because branch HEAD b0909a9 differs from pinned v0.3.46 b1358ec; self_reflect=no durable agent/process change beyond scoped regressions, no skill or memory mutation",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/hierarchy.json",
+        ".go/runs/events.jsonl",
+        "CHANGELOG.md",
+        "docs/go-command-router.md",
+        "go_workflow/routing.py",
+        "tests/test_smoke.py",
+        ".go/tasks/active/dutch-imperative-go-authority.json"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "b0909a91a7d95f7e46c15f4e48cfeada09227205",
+        "observed_head_commit": "b0909a91a7d95f7e46c15f4e48cfeada09227205"
+      },
+      "verification": {
+        "command": "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest tests/test_smoke.py -q -k \"authority or routing or dutch\"",
+        "result": "11 passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS independent devil review of final authority boundary",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign",
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "Recognize an explicit Dutch user imperative as execution authorization without granting authority to advice questions, read-only or plan-only requests."
+    ],
+    "decision_ids": [
+      "bounded-serial-campaign-contract-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

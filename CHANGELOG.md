@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Recognize simple positive Dutch direct-object `los … op` imperatives as execution-authorized Go intent; keep questions, `niet`/`nooit`/`onder geen beding`, compound conjunctions including `en`/`én`, and advice/read-only/plan-only overrides non-executing.
+
 ## 0.3.46 — repository impact and conformance
 
 - Trace a Git diff through bounded reverse dependency and containment edges to exact changed nodes, impacted nodes, and recommended tests.

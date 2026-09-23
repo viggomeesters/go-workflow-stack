@@ -34,11 +34,29 @@ def classify_public_go_intent(intent: str, state: dict[str, Any]) -> dict[str, A
     explicit_loop = bool(re.match(r"^(?:go\s+)?(?:loop|ralph)\b", text))
     named_task = bool(re.fullmatch(r"(?:go\s+)?[a-z]+\d+", text, flags=re.I))
     continuation = bool(re.match(r"^(?:ga verder|werk verder|continue|finish|next)\b", text))
-    imperative = bool(re.match(
-        r"^(?:fix|maak|verbeter|bouw|implementeer|voer|werk|ga|stel|schrijf|update|verwijder|"
-        r"add|create|implement|build|execute|continue|finish)\b",
-        text,
-    ))
+    # `los` is ambiguous at sentence start; accept only simple, positive commands.
+    dutch_los_object = bool(
+        re.match(r"^los\s+(?:het|de|dit|dat|deze|die|een|mijn|jouw|ons)\b", text)
+    )
+    dutch_los_compound = bool(
+        re.search(r"[,;:]|\b(?:en|én|maar|of|want)\b", text)
+        or len(re.findall(r"\blos\b", text)) > 1
+        or len(re.findall(r"\bop\b", text)) > 1
+    )
+    dutch_los_imperative = (
+        dutch_los_object
+        and bool(re.search(r"\bop[.!]?\s*$", text))
+        and not re.search(r"\b(?:niet|nooit)\b|\bonder\s+geen\s+beding\b", text)
+        and not text.endswith("?")
+        and not dutch_los_compound
+    )
+    imperative = dutch_los_imperative or bool(
+        re.match(
+            r"^(?:fix|maak|verbeter|bouw|implementeer|voer|werk|ga|stel|schrijf|update|verwijder|"
+            r"add|create|implement|build|execute|continue|finish)\b",
+            text,
+        )
+    )
     question = bool(
         text.endswith("?")
         or re.match(r"^(?:hoe|wat|waarom|welke|kan|kunnen|zou|moeten|how|what|why|which|can|could|should|would)\b", text)

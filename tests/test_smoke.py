@@ -2580,6 +2580,141 @@ def test_public_go_authority_distinguishes_advice_read_only_and_execution():
     assert recommended["planning_state_authorized"] is True
 
 
+def test_dutch_los_imperative_routes_to_goal_authority():
+    from go_workflow.routing import classify_public_go_intent, recommend_route
+
+    prompt = "Los het probleem duurzaam op"
+    classified = classify_public_go_intent(prompt, {"open_task_count": 1})
+    assert classified["route"] == "goal"
+    assert classified["authority"] == "execute"
+    assert classified["authority_source"] == "imperative"
+    assert classified["implementation_authorized"] is True
+    assert classified["stop_before_implementation"] is False
+
+    possessive_object = classify_public_go_intent("Los mijn probleem duurzaam op", {"open_task_count": 1})
+    assert possessive_object["route"] == "goal"
+    assert possessive_object["authority"] == "execute"
+    assert possessive_object["authority_source"] == "imperative"
+
+    recommended = recommend_route("go", prompt, {
+        "repo_exists": True,
+        "has_go": True,
+        "has_vision": True,
+        "has_principles": True,
+        "has_hierarchy": True,
+        "valid": True,
+        "open_task_count": 1,
+    })
+    assert recommended["command"] == "auto"
+    assert recommended["selected_route"] == "goal"
+    assert recommended["authority_source"] == "imperative"
+    assert recommended["implementation_authorized"] is True
+
+
+def test_read_only_overrides_dutch_los_imperative():
+    from go_workflow.routing import classify_public_go_intent
+
+    classified = classify_public_go_intent("Alleen advies: los het probleem duurzaam op", {})
+    assert classified["route"] == "advice"
+    assert classified["authority"] == "read_only"
+    assert classified["implementation_authorized"] is False
+    assert classified["planning_state_authorized"] is False
+
+
+def test_dutch_nonimperative_los_daarvan_question_stays_advisory():
+    from go_workflow.routing import classify_public_go_intent
+
+    classified = classify_public_go_intent("Los daarvan, wat is de beste route?", {})
+    assert classified["route"] == "advice"
+    assert classified["authority"] == "advice"
+    assert classified["authority_source"] == "question"
+    assert classified["implementation_authorized"] is False
+
+
+def test_dutch_los_je_subject_question_stays_advisory():
+    from go_workflow.routing import classify_public_go_intent
+
+    for prompt in (
+        "Los je het probleem duurzaam op?",
+        "Los je mijn probleem duurzaam op?",
+        "Los het probleem duurzaam op?",
+        "Los mijn probleem duurzaam op?",
+    ):
+        classified = classify_public_go_intent(prompt, {})
+        assert classified["route"] == "advice"
+        assert classified["authority"] == "advice"
+        assert classified["authority_source"] == "question"
+        assert classified["implementation_authorized"] is False
+
+
+def test_negated_dutch_los_command_does_not_authorize_execution():
+    from go_workflow.routing import classify_public_go_intent
+
+    for prompt in (
+        "Los het probleem niet op",
+        "Los de storing niet op",
+        "Los het probleem nooit op",
+        "Los het probleem onder geen beding op",
+    ):
+        classified = classify_public_go_intent(prompt, {"open_task_count": 1})
+        assert classified["route"] == "advice"
+        assert classified["authority"] == "advice"
+        assert classified["implementation_authorized"] is False
+
+
+def test_dutch_los_with_compound_contrast_stays_nonexecuting():
+    from go_workflow.routing import classify_public_go_intent
+
+    for prompt in (
+        "Los het probleem op, niet de printer",
+        "Los het probleem op, niet op een later moment",
+    ):
+        classified = classify_public_go_intent(prompt, {"open_task_count": 1})
+        assert classified["route"] == "advice"
+        assert classified["implementation_authorized"] is False
+
+
+def test_dutch_los_compound_commands_stay_nonexecuting():
+    from go_workflow.routing import classify_public_go_intent
+
+    for prompt in (
+        "Los het probleem op, maar los de printer eerst op",
+        "Los het probleem op of los de printer op",
+        "Los het probleem op en los de printer op",
+        "Los het probleem én de storing op",
+    ):
+        classified = classify_public_go_intent(prompt, {"open_task_count": 1})
+        assert classified["route"] == "advice"
+        assert classified["implementation_authorized"] is False
+
+
+def test_router_cli_routes_dutch_imperative_to_auto_with_open_work(tmp_path: Path):
+    repo = tmp_path / "dutch-imperative-router"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    adopted = run_go(
+        "adopt", str(repo), "--project-id", "dutch-imperative-router", "--name", "Dutch imperative router",
+        "--feature-group", "workflow|Workflow", "--feature", "workflow|repo-local|Repo-local",
+        "--verification", "git diff --check",
+    )
+    assert adopted.returncode == 0, adopted.stderr + adopted.stdout
+    created = run_go(
+        "task", "create", str(repo), "--id", "existing-work", "--summary", "Existing work",
+        "--feature", "workflow.repo-local", "--acceptance", "Existing work remains claimable.",
+        "--verification", "git diff --check",
+    )
+    assert created.returncode == 0, created.stderr + created.stdout
+
+    routed = run_go(
+        "router", str(repo), "--command", "go", "--intent", "Los het probleem duurzaam op", "--json",
+    )
+    assert routed.returncode == 0, routed.stderr + routed.stdout
+    result = json.loads(routed.stdout)
+    assert result["selected_route"] == "goal"
+    assert result["recommended"]["command"] == "auto"
+    assert result["recommended"]["authority_source"] == "imperative"
+    assert result["recommended"]["implementation_authorized"] is True
+
+
 def test_authority_handoff_keeps_nonexecuting_routes_safe_and_preserves_promotion_source(tmp_path: Path):
     from go_workflow.routing import classify_public_go_intent
 

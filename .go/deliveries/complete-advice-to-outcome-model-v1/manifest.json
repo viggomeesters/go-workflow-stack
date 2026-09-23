@@ -1,0 +1,84 @@
+{
+  "schema": "go-workflow.delivery.v1",
+  "delivery_id": "complete-advice-to-outcome-model-v1",
+  "project": {
+    "id": "go-workflow-stack",
+    "name": "Go Workflow Stack"
+  },
+  "assignment": {
+    "kind": "epic",
+    "id": "complete-advice-to-outcome-model",
+    "title": "Complete advice-to-outcome model"
+  },
+  "release": {
+    "version": 1,
+    "status": "released",
+    "created_at": "2026-09-23T23:39:00+02:00",
+    "supersedes": null
+  },
+  "disclosure": {
+    "class": "restricted",
+    "scan_status": "passed"
+  },
+  "sections": {
+    "summary": "Make advice durable, authorization explicit, bare Go resumable, outcomes provable, and the contract portable across skills and template.",
+    "delivered_scope": [
+      "Classify advice, read-only, imperative, Go, and Sent as goal authority",
+      "Persist and validate the latest recommendation in repo-local .go",
+      "Promote the pending recommendation with one bare Go and resume without chat",
+      "Require work-unit outcome dispositions and evidence before completion",
+      "Prove the complete advice-to-outcome journey and portable runtime contract",
+      "Close Sent-as-goal promotion provenance and non-executing route authority",
+      "Prepare and locally tag go-workflow-stack v0.3.8",
+      "Classify explicit Dutch imperatives as execution-authorized"
+    ],
+    "excluded_scope": [
+      "Geen aanvullende uitgesloten scope vastgelegd."
+    ],
+    "evidence": [
+      {
+        "label": "Classify advice, read-only, imperative, Go, and Sent as goal authority",
+        "summary": "RED: focused authority test failed because question prompts routed to now and exposed no authority fields. GREEN: classifier now returns advice/read_only/execute, authority source, implementation_authorized, and planning_state_authorized; focused routing+authority tests 2 passed. Public router readback confirmed question=no implementation, only-advice=no writes, Sent as goal=execute. Self-reflect: no additional durable agent/process improvement needed; the governing behavior is captured by this planned runtime task and tests."
+      },
+      {
+        "label": "Persist and validate the latest recommendation in repo-local .go",
+        "summary": "RED: recommendation tests failed because no supported recommendation command or state existed. GREEN: recommendation create/status now validates execution briefs, persists compact .go/recommendations/pending.json with authority/time/hash/source, validates it during repo validation, rejects tampered hashes before writes, and supports --read-only with zero .go mutation; focused 2 tests passed. Self-reflect: no additional durable agent/process improvement needed; the planned supported state boundary replaces the prior ad-hoc gap."
+      },
+      {
+        "label": "Promote the pending recommendation with one bare Go and resume without chat",
+        "summary": "RED: bare Go with only pending .go state returned task_required and created nothing. GREEN: cmd_go now discovers validated pending recommendation state, materializes its work units, archives it as applied only after valid task creation, records Go authority, and executes the task in the same invocation. Recovery/idempotency test passed: no chat/brief input, one applied record, no task named Go, second Go creates nothing. Focused recommendation/execution-brief suite passed. Self-reflect: no additional durable process change needed beyond the planned resume contract and regression."
+      },
+      {
+        "label": "Require work-unit outcome dispositions and evidence before completion",
+        "summary": "RED: execution-brief tasks had no outcome_tracking_version/requested_outcomes, so finish could not account for each acceptance item. GREEN: every acceptance becomes stable R# pending state; manual finish is blocked until terminal evidence exists; empty rejected/blocked evidence is refused; autonomous verification+critic records verified disposition with exact command evidence before the shared finish gate. Focused authority/recommendation/execution-brief suite: 7 passed. Self-reflect: no additional durable process improvement needed; evidence closure is now enforced in the runtime contract."
+      },
+      {
+        "label": "Prove the complete advice-to-outcome journey and portable runtime contract",
+        "summary": "Broad proof completed. End-to-end public journey: question routes advice; a 100-idea exploration persists only the compact chosen approach; source brief is deleted; intent=Go resumes solely from .go; two semantic tasks execute in the same run; every R# is verified with evidence; repo validates. First full regression found auto-evidence incorrectly closing legacy free-intent R8; repaired by restricting auto-close to execution_brief_acceptance. Final scripts/check-linux.sh: Python 3.12.13, 102 tests passed, stack .go valid, template pairing ok, no GitHub Actions. Self-reflect: durable lesson already embodied in the regression guard — evidence automation must be provenance-scoped, not applied to every tracked outcome."
+      },
+      {
+        "label": "Close Sent-as-goal promotion provenance and non-executing route authority",
+        "summary": "RED: non-executing Go task/vision routes still exposed implementation_authorized=true and promotion had no authority-source flag. GREEN: task/vision/plan/advice/Wayfinder stop before implementation; continuation imperatives consume pending state rather than creating relay tasks; --authority-source preserves go/imperative/sent_as_goal in the applied record. Focused authority and promotion tests passed. Self-reflect: completion audit correctly created this provenance repair task instead of hiding the post-done gap."
+      },
+      {
+        "label": "Prepare and locally tag go-workflow-stack v0.3.8",
+        "summary": "Versioned stack/package/project contract to 0.3.8/v0.3.8 and added release notes for authority, durable recommendation, bare-Go promotion, evidence closure, skills, and template. Release regression initially found two hermetic preflight fixtures still on 0.3.7; updated them and focused release tests passed. Final scripts/check-linux.sh: Python 3.12.13, 103 tests passed, .go valid, template pairing ok, no GitHub Actions. Local annotated tag will be created only after the release commit is clean. No push/publish. Self-reflect: version-synchronized release fixtures are now part of the verified gate."
+      },
+      {
+        "label": "Classify explicit Dutch imperatives as execution-authorized",
+        "summary": "verification_command=PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest tests/test_smoke.py -q -k \"authority or routing or dutch\"; verification_result=11 passed; make_check=passed; repo_validation=passed; git_diff_check=passed; critic=PASS independent devil review of final authority boundary; architecture_conformance=passed for autonomous-campaign and architecture-lane-governance; route_readback=exact imperative selected goal and recommended auto with execution authority; full_smoke_probe=196 passed, 9 failed on exact runtime provenance because branch HEAD b0909a9 differs from pinned v0.3.46 b1358ec; self_reflect=no durable agent/process change beyond scoped regressions, no skill or memory mutation"
+      }
+    ],
+    "limitations": [
+      "Alleen bewijs dat in .go is vastgelegd wordt in deze levering vertegenwoordigd."
+    ],
+    "next_steps": [
+      "Review deze levering met de opdrachtgever."
+    ]
+  },
+  "provenance": {
+    "source": ".go",
+    "source_sha256": "c97bf222b378644196acce3713de96891573403c17966134df4779a59474eeb7",
+    "html_sha256": "9c8c929cca4e970e6138d82c1831215d6037a656420abea04ffbd3be3a2ff848"
+  }
+}

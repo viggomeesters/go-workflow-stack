@@ -2,7 +2,7 @@
 import json
 import pytest
 
-from test_abc_contracts import fixture, run, write
+from test_abc_contracts import fixture, profile, run, write
 
 
 def test_project_rejects_phase_without_required_handoff_and_outcome_contract(tmp_path):
@@ -34,6 +34,9 @@ def test_evidence_schema_and_repo_validator_agree(tmp_path, status, extra, valid
     schema = json.loads((ROOT / 'schemas/verification-evidence.schema.json').read_text())
     assert Draft202012Validator(schema).is_valid(proof) == valid
     path = repo / '.go/tasks/open/task-schema-smoke.json'
-    task = json.loads(path.read_text()); task['verification_evidence'] = [proof]; write(path, task)
+    task = json.loads(path.read_text())
+    task['execution_contract'] = profile()  # Typed proof validation is opt-in.
+    task['verification_evidence'] = [proof]
+    write(path, task)
     result = run(repo, 'validate', repo)
     assert (result.returncode == 0) == valid, result.stdout + result.stderr

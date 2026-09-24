@@ -1,0 +1,101 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "repair-legacy-evidence-schema-fixture",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Align opted-in verification-evidence test fixture with legacy contract",
+  "description": "The full-suite phase evidence test writes typed proof onto an unopted legacy source task and then expects strict opt-in validation. Keep legacy metadata inert; give the fixture an explicit execution contract so invalid typed proofs fail, while keeping a separate legacy regression.",
+  "scope": {
+    "read": [
+      "tests/test_abc_phase_contracts.py",
+      "tests/test_abc_contracts.py",
+      "tests/test_legacy_lifecycle_compatibility.py",
+      "go_workflow/cli.py"
+    ],
+    "modify": [
+      "tests/test_abc_phase_contracts.py"
+    ]
+  },
+  "acceptance": [
+    "Opted-in task verification evidence agrees with the schema for all six parameterized cases.",
+    "Legacy tasks without execution_contract keep their historical metadata semantics."
+  ],
+  "verification": [
+    "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest -q tests/test_abc_phase_contracts.py tests/test_legacy_lifecycle_compatibility.py"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-24T22:46:23+02:00",
+    "base_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-24T22:53:47+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Independent read-only critic PASS 2026-09-24; 42 focused + 2 dependency tests passed; full suite pending",
+      "transaction_id": "6a8192485072472db6d075466a2b2a48"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-24T22:53:38+02:00",
+      "task_id": "repair-legacy-evidence-schema-fixture",
+      "agent": "hermes",
+      "summary": "changed_files=tests/test_abc_phase_contracts.py; verification_command=PYTHONPATH=. uv run --no-project --with pytest --with jsonschema pytest -q tests/test_abc_phase_contracts.py tests/test_legacy_lifecycle_compatibility.py; verification_result=42 passed; dependency_regression=2 passed; critic=independent read-only PASS; runtime=local WSL; full_suite=running separately",
+      "changed_files": [
+        "tests/test_abc_phase_contracts.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
+        "observed_head_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208"
+      },
+      "verification": {
+        "command": "PYTHONPATH=. uv run --no-project --with pytest --with jsonschema pytest -q tests/test_abc_phase_contracts.py tests/test_legacy_lifecycle_compatibility.py",
+        "result": "42 passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "local WSL",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "local WSL",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent read-only PASS",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-contracts"
+    ],
+    "concerns": [
+      "Typed verification proof must be checked for opted-in tasks while legacy metadata remains inert; this corrects a contradictory fixture, not the compatibility policy."
+    ],
+    "decision_ids": [
+      "abc-d01-release-unit"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

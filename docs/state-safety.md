@@ -48,6 +48,25 @@ or absent external results remain pending. This interface does not itself push,
 publish or deploy. A completed task in cleanup recovery only retries validated
 workspace cleanup, retaining its release receipt.
 
+An owner handoff is distinct from managed-run resume. It requires the expected
+old owner/run, a new owner/run, a reason, explicit confirmation that the prior
+owner stopped, and a ready registered workspace (or the explicit legacy-unmanaged
+mode). The command serializes on the workspace-execution and task locks, checks
+all available run liveness, journals the transition, preserves worker files, and
+records the old/new binding and host evidence. A known host mismatch always
+fails; a hostless workspace needs a matching stopped checkpoint or explicit
+`--confirm-same-host` attestation. Git index flags that can hide paths are refused
+before handoff. Live managed checkpoints, active publication, unknown
+liveness, and cross-control clone migration remain unsupported. A prepared journal
+records exact before/after owner snapshots. If post-write readback observes
+workspace drift, recovery conditionally rolls task/workspace ownership back only
+when each record still equals this handoff's after hash; concurrent state is never
+overwritten, and the journal is marked `blocked` for inspection. The locks and
+stopped-owner acknowledgement are supported coordination, not a filesystem
+atomicity guarantee against arbitrary writers. Retry a pending interrupted handoff
+only with its exact `--handoff-id`; never reset or clean the workspace. A blocked
+handoff must be resolved and replaced with a new handoff id.
+
 `managed relocate` repairs one explicitly moved primary/worker pair on the same
 host. It requires absent old paths, the existing Git repository UUID and marker,
 stopped processes and matching task/owner/run. A durable path mapping makes

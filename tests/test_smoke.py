@@ -2620,6 +2620,13 @@ def test_read_only_overrides_dutch_los_imperative():
     assert classified["implementation_authorized"] is False
     assert classified["planning_state_authorized"] is False
 
+    plan_only = classify_public_go_intent("Alleen plan: los het probleem duurzaam op", {"open_task_count": 1})
+    assert plan_only["route"] == "plan"
+    assert plan_only["authority_source"] == "explicit_stop"
+    assert plan_only["implementation_authorized"] is False
+    assert plan_only["stop_before_implementation"] is True
+    assert plan_only["planning_state_authorized"] is True
+
 
 def test_dutch_nonimperative_los_daarvan_question_stays_advisory():
     from go_workflow.routing import classify_public_go_intent
@@ -2714,12 +2721,25 @@ def test_router_cli_routes_dutch_imperative_to_auto_with_open_work(tmp_path: Pat
     assert result["recommended"]["authority_source"] == "imperative"
     assert result["recommended"]["implementation_authorized"] is True
 
+    plan_only = run_go(
+        "router", str(repo), "--command", "go", "--intent",
+        "Alleen plan: los het probleem duurzaam op", "--json",
+    )
+    assert plan_only.returncode == 0, plan_only.stderr + plan_only.stdout
+    plan_result = json.loads(plan_only.stdout)
+    assert plan_result["selected_route"] == "plan"
+    assert plan_result["recommended"]["command"] == "plan"
+    assert plan_result["recommended"]["authority_source"] == "explicit_stop"
+    assert plan_result["recommended"]["implementation_authorized"] is False
+    assert plan_result["recommended"]["stop_before_implementation"] is True
+
 
 def test_authority_handoff_keeps_nonexecuting_routes_safe_and_preserves_promotion_source(tmp_path: Path):
     from go_workflow.routing import classify_public_go_intent
 
     for prompt, route in [
         ("Go plan menu cleanup", "plan"),
+        ("Alleen plan: los het probleem duurzaam op", "plan"),
         ("Go task leg menu cleanup vast", "task"),
         ("Go vision voor menu cleanup", "vision"),
         ("Wayfinder menu cleanup", "wayfinder"),

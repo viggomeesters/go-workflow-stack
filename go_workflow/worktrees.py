@@ -3,8 +3,11 @@ from __future__ import annotations
 
 import json
 from contextlib import contextmanager
+import hashlib
 import os
 import re
+import socket
+import stat
 import subprocess
 import uuid
 from pathlib import Path
@@ -84,12 +87,14 @@ def validate_record(record):
     if not ID.fullmatch(record['task_id']) or not SHA.fullmatch(record['base_commit']): raise WorkspaceError('Invalid workspace task/base identity')
     if record['state'] not in {'creating', 'ready', 'integrated', 'cleanup_failed', 'cleaned'}:
         raise WorkspaceError('Invalid workspace state')
-    optional = {'integration', 'ownership_history', 'reconciliations', 'cleanup_error', 'recovery_action'}
+    optional = {'integration', 'ownership_history', 'reconciliations', 'cleanup_error', 'recovery_action', 'control_host'}
     if set(record) - required - optional: raise WorkspaceError('Unknown workspace registry fields')
     for name in ('owner', 'run_id'):
         if not ID.fullmatch(record[name]): raise WorkspaceError('Invalid workspace ' + name)
     for name in ('repository_id', 'generation'):
         if not re.fullmatch('[0-9a-f]{32}', record[name]): raise WorkspaceError('Invalid workspace ' + name)
+    if 'control_host' in record and (not isinstance(record['control_host'], str) or not ID.fullmatch(record['control_host'])):
+        raise WorkspaceError('Invalid workspace control_host')
     for name in ('control_repo', 'path', 'common_dir'):
         if not Path(record[name]).is_absolute(): raise WorkspaceError('Workspace paths must be absolute')
     if 'integration' in record:
@@ -122,7 +127,10 @@ def validate_record(record):
 
 
 def marker_for(record):
-    return {name: record[name] for name in ('schema', 'task_id', 'control_repo', 'path', 'repository_id', 'generation')}
+    marker = {name: record[name] for name in ('schema', 'task_id', 'control_repo', 'path', 'repository_id', 'generation')}
+    if 'control_host' in record:
+        marker['control_host'] = record['control_host']
+    return marker
 
 
 def verify_workspace(record, *, pending=False):
@@ -135,6 +143,8 @@ def verify_workspace(record, *, pending=False):
     identity = common / 'go-workflow-repository-id'
     if not identity.is_file() or identity.read_text().strip() != record['repository_id']:
         raise WorkspaceError('Workspace repository id mismatch')
+    if record.get('control_host') and record['control_host'] != socket.gethostname():
+        raise WorkspaceError('Workspace control_host mismatch; cross-host workspace use is unsupported')
     if git_text(workspace, 'symbolic-ref', '--quiet', '--short', 'HEAD') != record['branch']:
         raise WorkspaceError('Workspace branch mismatch')
     if git(workspace, 'merge-base', '--is-ancestor', record['base_commit'], 'HEAD', check=False).returncode:
@@ -185,7 +195,8 @@ def create_workspace(control, task_id, owner, run_id, path, branch, base_branch,
             identity = common / 'go-workflow-repository-id'
             if not identity.exists(): atomic_write_text(identity, uuid.uuid4().hex + '\n')
             record = {**expected, 'schema': SCHEMA, 'common_dir': str(common),
-                      'repository_id': identity.read_text().strip(), 'generation': uuid.uuid4().hex, 'state': 'creating'}
+                      'repository_id': identity.read_text().strip(), 'generation': uuid.uuid4().hex,
+                      'control_host': socket.gethostname(), 'state': 'creating'}
             atomic_json(target, record)
         if not path.exists():
             if git(control, 'show-ref', '--verify', '--quiet', 'refs/heads/' + branch, check=False).returncode == 0:
@@ -270,6 +281,42 @@ def changed_paths(record):
                  ('ls-files', '--others', '--exclude-standard', '-z')]:
         paths.update(path for path in git(workspace, *args).stdout.split('\0') if path)
     return sorted(paths)
+
+
+def workspace_content_fingerprint(record):
+    """Hash registered worktree dirt and staged-index metadata without reading blobs."""
+    workspace = Path(record['path'])
+    head = git_text(workspace, 'rev-parse', 'HEAD')
+    status = git_text(workspace, 'status', '--porcelain', '--untracked-files=all')
+    # Git can refresh .git/index stat-cache data without changing staged work, so
+    # fingerprint the stable mode/object/stage/path records rather than index bytes.
+    staged_index = sorted(entry for entry in git(workspace, 'ls-files', '--stage', '-z').stdout.split('\0') if entry)
+    entries = []
+    for relative in changed_paths(record):
+        name = Path(relative)
+        if name.is_absolute() or '..' in name.parts:
+            raise WorkspaceError('Workspace status contains an unsafe path')
+        target = workspace / name
+        try:
+            info = target.lstat()
+        except FileNotFoundError:
+            kind, mode, payload = 'deleted', None, b''
+        else:
+            mode = stat.S_IMODE(info.st_mode)
+            if stat.S_ISLNK(info.st_mode):
+                kind, payload = 'symlink', os.readlink(target).encode('utf-8', errors='surrogateescape')
+            elif stat.S_ISREG(info.st_mode):
+                kind, payload = 'file', target.read_bytes()
+            elif stat.S_ISDIR(info.st_mode):
+                kind = 'directory'
+                payload = b''
+            else:
+                kind, payload = 'other', str(info.st_mode).encode('ascii')
+        entries.append({'path': relative, 'kind': kind, 'mode': mode,
+                        'sha256': hashlib.sha256(payload).hexdigest()})
+    body = {'head': head, 'status': status, 'staged_index': staged_index, 'entries': entries}
+    encoded = json.dumps(body, sort_keys=True, separators=(',', ':'), ensure_ascii=False).encode('utf-8')
+    return hashlib.sha256(encoded).hexdigest()
 
 
 def require_visible_index(record):

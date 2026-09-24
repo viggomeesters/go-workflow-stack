@@ -33,7 +33,8 @@
           "tasks": [
             "abc-03",
             "abc-04",
-            "abc-11"
+            "abc-11",
+            "safe-active-task-handoff"
           ]
         },
         {

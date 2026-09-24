@@ -3,6 +3,7 @@
 ## Unreleased
 
 - Recognize simple positive Dutch direct-object `los … op` imperatives as execution-authorized Go intent; keep questions, `niet`/`nooit`/`onder geen beding`, compound conjunctions including `en`/`én`, and advice/read-only/plan-only overrides non-executing.
+- Add `task handoff` for an explicitly acknowledged idle active claim; it journals claim/workspace rebinds, preserves dirty worker contents, and verifies recorded host identity or explicit same-host attestation while refusing live or known cross-host transfers.
 
 ## 0.3.46 — repository impact and conformance
 

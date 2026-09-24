@@ -20,6 +20,7 @@ import re
 import signal
 import shlex
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
@@ -28,6 +29,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from copy import deepcopy
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 STACK_ROOT = SCRIPT_DIR.parent
@@ -45,10 +47,11 @@ from go_workflow.adapters import detect_hermes_prompt_flag, native_agent_command
 from go_workflow.execution_context import ContextError, create_snapshot, verify_snapshot
 from go_workflow.model_profiles import phase_model, controlled_preflight, adapter_capabilities
 from go_workflow.release import PublicationError
-from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run
+from go_workflow.run_state import RunStateError, select_managed_task, execute_managed, process_command, worker_enter, relocate_run, state_path, read_state
 from go_workflow.completion import CompletionError, require_completion, lifecycle_report
 from go_workflow.worktrees import (guard_workspace_command, registered_workspace, execution_lease, active_task,
     validate_record, stage_workspace, integration_slot, record_integration, cleanup_workspace, reconcile_workspace, rebind_workspace, owned_record, verify_workspace,
+    registry_path, read_object, require_run_idle, require_visible_index, workspace_content_fingerprint,
     WorkspaceError, create_workspace, workflow_root, is_git_checkout)
 from go_workflow.capacity_policy import plan_capacity
 from go_workflow.campaign import CampaignError, execute_campaign, plan_campaign
@@ -4494,6 +4497,423 @@ def cmd_task_outcome(args: argparse.Namespace) -> int:
     return 0
 
 
+def _handoff_json_hash(value: Any) -> str:
+    payload = json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _handoff_event_exists(root: Path, task_id: str, handoff_id: str) -> bool:
+    path = root / "runs" / "events.jsonl"
+    if not path.is_file():
+        return False
+    for line_number, line in enumerate(path.read_text(encoding="utf-8").splitlines(), start=1):
+        if not line.strip():
+            continue
+        try:
+            item = json.loads(line)
+        except json.JSONDecodeError as exc:
+            raise RepoLocalError(f"cannot hand off through malformed runs/events.jsonl line {line_number}") from exc
+        data = item.get("data") if isinstance(item, dict) else None
+        if (isinstance(item, dict) and item.get("event") == "task.claimed"
+                and item.get("task_id") == task_id and isinstance(data, dict)
+                and data.get("handoff_id") == handoff_id):
+            return True
+    return False
+
+
+def _handoff_workspace_after(record: dict[str, Any], journal: dict[str, Any]) -> dict[str, Any]:
+    updated = deepcopy(record)
+    history = list(updated.get("ownership_history") or [])
+    history.append({"owner": journal["expected_owner"], "run_id": journal["old_run_id"]})
+    updated["ownership_history"] = history
+    updated.update(owner=journal["new_owner"], run_id=journal["new_run_id"])
+    return validate_record(updated)
+
+
+def _block_handoff_after_apply_failure(
+    root: Path, journal_path: Path, journal: dict[str, Any], active_path: Path, registry: Path, reason: str
+) -> str:
+    """Block a failed apply and restore only snapshots that still exactly match its after-state."""
+    rollback: dict[str, str] = {}
+    snapshots = (
+        ("task", active_path, journal.get("task_before"), journal.get("task_before_sha256"), journal.get("task_after_sha256")),
+        ("workspace", registry, journal.get("workspace_before"), journal.get("workspace_before_sha256"), journal.get("workspace_after_sha256")),
+    )
+    for name, path, before, before_hash, after_hash in snapshots:
+        if name == "workspace" and journal.get("legacy_unmanaged"):
+            continue
+        if not isinstance(before, dict) or _handoff_json_hash(before) != before_hash:
+            rollback[name] = "not_restored_missing_or_invalid_before_snapshot"
+            continue
+        try:
+            current = load_json(path) if name == "task" else validate_record(read_object(path))
+        except (OSError, RepoLocalError, WorkspaceError):
+            rollback[name] = "not_restored_unreadable"
+            continue
+        if _handoff_json_hash(current) != after_hash:
+            rollback[name] = "not_restored_after_state_drifted"
+            continue
+        try:
+            dump_json(path, deepcopy(before))
+            restored = load_json(path) if name == "task" else validate_record(read_object(path))
+        except (OSError, RepoLocalError, WorkspaceError):
+            rollback[name] = "restore_failed"
+            continue
+        rollback[name] = "restored" if _handoff_json_hash(restored) == before_hash else "restore_readback_mismatch"
+
+    journal["status"] = "blocked"
+    journal["blocked_at"] = now_iso()
+    journal["blocked_reason"] = reason
+    journal["rollback"] = rollback
+    dump_json(journal_path, journal)
+    return "; handoff journal is blocked; inspect its rollback record before using a new handoff id"
+
+
+def _apply_task_handoff_journal(repo: Path, root: Path, journal_path: Path, journal: dict[str, Any]) -> dict[str, Any]:
+    task_id = journal["task_id"]
+    active_path = root / "tasks" / "active" / (task_id + ".json")
+    registry = registry_path(repo, task_id)
+    task = load_json(active_path)
+    task_hash = _handoff_json_hash(task)
+    before_task_hash = journal["task_before_sha256"]
+    after_task_hash = journal["task_after_sha256"]
+    if task.get("status") != "active" or task_hash not in {before_task_hash, after_task_hash}:
+        raise RepoLocalError("task state drifted during prepared handoff; preserve and inspect")
+    expected_task_owner = journal["expected_owner"] if task_hash == before_task_hash else journal["new_owner"]
+    if (task.get("claim") or {}).get("agent") != expected_task_owner:
+        raise RepoLocalError("task claim owner drifted during prepared handoff")
+
+    record = None
+    record_hash = None
+    content_fingerprint = None
+    if journal["legacy_unmanaged"]:
+        if registry.exists():
+            raise RepoLocalError("legacy handoff found a workspace registry; preserve and inspect")
+        workspace_contract = ((task.get("execution_contract") or {}).get("workspace") or {})
+        if workspace_contract.get("mode") == "task_worktree":
+            raise RepoLocalError("task requires a registered workspace; legacy handoff is refused")
+        if not journal.get("confirm_same_host"):
+            raise RepoLocalError("legacy handoff lacks same-host confirmation")
+        for channel in ("managed", "completion", "publication"):
+            if state_path(repo, task_id, channel).exists():
+                raise RepoLocalError("legacy handoff found managed run state; preserve and inspect")
+    else:
+        if not registry.is_file():
+            raise RepoLocalError("registered workspace disappeared during prepared handoff")
+        record = validate_record(read_object(registry))
+        record_hash = _handoff_json_hash(record)
+        before_record_hash = journal["workspace_before_sha256"]
+        after_record_hash = journal["workspace_after_sha256"]
+        if record_hash not in {before_record_hash, after_record_hash}:
+            raise RepoLocalError("workspace registry drifted during prepared handoff; preserve and inspect")
+        expected_record_owner = journal["expected_owner"] if record_hash == before_record_hash else journal["new_owner"]
+        expected_record_run = journal["old_run_id"] if record_hash == before_record_hash else journal["new_run_id"]
+        if record.get("owner") != expected_record_owner or record.get("run_id") != expected_record_run:
+            raise RepoLocalError("workspace owner/run identity drifted during prepared handoff")
+        if record.get("state") != "ready":
+            raise WorkspaceError("only a ready workspace can be handed off")
+        if state_path(repo, task_id, "managed").exists():
+            raise WorkspaceError("managed run checkpoint exists; resume it before handoff")
+        if state_path(repo, task_id, "publication").exists():
+            raise WorkspaceError("publication checkpoint exists; finish/read it back before handoff")
+        verify_workspace(record)
+        require_visible_index(record)
+        current_host_evidence = _handoff_host_evidence(
+            repo, task_id, record, journal["expected_owner"], journal["old_run_id"], bool(journal.get("confirm_same_host"))
+        )
+        if current_host_evidence != journal.get("host_evidence"):
+            raise WorkspaceError("host evidence changed during prepared handoff; preserve and inspect")
+        require_run_idle(record)
+        content_fingerprint = workspace_content_fingerprint(record)
+        if content_fingerprint != journal.get("workspace_content_sha256"):
+            raise RepoLocalError("workspace content changed during prepared handoff; preserve and inspect")
+
+    # Construct and validate all intended writes only after the complete preflight above.
+    updated_task = None
+    if task_hash == before_task_hash:
+        updated_task = deepcopy(journal.get("task_after") or {})
+        if _handoff_json_hash(updated_task) != after_task_hash:
+            raise RepoLocalError("handoff journal task snapshot is invalid")
+
+    updated_record = None
+    if not journal["legacy_unmanaged"] and record_hash == journal["workspace_before_sha256"]:
+        updated_record = deepcopy(journal.get("workspace_after") or {})
+        if _handoff_json_hash(updated_record) != journal["workspace_after_sha256"]:
+            raise RepoLocalError("handoff journal workspace snapshot is invalid")
+
+    events_path = root / "runs" / "events.jsonl"
+    event_already_recorded = _handoff_event_exists(root, task_id, journal["handoff_id"])
+
+    if updated_task is not None:
+        dump_json(active_path, updated_task)
+    if updated_record is not None:
+        dump_json(registry, updated_record)
+
+    try:
+        final_task = load_json(active_path)
+        if _handoff_json_hash(final_task) != after_task_hash:
+            raise RepoLocalError("task claim handoff readback mismatch")
+        if not journal["legacy_unmanaged"]:
+            final_record = validate_record(read_object(registry))
+            verify_workspace(final_record)
+            if _handoff_json_hash(final_record) != journal["workspace_after_sha256"]:
+                raise RepoLocalError("workspace handoff readback mismatch")
+            if workspace_content_fingerprint(final_record) != journal.get("workspace_content_sha256"):
+                raise RepoLocalError("workspace content changed while handoff was applied; preserve and inspect")
+        elif registry.exists():
+            raise RepoLocalError("legacy handoff created a workspace registry unexpectedly")
+    except (RepoLocalError, WorkspaceError) as exc:
+        guidance = _block_handoff_after_apply_failure(root, journal_path, journal, active_path, registry, str(exc))
+        raise RepoLocalError(str(exc) + guidance) from exc
+
+    if not event_already_recorded:
+        append_jsonl(events_path, event(
+            task_id, "task.claimed", journal["new_owner"], journal["event_data"]
+        ))
+    journal["status"] = "completed"
+    journal["completed_at"] = now_iso()
+    journal["event_recorded"] = True
+    dump_json(journal_path, journal)
+    return {
+        "schema": "go-workflow.task-handoff-result.v1",
+        "status": "transferred",
+        "task_id": task_id,
+        "handoff_id": journal["handoff_id"],
+        "old_owner": journal["expected_owner"],
+        "new_owner": journal["new_owner"],
+        "old_run_id": journal["old_run_id"],
+        "new_run_id": journal["new_run_id"],
+        "legacy_unmanaged": journal["legacy_unmanaged"],
+        "host_evidence": journal.get("host_evidence"),
+        "workspace_fingerprint_sha256": journal.get("workspace_content_sha256"),
+    }
+
+
+def _handoff_host_evidence(repo: Path, task_id: str, record: dict[str, Any], expected_owner: str, old_run_id: str, confirm_same_host: bool) -> str:
+    current_host = socket.gethostname()
+    evidence: list[str] = []
+    record_host = record.get("control_host")
+    if record_host:
+        if record_host != current_host:
+            raise WorkspaceError("handoff workspace control_host mismatch; cross-host handoff is unsupported")
+        evidence.append("workspace-control-host")
+    completion_path = state_path(repo, task_id, "completion")
+    if completion_path.is_file():
+        completion = read_state(repo, task_id, "completion")
+        controller = completion.get("controller") or {}
+        checkpoint_host = controller.get("host")
+        if checkpoint_host:
+            if checkpoint_host != current_host:
+                raise WorkspaceError("handoff completion checkpoint host mismatch; cross-host handoff is unsupported")
+            if completion.get("owner") and completion.get("owner") != expected_owner:
+                raise WorkspaceError("handoff completion checkpoint owner mismatch")
+            if completion.get("run_id") and completion.get("run_id") != old_run_id:
+                raise WorkspaceError("handoff completion checkpoint run-id mismatch")
+            evidence.append("completion-checkpoint-host")
+    if evidence:
+        return "+".join(evidence)
+    if not confirm_same_host:
+        raise WorkspaceError("host identity is unavailable; explicit --confirm-same-host is required")
+    return "operator-confirmation"
+
+
+def perform_task_handoff(repo: Path, args: argparse.Namespace) -> dict[str, Any]:
+    repo = Path(repo).resolve()
+    root = go_root(repo)
+    task_id = args.task_id
+    old_owner = str(args.expected_owner or "").strip()
+    new_owner = str(args.new_owner or "").strip()
+    reason = str(args.reason or "").strip()
+    old_run_id = str(args.old_run_id or "").strip()
+    new_run_id = str(args.new_run_id or "").strip()
+    legacy_unmanaged = bool(args.legacy_unmanaged)
+    confirm_same_host = bool(args.confirm_same_host)
+    handoff_id = str(args.handoff_id or uuid.uuid4().hex).strip()
+    owner_pattern = r"^[A-Za-z0-9][A-Za-z0-9._-]*$"
+    if not re.fullmatch(owner_pattern, old_owner) or not re.fullmatch(owner_pattern, new_owner):
+        raise RepoLocalError("handoff requires valid expected/new owner ids")
+    if old_owner == new_owner:
+        raise RepoLocalError("handoff old and new owners must differ")
+    if not reason or len(reason) > 500:
+        raise RepoLocalError("handoff requires a 1-500 character reason")
+    if not bool(args.confirm_owner_stopped):
+        raise RepoLocalError("handoff requires --confirm-owner-stopped")
+    if not re.fullmatch(r"[0-9a-f]{32}", handoff_id):
+        raise RepoLocalError("handoff id must be 32 lowercase hexadecimal characters")
+
+    journal_path = root / "runs" / task_id / "handoffs" / (handoff_id + ".json")
+    journal_created = journal_path.exists()
+    try:
+        with repository_lock(root, "workspace-execution-" + task_id):
+            with repository_lock(root, "task-" + task_id):
+                if journal_path.exists():
+                    journal = load_json(journal_path)
+                    identity = (journal.get("schema") == "go-workflow.task-handoff.v1"
+                        and journal.get("handoff_id") == handoff_id
+                        and journal.get("task_id") == task_id
+                        and journal.get("expected_owner") == old_owner
+                        and journal.get("new_owner") == new_owner
+                        and journal.get("old_run_id") == (old_run_id or None)
+                        and journal.get("new_run_id") == (new_run_id or None)
+                        and journal.get("legacy_unmanaged") is legacy_unmanaged
+                        and journal.get("confirm_same_host") is confirm_same_host
+                        and journal.get("reason") == reason)
+                    if not identity:
+                        raise RepoLocalError("handoff id belongs to a different transfer")
+                    if journal.get("status") == "completed":
+                        return {
+                            "schema": "go-workflow.task-handoff-result.v1",
+                            "status": "already_transferred",
+                            "task_id": task_id,
+                            "handoff_id": handoff_id,
+                            "old_owner": old_owner,
+                            "new_owner": new_owner,
+                            "old_run_id": old_run_id or None,
+                            "new_run_id": new_run_id or None,
+                            "legacy_unmanaged": legacy_unmanaged,
+                            "confirm_same_host": confirm_same_host,
+                            "host_evidence": journal.get("host_evidence"),
+                            "workspace_fingerprint_sha256": journal.get("workspace_content_sha256"),
+                        }
+                    if journal.get("status") == "blocked":
+                        raise RepoLocalError(
+                            "handoff journal is blocked; inspect its rollback record and create a new handoff after resolving drift"
+                        )
+                    if journal.get("status") != "prepared":
+                        raise RepoLocalError("handoff journal has an unsupported status")
+                    return _apply_task_handoff_journal(repo, root, journal_path, journal)
+
+                task_path_value, task = find_task(root, task_id)
+                if task_path_value.parent.name != "active" or task.get("status") != "active":
+                    raise RepoLocalError("handoff requires an active task")
+                claim = task.get("claim") or {}
+                if claim.get("agent") != old_owner:
+                    raise RepoLocalError("handoff expected owner does not match the current task claim")
+
+                registry = registry_path(repo, task_id)
+                if registry.exists() and not registry.is_file():
+                    raise WorkspaceError("workspace registry path is not a regular file; preserve and inspect")
+                workspace_mode = ((task.get("execution_contract") or {}).get("workspace") or {}).get("mode")
+                record = None
+                content_fingerprint = None
+                host_evidence = ""
+                base_commit = claim.get("base_commit")
+                if registry.is_file():
+                    if legacy_unmanaged:
+                        raise RepoLocalError("--legacy-unmanaged cannot be used when a workspace is registered")
+                    if not re.fullmatch(owner_pattern, old_run_id) or not re.fullmatch(owner_pattern, new_run_id):
+                        raise RepoLocalError("registered workspace handoff requires valid old/new run ids")
+                    if old_run_id == new_run_id:
+                        raise RepoLocalError("registered workspace handoff requires a new run id")
+                    record = validate_record(read_object(registry))
+                    if record.get("control_repo") != str(repo) or record.get("owner") != old_owner or record.get("run_id") != old_run_id:
+                        raise WorkspaceError("handoff workspace owner/run/control identity mismatch")
+                    if record.get("state") != "ready":
+                        raise WorkspaceError("only a ready workspace can be handed off")
+                    if state_path(repo, task_id, "managed").exists():
+                        raise WorkspaceError("managed run checkpoint exists; recover it through the managed-run lane before handoff")
+                    if state_path(repo, task_id, "publication").exists():
+                        raise WorkspaceError("publication checkpoint exists; finish/read it back before handoff")
+                    verify_workspace(record)
+                    require_visible_index(record)
+                    host_evidence = _handoff_host_evidence(repo, task_id, record, old_owner, old_run_id, confirm_same_host)
+                    require_run_idle(record)
+                    content_fingerprint = workspace_content_fingerprint(record)
+                    base_commit = record.get("base_commit") or base_commit
+                else:
+                    if not legacy_unmanaged:
+                        raise RepoLocalError("unregistered claim requires explicit --legacy-unmanaged")
+                    if workspace_mode == "task_worktree":
+                        raise WorkspaceError("task requires a registered workspace; legacy handoff is refused")
+                    if old_run_id or new_run_id:
+                        raise RepoLocalError("legacy unmanaged handoff must not invent run ids")
+                    for channel in ("managed", "completion", "publication"):
+                        if state_path(repo, task_id, channel).exists():
+                            raise WorkspaceError("legacy handoff found managed run state; preserve and inspect")
+                    if not confirm_same_host:
+                        raise RepoLocalError("legacy unmanaged handoff requires --confirm-same-host")
+                    host_evidence = "operator-confirmation"
+
+                claim_after = deepcopy(claim)
+                claim_after.update(agent=new_owner, claimed_at=now_iso())
+                task_after = deepcopy(task)
+                task_after["claim"] = claim_after
+                record_after = _handoff_workspace_after(record, {
+                    "expected_owner": old_owner,
+                    "old_run_id": old_run_id,
+                    "new_owner": new_owner,
+                    "new_run_id": new_run_id,
+                }) if record else None
+                event_data = {
+                    "action": "owner_handoff",
+                    "handoff_id": handoff_id,
+                    "previous_owner": old_owner,
+                    "previous_run_id": old_run_id or None,
+                    "new_owner": new_owner,
+                    "new_run_id": new_run_id or None,
+                    "reason": reason,
+                    "legacy_unmanaged": legacy_unmanaged,
+                    "confirm_same_host": confirm_same_host,
+                    "host_evidence": host_evidence,
+                }
+                if base_commit:
+                    event_data["base_commit"] = base_commit
+                if content_fingerprint:
+                    event_data["workspace_content_sha256"] = content_fingerprint
+                journal = {
+                    "schema": "go-workflow.task-handoff.v1",
+                    "handoff_id": handoff_id,
+                    "status": "prepared",
+                    "created_at": now_iso(),
+                    "task_id": task_id,
+                    "expected_owner": old_owner,
+                    "new_owner": new_owner,
+                    "old_run_id": old_run_id or None,
+                    "new_run_id": new_run_id or None,
+                    "reason": reason,
+                    "legacy_unmanaged": legacy_unmanaged,
+                    "confirm_same_host": confirm_same_host,
+                    "host_evidence": host_evidence,
+                    "claim_after": claim_after,
+                    "task_before": task,
+                    "task_after": task_after,
+                    "task_before_sha256": _handoff_json_hash(task),
+                    "task_after_sha256": _handoff_json_hash(task_after),
+                    "workspace_before": record,
+                    "workspace_after": record_after,
+                    "workspace_before_sha256": _handoff_json_hash(record) if record else None,
+                    "workspace_after_sha256": _handoff_json_hash(record_after) if record_after else None,
+                    "workspace_content_sha256": content_fingerprint,
+                    "event_data": event_data,
+                }
+                dump_json(journal_path, journal)
+                journal_created = True
+                return _apply_task_handoff_journal(repo, root, journal_path, journal)
+    except StateLockError as exc:
+        raise RepoLocalError(str(exc)) from exc
+    except (WorkspaceError, RunStateError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    except Exception as exc:
+        if journal_path.is_file():
+            try:
+                pending = load_json(journal_path).get("status") == "prepared"
+            except RepoLocalError:
+                pending = False
+            if pending:
+                raise RepoLocalError(f"handoff {handoff_id} is pending; preserve the workspace and retry with --handoff-id {handoff_id}: {exc}") from exc
+        raise
+
+
+def cmd_task_handoff(args: argparse.Namespace) -> int:
+    repo = Path(args.repo).resolve()
+    result = perform_task_handoff(repo, args)
+    if args.json:
+        print(json.dumps(result, indent=2, ensure_ascii=False))
+    else:
+        print(f"{args.task_id}: {result['status']} {result['old_owner']} -> {result['new_owner']} ({result['handoff_id']})")
+    return 0
+
+
 def cmd_task_review(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
     root = go_root(repo)
@@ -5861,6 +6281,20 @@ def build_parser() -> argparse.ArgumentParser:
     task_review.add_argument("--agent", default="agent")
     task_review.add_argument("--owner", default="", help="owner/assignee for needs_fix return path")
     task_review.set_defaults(func=cmd_task_review)
+    task_handoff = task_sub.add_parser("handoff", help="Transfer one idle active task claim without modifying worker files")
+    task_handoff.add_argument("repo")
+    task_handoff.add_argument("--task-id", required=True)
+    task_handoff.add_argument("--expected-owner", required=True)
+    task_handoff.add_argument("--new-owner", required=True)
+    task_handoff.add_argument("--old-run-id", default="")
+    task_handoff.add_argument("--new-run-id", default="")
+    task_handoff.add_argument("--reason", required=True)
+    task_handoff.add_argument("--confirm-owner-stopped", action="store_true")
+    task_handoff.add_argument("--confirm-same-host", action="store_true")
+    task_handoff.add_argument("--legacy-unmanaged", action="store_true")
+    task_handoff.add_argument("--handoff-id", default="")
+    task_handoff.add_argument("--json", action="store_true")
+    task_handoff.set_defaults(func=cmd_task_handoff)
     epic = sub.add_parser("epic", help="Author repo-local epics")
     epic_sub = epic.add_subparsers(dest="epic_command", required=True)
     epic_create = epic_sub.add_parser("create", help="Create an epic in hierarchy.json")
@@ -6268,12 +6702,17 @@ def semantic_version_tuple(value: str) -> tuple[int, int, int]:
 
 def cmd_doctor(args: argparse.Namespace) -> int:
     repo = Path(args.repo).resolve()
+    # A source checkout used directly as the CLI runtime must match the pinned
+    # immutable release. Tests may set STACK_ROOT to an isolated fixture; this
+    # also verifies the stack source selected by the runtime, not the caller's
+    # cwd or an unrelated installed package.
+    stack_source = STACK_ROOT
     project_path = go_root(repo) / "project.json"
     project = load_json(project_path) if project_path.is_file() else {}
     required_version = str(project.get("required_stack_version") or "0.0.0")
     required_ref = str(project.get("stack_ref") or "")
     compatible = semantic_version_tuple(STACK_VERSION) >= semantic_version_tuple(required_version)
-    identity = resolve_runtime_identity(STACK_ROOT, required_ref, expected_version=STACK_VERSION)
+    identity = resolve_runtime_identity(stack_source, required_ref, expected_version=STACK_VERSION)
     git_head = identity["git_head"]
     pinned_commit = identity["pinned_commit"]
     exact_ref = identity["exact_ref"]

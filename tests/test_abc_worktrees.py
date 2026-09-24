@@ -223,9 +223,13 @@ def test_missing_marker_does_not_reactivate_the_copied_queue(tmp_path):
 
 def test_workspace_schema_and_repo_validation_reject_malformed_registry(tmp_path):
     from jsonschema import Draft202012Validator
+    import socket
+    from go_workflow.worktrees import marker_path
     repo,base=setup_repo(tmp_path);workspace=tmp_path/'worker'
     result=create(repo,base,workspace);assert result.returncode==0,result.stderr
     record=json.loads(result.stdout)
+    assert record["control_host"] == socket.gethostname()
+    assert json.loads(marker_path(workspace).read_text())["control_host"] == record["control_host"]
     schema=json.loads((ROOT/'schemas/workspace-state.schema.json').read_text())
     validator=Draft202012Validator(schema)
     assert not list(validator.iter_errors(record))

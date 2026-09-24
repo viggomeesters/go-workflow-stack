@@ -64,6 +64,48 @@ the execution lock throughout the subprocess; another writer cannot start.
 Registry paths are machine-specific. A clone keeps historical records but cannot
 reuse a different machine's workspace without an explicit future migration.
 
+### Idle task-claim handoff
+
+Use `task handoff` only from the task's canonical control checkout. It requires
+an exact prior owner, a distinct new owner, a reason, and `--confirm-owner-stopped`.
+For host-bound records, the `control_host` must match the local host. For
+older hostless records, a matching stopped completion checkpoint or explicit
+`--confirm-same-host` is required; a recorded mismatch cannot be overridden.
+For a ready registered workspace, also provide the exact old/new run IDs. The
+stored `control_host` must match the local host; older hostless records need a
+matching stopped completion checkpoint or explicit `--confirm-same-host`. A
+known mismatch can never be overridden.
+
+```sh
+./go task handoff . --task-id T038 --expected-owner codex --new-owner hermes \
+  --old-run-id run-1 --new-run-id run-2 --reason "reviewed idle handoff" \
+  --confirm-owner-stopped --json
+```
+
+The command refuses live/unknown execution, non-ready workspace records, managed
+run checkpoints, publication checkpoints, or identity drift. It journals an
+idempotent transition under `.go/runs/<task>/handoffs`, updates the task claim
+and workspace owner/run under the task/execution locks, and verifies a content
+fingerprint before/after; hidden `assume-unchanged`/`skip-worktree` index flags
+fail closed. Its prepared journal records exact before/after task and workspace
+owner snapshots: if readback detects apply-window workspace drift, it restores
+only records still equal to that handoff's exact after hashes, then marks the
+journal `blocked`. It never claims filesystem atomicity against arbitrary
+writers; the supported locks and stopped-owner gate narrow the window, while
+readback/conditional rollback contain it. It never copies, cleans, resets,
+stages, or deletes the worker tree. Retry a pending interrupted command only
+with its returned `--handoff-id` after inspection; a blocked journal cannot be
+silently retried and requires drift resolution plus a new handoff id.
+
+A legacy claim with no registered workspace may be transferred only when its task
+contract does not require `task_worktree`, no managed checkpoints exist, and both
+`--legacy-unmanaged` and `--confirm-same-host` are supplied; omit run IDs in that
+case. The hostless same-host assertion is explicit; a recorded host mismatch is
+never waived. Cross-control-clone and cross-host migration are not implemented;
+keep one canonical control checkout and do not reuse a worker path from another
+clone. `workspace rebind` remains a lower-level operation for a claim already
+transferred through a supported handoff.
+
 ## Scope and integration
 
 Scope checks include the complete net diff from the recorded base, the index,

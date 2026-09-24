@@ -1,0 +1,40 @@
+{
+  "schema": "go-workflow.task-handoff.v1",
+  "handoff_id": "c5030f083dad4da990372731df04bd6d",
+  "status": "completed",
+  "created_at": "2026-09-24T07:48:39+02:00",
+  "task_id": "safe-active-task-handoff",
+  "expected_owner": "hermes",
+  "new_owner": "hermes-recovery",
+  "old_run_id": null,
+  "new_run_id": null,
+  "reason": "Continue the already-started user-authorized implementation after confirming the previous writer/process is stopped; preserve the dirty task workspace and evidence.",
+  "legacy_unmanaged": true,
+  "confirm_same_host": true,
+  "host_evidence": "operator-confirmation",
+  "claim_after": {
+    "agent": "hermes-recovery",
+    "claimed_at": "2026-09-24T07:48:39+02:00",
+    "base_commit": "fd9213ab53e22c39ff9997e2686a154ac0252229"
+  },
+  "task_before_sha256": "a0b2e56704465d3e6610eb0c8373933d0d6a0adc066cebe5633dbafdc1f9e577",
+  "task_after_sha256": "36d4a2f96d592aecbb554369177de00e924e94e86e8c4756978a54655520bd5b",
+  "workspace_before_sha256": null,
+  "workspace_after_sha256": null,
+  "workspace_content_sha256": null,
+  "event_data": {
+    "action": "owner_handoff",
+    "handoff_id": "c5030f083dad4da990372731df04bd6d",
+    "previous_owner": "hermes",
+    "previous_run_id": null,
+    "new_owner": "hermes-recovery",
+    "new_run_id": null,
+    "reason": "Continue the already-started user-authorized implementation after confirming the previous writer/process is stopped; preserve the dirty task workspace and evidence.",
+    "legacy_unmanaged": true,
+    "confirm_same_host": true,
+    "host_evidence": "operator-confirmation",
+    "base_commit": "fd9213ab53e22c39ff9997e2686a154ac0252229"
+  },
+  "completed_at": "2026-09-24T07:48:39+02:00",
+  "event_recorded": true
+}

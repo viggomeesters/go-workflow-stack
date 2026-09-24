@@ -1,0 +1,154 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "status": "active",
+  "summary": "Publish safe same-host handoff for idle task/workspace claims",
+  "description": "Produce the next immutable Go Workflow Stack release containing the reviewed same-host idle task/workspace handoff and preserve the existing Dutch-router fix. The current remote latest tag is v0.3.46, so v0.3.47 is expected; the release tool must reserve the actual next patch version from live remote refs. Align runtime/package/self-pin/release-pairing metadata, run the exact candidate release preflight, then publish only to the configured official GitHub origin/main with explicit push policy. Preserve all historical tags and pairings; do not deploy, attach unrequested assets, or use GitHub Actions.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/project.json",
+      ".go/architecture/briefs/abc-publication.json",
+      ".go/architecture/briefs/architecture-lane-governance.json",
+      ".go/decisions/events.jsonl",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "release-pairings.json",
+      "CHANGELOG.md",
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
+      "tests/test_abc_release.py"
+    ],
+    "modify": [
+      ".go/tasks/{state}/release-safe-active-task-handoff-v0347.json",
+      ".go/hierarchy.json",
+      ".go/runs/**",
+      ".go/evidence/**",
+      ".go/architecture/events.jsonl",
+      ".go/project.json",
+      "pyproject.toml",
+      "go_workflow/constants.py",
+      "CHANGELOG.md",
+      "release-pairings.json",
+      "docs/releases/**",
+      "tests/test_abc_release.py"
+    ]
+  },
+  "acceptance": [
+    "The release controller reserves the next patch version from live remote refs under the official github-release profile; with v0.3.46 still latest, the expected candidate is v0.3.47 and no existing tag is replaced.",
+    "Version, runtime constant, stack self-pin, release pairing, changelog and release notes identify the exact same candidate; historical release mappings and v0.3.46 remain unchanged.",
+    "The exact candidate passes the full Python suite, make check, repo and architecture validation, WSL doctor, and release-check candidate preflight including its immutable template pairing; no development override or GitHub Actions is used.",
+    "After an independent final review, the existing release publisher commits/integrates, creates an annotated tag, pushes main and tag, publishes a GitHub release with no unrequested assets, and reads back exact remote refs and hosted release metadata.",
+    "No deployment or application service action occurs; release remains pending if any test, review, tag, remote, or hosted readback gate fails."
+  ],
+  "verification": [
+    "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest -q",
+    "make check",
+    "python3 cli/go.py validate .",
+    "python3 cli/go.py architecture validate . --json",
+    "python3 cli/go.py doctor . --platform wsl --agent hermes --json",
+    "bash scripts/release-check.sh --allow-candidate",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes-recovery",
+    "claimed_at": "2026-09-24T09:00:25+02:00",
+    "base_commit": "cd9cc4890888989ab5f039fb7920a23f24ec8533"
+  },
+  "work_status": "in_progress",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "execution_contract": {
+    "schema": "go-workflow.execution-contract.v1",
+    "task_kind": "product",
+    "model": {
+      "id": "gpt-6-luna",
+      "effort": "high"
+    },
+    "release": {
+      "mode": "required",
+      "profile": "github-release"
+    },
+    "workspace": {
+      "mode": "task_worktree",
+      "control_state": "repo_local_single_writer",
+      "base_branch": "main"
+    }
+  },
+  "dependencies": [
+    {
+      "project": "go-workflow-stack",
+      "task_id": "safe-active-task-handoff",
+      "requires": "done"
+    },
+    {
+      "project": "go-workflow-stack",
+      "task_id": "configure-github-publication-profile",
+      "requires": "done"
+    }
+  ],
+  "outcome_tracking_version": 1,
+  "intent_source": {
+    "text": "Produce the next immutable Go Workflow Stack release containing the reviewed same-host idle task/workspace handoff and preserve the existing Dutch-router fix. The current remote latest tag is v0.3.46, so v0.3.47 is expected; the release tool must reserve the actual next patch version from live remote refs. Align runtime/package/self-pin/release-pairing metadata, run the exact candidate release preflight, then publish only to the configured official GitHub origin/main with explicit push policy. Preserve all historical tags and pairings; do not deploy, attach unrequested assets, or use GitHub Actions.",
+    "sha256": "11febfebab44c62bba6ac9bba3d94ed1aad2ff0ba2bce4ad6aeb4175bb6a27b9",
+    "source_ref": "repo-local-intake:release-safe-active-task-handoff-v0347"
+  },
+  "requested_outcomes": [
+    {
+      "id": "R1",
+      "text": "The release controller reserves the next patch version from live remote refs under the official github-release profile; with v0.3.46 still latest, the expected candidate is v0.3.47 and no existing tag is replaced.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Version, runtime constant, stack self-pin, release pairing, changelog and release notes identify the exact same candidate; historical release mappings and v0.3.46 remain unchanged.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "The exact candidate passes the full Python suite, make check, repo and architecture validation, WSL doctor, and release-check candidate preflight including its immutable template pairing; no development override or GitHub Actions is used.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "After an independent final review, the existing release publisher commits/integrates, creates an annotated tag, pushes main and tag, publishes a GitHub release with no unrequested assets, and reads back exact remote refs and hosted release metadata.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "No deployment or application service action occurs; release remains pending if any test, review, tag, remote, or hosted readback gate fails.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "abc-publication",
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "Publish the reviewed safe task/workspace handoff as an immutable release with exact candidate proof and explicit remote authorization"
+    ],
+    "decision_ids": [
+      "abc-d08-resumable-publication",
+      "material-work-requires-governing-decision-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  }
+}

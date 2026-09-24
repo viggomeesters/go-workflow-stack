@@ -1,0 +1,119 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "configure-github-publication-profile",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Configure explicit GitHub publication metadata for stack releases",
+  "description": "The stack already names the GitHub release provider, remote, branch and repository, but the publication profile lacks the required version source, bump policy, tag prefix and changelog path. Add only this declarative profile using pyproject.toml project.version, patch bump, v-prefixed tags and CHANGELOG.md. This task does not bump the version or perform any remote write; the separate release task still requires explicit push authorization.",
+  "scope": {
+    "read": [
+      "AGENTS.md",
+      ".go/project.json",
+      ".go/architecture/briefs/abc-publication.json",
+      ".go/architecture/briefs/architecture-lane-governance.json",
+      ".go/decisions/events.jsonl",
+      "schemas/project.schema.json",
+      "go_workflow/release.py",
+      "tests/test_abc_release.py"
+    ],
+    "modify": [
+      ".go/tasks/{state}/configure-github-publication-profile.json",
+      ".go/hierarchy.json",
+      ".go/project.json",
+      ".go/runs/events.jsonl",
+      ".go/evidence/events.jsonl",
+      ".go/architecture/events.jsonl"
+    ]
+  },
+  "acceptance": [
+    "GitHub release profile keeps provider=github-release, remote=origin, branch=main and repository=viggomeesters/go-workflow-stack, and adds a valid publication contract for pyproject.toml project.version with patch bump, v tag prefix and CHANGELOG.md.",
+    "The repo-local project schema and validate command accept the profile and existing release pairing/history remains unchanged.",
+    "Configuration alone does not bump a version, create a tag, push or publish; release.prepare still requires explicit task/run push authority."
+  ],
+  "verification": [
+    "python3 cli/go.py validate .",
+    "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest tests/test_abc_release.py -q",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes-recovery",
+    "claimed_at": "2026-09-24T08:41:09+02:00",
+    "base_commit": "72ecbc366e73edf2056965c8006ef22f605b15d0"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-24T08:49:19+02:00",
+      "agent": "spec-review-publication-profile",
+      "status": "approved",
+      "evidence": "Independent spec/security review PASS. Exact publication config matches release.py validate_publication and the released publication contract. Existing provider/remote/branch/repository unchanged; config adds no push authority. Validated schema, 42 release/TOML tests passed, architecture valid, diff-check clean. Reviewer read-only.",
+      "transaction_id": "ef2ad2c6a65b4164ae5488116288c840"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-24T08:49:04+02:00",
+      "task_id": "configure-github-publication-profile",
+      "agent": "hermes-recovery",
+      "summary": "verification_command=python3 cli/go.py validate . + pytest tests/test_abc_release.py -q + pytest tests/test_abc_release.py tests/test_toml_release.py -q + architecture validate + git diff --check; verification_result=PASS: repo validate, 28 publication tests, independent 42 release/TOML tests, architecture validate, and diff check; critic=Independent spec/security review PASS; configuration does not grant push authority and release.prepare still requires explicit push flags; runtime=Hermes WSL; model=gpt-6-luna; billing_mode=unknown; no_version_bump_or_external_effect=true",
+      "changed_files": [
+        ".go/architecture/events.jsonl",
+        ".go/hierarchy.json",
+        ".go/project.json",
+        ".go/runs/events.jsonl",
+        ".go/tasks/active/configure-github-publication-profile.json"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "72ecbc366e73edf2056965c8006ef22f605b15d0",
+        "observed_head_commit": "72ecbc366e73edf2056965c8006ef22f605b15d0"
+      },
+      "verification": {
+        "command": "python3 cli/go.py validate . + pytest tests/test_abc_release.py -q + pytest tests/test_abc_release.py tests/test_toml_release.py -q + architecture validate + git diff --check",
+        "result": "PASS: repo validate, 28 publication tests, independent 42 release/TOML tests, architecture validate, and diff check"
+      },
+      "runtime": {
+        "agent": "hermes-recovery",
+        "runtime": "Hermes WSL",
+        "model": "gpt-6-luna",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Hermes WSL",
+        "billing_mode": "unknown",
+        "owner": "hermes-recovery",
+        "model": "gpt-6-luna",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "Independent spec/security review PASS",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "foundational",
+    "scope_refs": [
+      "abc-publication",
+      "architecture-lane-governance"
+    ],
+    "concerns": [
+      "Add declarative release version/bump/changelog metadata without granting push authority"
+    ],
+    "decision_ids": [
+      "abc-d08-resumable-publication",
+      "material-work-requires-governing-decision-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "risk_acceptance"
+  }
+}

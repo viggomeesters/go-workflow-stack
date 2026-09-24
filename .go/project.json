@@ -20,7 +20,17 @@
       "provider": "github-release",
       "remote": "origin",
       "branch": "main",
-      "repository": "viggomeesters/go-workflow-stack"
+      "repository": "viggomeesters/go-workflow-stack",
+      "publication": {
+        "version": {
+          "path": "pyproject.toml",
+          "format": "toml",
+          "key": "project.version"
+        },
+        "bump": "patch",
+        "tag_prefix": "v",
+        "changelog": "CHANGELOG.md"
+      }
     }
   }
 }

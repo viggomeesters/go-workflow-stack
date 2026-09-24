@@ -178,6 +178,53 @@ def preview_compatibility(repo: Path, stack_repo: Path, commit: str,
         raise StackUpdateError(f'Cannot complete isolated target validation: {exc}') from exc
 
 
+def current_pin_compatibility(repo: Path, commit: str) -> dict[str, Any]:
+    """A no-op pin checks live state with the current code, not an older tag.
+
+    The release tag still has to resolve exactly; no migration or gateway write
+    is permitted here.  Actual pin changes always use the isolated target.
+    """
+    from .cli import validate_repo
+    before = workflow_graph(repo)
+    digest = hashlib.sha256(json.dumps({str(key): value for key, value in before.items()},
+                                      sort_keys=True).encode()).hexdigest()
+    with tempfile.TemporaryDirectory(prefix='go-current-pin-preview-') as directory:
+        base = Path(directory).resolve()
+        locations = {original: base / f'participant-{index}'
+                     for index, original in enumerate(before)}
+        for original, files in before.items():
+            destination = locations[original]
+            destination.mkdir()
+            for name in files:
+                source = original / '.go' / name
+                target = destination / '.go' / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(source, target)
+            for agent in original.iterdir():
+                if agent.name.casefold() == 'agents.md' and agent.is_file() and not agent.is_symlink():
+                    shutil.copy2(agent, destination / agent.name)
+            project_path = destination / '.go/project.json'
+            if project_path.exists():
+                candidate = json.loads(project_path.read_text())
+                mapping = candidate.get('dependency_projects')
+                if isinstance(mapping, dict):
+                    candidate['dependency_projects'] = {
+                        key: str(locations[(original / value).resolve()])
+                        if isinstance(value, str) and value.strip() else value
+                        for key, value in mapping.items()}
+                    atomic_json(project_path, candidate)
+        snapshot_before = {path: workflow_inventory(path) for path in locations.values()}
+        errors = validate_repo(locations[repo])
+        if any(workflow_inventory(path) != value for path, value in snapshot_before.items()):
+            raise StackUpdateError('Current validator mutated its workflow snapshot; no-op refused')
+    if workflow_graph(repo) != before:
+        raise StackUpdateError('Workflow state changed during current-pin validation')
+    return {'status': 'failed' if errors else 'passed', 'resolved_commit': commit,
+            'source_digest': digest, 'exit_code': 1 if errors else 0, 'errors': errors,
+            'stdout': '' if errors else 'current runtime validation passed',
+            'stderr': '\n'.join(errors), 'validation': 'current-runtime-noop'}
+
+
 def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, Any]:
     repo, stack_repo = repo.resolve(), stack_repo.resolve()
     match = VERSION_REF_RE.fullmatch(to_ref)
@@ -238,7 +285,8 @@ def plan_stack_update(repo: Path, stack_repo: Path, to_ref: str) -> dict[str, An
         "agents_gateway": gateway_summary,
         "before_project": project,
         "after_project": after,
-        "compatibility": preview_compatibility(repo, stack_repo, resolved.stdout.strip(), after),
+        "compatibility": (current_pin_compatibility(repo, resolved.stdout.strip()) if up_to_date
+                          else preview_compatibility(repo, stack_repo, resolved.stdout.strip(), after)),
     }
 
 

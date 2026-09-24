@@ -109,7 +109,8 @@
         "agent-team-pattern-docs-and-migration",
         "release-v038-agent-capacity",
         "make-completed-task-evidence-audit-tight-bind-a",
-        "repair-legacy-evidence-schema-fixture"
+        "repair-legacy-evidence-schema-fixture",
+        "repair-compatibility-manifest-fixture"
       ],
       "planned_direction": "Zelfstandige taakreleases met expliciete modellen, fasebewijs en veilige taakworktrees; planning in .go/plans/abc-lifecycle.json"
     },

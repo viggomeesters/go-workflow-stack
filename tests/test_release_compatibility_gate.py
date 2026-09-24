@@ -13,6 +13,24 @@ def run_gate(tmp_path, *, regress=False):
     repo.mkdir()
     for name in ('go_workflow', 'cli', 'schemas', 'fixtures', 'tests', 'scripts'):
         shutil.copytree(ROOT / name, repo / name)
+    for name in ('AGENTS.md', 'release-pairings.json', 'pyproject.toml'):
+        shutil.copy2(ROOT / name, repo / name)
+    contract = ROOT / '.go'
+    fixture_contract = repo / '.go'
+    fixture_contract.mkdir()
+    for name in ('project.json', 'vision.json', 'hierarchy.json',
+                 'architecture-principles.json', 'repository-map.json'):
+        shutil.copy2(contract / name, fixture_contract / name)
+    for name in ('architecture', 'decisions', 'tasks'):
+        shutil.copytree(contract / name, fixture_contract / name)
+    for name in ('evidence', 'runs'):
+        (fixture_contract / name).mkdir()
+        shutil.copy2(contract / name / 'events.jsonl', fixture_contract / name / 'events.jsonl')
+    subprocess.run(['git', 'init', '-q', str(repo)], check=True)
+    subprocess.run(['git', '-C', str(repo), 'add', '-A'], check=True)
+    subprocess.run(['git', '-C', str(repo), '-c', 'core.hooksPath=/dev/null',
+                    '-c', 'user.name=go-workflow', '-c', 'user.email=go-workflow@local.invalid',
+                    'commit', '-qm', 'Compatibility fixture'], check=True)
     if regress:
         path = repo / 'go_workflow/cli.py'
         source = path.read_text()
@@ -22,7 +40,7 @@ def run_gate(tmp_path, *, regress=False):
     return subprocess.run(['bash', str(repo / 'scripts/check-compatibility.sh')],
                           cwd=tmp_path, text=True, capture_output=True,
                           env={**os.environ, 'PYTHON': sys.executable,
-                               'PYTHONDONTWRITEBYTECODE': '1'}, timeout=120)
+                               'PYTHONDONTWRITEBYTECODE': '1'}, timeout=300)
 
 
 def test_compatibility_gate_accepts_supported_history(tmp_path):

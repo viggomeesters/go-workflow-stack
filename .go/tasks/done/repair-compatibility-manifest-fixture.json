@@ -1,0 +1,86 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "repair-compatibility-manifest-fixture",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Copy release pairing manifest into isolated compatibility fixture",
+  "description": "Compatibility test clones code/tests/scripts but omits the root release-pairings.json now required by historical pairing tests; test the actual isolated source tree without changing production release behavior.",
+  "scope": {
+    "read": [
+      "tests/test_release_compatibility_gate.py",
+      "tests/test_release_pairings.py",
+      "scripts/check-compatibility.sh"
+    ],
+    "modify": [
+      "tests/test_release_compatibility_gate.py"
+    ]
+  },
+  "acceptance": [
+    "Isolated compatibility gate tests run against a fixture containing the exact checked-in release-pairings.json.",
+    "The negative regression still fails on reintroduced legacy dependency validation."
+  ],
+  "verification": [
+    "PYTHONPATH=. uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" pytest -q tests/test_release_compatibility_gate.py"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-24T23:00:51+02:00",
+    "base_commit": "6555d681e133fd0dfe13605060c0d89a0310cb74"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-24T23:41:57+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Independent read-only critic PASS; exact focused compatibility gate 2 passed in 307.34s.",
+      "transaction_id": "fe7eff50802844d894e291c9608cf7c2"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-24T23:41:57+02:00",
+      "task_id": "repair-compatibility-manifest-fixture",
+      "agent": "hermes",
+      "summary": "changed_files=tests/test_release_compatibility_gate.py; verification_command=env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_compatibility_gate.py; result=PASS 2 passed in 307.34s; critic=PASS independent read-only re-review of current governance fixture; runtime=hermes",
+      "changed_files": [
+        "tests/test_release_compatibility_gate.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "6555d681e133fd0dfe13605060c0d89a0310cb74",
+        "observed_head_commit": "6555d681e133fd0dfe13605060c0d89a0310cb74"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_compatibility_gate.py",
+        "result": "PASS 2 passed in 307.34s"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "PASS independent read-only re-review of current governance fixture",
+        "skip_reason": null
+      }
+    }
+  ]
+}

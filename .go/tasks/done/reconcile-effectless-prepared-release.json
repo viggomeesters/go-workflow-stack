@@ -1,0 +1,94 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "reconcile-effectless-prepared-release",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Reconcile effectless prepared release after linear base advance",
+  "description": "Add a guarded release-specific reconciliation command for a prepared release with zero publication effects, a linear advanced main, and scoped dirty release candidate changes. Preserve candidate bytes and immutable release intent, fail closed on conflicts/effects/owners, atomically update workspace registry and frozen release state via supported code, and invalidate prior candidate verification.",
+  "scope": {
+    "read": [
+      "go_workflow/release.py",
+      "go_workflow/worktrees.py",
+      "go_workflow/cli.py",
+      "tests/test_release_reconcile.py",
+      ".go/runs/release-safe-active-task-handoff-v0347/",
+      ".go/workspaces/release-safe-active-task-handoff-v0347.json"
+    ],
+    "modify": [
+      "go_workflow/release.py",
+      "go_workflow/worktrees.py",
+      "go_workflow/cli.py",
+      "tests/test_release_reconcile.py"
+    ]
+  },
+  "acceptance": [
+    "No-effect prepared candidate with linear advanced base reconciles without editing release candidate content; registry and frozen state move together; all prior verification invalidated.",
+    "Any publication effect, non-linear base, conflicting/changed candidate bytes, unowned workspace, or missing lock leaves state and candidate unchanged."
+  ],
+  "verification": [
+    "env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_reconcile.py",
+    "make check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T00:37:19+02:00",
+    "base_commit": "05940adc673b04f2137bb01801a554301f9d1bcf"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T01:29:18+02:00",
+      "task_id": "reconcile-effectless-prepared-release",
+      "agent": "hermes",
+      "summary": "verification_command=env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_reconcile.py plus env -u PYTHONPATH make check; verification_result=10 passed and make check PASS, completion proof cbc9ef29c5edfe39e77de2bc08ab51e7917538eb2d8ea5e41cb7a8a1fe65b834; critic=independent PASS on source sha256 6c42ed9ffc6c5a5cf4c8c14354cf25300bf9a87d621cd79bc6e2a201bc9d64ff; changed_files=go_workflow/release.py,go_workflow/cli.py,tests/test_release_reconcile.py; runtime=Hermes Agent",
+      "changed_files": [
+        "go_workflow/release.py",
+        "go_workflow/cli.py",
+        "tests/test_release_reconcile.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "05940adc673b04f2137bb01801a554301f9d1bcf",
+        "observed_head_commit": "05940adc673b04f2137bb01801a554301f9d1bcf"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_reconcile.py plus env -u PYTHONPATH make check",
+        "result": "10 passed and make check PASS, completion proof cbc9ef29c5edfe39e77de2bc08ab51e7917538eb2d8ea5e41cb7a8a1fe65b834"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "Hermes Agent",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Hermes Agent",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent PASS on source sha256 6c42ed9ffc6c5a5cf4c8c14354cf25300bf9a87d621cd79bc6e2a201bc9d64ff",
+        "skip_reason": null
+      }
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/reconcile-effectless-prepared-release/completion/verification-6a2c60a2ce9b478daf044c7e5bbae5d1.json",
+      "sha256": "cbc9ef29c5edfe39e77de2bc08ab51e7917538eb2d8ea5e41cb7a8a1fe65b834"
+    }
+  }
+}

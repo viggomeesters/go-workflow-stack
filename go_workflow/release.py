@@ -12,6 +12,7 @@ from pathlib import Path
 import re
 import shlex
 import socket
+import stat
 import subprocess
 import time
 import tomllib
@@ -23,7 +24,7 @@ from .execution_context import json_hash
 from .state_io import atomic_json, atomic_write_text, repository_lock
 from .worktrees import (active_task, checked_scope, git, git_text, owned_record,
                         read_object, registry_path, require_clean, require_run_idle,
-                        stage_workspace, verify_workspace)
+                        stage_workspace, verify_workspace, validate_record)
 
 SCHEMA = 'go-workflow.publication-state.v1'
 BUDGET = ContextVar('publication_budget', default=None)
@@ -393,6 +394,186 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
                 atomic_write_text(target, change['after'])
             checked_scope(record); state['phase'] = 'prepared'; _save(control, state)
         return deepcopy(state)
+
+
+def reconcile_prepared_release(control, task_id, owner, run_id):
+    """Advance an effectless dirty candidate to a linear base; invalidate its proof.
+
+    This is deliberately narrower than workspace reconciliation: only a
+    fast-forward with no overlapping paths and no publication effect is safe.
+    The integration lock excludes other workflow writers across the transition.
+    An interrupted state write can be rolled forward on the next invocation.
+    """
+    from datetime import datetime, timezone
+
+    def candidate_content(worker, path):
+        target = worker / path
+        if target.is_symlink():
+            payload, kind = os.readlink(os.fsencode(target)), 'symlink'
+        elif target.is_file():
+            payload, kind = target.read_bytes(), 'file'
+        elif not target.exists():
+            payload, kind = b'', 'deleted'
+        else:
+            raise PublicationError('Candidate has unsupported file type: ' + path)
+        return (kind, stat.S_IMODE(target.lstat().st_mode) if kind != 'deleted' else None, payload)
+
+    def candidate_fingerprint(worker, scope_record):
+        paths = checked_scope(scope_record)
+        entries = []
+        for path in paths:
+            kind, mode, payload = candidate_content(worker, path)
+            entries.append({'path': path, 'kind': kind, 'mode': mode,
+                            'sha256': hashlib.sha256(payload).hexdigest()})
+        payload = {'entries': entries, 'diff_sha256': hashlib.sha256(
+            git(worker, 'diff', '--binary', 'HEAD', '--').stdout.encode()).hexdigest()}
+        return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
+
+    control = Path(control).resolve()
+    with repository_lock(control / '.go', 'workspace-integration'):
+        with repository_lock(control / '.go', 'workspace-execution-' + task_id):
+            record = verify_workspace(owned_record(control, task_id, owner, run_id))
+            require_run_idle(record)
+            task = active_task(control, task_id, owner)
+            state = validate_state(read_object(state_path(control, task_id)))
+            if (state['task_id'] != task_id or state['control_repo'] != str(control)
+                    or state['owner'] != owner or state['run_id'] != run_id
+                    or state['contract_digest'] != contract_digest(task)
+                    or state['profile'] != publication_profile(control, task)
+                    or state['phase'] != 'prepared' or state['effects'] or state['observations']):
+                raise PublicationError('Only the owned effectless prepared release may reconcile')
+            reservation = (control / state['reservation']).resolve()
+            if (reservation.parent != (control / '.go/runs/publication-reservations').resolve()
+                    or not reservation.is_file()
+                    or read_object(reservation) != {'task_id': task_id, 'owner': owner, 'run_id': run_id,
+                                                      'version': state['version'], 'status': 'reserved'}):
+                raise PublicationError('Publication reservation is missing or changed')
+            worker = Path(record['path'])
+            if record['state'] != 'ready' or state['tag'] != state['profile']['publication']['tag_prefix'] + state['version']:
+                raise PublicationError('Release workspace/version is not ready')
+            if git_text(control, 'symbolic-ref', '--short', 'HEAD') != record['base_branch']:
+                raise PublicationError('Control branch changed')
+            new_base = git_text(control, 'rev-parse', 'HEAD')
+            url, refs = _remote(control, state['profile'])
+            if (url != state['remote_url'] or refs.get('refs/heads/' + record['base_branch']) != new_base
+                    or 'refs/tags/' + state['tag'] in refs):
+                raise PublicationError('Remote base/tag changed')
+            old_base = state['base_commit']
+            journal_path = control / '.go/runs' / task_id / 'reconciliation-intent.json'
+            journal = read_object(journal_path) if journal_path.exists() else None
+            if journal and set(journal) != {'old_base', 'new_base', 'candidate_sha256'}:
+                raise PublicationError('Foreign release reconciliation intent')
+            if journal and journal['new_base'] != new_base:
+                history = record.get('reconciliations') or []
+                if (journal['new_base'] == old_base and state['workspace'] == record
+                        and state['base_commit'] == old_base and history
+                        and history[-1]['old_base_commit'] == journal['old_base']
+                        and history[-1]['new_base_commit'] == old_base
+                        and git_text(worker, 'rev-parse', 'HEAD') == old_base):
+                    journal = None  # The preceding reconciliation completed.
+                else:
+                    raise PublicationError('Foreign or stale release reconciliation intent')
+            if state['workspace'] != record:
+                # Crash between registry and release-state writes: only roll
+                # forward the exact recorded reconciliation, never guess.
+                history = record.get('reconciliations') or []
+                old_record = deepcopy(record)
+                old_record['base_commit'] = old_base
+                old_record['reconciliations'] = history[:-1]
+                if not old_record['reconciliations']:
+                    old_record.pop('reconciliations')
+                if (not history or history[-1]['old_base_commit'] != old_base
+                        or history[-1]['new_base_commit'] != new_base
+                        or history[-1]['workspace_head_before'] != old_base
+                        or history[-1]['workspace_head_after'] != new_base
+                        or old_record != state['workspace']
+                        or git_text(worker, 'rev-parse', 'HEAD') != new_base):
+                    raise PublicationError('Frozen workspace differs from registry')
+                advancing = set(git(control, 'diff', '--name-only', '-z', old_base, new_base).stdout.split('\0'))
+                if advancing.intersection(checked_scope(record)):
+                    raise PublicationError('Base/candidate overlap during recovery')
+                for change in state['preparation']:
+                    target = _file(worker, task, change['path'])
+                    if not target.exists() or target.read_text() != change['after']:
+                        raise PublicationError('Frozen preparation bytes changed during recovery')
+                if (not journal or journal['old_base'] != old_base
+                        or candidate_fingerprint(worker, record) != journal['candidate_sha256']):
+                    raise PublicationError('Candidate fingerprint changed during recovery')
+                state.update(workspace=record, base_commit=new_base, remote_base=new_base)
+                state.pop('content_digest', None)
+                state.pop('release_evidence', None)
+                _save(control, state)
+                return deepcopy(state)
+            if old_base != record['base_commit'] or state['remote_base'] != old_base:
+                raise PublicationError('Frozen base differs from workspace')
+            if new_base == old_base:
+                if journal and journal['new_base'] == new_base:
+                    history = record.get('reconciliations') or []
+                    if (not history or history[-1]['old_base_commit'] != journal['old_base']
+                            or history[-1]['new_base_commit'] != new_base
+                            or candidate_fingerprint(worker, record) != journal['candidate_sha256']):
+                        raise PublicationError('Candidate fingerprint changed after completed reconciliation')
+                for change in state['preparation']:
+                    target = _file(worker, task, change['path'])
+                    if not target.exists() or target.read_text() != change['after']:
+                        raise PublicationError('Frozen preparation bytes changed')
+                return deepcopy(state)
+            worker_head = git_text(worker, 'rev-parse', 'HEAD')
+            if (git(control, 'merge-base', '--is-ancestor', old_base, new_base, check=False).returncode
+                    or worker_head not in {old_base, new_base}):
+                raise PublicationError('Non-linear base or candidate commits require explicit review')
+            for change in state['preparation']:
+                target = _file(worker, task, change['path'])
+                if not target.exists() or target.read_text() != change['after']:
+                    raise PublicationError('Frozen preparation bytes changed')
+                source = git(control, 'show', old_base + ':' + change['path'], check=False)
+                if source.returncode or _hash(source.stdout) != change['before']:
+                    raise PublicationError('Frozen preparation source changed')
+            if git(worker, 'diff', '--cached', '--quiet', check=False).returncode:
+                raise PublicationError('Staged candidate changes require explicit review')
+            scope_record = {**record, 'base_commit': new_base} if worker_head == new_base else record
+            paths = checked_scope(scope_record)
+            advancing = set(git(control, 'diff', '--name-only', '-z', old_base, new_base).stdout.split('\0'))
+            if advancing.intersection(paths):
+                raise PublicationError('Base/candidate overlap: ' + ', '.join(sorted(advancing.intersection(paths))))
+            fingerprint = candidate_fingerprint(worker, scope_record)
+            if journal:
+                if journal != {'old_base': old_base, 'new_base': new_base, 'candidate_sha256': fingerprint}:
+                    raise PublicationError('Candidate fingerprint changed after reconciliation intent')
+            elif worker_head == new_base:
+                raise PublicationError('Worker advanced without durable candidate intent')
+            else:
+                atomic_json(journal_path, {'old_base': old_base, 'new_base': new_base,
+                                           'candidate_sha256': fingerprint})
+            original = {path: candidate_content(worker, path) for path in paths}
+            original_diff = git(worker, 'diff', '--binary', 'HEAD', '--').stdout
+            if worker_head == old_base:
+                result = git(worker, '-c', 'core.hooksPath=/dev/null', 'merge', '--ff-only', new_base, check=False)
+                if result.returncode:
+                    raise PublicationError('Candidate fast-forward conflict; preserve worker: ' + result.stderr.strip())
+            if (git_text(worker, 'rev-parse', 'HEAD') != new_base
+                    or any(candidate_content(worker, path) != content for path, content in original.items())
+                    or git(worker, 'diff', '--binary', 'HEAD', '--').stdout != original_diff
+                    or candidate_fingerprint(worker, {**record, 'base_commit': new_base}) != fingerprint):
+                raise PublicationError('Candidate bytes changed during reconciliation; preserve worker for review')
+            proposed = deepcopy(record)
+            proposed['base_commit'] = new_base
+            proposed.setdefault('reconciliations', []).append({
+                'old_base_commit': old_base, 'new_base_commit': new_base,
+                'workspace_head_before': old_base, 'workspace_head_after': new_base,
+                'reconciled_at': datetime.now(timezone.utc).isoformat(),
+                'evidence_invalidated': True,
+            })
+            validate_record(proposed)
+            checked_scope(proposed)
+            # Registry first: a crash leaves enough history to finish the
+            # frozen-state write through the guarded roll-forward above.
+            atomic_json(registry_path(control, task_id), proposed)
+            state.update(workspace=proposed, base_commit=new_base, remote_base=new_base)
+            state.pop('content_digest', None)
+            state.pop('release_evidence', None)
+            _save(control, state)
+            return deepcopy(state)
 
 
 def _intent(control, state, key, expected):

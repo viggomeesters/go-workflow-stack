@@ -1,9 +1,9 @@
 {
   "task_id": "taskwise-t05",
   "accepted_surface": "live terminal beside chat; user Implement authorization",
-  "tests": "61 passed; 35 passed and 2 optional tests skipped; real 300-second pilot still pending",
+  "tests": "62 passed on final log-backed implementation; 35 compatibility tests passed, 2 optional tests skipped",
   "tdd": "Missing public command, rendering receipt and intake resolution each reproduced before implementation; logs retained",
-  "review": "review_t01 independently reviewed and ran 11 targeted tests: no blockers",
+  "review": "review_t01 independently approved original viewer and log-backed projection; no blocking findings",
   "native_terminal": {
     "live_at_capture": true,
     "attached_tty": true,
@@ -14,17 +14,19 @@
     "ui_screenshot": "not obtained: computer-use policy disallows Terminal inspection; proof uses real TTY rendering receipts"
   },
   "source_sha256": {
-    "go_workflow/progress_terminal.py": "948b0689de54cb58c9ec3120130e08e2bbb5e01b005cd51c8dc34bf6c90c8641",
+    "go_workflow/progress_terminal.py": "bb7cfc501fc5a3101a0ec2047a116320ab78e6540f66238a421680d3b6f5fe07",
     "go_workflow/campaign_intake.py": "20d7b4d9b2e820a252eaac30a44b71a6116d4386249d8660cbcbc33deb96f1c9",
     "go_workflow/cli.py": "ffe407901ee44e98b2154ee76330921c92b0c991348c035f966b94d019f2be58",
-    "tests/test_progress_terminal.py": "46007ca408d708eac26c7dc00896b1212c9b203bbf24cede9ac7588262f7a034"
+    "tests/test_progress_terminal.py": "04dfbf9c4ff9e5ab10df861a90dbf03ed84c568e6a0eb549810344fa3a516b8b"
   },
   "rollout": "pending release and isolated Book Forge native worker pilot",
   "self_reflect": "No durable agent/process improvement needed; this extends the agreed product contract, with independent review and actual TTY delivery evidence.",
   "raw_test_log_sha256": {
     "taskwise-terminal-intake-red.txt": "4d25d8b6f8abef8f8db7d51618180b226604713c4076512cebe1cf8f5dd6e65b",
     "taskwise-terminal-receipt-red.txt": "44a087ee6507bf519092c56f94aac3a9439899983aeba4923f727f70082d6b0d",
-    "taskwise-terminal-red.txt": "b17587916974e01f9cc8f4699753c7a8c8d6a0cefd6a14169c7bea438bf1c968"
+    "taskwise-terminal-red.txt": "b17587916974e01f9cc8f4699753c7a8c8d6a0cefd6a14169c7bea438bf1c968",
+    "log-red.txt": "0795117139c33f56ff78a19c14136fb8e3058edf9fa9f30056e47b769978d1f2"
   },
-  "log_format": "RED logs are display copies with trailing whitespace removed; raw digests recorded."
+  "log_format": "RED logs are display copies with trailing whitespace removed; raw digests recorded.",
+  "readable_log": "User requested a plain live logfile; transport regenerates it from canonical outbox even while viewer is closed. Viewer reads and verifies that exact file before acknowledging rendering."
 }

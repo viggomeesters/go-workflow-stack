@@ -61,6 +61,26 @@ def _live(view):
                 and supervisor_alive(view['viewer']))
 
 
+def _log_text(events):
+    return ''.join(terminal_text(f"[{event['created_at']}] {event['message']}") + '\n' for event in events)
+
+
+def materialize_log(box):
+    """Regenerable readable projection; a log write is never a delivery receipt."""
+    from .state_io import atomic_write_text
+    path = box.path.with_suffix('.log')
+    _safe_path(path)
+    with repository_lock(box.root, 'progress-terminal-log-' + box.campaign_id):
+        events = box.snapshot()['events']
+        text = _log_text(events)
+        if not path.exists() or path.read_text() != text:
+            atomic_write_text(path, text)
+        readback = path.read_text()
+        if readback != text:
+            raise ValueError('Readable progress log differs from canonical events')
+    return events, readback
+
+
 def watch(repo, campaign_id):
     if not sys.stdout.isatty():
         raise ValueError('Progress display requires an attached terminal (TTY)')
@@ -81,18 +101,21 @@ def watch(repo, campaign_id):
         cursor = 0
         last_write = 0
         while True:
-            events = box.snapshot()['events']
-            changed = False
-            for event in events[cursor:]:
-                digest = event_digest(event)
+            events, text = materialize_log(box)
+            fresh = events[cursor:]
+            changed = bool(fresh)
+            for event in fresh:
                 old = state['displayed'].get(event['id'])
-                if old and old != digest:
+                if old and old != event_digest(event):
                     raise ValueError('Displayed event identity changed content')
-                print(terminal_text(f"[{event['created_at']}] {event['message']}"), flush=True)
-                # A real TTY write and flush precedes every rendering receipt.
-                state['displayed'][event['id']] = digest
-                cursor = event['sequence']
-                changed = True
+            if fresh:
+                # Read the actual plain log; verify it against the canonical outbox
+                # before rendering and acknowledging a contiguous event prefix.
+                sys.stdout.write(text[len(_log_text(events[:cursor])):])
+                sys.stdout.flush()
+                for event in fresh:
+                    state['displayed'][event['id']] = event_digest(event)
+                    cursor = event['sequence']
             now = time.monotonic()
             if changed or now - last_write >= 1:
                 state.update(ready=True, updated_at=time.time())
@@ -104,6 +127,7 @@ def watch(repo, campaign_id):
 
 def request(repo, campaign_id, payload, *, auto_open=True):
     box = ProgressOutbox(repo, campaign_id)
+    materialize_log(box)
     operation = payload.get('operation')
     if operation == 'preflight':
         _ensure_viewer(box, auto_open)
@@ -162,10 +186,11 @@ def enable_terminal(repo):
         ignore = path.parent.parent / '.gitignore'
         _safe_path(ignore)
         text = ignore.read_text() if ignore.exists() else ''
-        pattern = '.go/runs/progress/*.terminal.json'
-        if pattern not in text.splitlines():
+        patterns = ['.go/runs/progress/*.terminal.json', '.go/runs/progress/*.log']
+        missing = [pattern for pattern in patterns if pattern not in text.splitlines()]
+        if missing:
             from .state_io import atomic_write_text
-            atomic_write_text(ignore, (text.rstrip('\n') + '\n' + pattern + '\n'))
+            atomic_write_text(ignore, text.rstrip('\n') + '\n' + '\n'.join(missing) + '\n')
         project['progress_transport'] = choice
         atomic_json(path, project)
     return {'configured': choice, 'existing_campaigns_changed': False,

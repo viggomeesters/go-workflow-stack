@@ -113,3 +113,12 @@ Task text is escaped before terminal rendering, so embedded ANSI/OSC controls
 cannot affect the terminal. Machine-local viewer liveness and rendering metadata
 (`*.terminal.json`) should be ignored by Git; canonical events and delivery
 acknowledgments remain under `.go/runs/progress/<campaign-id>.json`.
+
+A readable `.go/runs/progress/<campaign-id>.log` is regenerated from the canonical
+JSON outbox by the terminal transport, even when the window is closed and live
+delivery fails. The viewer reads and verifies this same plain log. You can also
+follow it yourself with `tail -F .go/runs/progress/<campaign-id>.log` (`-F` follows
+atomic file replacement). A plain tail does not acknowledge delivery to Go.
+The log has no separate task status or queue; it can be rebuilt from the JSON
+outbox. Terminal configuration ignores both the derived `.log` and machine-local
+viewer checkpoints in Git while preserving pre-existing ignore entries.

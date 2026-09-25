@@ -38,7 +38,8 @@
   },
   "acceptance": [
     "Versioned progress events, durable acknowledgments, independent 300-second watcher, transport capability and reference adapter; integrated ten-task proof and release rollout.",
-    "User-approved terminal alternative: automatically open an independently updating real TTY for configured new Go runs; render existing ordered outbox, receipt only after display flush, safe replay/reopen, pending on viewer loss, prove on bounded Book Forge task without book generation."
+    "User-approved terminal alternative: automatically open an independently updating real TTY for configured new Go runs; render existing ordered outbox, receipt only after display flush, safe replay/reopen, pending on viewer loss, prove on bounded Book Forge task without book generation.",
+    "User follow-up: also persist a readable log file and make the terminal follow it live; preserve canonical JSON authority and do not equate log-write with visible delivery."
   ],
   "verification": [
     "python3 -m pytest tests/test_taskwise_campaign.py -q",

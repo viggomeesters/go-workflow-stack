@@ -1,0 +1,22 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+___________ test_readable_log_keeps_messages_when_terminal_is_closed ___________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-1271/test_readable_log_keeps_messag0')
+
+    def test_readable_log_keeps_messages_when_terminal_is_closed(tmp_path):
+        from go_workflow.progress_transport import flush
+        box = fixture(tmp_path)
+        box.emit('start', 'T01', {'title': 'Keep this result'}, key='first')
+        assert not flush(tmp_path, 'pilot', config(tmp_path))['ok']
+        log = tmp_path / '.go/runs/progress/pilot.log'
+>       assert log.is_file(), 'Readable log must exist even without a live terminal'
+E       AssertionError: Readable log must exist even without a live terminal
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-1271/test_readable_log_keeps_messag0/.go/runs/progress/pilot.log').is_file
+
+tests/test_progress_terminal.py:262: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_progress_terminal.py::test_readable_log_keeps_messages_when_terminal_is_closed
+1 failed in 0.10s

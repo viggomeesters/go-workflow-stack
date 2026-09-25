@@ -248,6 +248,23 @@ def test_enable_persists_portable_preference_and_ignores_only_local_viewer_state
     first = enable_terminal(tmp_path)
     assert first['existing_campaigns_changed'] is False
     assert enable_terminal(tmp_path) == first
-    assert (tmp_path / '.gitignore').read_text() == 'user-pattern\n.go/runs/progress/*.terminal.json\n'
+    assert (tmp_path / '.gitignore').read_text() == 'user-pattern\n.go/runs/progress/*.terminal.json\n.go/runs/progress/*.log\n'
     preference = json.loads((tmp_path / '.go/project.json').read_text())['progress_transport']
     assert preference == {'schema': 'go-workflow.terminal-progress.v1', 'auto_open': True}
+
+
+def test_readable_log_keeps_messages_when_terminal_is_closed(tmp_path):
+    from go_workflow.progress_transport import flush
+    box = fixture(tmp_path)
+    box.emit('start', 'T01', {'title': 'Keep this result'}, key='first')
+    assert not flush(tmp_path, 'pilot', config(tmp_path))['ok']
+    log = tmp_path / '.go/runs/progress/pilot.log'
+    assert log.is_file(), 'Readable log must exist even without a live terminal'
+    first = log.read_text()
+    assert 'T01 in progress' in first
+    box.emit('phase', 'T01', {'phase': 'verify'}, key='second')
+    assert not flush(tmp_path, 'pilot', config(tmp_path))['ok']
+    assert log.read_text().startswith(first)
+    assert log.read_text().count('T01 in progress') == 1
+    assert 'T01 fase verify' in log.read_text()
+    assert len(box.pending()) == 2, 'Writing a log alone is not terminal delivery'

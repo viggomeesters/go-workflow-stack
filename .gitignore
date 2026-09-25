@@ -6,3 +6,4 @@ build/
 
 # Machine-local TTY liveness/receipts; canonical delivery stays in the progress outbox.
 .go/runs/progress/*.terminal.json
+.go/runs/progress/*.log

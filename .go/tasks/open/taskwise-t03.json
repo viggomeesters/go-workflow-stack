@@ -1,0 +1,59 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "taskwise-t03",
+  "project": "go-workflow-stack",
+  "status": "open",
+  "summary": "T03 — Autonoom herstel",
+  "description": "Authorized implementation plan: serial tasks, single immutable release after integrated verification. Preserve legacy runs and user changes. No Hermes runner or Book Forge edits.",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Different strategy after repeated failure; linked bounded repairs; safe future-task amendments and independent continuation."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_taskwise_campaign.py -q"
+  ],
+  "claim": {
+    "agent": null,
+    "claimed_at": null
+  },
+  "work_status": "pending",
+  "review_status": "none",
+  "review_history": [],
+  "evidence": [],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "bounded-serial-campaign-contract-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

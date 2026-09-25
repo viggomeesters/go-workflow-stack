@@ -118,7 +118,12 @@
         "make-completed-task-evidence-audit-tight-bind-a",
         "repair-legacy-evidence-schema-fixture",
         "repair-compatibility-manifest-fixture",
-        "noop-stack-preflight-forward-compat"
+        "noop-stack-preflight-forward-compat",
+        "taskwise-t01",
+        "taskwise-t02",
+        "taskwise-t03",
+        "taskwise-t04",
+        "taskwise-t05"
       ],
       "planned_direction": "Zelfstandige taakreleases met expliciete modellen, fasebewijs en veilige taakworktrees; planning in .go/plans/abc-lifecycle.json"
     },

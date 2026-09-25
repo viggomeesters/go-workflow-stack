@@ -111,7 +111,7 @@ def validate_state(value):
                 'contract_digest', 'authority', 'base_commit', 'remote_base', 'remote_url', 'version', 'tag',
                 'phase', 'preparation', 'effects', 'observations', 'reservation', 'notes'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence', 'deployment'}
+            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence', 'deployment', 'candidate'}
             or value.get('schema') != SCHEMA or not isinstance(value.get('phase'), str) or value.get('phase') not in {'preparing', 'prepared', 'publishing', 'deploying', 'finishing', 'published'}
             or not isinstance(value.get('preparation'), list) or not isinstance(value.get('effects'), dict)
             or not isinstance(value.get('observations'), list)):
@@ -163,6 +163,18 @@ def validate_state(value):
         if (not isinstance(ref, dict) or set(ref) != {'path', 'sha256'} or not isinstance(ref['path'], str)
                 or not isinstance(ref['sha256'], str) or not re.fullmatch('[0-9a-f]{64}', ref['sha256'])):
             raise PublicationError('Invalid publication evidence reference')
+    if 'candidate' in value:
+        candidate=value['candidate']
+        if (not isinstance(candidate,dict) or set(candidate)!={'schema','revision','digest','history'}
+                or candidate.get('schema')!='go-workflow.release-candidate.v1'
+                or type(candidate.get('revision')) is not int or candidate['revision']<1
+                or not re.fullmatch('[0-9a-f]{64}',str(candidate.get('digest')))
+                or not isinstance(candidate.get('history'),list) or len(candidate['history'])!=candidate['revision']
+                or any(not isinstance(item,dict) or set(item)!={'reason','digest'}
+                       or not isinstance(item.get('reason'),str) or not item['reason'].strip()
+                       or not re.fullmatch('[0-9a-f]{64}',str(item.get('digest'))) for item in candidate['history'])
+                or candidate['history'][-1]['digest']!=candidate['digest']):
+            raise PublicationError('Invalid explicit release candidate revision')
     if 'deployment' in value:
         from .deployment import validate_state as validate_deployment
         validate_deployment(value['deployment'])
@@ -445,7 +457,7 @@ def rebind_prepared_verification(control, task_id, owner, run_id):
             return deepcopy(state)
 
 
-def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allow_push=False, allow_deploy=False):
+def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allow_push=False, allow_deploy=False, freeze_candidate=False):
     control = Path(control).resolve()
     with publication_slot(control, task_id, owner, run_id) as (record, session):
         task = active_task(control, task_id, owner); profile = publication_profile(control, task)
@@ -508,8 +520,34 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
                 if _hash(current) != change['before']: raise PublicationError('Preparation file changed; preserve it and reconcile')
                 atomic_write_text(target, change['after'])
             checked_scope(record); state['phase'] = 'prepared'; _save(control, state)
+        if freeze_candidate and 'candidate' not in state and not state['effects']:
+            digest=content_snapshot(worker,task)['digest']
+            state['candidate']={'schema':'go-workflow.release-candidate.v1','revision':1,'digest':digest,
+                                'history':[{'reason':'Initial prepared candidate','digest':digest}]}
+            _save(control,state)
         return deepcopy(state)
 
+
+
+def revise_prepared_candidate(control,task_id,owner,run_id,*,reason):
+    """Explicitly admit repaired content before re-verification, never after effects."""
+    if not isinstance(reason,str) or not reason.strip():
+        raise PublicationError('Candidate revision requires a concrete repair reason')
+    control=Path(control).resolve()
+    with publication_slot(control,task_id,owner,run_id) as (record,_):
+        task=active_task(control,task_id,owner)
+        state=_load(control,task,owner,run_id)
+        if state['phase']!='prepared' or state['effects'] or 'candidate' not in state:
+            raise PublicationError('Only an effectless frozen candidate can be revised')
+        worker=Path(record['path']);verify_workspace(record);checked_scope(record)
+        digest=content_snapshot(worker,task)['digest']
+        candidate=state['candidate']
+        if digest!=candidate['digest']:
+            candidate['revision']+=1
+            candidate['digest']=digest
+            candidate['history'].append({'reason':reason,'digest':digest})
+            _save(control,state)
+        return deepcopy(candidate)
 
 def reconcile_prepared_release(control, task_id, owner, run_id):
     """Advance an effectless dirty candidate to a linear base; invalidate its proof.
@@ -835,6 +873,8 @@ def publish_release(control, task_id, owner, run_id):
         if any(outcome['status'] in {'blocked', 'rejected'} for outcome in task.get('requested_outcomes', [])):
             raise PublicationError('Explicitly blocked/rejected requirement needs resolution before publication')
         if state['phase'] not in {'deploying', 'finishing'}:
+            if 'candidate' in state and content_snapshot(worker,task)['digest']!=state['candidate']['digest']:
+                raise PublicationError('Candidate content changed; explicitly revise before final verification')
             findings = completion_findings(worker, task, phase_only=True)
             if findings: raise PublicationError('Final candidate proof blocked: ' + '; '.join(findings))
             if api.architecture_finish_findings(control / '.go', task):
@@ -879,3 +919,131 @@ def publish_release(control, task_id, owner, run_id):
         state['phase'] = 'published'; _save(control, state)
         _release_reservation(control, state)
         return {'status': 'published', 'task_id': task_id, 'commit': state['commit'], 'tag': state['tag'], 'cleanup': 'separate'}
+
+
+def taskwise_no_release_policy(control, task, args):
+    """Freeze explicit taskwise delivery authority without inventing a release."""
+    if not getattr(args, 'taskwise_delivery', False):
+        return None
+    if ((task.get('execution_contract') or {}).get('release') or {}).get('mode') != 'none':
+        return None
+    policy = getattr(args, 'ship_policy', 'none')
+    if policy == 'local-commit':
+        policy = 'commit'
+    if policy not in {'none', 'commit', 'push'}:
+        raise PublicationError('Invalid taskwise shipping policy')
+    if policy == 'push' and not getattr(args, 'allow_push', False):
+        raise PublicationError('Taskwise push requires explicit frozen push authorization')
+    binding = {'schema': 'go-workflow.taskwise-delivery.v1', 'ship_policy': 'local-commit' if policy == 'commit' else policy,
+               'branch': args.base_branch, 'remote': None, 'remote_url': None, 'remote_base': None}
+    if policy == 'push':
+        url, refs = _remote(control, {'provider': 'git-tag', 'remote': 'origin'})
+        binding.update(remote='origin', remote_url=url, remote_base=refs.get('refs/heads/' + args.base_branch))
+        if binding['remote_base'] is None:
+            raise PublicationError('Configured origin lacks taskwise base branch; configure it before execution')
+    return binding
+
+
+def complete_taskwise_no_release(control, task_id, owner, run_id, session):
+    """Commit/integrate/finish a verified release:none task; closure sync follows."""
+    from . import cli as api
+    from argparse import Namespace
+    state = session.load()
+    policy = state['publication']['taskwise_delivery']
+    if policy['ship_policy'] == 'none':
+        raise PublicationError('Taskwise delivery needs a product commit; explicit ship-policy none forbids it')
+    with publication_slot(control, task_id, owner, run_id) as (_, command_session):
+        record = owned_record(control, task_id, owner, run_id, active=False)
+        task = active_task(control, task_id)
+        if task['execution_contract']['release']['mode'] != 'none':
+            raise PublicationError('Profileless completion is only valid for explicit release:none')
+        if any(outcome.get('status') in {'blocked', 'rejected'} for outcome in task.get('requested_outcomes', [])):
+            raise PublicationError('Explicitly blocked/rejected outcome requires resolution')
+        worker = Path(record['path'])
+        verify_workspace(record)
+        if completion_findings(worker, task, phase_only=True):
+            raise PublicationError('Taskwise completion requires current verification and critic proof: '
+                                   + '; '.join(completion_findings(worker, task, phase_only=True)))
+        if api.architecture_finish_findings(control / '.go', task):
+            raise PublicationError('Architecture proof is incomplete before taskwise completion')
+
+        def effect(name, expected=None, observed=None):
+            effects = deepcopy(session.load()['effects'])
+            if name not in effects:
+                if expected is None:
+                    raise PublicationError('Missing taskwise effect intent')
+                effects[name] = {'status': 'pending', 'expected': expected}
+            elif expected is not None and effects[name]['expected'] != expected:
+                raise PublicationError('Taskwise effect intent changed: ' + name)
+            if observed is not None:
+                if effects[name]['expected'] != observed:
+                    raise PublicationError('Taskwise effect readback differs: ' + name)
+                effects[name]['status'] = 'confirmed'
+            session.update(effects=effects)
+            return effects[name]['expected']
+
+        effects = session.load()['effects']
+        if 'taskwise_commit' not in effects:
+            stage_workspace(control, task_id, owner, run_id,
+                            command_runner=lambda cwd, argv: _write_command(command_session, cwd, argv))
+            effect('taskwise_commit', {'parent': git_text(worker, 'rev-parse', 'HEAD'),
+                                      'tree': git_text(worker, 'write-tree'),
+                                      'message': f'go deliver: {task_id} {run_id}'})
+        expected = effect('taskwise_commit')
+        head = git_text(worker, 'rev-parse', 'HEAD')
+        if head == expected['parent']:
+            _write_command(command_session, worker, ['git', 'commit', '--allow-empty', '-m', expected['message']])
+            head = git_text(worker, 'rev-parse', 'HEAD')
+        effect('taskwise_commit', observed={'parent': git_text(worker, 'rev-parse', head + '^'),
+                                           'tree': git_text(worker, 'rev-parse', head + '^{tree}'),
+                                           'message': git_text(worker, 'show', '-s', '--format=%B', head)})
+        require_clean(record)
+        if git_text(control, 'symbolic-ref', '--short', 'HEAD') != policy['branch']:
+            raise PublicationError('Taskwise control branch changed')
+        effect('taskwise_integration', head)
+        base = git_text(control, 'rev-parse', 'HEAD')
+        if base != head:
+            if base != record['base_commit']:
+                raise PublicationError('Taskwise base advanced; preserve and reconcile candidate')
+            if content_snapshot(control, task)['digest'] != content_snapshot(control, task, base)['digest']:
+                raise PublicationError('Control product content is dirty; preserve unrelated work')
+            _write_command(command_session, control, ['git', 'merge', '--ff-only', head])
+        effect('taskwise_integration', observed=git_text(control, 'rev-parse', 'HEAD'))
+        with repository_lock(control / '.go', 'workspace-execution-' + task_id):
+            record.update(state='integrated', integration={'workspace_head': head, 'integrated_commit': head})
+            atomic_json(registry_path(control, task_id), record)
+        if policy['ship_policy'] == 'push':
+            remote_profile = {'provider': 'git-tag', 'remote': policy['remote']}
+            url, refs = _remote(control, remote_profile)
+            if url != policy['remote_url']:
+                raise PublicationError('Taskwise publication remote changed')
+            branch = 'refs/heads/' + policy['branch']
+            effect('taskwise_push', {branch: head})
+            if refs.get(branch) != head:
+                if refs.get(branch) != policy['remote_base']:
+                    raise PublicationError('Remote taskwise branch advanced; preserve pending delivery')
+                _write_command(command_session, control, ['git', 'push', policy['remote'], head + ':' + branch])
+                url, refs = _remote(control, remote_profile)
+                if url != policy['remote_url']:
+                    raise PublicationError('Taskwise publication remote changed during push')
+            effect('taskwise_push', observed={branch: refs.get(branch)})
+        task = active_task(control, task_id)
+        if task['status'] == 'active':
+            ref = task['completion_evidence']['verification']['path']
+            for outcome in task.get('requested_outcomes', []):
+                if outcome['status'] in {'blocked', 'rejected'}:
+                    raise PublicationError('Explicitly blocked/rejected outcome requires resolution')
+                with redirect_stdout(io.StringIO()):
+                    api.cmd_task_outcome(Namespace(repo=str(control), task_id=task_id, outcome=outcome['id'],
+                        status='verified', evidence=ref, agent=owner))
+            with redirect_stdout(io.StringIO()):
+                api.cmd_finish(Namespace(repo=str(control), task_id=task_id, agent=owner,
+                    evidence='changed_files=' + ','.join(checked_scope(record)) +
+                    '; verification_command=declared task commands; verification_result=passed; critic=passed recorded review; '
+                    'runtime=managed taskwise; model=requested ' + task['execution_contract']['model']['id'] +
+                    ' (effective identity unconfirmed); billing_mode=unknown; release=not applicable; commit=' + head))
+        with redirect_stdout(io.StringIO()):
+            api.cmd_task_review(api.build_parser().parse_args(['task', 'review', str(control), '--task-id', task_id,
+                '--status', 'approved', '--agent', owner, '--evidence',
+                'Current content-bound verification and critic passed; configured no-release policy retained.']))
+        return {'status': 'delivered', 'commit': head, 'tag': None, 'deployment': 'not_applicable'}

@@ -135,7 +135,9 @@
     },
     "campaign_failures": {
       "type": "array",
-      "items": {"type": "object"}
+      "items": {
+        "type": "object"
+      }
     },
     "cleanup": {
       "type": "object"
@@ -173,6 +175,55 @@
           "type": "boolean"
         },
         "allow_deploy": {
+          "type": "boolean"
+        },
+        "taskwise_delivery": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "ship_policy",
+            "branch",
+            "remote",
+            "remote_url",
+            "remote_base"
+          ],
+          "properties": {
+            "schema": {
+              "const": "go-workflow.taskwise-delivery.v1"
+            },
+            "ship_policy": {
+              "enum": [
+                "none",
+                "local-commit",
+                "push"
+              ]
+            },
+            "branch": {
+              "type": "string",
+              "minLength": 1
+            },
+            "remote": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "remote_url": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "remote_base": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          }
+        },
+        "taskwise_candidate": {
           "type": "boolean"
         }
       }

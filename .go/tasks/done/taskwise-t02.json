@@ -1,0 +1,109 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "taskwise-t02",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "T02 — Taakgewijze oplevering",
+  "description": "Authorized implementation plan: serial tasks, single immutable release after integrated verification. Preserve legacy runs and user changes. No Hermes runner or Book Forge edits.",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Serial verified delivery; durable publication and task closure; crash-safe retries and delivery groups."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_taskwise_campaign.py -q"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-25T12:59:48+02:00",
+    "base_commit": "6d1ff3597e4287859473d134ba564928d469f527"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T13:39:04+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Independent inspect_progress review; findings repaired including fresh metadata after lock acquisition; 192 regression tests and 18 final block tests passed. See .go/evidence/taskwise-t02/result.json.",
+      "transaction_id": "b632f2658c9c4b6f86229a4b8a5ff2dc"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T13:39:04+02:00",
+      "task_id": "taskwise-t02",
+      "agent": "codex",
+      "summary": "changed_files=campaign release run-state closure delivery-block modules schemas docs tests; verification_command=local pytest regression plus final block regression; verification_result=192 passed and 18 passed; critic=independent inspect_progress reviewed and corrections applied; runtime=local Python; model=effective identity unconfirmed; billing_mode=unknown; evidence=.go/evidence/taskwise-t02/result.json; Self-reflect=no durable process correction needed",
+      "changed_files": [
+        "campaign release run-state closure delivery-block modules schemas docs tests"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "6d1ff3597e4287859473d134ba564928d469f527",
+        "observed_head_commit": "6d1ff3597e4287859473d134ba564928d469f527"
+      },
+      "verification": {
+        "command": "local pytest regression plus final block regression",
+        "result": "192 passed and 18 passed"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "local Python",
+        "model": "effective identity unconfirmed",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "local Python",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": "effective identity unconfirmed",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent inspect_progress reviewed and corrections applied",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "bounded-serial-campaign-contract-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

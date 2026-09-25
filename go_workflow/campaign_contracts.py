@@ -71,8 +71,14 @@ def validate_campaign_contract(data: Any) -> list[str]:
     taskwise = isinstance(data, dict) and 'execution' in data
     data = obj(data, 'schema id project revision previous_sha256 intent goal basis authority decisions' + (' execution' if taskwise else ''), 'campaign')
     if taskwise:
-        execution = obj(data['execution'], 'schema mode', 'execution')
-        if execution != {'schema': 'go-workflow.taskwise-execution.v1', 'mode': 'until_scope'}:
+        has_shipping = isinstance(data['execution'], dict) and 'shipping' in data['execution']
+        execution = obj(data['execution'], 'schema mode' + (' shipping' if has_shipping else ''), 'execution')
+        if has_shipping:
+            shipping = obj(execution['shipping'], 'schema policy source_ref', 'shipping')
+            if shipping.get('schema') != 'go-workflow.taskwise-shipping.v1' or shipping.get('policy') not in {'none', 'local-commit', 'push'}:
+                errors.append('invalid taskwise shipping policy')
+            string(shipping.get('source_ref'), 'shipping.source_ref')
+        if execution.get('schema') != 'go-workflow.taskwise-execution.v1' or execution.get('mode') != 'until_scope':
             errors.append('execution must explicitly select taskwise until_scope')
     if data.get('schema') != CAMPAIGN_SCHEMA:
         errors.append('campaign schema mismatch')
@@ -189,8 +195,11 @@ def validate_campaign_contract(data: Any) -> list[str]:
                 errors.append(f'planning cannot grant {label} authority')
         elif section.get('source_ref') is not None:
             errors.append(f'disabled {label} authority must have null source_ref')
-    if release.get('allow_push') is True and not profiles:
+    if release.get('allow_push') is True and not profiles and not taskwise:
         errors.append('release authority for push requires explicit profiles')
+    shipping = (data.get('execution') or {}).get('shipping')
+    if shipping and (shipping.get('policy') == 'push') != (release.get('allow_push') is True):
+        errors.append('shipping policy and push authority disagree')
     stops = strings(authority.get('stop_conditions'), 'stop_conditions', len(STOP_CONDITIONS), choices=STOP_CONDITIONS)
     if stops != set(STOP_CONDITIONS):
         errors.append('all mandatory stop_conditions required')
@@ -399,6 +408,11 @@ def proven_progress(repo: Path, contract: dict[str, Any]) -> dict[str, Any]:
             proof_errors = completion_findings(repo, _task(repo, task_id), current=False, remote=False)
             delivered = report['delivered'] and not proof_errors
             findings[task_id] = report['blockers'] + [{'code': 'invalid_content_proof', 'message': error} for error in proof_errors]
+            if (contract.get('execution') or {}).get('shipping'):
+                from .delivery_closure import inspect_closure
+                closure = inspect_closure(repo, task_id, expected_policy=contract["execution"]["shipping"]["policy"])
+                delivered = delivered and closure['delivered']
+                findings[task_id] += [{'code': 'closure_pending', 'message': error} for error in closure['blockers']]
         except (ValueError, OSError, KeyError, TypeError) as exc:
             delivered = False
             findings[task_id] = [{'code': 'unproven', 'message': str(exc)}]

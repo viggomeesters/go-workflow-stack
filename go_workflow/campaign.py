@@ -227,7 +227,7 @@ def _validate_state(state: dict[str, Any]) -> None:
         or any(not isinstance(item, str) or not item for item in completed)
         or len(completed) != len(set(completed))
         or consumption["tasks_completed"] != len(completed)
-        or consumption["attempts_started"] < consumption["tasks_completed"]
+        or consumption["attempts_started"] + sum(item.get("event") == "campaign.block_member_completed" for item in state.get("history", [])) < consumption["tasks_completed"]
     ):
         raise CampaignError("campaign run state invalid: completed task accounting")
     if state.get("status") not in RUN_STATUSES:
@@ -313,10 +313,24 @@ def _start_wall(state: dict[str, Any]) -> None:
         state["clock"]["active_since_epoch"] = time.time()
 
 
+
+def _record_group_completion(repo, state, coordinator_id):
+    task=_load_object(repo/".go/tasks/done"/(coordinator_id+".json"),"completed task")
+    for member in (task.get("delivery_block") or {}).get("member_ids",[]):
+        if member not in state["completed_tasks"]:
+            from .campaign_delivery import delivery_report
+            if not delivery_report(repo,member)["delivered"]:
+                raise CampaignError("Joint member is not delivered: "+member)
+            state["completed_tasks"].append(member)
+            state["consumption"]["tasks_completed"]+=1
+            state["history"].append({"event":"campaign.block_member_completed","created_at":_now_iso(),
+                                     "task_id":member,"coordinator_id":coordinator_id})
+
 def _reconcile_completed_task(
     repo: Path,
     state_path: Path,
     state: dict[str, Any],
+    contract: dict[str, Any] | None = None,
 ) -> None:
     """Recover the narrow crash window after managed completion returned."""
     task_id = state.get("current_task")
@@ -333,12 +347,21 @@ def _reconcile_completed_task(
     if workspace_path.is_file():
         from .campaign_delivery import delivery_report
 
+        shipping = ((contract or {}).get("execution") or {}).get("shipping")
+        if shipping:
+            from .delivery_closure import synchronize_closure
+            from .delivery_blocks import finalize_block
+            finalize_block(repo, task_id)
+            closure = synchronize_closure(repo, task_id, policy=shipping["policy"])
+            if not closure["delivered"]:
+                raise CampaignError("Task closure synchronization pending: " + str(closure["blockers"]))
         delivery = delivery_report(repo, task_id)
         if not delivery["delivered"]:
             exact = "; ".join(item["message"] for item in delivery["blockers"])
             raise CampaignError(f"completed task lacks delivery proof: {task_id}: {exact}")
     state["completed_tasks"].append(task_id)
     state["consumption"]["tasks_completed"] += 1
+    _record_group_completion(repo,state,task_id)
     state["current_task"] = None
     state["dispatch"] = None
     state["provider"] = {
@@ -473,14 +496,16 @@ def _bound_task_args(
     bound.task_id = task["id"]
     release_authority = contract["authority"]["release"]
     bound.allow_push = bool(release_authority["allow_push"])
-    bound.ship_policy = "push" if bound.allow_push else ("local-commit" if getattr(args, "explicit_ship_policy", None) == "local-commit" else "none")
+    shipping = (contract.get("execution") or {}).get("shipping")
+    bound.ship_policy = shipping["policy"] if shipping else ("push" if bound.allow_push else "none")
+    bound.taskwise_delivery = shipping is not None
     release = ((task.get("execution_contract") or {}).get("release") or {})
     project = _load_object(repo / ".go" / "project.json", "campaign project")
     profile = (project.get("release_profiles") or {}).get(release.get("profile"), {})
     deployment = profile.get("deployment") if isinstance(profile, dict) else None
     target = deployment.get("target") if isinstance(deployment, dict) else None
     bound.allow_deploy = (
-        bool(getattr(bound, "allow_deploy", False))
+        (shipping is not None or bool(getattr(bound, "allow_deploy", False)))
         and isinstance(target, str)
         and target in contract["authority"]["deployment"]["targets"]
     )
@@ -546,6 +571,9 @@ def plan_campaign(
     """Return an allowlist-ordered read-only projection of currently eligible work."""
     contract = load_contract(repo, contract_path, previous_path=previous_path)
     root = repo / ".go"
+    from .delivery_blocks import pending_block_findings
+    pending = pending_block_findings(repo)
+    if pending:raise CampaignError("; ".join(pending))
     permitted = contract["authority"]["permitted_tasks"]
     active_paths = sorted((root / "tasks" / "active").glob("*.json"))
     if len(active_paths) > 1:
@@ -661,7 +689,7 @@ def execute_campaign(
         state_path, state = _load_or_create_state(
             repo, contract, contract_path, workspace_root, args,
         )
-        _reconcile_completed_task(repo, state_path, state)
+        _reconcile_completed_task(repo, state_path, state, contract)
         action = str(getattr(args, "campaign_action", "run") or "run")
         if action in {"pause", "drain", "cancel"}:
             status, reason = _control_stop(state_path, state, action, str(getattr(args, "agent", "agent")))
@@ -768,6 +796,11 @@ def execute_campaign(
                 break
 
             task = selected[0]
+            block_members=(task.get("delivery_block") or {}).get("member_ids",[])
+            if budget["max_tasks"] is not None and state["consumption"]["tasks_completed"]+1+len(block_members)>budget["max_tasks"]:
+                _stop(state_path,state,"budget_exhausted","Remaining task budget cannot fit the indivisible delivery block")
+                result.update(status="budget_exhausted",budget_exhausted=True)
+                break
             model = _task_model(task)
             provider = state["provider"]
             if provider["task_id"] == task["id"] and provider["model"] is not None and provider["model"] != model:
@@ -846,6 +879,20 @@ def execute_campaign(
                 from .campaign_delivery import delivery_report
 
                 delivery = delivery_report(repo, task["id"])
+                shipping = (contract.get("execution") or {}).get("shipping")
+                if shipping and delivery["delivered"]:
+                    from .delivery_closure import synchronize_closure
+                    try:
+                        from .delivery_blocks import finalize_block
+                        finalize_block(repo, task["id"])
+                        closure = synchronize_closure(repo, task["id"], policy=shipping["policy"])
+                    except (ValueError, OSError) as exc:
+                        closure = {"delivered": False, "blockers": [str(exc)]}
+                    task_result["closure"] = closure
+                    if not closure["delivered"]:
+                        delivery["delivered"] = False
+                        delivery["stop_condition"] = "unknown_external_effect"
+                        delivery["blockers"].append({"code": "closure_pending", "message": str(closure["blockers"]), "condition": "unknown_external_effect"})
                 task_result["delivery"] = delivery
             successful = (
                 code == 0
@@ -941,6 +988,7 @@ def execute_campaign(
             if task["id"] not in state["completed_tasks"]:
                 state["completed_tasks"].append(task["id"])
                 state["consumption"]["tasks_completed"] += 1
+                if managed_delivery:_record_group_completion(repo,state,task["id"])
             _checkpoint_wall(state)
             _start_wall(state)
             state["current_task"] = None

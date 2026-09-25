@@ -96,7 +96,9 @@ def test_explicit_budget_selection_and_no_release_exception(tmp_path):
     repo, task = setup(tmp_path)
     contract = intake(repo, task_ids=[task['id']], budget={'wall_seconds': 600})
     assert contract['authority']['budget']['wall_seconds'] == 600
-    assert contract['authority']['release'] == {'profiles': [], 'allow_push': False, 'source_ref': None}
+    assert contract['authority']['release'] == {
+        'profiles': [], 'allow_push': True, 'source_ref': 'user:explicit-current-request'}
+    assert contract['execution']['shipping']['policy'] == 'push'
     with pytest.raises(ValueError, match='must exist'):
         intake(repo, task_ids=['absent'])
     with pytest.raises(ValueError, match='duplicate'):
@@ -113,4 +115,44 @@ def test_explicit_shipping_restrictions_survive_intake(tmp_path, ship_policy):
     write(project_path, project)
     task['execution_contract']['release'] = {'mode':'required','profile':'production'}
     write(repo/'.go/tasks/open'/f'{task["id"]}.json', task)
-    assert intake(repo, ship_policy=ship_policy)['authority']['release']['allow_push'] is False
+    contract = intake(repo, ship_policy=ship_policy)
+    assert contract['authority']['release']['allow_push'] is False
+    assert contract['execution']['shipping'] == {
+        'schema': 'go-workflow.taskwise-shipping.v1', 'policy': ship_policy,
+        'source_ref': 'user:explicit-current-request'}
+    assert contract['authority']['release']['profiles'] == ['production']
+    assert 'release' in contract['goal']['outcomes'][0]['required_evidence']
+
+
+@pytest.mark.parametrize('requested,expected', [(None, 'local-commit'), ('push', 'local-commit'),
+                                               ('local-commit', 'local-commit'), ('none', 'none')])
+def test_repository_push_restriction_caps_current_request(tmp_path, requested, expected):
+    repo, _ = setup(tmp_path)
+    path = repo / '.go/project.json'
+    project = json.loads(path.read_text())
+    project['taskwise_policy'] = {'allow_push': False}
+    write(path, project)
+    contract = intake(repo, ship_policy=requested)
+    assert contract['execution']['shipping']['policy'] == expected
+    assert contract['authority']['release']['allow_push'] is False
+
+
+@pytest.mark.parametrize('shipping', ['none', 'local-commit'])
+def test_cli_restriction_also_withholds_deployment_without_weakening_evidence(tmp_path, shipping):
+    repo, task = setup(tmp_path)
+    path = repo / '.go/project.json'
+    project = json.loads(path.read_text())
+    project['release_profiles'] = {'production': {'deployment': {'mode': 'required', 'target': 'live'}}}
+    write(path, project)
+    task['execution_contract']['release'] = {'mode': 'required', 'profile': 'production'}
+    write(repo / '.go/tasks/open' / f'{task["id"]}.json', task)
+    contract = intake(repo, ship_policy=shipping)
+    assert contract['authority']['deployment'] == {'targets': [], 'source_ref': None}
+    assert 'live' in contract['goal']['outcomes'][0]['required_evidence']
+
+
+@pytest.mark.parametrize('policy', ['force', '', False, {'mode': 'push'}])
+def test_invalid_shipping_is_not_inferred(tmp_path, policy):
+    repo, _ = setup(tmp_path)
+    with pytest.raises(ValueError, match='ship_policy'):
+        intake(repo, ship_policy=policy)

@@ -296,3 +296,44 @@ A reasoned no-release task does not acquire an invented release profile.
 The campaign plan exposes delivery-proven `progress`, separate from its activity
 history. Git changes and status labels alone do not count as delivered work;
 an empty eligible queue still requires the original goal audit.
+
+### Delivery boundary for new taskwise runs
+
+New intake freezes `execution.shipping` separately from release profiles. The
+normal policy is commit and push. Explicit CLI restrictions and restrictive
+project policy win. A reasoned `release:none` task uses the same managed
+verification, critic, scoped Git integration and cleanup; it does not invent a
+version, tag or deployment. Required but unconfigured publication remains a
+blocker. Saved runs without this opt-in keep their original authority.
+
+After product publication and cleanup, the controller synchronizes the canonical
+task/run/proof records in a separate closure commit. A versioned
+`delivery-closure.json` manifest binds their exact bytes. Publication tags stay
+on the verified product commit. The local Git journal supports lost-ack recovery;
+it is not portable proof. A fresh clone verifies the committed records and
+remote preservation of the closure. Unrelated staged work is preserved, including
+changes made while a closure retry is pending. No next task starts while closure
+readback is unresolved.
+
+Taskwise versioned releases freeze an explicit candidate revision. Product
+changes require `revise_prepared_candidate` with a repair reason before new final
+proof; the managed repair/preparation phase calls this operation explicitly.
+Existing matching proof remains readable, but stale proof cannot authorize the
+changed candidate. Once external publication effects exist, the candidate cannot
+be revised in place.
+
+Joint delivery must be declared before claim with the internal command:
+
+```sh
+python3 cli/go.py campaign block . --coordinator existing-task-id \
+  --member other-existing-task-id --reason 'These changes must deploy together' \
+  --agent owner
+```
+
+This retains the existing IDs, chooses one coordinator workspace, and binds each
+original contract and outcome to the combined verification and critic candidate.
+Members remain blocked awaiting shared delivery. They receive completion only
+from the real shared proof, then their records enter the same closure commit.
+Incompatible models, release destinations, architecture, already claimed work,
+and dependency cycles must be reconciled before grouping. Preparation and
+finalization use recoverable intents; incomplete transitions fence new claims.

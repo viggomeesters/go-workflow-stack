@@ -542,6 +542,31 @@
         },
         "mode": {
           "const": "until_scope"
+        },
+        "shipping": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "policy",
+            "source_ref"
+          ],
+          "properties": {
+            "schema": {
+              "const": "go-workflow.taskwise-shipping.v1"
+            },
+            "policy": {
+              "enum": [
+                "none",
+                "local-commit",
+                "push"
+              ]
+            },
+            "source_ref": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
         }
       }
     }

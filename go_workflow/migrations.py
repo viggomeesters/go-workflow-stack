@@ -148,7 +148,8 @@ def configured_project(project, settings):
 
 
 def pending_lifecycle_findings(repo):
-    findings = []
+    from .delivery_blocks import pending_block_findings
+    findings = pending_block_findings(repo)
     for path in sorted((Path(repo) / '.go/migrations').glob('*.json')):
         try:
             record = _read(path)

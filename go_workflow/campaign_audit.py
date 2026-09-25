@@ -71,6 +71,7 @@ def _outcome_audit(
     root: Path,
     contract_outcome: dict[str, Any],
     contract_errors: list[str],
+    shipping: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     findings: list[str] = list(contract_errors)
     task_results: list[dict[str, Any]] = []
@@ -96,6 +97,11 @@ def _outcome_audit(
                 from .architecture import architecture_finish_findings
 
                 link_findings.extend(architecture_finish_findings(root, task))
+                if shipping:
+                    from .delivery_closure import inspect_closure
+                    closure = inspect_closure(repo, task_id, expected_policy=shipping["policy"])
+                    if not closure["delivered"]:
+                        link_findings.extend(closure["blockers"])
                 requirements = {
                     item.get("id"): item for item in task.get("requested_outcomes", [])
                     if isinstance(item, dict) and isinstance(item.get("id"), str)
@@ -309,7 +315,7 @@ def audit_campaign_goal(
     outcomes: list[dict[str, Any]] = []
     provenance: list[dict[str, Any]] = []
     for outcome in contract.get("goal", {}).get("outcomes", []):
-        result, items = _outcome_audit(repo, root, outcome, contract_errors)
+        result, items = _outcome_audit(repo, root, outcome, contract_errors, (contract.get("execution") or {}).get("shipping"))
         outcomes.append(result)
         provenance.extend(items)
     for decision in contract.get("decisions", []):

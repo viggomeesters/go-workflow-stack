@@ -57,8 +57,40 @@ def delivery_report(repo: Path, task_id: str) -> dict[str, Any]:
     """Project exact remaining blockers without mutating Git or external state."""
     repo = Path(repo).resolve()
     task = _task(repo, task_id)
+    if (task.get("delivery_block") or {}).get("role") == "member":
+        from .delivery_blocks import member_completion_findings
+        errors = member_completion_findings(repo,task)
+        coordinator_id = task["delivery_block"]["coordinator_id"]
+        if coordinator_id == task_id:raise ValueError("Self-referential joint member")
+        report = delivery_report(repo,coordinator_id)
+        report["task_id"] = task_id
+        report["blockers"] += [{"code":"joint_delivery_pending","message":error,"condition":"authority_required"} for error in errors]
+        report["delivered"] = report["delivered"] and not errors
+        if errors:report["stop_condition"]="authority_required"
+        return report
     release_policy = ((task.get("execution_contract") or {}).get("release") or {})
     release_mode = release_policy.get("mode")
+    closure_path = repo / ".go/runs" / task_id / "delivery-closure.json"
+    if closure_path.exists() or closure_path.is_symlink():
+        from .delivery_closure import inspect_closure
+        closure = inspect_closure(repo, task_id)
+        receipt = task.get("release_receipt") or {}
+        if closure["delivered"] and receipt.get("commit") and _head_relation(repo, task, receipt["commit"]) == "released_commit_not_preserved":
+            closure["delivered"] = False
+            closure["blockers"].append("Current branch does not preserve the released product commit")
+        publication = ({"status": "verified", "commit": receipt.get("commit"), "tag": receipt.get("tag")}
+                       if closure["delivered"] and release_mode == "required"
+                       else {"status": "not_applicable", "commit": None, "tag": None})
+        project = read_object(repo / ".go/project.json")
+        profile = (project.get("release_profiles") or {}).get(release_policy.get("profile"), {})
+        live = (profile.get("deployment") or {}).get("mode") == "required"
+        return {"schema": SCHEMA, "task_id": task_id, "release_policy": release_mode,
+                "delivered": closure["delivered"], "reported_live": closure["delivered"] and live,
+                "head_relation": _head_relation(repo, task, receipt["commit"]) if publication["commit"] else "not_applicable",
+                "publication": publication, "workspace_state": "cleaned" if closure["delivered"] else "unconfirmed",
+                "blockers": [{"code": "closure_pending", "message": error, "condition": "unknown_external_effect"}
+                             for error in closure["blockers"]],
+                "stop_condition": None if closure["delivered"] else "unknown_external_effect"}
     blockers: list[dict[str, str]] = []
     run_path = repo / ".go" / "runs" / task_id / "run-state.json"
     release_path = repo / ".go" / "runs" / task_id / "release-state.json"

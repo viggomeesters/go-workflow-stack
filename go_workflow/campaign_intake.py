@@ -4,6 +4,8 @@ Optional project.json ``taskwise_policy`` accepts boolean ``allow_push`` and
 ``allow_deployment`` restrictions. It cannot enlarge the selected task scope or
 invent a release/deployment configuration. Persisting the returned contract is
 owned by the caller; this function never modifies existing runs or task records.
+Shipping restrictions are captured in execution.shipping, including the difference
+between no commit authority and local-only commit authority.
 """
 from __future__ import annotations
 
@@ -47,6 +49,9 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
     if (not isinstance(policy, dict) or set(policy) - {'allow_push', 'allow_deployment'}
             or any(type(value) is not bool for value in policy.values())):
         raise ValueError('taskwise_policy accepts only boolean allow_push and allow_deployment')
+    effective_shipping = ship_policy or 'push'
+    if not policy.get('allow_push', True) and effective_shipping == 'push':
+        effective_shipping = 'local-commit'
     tasks = {}
     for state in ('open', 'active', 'blocked', 'done'):
         for path in sorted((root / 'tasks' / state).glob('*.json')):
@@ -94,7 +99,7 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
             if isinstance(deployment, dict) and deployment.get('mode') == 'required':
                 target = _text(deployment.get('target'), f'{key}: deployment target')
                 evidence.append('live')
-                if policy.get('allow_deployment', True) and target not in targets:
+                if effective_shipping == 'push' and policy.get('allow_deployment', True) and target not in targets:
                     targets.append(target)
         requested = task.get('requested_outcomes')
         if not isinstance(requested, list) or not requested:
@@ -125,10 +130,12 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
         if not isinstance(budget, dict) or set(budget) - (set(ceilings) | {'max_commands'}):
             raise ValueError('budget accepts only wall_seconds, max_tasks and max_attempts')
         ceilings.update(budget)
-    push = bool(profiles) and policy.get('allow_push', True) and ship_policy in (None, 'push')
+    push = effective_shipping == 'push'
     result = {'schema': CAMPAIGN_SCHEMA, 'id': campaign_id, 'project': project['id'],
               'revision': 1, 'previous_sha256': None,
-              'execution': {'schema': 'go-workflow.taskwise-execution.v1', 'mode': 'until_scope'},
+              'execution': {'schema': 'go-workflow.taskwise-execution.v1', 'mode': 'until_scope',
+                            'shipping': {'schema': 'go-workflow.taskwise-shipping.v1',
+                                         'policy': effective_shipping, 'source_ref': source_ref}},
               'intent': {'text': intent, 'sha256': _sha(intent), 'source_ref': source_ref},
               'goal': {'text': intent, 'non_goals': [], 'outcomes': outcomes},
               'basis': {'vision_sha256': hashlib.sha256((root / 'vision.json').read_bytes()).hexdigest(),

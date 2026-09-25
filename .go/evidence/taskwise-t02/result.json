@@ -1,0 +1,42 @@
+{
+  "task_id": "taskwise-t02",
+  "verification": {
+    "result": "192 passed in 314.57s; final lock/readback regression 18 passed in 23.03s",
+    "logs": [
+      ".go/evidence/taskwise-t02/regression.txt",
+      ".go/evidence/taskwise-t02/block-final.txt"
+    ],
+    "command": "python3 -m pytest tests/test_delivery_blocks.py tests/test_taskwise_closure.py tests/test_taskwise_candidate.py tests/test_taskwise_no_release.py tests/test_taskwise_campaign.py tests/test_campaign_intake.py tests/test_autonomy_contracts.py tests/test_autonomy_campaign.py tests/test_autonomy_delivery.py tests/test_autonomy_goal_audit.py tests/test_abc_release.py tests/test_abc_resume.py -q"
+  },
+  "review": {
+    "reviewer": "/root/inspect_progress",
+    "mode": "independent",
+    "blocking_findings": [],
+    "repaired": "Readback and exact integrated content binding; preserve unrelated staging; grouped actual outcome evidence; claim/managed/task lock serialization. Final suggested reload under locks applied and 18 tests passed."
+  },
+  "source_sha256": {
+    "docs/autonomous-campaign.md": "2c3a14ec8ecf0d4fd106bcc4f95a23ca5a94b950a5211fb18f8cffc6478601bd",
+    "go_workflow/campaign.py": "b661160a94c8e4da937cac8550d03fac80f9993156ce0cb2b88adb05656b15aa",
+    "go_workflow/campaign_audit.py": "23058ff14354cf96be4a012f37a621995e6f197c2f37a52d088aada191454ba1",
+    "go_workflow/campaign_contracts.py": "9fed85a02a9905f05da74bf46d964efe61cf73f607705c4e8505fb162e39d42e",
+    "go_workflow/campaign_delivery.py": "76016fbc5dfe52cdfdb0ba7af0874da9f2e36ef71526a4981315bb080bc5ccd6",
+    "go_workflow/campaign_intake.py": "dcb7ab6cad134b90204c36cf172fc1db8226f08b2b574ec61d7b115c685717bb",
+    "go_workflow/cli.py": "2234c89edaa8e4aa6e7eb00eec3c0bb2173e43b5804865bdb435b10d83d078e3",
+    "go_workflow/completion.py": "9b75c348055766f89536c7da69887670d1bcd8bb8b4fd0b5e0ad7040ec2977cc",
+    "go_workflow/migrations.py": "caf3eea5b267ff90d5118454e53d740e26134a4456b96482e4055d6999cf5543",
+    "go_workflow/release.py": "59214094faeb4ab731dbd9ecb98674f65873cae78e23746f6a01781f1122baff",
+    "go_workflow/run_state.py": "44d1576064c61530fbf99ee25310fd76b266357d6a511dccb18441db3ec7ef44",
+    "schemas/campaign-contract.schema.json": "135747990ccfec6c3676f3072f5a102a7e75cc204793d50146337e28c115d68f",
+    "schemas/publication-state.schema.json": "8a9da14f3c9a1babc374d1c444cc197dea62c7d51311e33b36e8c5939bb3fd72",
+    "schemas/run-state.schema.json": "6e788d84a3ea63178497b10475a9fc70e3565251767a340394d23f350ba63c7a",
+    "tests/test_campaign_intake.py": "8dfade5713bae828520ac099bf8764fb4b786b14196a13fc33622d58d869cf1c",
+    "go_workflow/delivery_blocks.py": "4b598b9265285603560f9ea22e68f93be459c5d7e383d13361931edc94589bcd",
+    "go_workflow/delivery_closure.py": "4145de0c5d0b74614b8aca348287e4a9deb48d57f64c19edcdb8ae5d7adbee56",
+    "tests/test_delivery_blocks.py": "0f739b05bd83f77492550e15820b025dc4b4d28ed8f3c4d8f387fde41e95e929",
+    "tests/test_taskwise_candidate.py": "c1558564e59dc927b8dcc6b94e6226068eadb860de9f4817c1bb9f9b3fa2ce83",
+    "tests/test_taskwise_closure.py": "52b36bd910cfbaaae105a7a290b7fa6229a612f9389e620d63adb474670dad1a",
+    "tests/test_taskwise_no_release.py": "6e740776088fdde42d0cc4305980c86e1bae8fce566c632b31a7262db5cc2bb9"
+  },
+  "release": "Development task committed and pushed to feature branch. One immutable release deferred until T01-T05 integrated verification as authorized.",
+  "self_reflect": "Review defects repaired within task scope; no durable skill or process correction needed."
+}

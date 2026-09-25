@@ -252,6 +252,9 @@ def record_critic(repo, task_id, owner, review):
 
 
 def completion_findings(repo, task, *, current=True, remote=True, phase_only=False):
+    if (task.get('delivery_block') or {}).get('role') == 'member':
+        from .delivery_blocks import member_completion_findings
+        return member_completion_findings(repo,task)
     if 'execution_contract' not in task: return []
     root = workflow_root(repo)
     # Historical proof is portable Git/evidence data. Old process identities

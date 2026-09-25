@@ -2404,7 +2404,7 @@ def run_default_critic_agent(
     if publication_pending:
         instructions += " " + " ".join([
             "This critic runs before controller-owned publication.",
-            "Judge whether the current scoped candidate, prepared version/changelog, executed checks and release configuration are ready for publication.",
+            "Judge whether the current scoped candidate and executed checks are ready for configured commit/push. For release:required, also review the prepared version/changelog and release configuration; release:none does not require a tag or version change.",
             "Task-level push, tag, release-readback and live-deployment requirements remain pending downstream controller work. Do not block solely because their post-publication receipts do not exist yet.",
             "Still block missing or failed current verification, unsafe release readiness, scope violations and implementation defects. Never invent release evidence or waive a required downstream check.",
             "Do not publish or mark shipping outcomes verified. Your success approves only this critic phase; the controller must prove publication and any required deployment before task completion.",
@@ -5130,6 +5130,13 @@ def cmd_validate(args: argparse.Namespace) -> int:
     return 0
 
 
+def cmd_campaign_block(args):
+    from .delivery_blocks import prepare_block
+    value=prepare_block(Path(args.repo).resolve(),args.coordinator,args.member,args.reason,args.agent)
+    print(json.dumps(value,indent=2,ensure_ascii=False))
+    return 0
+
+
 def cmd_campaign_audit(args: argparse.Namespace) -> int:
     """Run the same outcome audit used by campaign completion."""
     from .campaign_audit import audit_campaign_goal
@@ -6455,6 +6462,13 @@ def build_parser() -> argparse.ArgumentParser:
     validate.set_defaults(func=cmd_validate)
     campaign_parser = sub.add_parser("campaign", help="Inspect bounded campaign completion evidence")
     campaign_sub = campaign_parser.add_subparsers(dest="campaign_command", required=True)
+    campaign_block = campaign_sub.add_parser("block", help="Prepare one joint delivery using existing task IDs")
+    campaign_block.add_argument("repo", nargs="?", default=".")
+    campaign_block.add_argument("--coordinator", required=True)
+    campaign_block.add_argument("--member", action="append", required=True)
+    campaign_block.add_argument("--reason", required=True)
+    campaign_block.add_argument("--agent", default="agent")
+    campaign_block.set_defaults(func=cmd_campaign_block)
     campaign_audit = campaign_sub.add_parser("audit", help="Audit adopted outcomes and write a compact handoff")
     campaign_audit.add_argument("repo", nargs="?", default=".")
     campaign_audit.add_argument("--contract", required=True)

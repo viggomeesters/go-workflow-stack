@@ -67,11 +67,24 @@ def validate_state(value):
 
     if 'publication' in value:
         spec = value['publication']
-        if (not isinstance(spec, dict) or not {'profile', 'ship_policy', 'allow_push'}.issubset(spec) or set(spec) - {'profile', 'ship_policy', 'allow_push', 'allow_deploy'}
+        if (not isinstance(spec, dict) or not {'profile', 'ship_policy', 'allow_push'}.issubset(spec) or set(spec) - {'profile', 'ship_policy', 'allow_push', 'allow_deploy', 'taskwise_delivery', 'taskwise_candidate'}
                 or not isinstance(spec['ship_policy'], str) or spec['ship_policy'] not in {'none', 'commit', 'push'}
                 or ('allow_deploy' in spec and type(spec['allow_deploy']) is not bool)
                 or type(spec['allow_push']) is not bool or (spec['profile'] is not None and not isinstance(spec['profile'], dict))):
             raise RunStateError('Invalid frozen publication selection/authority')
+        if 'taskwise_candidate' in spec and type(spec['taskwise_candidate']) is not bool:
+            raise RunStateError('Invalid frozen candidate opt-in')
+        delivery = spec.get('taskwise_delivery')
+        if delivery is not None:
+            if (not isinstance(delivery, dict) or set(delivery) != {'schema', 'ship_policy', 'branch', 'remote', 'remote_url', 'remote_base'}
+                    or delivery.get('schema') != 'go-workflow.taskwise-delivery.v1'
+                    or delivery.get('ship_policy') not in {'none', 'local-commit', 'push'}
+                    or not isinstance(delivery.get('branch'), str) or not delivery['branch']
+                    or any(delivery.get(key) is not None and not isinstance(delivery[key], str)
+                           for key in ('remote', 'remote_url', 'remote_base'))
+                    or (delivery['ship_policy'] == 'push' and (not spec['allow_push'] or spec['ship_policy']!='push'
+                        or not all(delivery.get(key) for key in ('remote', 'remote_url', 'remote_base'))))):
+                raise RunStateError('Invalid frozen taskwise delivery binding')
 
 
 def state_path(control, task_id, channel="managed"):
@@ -437,6 +450,12 @@ def _execute_managed(control, args, task_id, api, result):
                                  'allow_deploy': bool(getattr(args, 'allow_deploy', False))},
                  'controller': {'host': socket.gethostname(), 'pid': os.getpid()},
                  'worker_group': None, 'inflight': None, 'setup_task': task}
+        if getattr(args,'taskwise_delivery',False) and state['publication']['profile'] is not None:
+            state['publication']['taskwise_candidate']=True
+        taskwise_delivery = publisher.taskwise_no_release_policy(control, task, args)
+        if taskwise_delivery is not None:
+            state['publication']['taskwise_delivery'] = taskwise_delivery
+            state['publication']['ship_policy'] = 'commit' if taskwise_delivery['ship_policy'] == 'local-commit' else taskwise_delivery['ship_policy']
         policy = state['publication']
         from .deployment import authorize
         authorize((policy['profile'] or {}).get('deployment'), policy.get('allow_deploy', False))
@@ -448,6 +467,8 @@ def _execute_managed(control, args, task_id, api, result):
     profile = publisher.publication_profile(control, task) if publisher.configured(control, task) else None
     if profile != publication['profile']: raise RunStateError('Frozen publication profile changed; explicit checkpoint migration required')
     publishing = profile is not None
+    taskwise_delivery = publication.get('taskwise_delivery')
+    proving_delivery = publishing or taskwise_delivery is not None
     if publishing and (publication['ship_policy'] != 'push' or publication['allow_push'] is not True):
         raise RunStateError('Managed publication requires explicit --ship-policy push --allow-push at initial setup')
     if state['phase'] == 'setup':
@@ -497,6 +518,7 @@ def _execute_managed(control, args, task_id, api, result):
     publication_in_progress = (publishing and state['phase'] == 'release'
         and publisher.state_path(control, task_id).exists()
         and publisher._load(control, task, args.agent, state['run_id'])['phase'] in {'publishing', 'deploying', 'finishing', 'published'})
+    publication_in_progress = publication_in_progress or (taskwise_delivery is not None and state['phase'] == 'release' and bool(state['effects']))
     if not publication_in_progress and (state['inflight'] or current_code != state['code']):
         history = state['history'] + [{'event': 'reconciled_interruption_or_drift', 'previous_phase': state['phase'],
                                      'inflight': state['inflight'], 'code_before': state['code'], 'code_now': current_code,
@@ -516,7 +538,7 @@ def _execute_managed(control, args, task_id, api, result):
     while True:
         state = session.load()
         phase = state['phase']
-        if phase == 'release' and not publishing:
+        if phase == 'release' and not proving_delivery:
             result.update(status='release_pending', summary='Build, verification and critic confirmed; lifecycle publisher required.')
             break
         if result['commands_run'] >= maximum or time.monotonic() - started >= minutes * 60:
@@ -528,7 +550,10 @@ def _execute_managed(control, args, task_id, api, result):
             used = None
             try:
                 with publisher.publication_budget(maximum - result['commands_run'], started + minutes * 60) as used:
-                    published = publisher.publish_release(control, task_id, args.agent, state['run_id'])
+                    if taskwise_delivery is not None:
+                        published = publisher.complete_taskwise_no_release(control, task_id, args.agent, state['run_id'], session)
+                    else:
+                        published = publisher.publish_release(control, task_id, args.agent, state['run_id'])
                 session.update(phase='cleanup', inflight=None)
                 result['release'] = published
             except publisher.PublicationBudget:
@@ -557,7 +582,12 @@ def _execute_managed(control, args, task_id, api, result):
                 with publisher.publication_budget(1, started + minutes * 60):
                     publisher.prepare_release(control, task_id, args.agent, state['run_id'],
                         ship_policy=publication['ship_policy'], allow_push=publication['allow_push'],
-                        allow_deploy=publication.get('allow_deploy', False))
+                        allow_deploy=publication.get('allow_deploy', False),
+                        freeze_candidate=publication.get('taskwise_candidate',False))
+                    prepared=publisher._load(control, task, args.agent, state['run_id'])
+                    if 'candidate' in prepared:
+                        publisher.revise_prepared_candidate(control,task_id,args.agent,state['run_id'],
+                            reason='Managed build/repair completed; invalidate dependent verification and critic')
             except publisher.PublicationBudget as exc:
                 result.update(status='budget_exhausted', budget_exhausted=True, summary=str(exc)); break
             except (ValueError, api.StateLockError, api.RepoLocalError) as exc:
@@ -567,16 +597,16 @@ def _execute_managed(control, args, task_id, api, result):
             session.update(phase='verify', check_index=0, checks=[], code=run_code(workspace, record, task), budgets=state['budgets'])
             continue
         if phase == 'verify' and state['check_index'] >= len(task['verification']):
-            if publishing:
+            if proving_delivery:
                 artifact, _ = completion.finalize_checks(workspace, task, args.agent, [item['completion_check'] for item in state['checks']])
                 if artifact['status'] != 'passed': raise RunStateError('Final verification manifest is stale or failed')
             session.update(phase='critic'); continue
         before = run_code(workspace, record, task)
-        with session.operation() if phase != 'verify' or not publishing else __import__('contextlib').nullcontext():
+        with session.operation() if phase != 'verify' or not proving_delivery else __import__('contextlib').nullcontext():
             if phase == 'verify':
                 command = task['verification'][state['check_index']]
                 with execution_lease(workspace, task_id, args.agent, state['run_id']):
-                    if publishing:
+                    if proving_delivery:
                         check, output = completion.execute_check(workspace, task, command, session, timeout_seconds=timeout)
                         output = {'returncode': output['returncode'], 'completion_check': check}
                     else:
@@ -594,7 +624,7 @@ def _execute_managed(control, args, task_id, api, result):
                     'campaign_failures': state.get('campaign_failures', []),
                 }
                 if phase == 'critic':
-                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback, publication_pending=publishing)
+                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback, publication_pending=proving_delivery)
                 else:
                     command = (api.default_executor_agent_command if phase == 'build' else api.default_repair_agent_command)('codex', task)
                     output = api.run_hook_command(workspace, command, task, state['attempt'], 'direct_fix', phase, timeout,
@@ -612,7 +642,7 @@ def _execute_managed(control, args, task_id, api, result):
             changes.update(checks=state['checks'] + [output], check_index=state['check_index'] + 1)
             if not success: changes.update(phase='repair', attempt=state['attempt'] + 1)
         elif success:
-            if phase == 'critic' and publishing:
+            if phase == 'critic' and proving_delivery:
                 completion.record_critic(workspace, task_id, args.agent, {
                     'schema': 'go-workflow.critic-review.v1', **completion.bind(workspace, task),
                     'status': 'passed', 'reviewer': args.agent, 'review_mode': 'same_agent',

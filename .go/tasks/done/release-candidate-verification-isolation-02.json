@@ -1,0 +1,108 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "agent",
+  "shareable_delivery": "none",
+  "id": "release-candidate-verification-isolation-02",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Repair isolated candidate release verification without weakening gates",
+  "description": "Fix full-suite template fixture isolation, candidate doctor pretag semantics, and candidate preflight local-origin isolation; correct only release task verification invocations through supported rebind. Preserve the reserved version and original five-file candidate exactly. Current 8 pytest failures and doctor/preflight exit 1 are blockers, not approved evidence.",
+  "scope": {
+    "read": [
+      ".go/tasks/active/release-safe-active-task-handoff-v0347.json",
+      ".go/runs/release-safe-active-task-handoff-v0347/completion-state.json"
+    ],
+    "modify": [
+      "go_workflow/execution_context.py",
+      "tests/test_execution_context.py",
+      "tests/test_smoke.py",
+      "go_workflow/release.py",
+      "tests/test_release_reconcile.py",
+      ".go/tasks/active/release-safe-active-task-handoff-v0347.json"
+    ]
+  },
+  "acceptance": [
+    "Clean-environment full pytest retains real sibling template tests in a disposable isolated copy; no external template mutation and exact source proof.",
+    "Pretag doctor is honestly inspected for candidate-only expected missing tag while posttag exact-ref doctor remains mandatory.",
+    "Candidate release preflight runs local-origin opt-in only in isolated checkout and still executes its complete gate; official origin remains mandatory for public release."
+  ],
+  "verification": [
+    "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py tests/test_execution_context.py tests/test_smoke.py",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T03:52:35+02:00",
+    "base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T04:19:50+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Independent adversarial critic found no unresolved scoped code blocker; completion critic passed .go/runs/release-candidate-verification-isolation-02/completion/critic-42ee85fcd1bb4e65b48d9ea54bb43b53.json",
+      "transaction_id": "cb5c75390ecb47ce96ce61d7409012d1"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T04:19:50+02:00",
+      "task_id": "release-candidate-verification-isolation-02",
+      "agent": "hermes",
+      "summary": "changed_files=go_workflow/execution_context.py,go_workflow/release.py,tests/test_execution_context.py,tests/test_release_reconcile.py,.go/tasks/active/release-safe-active-task-handoff-v0347.json; verification=env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py tests/test_execution_context.py tests/test_smoke.py; result=224 passed exit 0, make check exit 0, git diff --check exit 0; critic=passed independent adversarial review and repo completion critic, no unresolved code blocker, release not published; runtime=hermes",
+      "changed_files": [
+        "go_workflow/execution_context.py",
+        "go_workflow/release.py",
+        "tests/test_execution_context.py",
+        "tests/test_release_reconcile.py",
+        ".go/tasks/active/release-safe-active-task-handoff-v0347.json"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "observed_head_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py tests/test_execution_context.py tests/test_smoke.py",
+        "result": "224 passed exit 0, make check exit 0, git diff --check exit 0"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "hermes",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "hermes",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed independent adversarial review and repo completion critic, no unresolved code blocker, release not published",
+        "skip_reason": null
+      }
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/release-candidate-verification-isolation-02/completion/verification-a9ee54265f8b4f1baf3064ec4b3f7120.json",
+      "sha256": "5254bf2407817d372ba540aec70ac7a34a58c1806428dad2bf6e3db6293d013b"
+    },
+    "critic": {
+      "path": ".go/runs/release-candidate-verification-isolation-02/completion/critic-42ee85fcd1bb4e65b48d9ea54bb43b53.json",
+      "sha256": "b6c38b22127d34b30682a9a8930ad2cdf810c951cf5d06768db888cbb71f7bf6"
+    }
+  }
+}

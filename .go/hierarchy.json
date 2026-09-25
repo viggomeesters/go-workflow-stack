@@ -56,7 +56,8 @@
             "reconcile-effectless-prepared-release",
             "release-candidate-preflight-isolation",
             "release-candidate-template-git-isolation",
-            "rebind-effectless-release-verification"
+            "rebind-effectless-release-verification",
+            "release-candidate-verification-isolation-02"
           ]
         },
         {

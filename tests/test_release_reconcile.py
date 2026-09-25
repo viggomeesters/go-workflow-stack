@@ -141,7 +141,7 @@ def test_rebind_rejects_other_changes_without_checkpoint_mutation(tmp_path, muta
     assert snapshot(repo, worker)[3:] == checkpoint
 
 def test_rebind_allowlist_preserves_every_release_gate_and_rejects_true(tmp_path):
-    from go_workflow.release import _safe_verification_correction
+    from go_workflow.release import _safe_verification_correction, _safe_second_verification_correction
     control = tmp_path / 'go-workflow-stack'
     before = [
         'PYTHONPATH=. uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" pytest -q',
@@ -160,6 +160,43 @@ def test_rebind_allowlist_preserves_every_release_gate_and_rejects_true(tmp_path
     assert not _safe_verification_correction(control, task, before, [*after[:1], 'true', *after[2:]])
     assert not _safe_verification_correction(control, task, before, [*after[:5], before[5], *after[6:]])
     assert not _safe_verification_correction(control, 'foreign-task', before, after)
+    final = after.copy()
+    final[4] = "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'"
+    final[5] += ' --allow-local-origin'
+    assert _safe_second_verification_correction(control, task, after, final)
+    assert not _safe_verification_correction(control, task, before, final)
+    assert not _safe_second_verification_correction(control, task, after, [*final[:5], 'true', final[6]])
+    assert not _safe_second_verification_correction(control, task, after, [*final[:4], 'true', *final[5:]])
+    assert not _safe_second_verification_correction(control, task, before, final)
+
+
+def test_candidate_doctor_requires_only_missing_pretag(monkeypatch, capsys):
+    import json
+    from types import SimpleNamespace
+    import go_workflow.release as publisher
+    good = {'ready': False, 'contract': {'valid': True, 'errors': []},
+            'agent': {'compatible': True},
+            'prerequisites': [{'name': name, 'available': True} for name in ('python', 'git', 'bash', 'make', 'uv')],
+            'actions': ['checkout the pinned go-workflow-stack ref v0.3.47'],
+            'stack': {'version': '0.3.47', 'required_version': '0.3.47',
+                      'ref': 'v0.3.47', 'required_ref': 'v0.3.47',
+                      'provenance_requested_ref': 'v0.3.47', 'identity_source': 'git-checkout',
+                      'git_head': 'a'*40, 'pinned_commit': None, 'exact_ref': False,
+                      'compatible': False, 'development_override': False}}
+    report = good.copy()
+    monkeypatch.setattr(publisher.subprocess, 'run',
+                        lambda *args, **kwargs: SimpleNamespace(returncode=1, stdout=json.dumps(report), stderr=''))
+    publisher.candidate_doctor_gate()
+    assert 'only the absent immutable pretag' in capsys.readouterr().out
+    for changed in ({'ready': True}, {'prerequisites': []},
+                    {'prerequisites': good['prerequisites'][:-1]},
+                    {'prerequisites': [{**good['prerequisites'][0], 'available': False}, *good['prerequisites'][1:]]},
+                    {'actions': ['unknown failure']},
+                    {'stack': {**good['stack'], 'development_override': True}},
+                    {'stack': {**good['stack'], 'pinned_commit': 'a'*40}}):
+        report = {**good, **changed}
+        with pytest.raises(publisher.PublicationError, match='beyond expected'):
+            publisher.candidate_doctor_gate()
 
 
 def test_reconcile_recovers_after_worker_fast_forward_before_checkpoint(tmp_path, monkeypatch):

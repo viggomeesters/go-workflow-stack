@@ -97,8 +97,22 @@ def verification_checkout(workspace: Path, record: dict, candidate_code: dict):
         if (actual['tracked_content_sha256'] != candidate['tracked_content_sha256']
                 or actual['files'] != candidate['files']):
             raise ContextError('Disposable verification source differs from managed candidate')
+        # Template tests expect a sibling checkout. Give them a disposable,
+        # independently cloned fixture, never the user's mutable sibling.
+        template_head = None
+        if record.get('control_repo'):
+            template = Path(record['control_repo']).resolve().parent / 'go-project-template'
+            if (template / '.go').is_dir():
+                if git(template, 'status', '--porcelain', '--untracked-files=all').stdout.strip():
+                    raise ContextError('Public template fixture is dirty; refusing partial verification')
+                template_head = git_text(template, 'rev-parse', 'HEAD')
+                git(workspace, 'clone', '--quiet', '--no-local', str(template), str(checkout.parent / 'go-project-template'))
+                fixture = checkout.parent / 'go-project-template'
+                if git_text(fixture, 'rev-parse', 'HEAD') != template_head or git(fixture, 'status', '--porcelain').stdout.strip():
+                    raise ContextError('Disposable template fixture differs from clean source')
         proof = {
             'schema': 'go-workflow.verification-source.v1',
+            'template_head': template_head,
             'candidate_digest': json_hash(candidate_code),
             'tracked_content_sha256': candidate['tracked_content_sha256'],
             'changed_files_sha256': json_hash(candidate['files']),

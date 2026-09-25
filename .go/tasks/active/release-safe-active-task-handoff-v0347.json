@@ -50,8 +50,8 @@
     "make check",
     "python3 cli/go.py validate .",
     "python3 cli/go.py architecture validate . --json",
-    "python3 cli/go.py doctor . --platform wsl --agent hermes --json",
-    "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template ./scripts/release-check.sh --allow-candidate",
+    "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'",
+    "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template ./scripts/release-check.sh --allow-candidate --allow-local-origin",
     "git diff --check"
   ],
   "claim": {

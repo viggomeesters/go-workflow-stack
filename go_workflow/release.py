@@ -329,8 +329,36 @@ def _version_change(text, spec, replacement=None):
 
 def _hash(text): return hashlib.sha256(text.encode()).hexdigest()
 
+def candidate_doctor_gate():
+    """Pretag-only doctor proof: accept exactly the missing tag, never a broken prerequisite."""
+    command = ['python3', 'cli/go.py', 'doctor', '.', '--platform', 'wsl', '--agent', 'hermes', '--json']
+    result = subprocess.run(command, text=True, capture_output=True, check=False)
+    try:
+        report = json.loads(result.stdout)
+        stack = report['stack']
+        valid = (result.returncode == 1 and report['ready'] is False
+                 and report['contract'] == {'valid': True, 'errors': []}
+                 and report['agent']['compatible'] is True
+                 and len(report['prerequisites']) == 5
+                 and {item['name'] for item in report['prerequisites']} == {'python', 'git', 'bash', 'make', 'uv'}
+                 and all(item['available'] is True for item in report['prerequisites'])
+                 and stack['version'] == stack['required_version'] == '0.3.47'
+                 and stack['ref'] == stack['required_ref'] == stack['provenance_requested_ref'] == 'v0.3.47'
+                 and stack['identity_source'] == 'git-checkout' and stack['git_head']
+                 and stack['pinned_commit'] is None and stack['exact_ref'] is False
+                 and stack['compatible'] is False and stack['development_override'] is False
+                 and report['actions'] == ['checkout the pinned go-workflow-stack ref v0.3.47'])
+    except (KeyError, TypeError, ValueError):
+        valid = False
+    print(result.stdout, end='')
+    if not valid:
+        raise PublicationError('Candidate doctor failed beyond expected missing pretag v0.3.47: '
+                               + result.stderr[-2000:])
+    print('Candidate doctor: only the absent immutable pretag blocks ready; post-tag exact_ref=true is still required')
+
+
 def _safe_verification_correction(control, task_id, before, after):
-    """Only the two v0.3.47 invocation fixes; never drop or replace a gate."""
+    """Explicit v0.3.47 gate-preserving invocation mappings; no arbitrary commands."""
     if task_id != 'release-safe-active-task-handoff-v0347' or not isinstance(before, list) or len(before) != 7:
         return False
     expected = before.copy()
@@ -341,6 +369,21 @@ def _safe_verification_correction(control, task_id, before, after):
     expected[5] = ('GO_PROJECT_TEMPLATE=' + str(control.parent / 'go-project-template')
                    + ' ./scripts/release-check.sh --allow-candidate')
     return after == expected
+
+
+def _safe_second_verification_correction(control, task_id, before, after):
+    """After reconciliation, only missing-tag semantics and isolated local origin may change."""
+    if task_id != 'release-safe-active-task-handoff-v0347' or not isinstance(before, list) or len(before) != 7:
+        return False
+    if (before[0] != 'env -u PYTHONPATH uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" python -m pytest -q'
+            or before[4] != 'python3 cli/go.py doctor . --platform wsl --agent hermes --json'
+            or before[5] != 'GO_PROJECT_TEMPLATE=' + str(control.parent / 'go-project-template')
+                               + ' ./scripts/release-check.sh --allow-candidate'):
+        return False
+    final = before.copy()
+    final[4] = "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'"
+    final[5] += ' --allow-local-origin'
+    return after == final
 
 def rebind_prepared_verification(control, task_id, owner, run_id):
     """Rebind a reserved, effectless candidate to a verification-only task correction.
@@ -387,7 +430,8 @@ def rebind_prepared_verification(control, task_id, owner, run_id):
             if (corrected != task or not isinstance(task.get('verification'), list)
                     or not task['verification']):
                 raise PublicationError('Only verification commands may change on the frozen task')
-            if not _safe_verification_correction(control, task_id, previous.get('verification'), task['verification']):
+            if not (_safe_verification_correction(control, task_id, previous.get('verification'), task['verification'])
+                    or _safe_second_verification_correction(control, task_id, previous.get('verification'), task['verification'])):
                 raise PublicationError('Verification correction is not an approved gate-preserving mapping')
             if state['contract_digest'] == contract_digest(task):
                 if task['verification'] == previous.get('verification'):

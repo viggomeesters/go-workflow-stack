@@ -12,7 +12,7 @@
   "repository_id": "a95f2da4c1b54466acf8b436dc9f0974",
   "generation": "28d41538bd264930b21fdbc5d8f8bbb6",
   "control_host": "DESKTOP-8FC0P83",
-  "state": "integrated",
+  "state": "cleaned",
   "reconciliations": [
     {
       "old_base_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
@@ -74,5 +74,6 @@
   "integration": {
     "workspace_head": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
     "integrated_commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
-  }
+  },
+  "recovery_action": "No action; delivered branch is retained"
 }

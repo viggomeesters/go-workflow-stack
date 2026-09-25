@@ -1,0 +1,17 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "task_id": "release-candidate-template-git-isolation",
+  "project": "go-workflow-stack",
+  "contract_digest": "7727acc6fdf1556787a61165edb53da1c232c6ed28bd9375ee160a7e5e49f2bd",
+  "revision": "833b782b1d412d847e4c875352947c2b50759140",
+  "content_digest": "b7d73e898a2a8756721eb7c692c9c297762ca0821638f3862d964e13a2be2f44",
+  "status": "passed",
+  "reviewer": "hermes-independent-read-only-reviewer",
+  "review_mode": "independent",
+  "summary": "Adversarial review A/no blockers: independent clone protects linked gitdir and caller refs, bytes overlay preserves template working tree, pushurl blocks default upstream write; standalone/linked fixture regression and 30 release tests passed.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    "scripts/release-check-inner.sh",
+    "tests/test_abc_release.py"
+  ]
+}

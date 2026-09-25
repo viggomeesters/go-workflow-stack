@@ -422,15 +422,29 @@ def test_task_completion_does_not_report_queue_done_with_blocked_work(tmp_path,m
     assert managed_publish(repo,base,worker,15)['status']=='task_complete'
 
 
-def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tmp_path):
+@pytest.mark.parametrize('linked_template', [False, True])
+def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tmp_path, linked_template):
     """The candidate gate may create fixture repos, never inside a task worker."""
     from test_abc_worktrees import ROOT
     import os
     repo = tmp_path / 'candidate'
     repo.mkdir()
     template = tmp_path / 'go-project-template'
-    (template / '.go').mkdir(parents=True)
-    (template / 'sentinel.txt').write_text('original\n')
+    template_source = tmp_path / 'template-source' if linked_template else template
+    (template_source / '.go').mkdir(parents=True)
+    (template_source / '.go' / 'marker').write_text('template\n')
+    (template_source / 'sentinel.txt').write_text('original\n')
+    git(template_source, 'init', '-q')
+    git(template_source, 'add', '.go/marker', 'sentinel.txt')
+    git(template_source, '-c', 'user.name=Test', '-c', 'user.email=test@example.org', 'commit', '-qm', 'template base')
+    if linked_template:
+        git(template_source, 'worktree', 'add', '-q', '-b', 'fixture-linked', str(template))
+    template_head = git(template, 'rev-parse', 'HEAD').strip()
+    upstream = tmp_path / 'template-upstream.git'
+    upstream.mkdir()
+    git(upstream, 'init', '--bare', '-q')
+    git(template, 'remote', 'add', 'origin', str(upstream))
+    git(template, 'push', '-q', 'origin', 'HEAD:refs/heads/main')
     (repo / 'scripts').mkdir()
     (repo / '.go').mkdir()
     (repo / 'go_workflow').mkdir()
@@ -452,6 +466,9 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
         'test -x changed.txt\n'
         'test "$(readlink link.txt)" = changed.txt\n'
         'test "$(cat ignored-config.txt)" = private-input\n'
+        'test "$(git -C "$GO_PROJECT_TEMPLATE" rev-parse HEAD)" = ' + template_head + '\n'
+        'git -C "$GO_PROJECT_TEMPLATE" tag fixture-only\n'
+        'if git -C "$GO_PROJECT_TEMPLATE" push origin HEAD:refs/heads/forbidden >/dev/null 2>&1; then exit 1; fi\n'
         'test "$(cat "$GO_PROJECT_TEMPLATE/sentinel.txt")" = original\n'
         'printf fixture > "$GO_PROJECT_TEMPLATE/sentinel.txt"\n'
         'test -d .git && touch fixture-created.txt\n'
@@ -479,6 +496,11 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
     assert git(repo, 'status', '--porcelain=v1', '-uall') == before
     assert not (repo / 'fixture-created.txt').exists()
     assert (template / 'sentinel.txt').read_text() == 'original\n'
+    assert git(template, 'rev-parse', 'HEAD').strip() == template_head
+    assert not git(template, 'tag', '-l', 'fixture-only').strip()
+    assert not git(template_source, 'tag', '-l', 'fixture-only').strip()
+    assert subprocess.run(['git', '-C', str(upstream), 'show-ref', '--verify', '--quiet',
+                           'refs/heads/forbidden'], check=False).returncode != 0
     assert (repo / 'removed.txt').exists() is False
     git(repo, 'add', 'added.txt')
     staged = git(repo, 'status', '--porcelain=v1', '-uall')

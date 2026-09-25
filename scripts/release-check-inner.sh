@@ -520,16 +520,46 @@ PYCANDIDATE
 import os
 from pathlib import Path
 import shutil
+import subprocess
 import sys
 
 source, target = map(Path, sys.argv[1:])
 if source.is_symlink():
     raise SystemExit('candidate template symlink is not isolated')
 for base, dirs, files in os.walk(source, followlinks=False):
-    dirs[:] = [name for name in dirs if name != '.git']
     if any((Path(base) / name).is_symlink() for name in dirs + files):
         raise SystemExit('candidate template contains an external-capable symlink')
-shutil.copytree(source, target, ignore=shutil.ignore_patterns('.git'))
+if subprocess.run(['git', '-C', str(source), 'diff', '--cached', '--quiet'], check=False).returncode:
+    raise SystemExit('candidate template index differs from HEAD; reconcile staged input first')
+head = subprocess.check_output(['git', '-C', str(source), 'rev-parse', 'HEAD'], text=True).strip()
+subprocess.run(['git', 'clone', '--no-local', '--quiet', str(source), str(target)], check=True)
+if subprocess.check_output(['git', '-C', str(target), 'rev-parse', 'HEAD'], text=True).strip() != head:
+    raise SystemExit('candidate template clone HEAD differs from source')
+if not (target / '.git').is_dir():
+    raise SystemExit('candidate template clone does not own its Git metadata')
+# Clone owns its object store and refs, even when source/.git is a linked-worktree
+# gitdir file. Replace only its worktree with the caller's exact current bytes.
+for entry in target.iterdir():
+    if entry.name == '.git':
+        continue
+    if entry.is_dir() and not entry.is_symlink():
+        shutil.rmtree(entry)
+    else:
+        entry.unlink()
+shutil.copytree(source, target, dirs_exist_ok=True, ignore=shutil.ignore_patterns('.git'))
+# Keep commits/tags and fetch provenance, but never inherit a writable push
+# destination from the caller's template checkout.
+source_origin = subprocess.run(['git', '-C', str(source), 'remote', 'get-url', 'origin'],
+                               text=True, capture_output=True, check=False)
+if source_origin.returncode == 0:
+    subprocess.run(['git', '-C', str(target), 'remote', 'set-url', 'origin',
+                    source_origin.stdout.strip()], check=True)
+remotes = subprocess.check_output(['git', '-C', str(target), 'remote'], text=True).splitlines()
+for remote in remotes:
+    subprocess.run(['git', '-C', str(target), 'config', '--local', '--unset-all',
+                    f'remote.{remote}.pushurl'], check=False, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    subprocess.run(['git', '-C', str(target), 'config', '--local', '--add',
+                    f'remote.{remote}.pushurl', str(target / '.no-upstream')], check=True)
 PYCOPYTEMPLATE
   fi
 fi

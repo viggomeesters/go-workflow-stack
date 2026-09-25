@@ -1,0 +1,101 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "release-candidate-template-git-isolation",
+  "project": "go-workflow-stack",
+  "control_repo": "/home/viggo/github/go-workflow-stack",
+  "owner": "hermes",
+  "run_id": "verify-3ee2e17b268b47ae9fe671327fc9dbb5",
+  "workspace": {
+    "path": "/home/viggo/github/go-workflow-stack",
+    "control_repo": "/home/viggo/github/go-workflow-stack"
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-candidate-template-git-isolation",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "833b782b1d412d847e4c875352947c2b50759140",
+        "worktree_digest": "b7d73e898a2a8756721eb7c692c9c297762ca0821638f3862d964e13a2be2f44",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-candidate-template-git-isolation/completion/command-01cda514d8cf4a21a254499e9f0c532f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-candidate-template-git-isolation/completion/command-01cda514d8cf4a21a254499e9f0c532f.json",
+        "sha256": "1ecbe579eb376960b92d5612704734420f406983e0f8dfa46c1e6ccf66585b24"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-candidate-template-git-isolation",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "833b782b1d412d847e4c875352947c2b50759140",
+        "worktree_digest": "b7d73e898a2a8756721eb7c692c9c297762ca0821638f3862d964e13a2be2f44",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-candidate-template-git-isolation/completion/command-28ab4ef1102c4e198dc82ace5e9c1685.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-candidate-template-git-isolation/completion/command-28ab4ef1102c4e198dc82ace5e9c1685.json",
+        "sha256": "8932ce7e7f283839a2e58b56ad3a5c952b7f779b7d7f528fe3d5bdf4e50e1662"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-candidate-template-git-isolation",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "833b782b1d412d847e4c875352947c2b50759140",
+        "worktree_digest": "b7d73e898a2a8756721eb7c692c9c297762ca0821638f3862d964e13a2be2f44",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-candidate-template-git-isolation/completion/command-a5e08fe2ded9480bae79acedcbc6044a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-candidate-template-git-isolation/completion/command-a5e08fe2ded9480bae79acedcbc6044a.json",
+        "sha256": "3922255aebb11ad791118735a221f13426a0a8cee9ab0dda6170ec0f2d1c759f"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [],
+  "requirements": [],
+  "models": {},
+  "task_hash": "7727acc6fdf1556787a61165edb53da1c232c6ed28bd9375ee160a7e5e49f2bd",
+  "code": {},
+  "execution_cwd": "/home/viggo/github/go-workflow-stack",
+  "controller": {
+    "host": "DESKTOP-8FC0P83",
+    "pid": 1386227
+  },
+  "worker_group": null,
+  "inflight": null
+}

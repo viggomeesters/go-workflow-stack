@@ -1,0 +1,14 @@
+{
+  "task_id": "release-candidate-template-git-isolation",
+  "project": "go-workflow-stack",
+  "contract_digest": "7727acc6fdf1556787a61165edb53da1c232c6ed28bd9375ee160a7e5e49f2bd",
+  "revision": "833b782b1d412d847e4c875352947c2b50759140",
+  "content_digest": "b7d73e898a2a8756721eb7c692c9c297762ca0821638f3862d964e13a2be2f44",
+  "command": "git diff --check",
+  "cwd": "/home/viggo/github/go-workflow-stack",
+  "elapsed_seconds": 1.0173655031248927,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

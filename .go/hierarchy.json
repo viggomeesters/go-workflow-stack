@@ -54,7 +54,8 @@
             "configure-github-publication-profile",
             "release-safe-active-task-handoff-v0347",
             "reconcile-effectless-prepared-release",
-            "release-candidate-preflight-isolation"
+            "release-candidate-preflight-isolation",
+            "release-candidate-template-git-isolation"
           ]
         },
         {

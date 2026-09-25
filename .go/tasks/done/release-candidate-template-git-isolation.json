@@ -1,0 +1,92 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "release-candidate-template-git-isolation",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Include template repository metadata in isolated candidate preflight",
+  "description": "Candidate check copies template without .git; eight public-template smoke failures. Copy Git metadata into disposable template without touching caller.",
+  "scope": {
+    "read": [
+      "scripts/release-check-inner.sh",
+      "tests/test_abc_release.py",
+      "tests/test_smoke.py"
+    ],
+    "modify": [
+      "scripts/release-check-inner.sh",
+      "tests/test_abc_release.py"
+    ]
+  },
+  "acceptance": [
+    "Template copy retains Git history/refs and dirty caller bytes; original template unchanged; candidate preflight smoke passes without worker guard failures."
+  ],
+  "verification": [
+    "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T02:25:29+02:00",
+    "base_commit": "833b782b1d412d847e4c875352947c2b50759140"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T02:37:33+02:00",
+      "task_id": "release-candidate-template-git-isolation",
+      "agent": "hermes",
+      "summary": "verification_command=env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py && make check && git diff --check; verification_result=passed content-bound verification c26caebf192f489d9ae1600736d44c76; review=independent A/no blockers critic a162d7a4608a490dbb63183cb310fb5c; changed_files=scripts/release-check-inner.sh,tests/test_abc_release.py; candidate_release=pending frozen task verification reconciliation",
+      "changed_files": [
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_release.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "833b782b1d412d847e4c875352947c2b50759140",
+        "observed_head_commit": "833b782b1d412d847e4c875352947c2b50759140"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py && make check && git diff --check",
+        "result": "passed content-bound verification c26caebf192f489d9ae1600736d44c76"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent A/no blockers critic a162d7a4608a490dbb63183cb310fb5c",
+        "skip_reason": null
+      }
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/release-candidate-template-git-isolation/completion/verification-c26caebf192f489d9ae1600736d44c76.json",
+      "sha256": "6a8ce28b8ebeeb220554fb0a6aca93a6dd22a3d080782c73ddd1af32ce4fea06"
+    },
+    "critic": {
+      "path": ".go/runs/release-candidate-template-git-isolation/completion/critic-a162d7a4608a490dbb63183cb310fb5c.json",
+      "sha256": "22c9029151a8fd72310951039a7a06381c888b19d8a8b376bda70376ff9033ba"
+    }
+  }
+}

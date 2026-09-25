@@ -1,0 +1,81 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "rebind-effectless-release-verification",
+  "project": "go-workflow-stack",
+  "contract_digest": "6c0f88885b064abb893128f202a5aecd54a122d60c4d71201a47f5d2fe489d14",
+  "revision": "a8e65a7507782be0a901445479d5721099160a69",
+  "content_digest": "d8c1e156f1dd462cd2b611b273672762d9e31512163ff5a16bb1e95a8d20e1d5",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "rebind-effectless-release-verification",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "a8e65a7507782be0a901445479d5721099160a69",
+        "worktree_digest": "d8c1e156f1dd462cd2b611b273672762d9e31512163ff5a16bb1e95a8d20e1d5",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/rebind-effectless-release-verification/completion/command-0aae1a25ee864c8e8df67b5c2f852c79.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/rebind-effectless-release-verification/completion/command-0aae1a25ee864c8e8df67b5c2f852c79.json",
+        "sha256": "3f638d57c17e0b99094e4e4c041a21b9d054bad3c6df68deaa13ae125c6e9cba"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "rebind-effectless-release-verification",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "a8e65a7507782be0a901445479d5721099160a69",
+        "worktree_digest": "d8c1e156f1dd462cd2b611b273672762d9e31512163ff5a16bb1e95a8d20e1d5",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/rebind-effectless-release-verification/completion/command-5f67702f9b844e39ba64e008581a3ae4.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/rebind-effectless-release-verification/completion/command-5f67702f9b844e39ba64e008581a3ae4.json",
+        "sha256": "57ef289f33387c8a392265defd5e5cc2d6c114049709d4e57ef66e838fb42cb2"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "rebind-effectless-release-verification",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "a8e65a7507782be0a901445479d5721099160a69",
+        "worktree_digest": "d8c1e156f1dd462cd2b611b273672762d9e31512163ff5a16bb1e95a8d20e1d5",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/rebind-effectless-release-verification/completion/command-24b180489c56455cbd3a5a35379546dd.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/rebind-effectless-release-verification/completion/command-24b180489c56455cbd3a5a35379546dd.json",
+        "sha256": "ba501d0fc24a782a4b7751fb2c76d5a7a0a172a4f3a418961a8e2f51fefa940a"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

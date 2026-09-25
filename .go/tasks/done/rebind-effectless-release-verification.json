@@ -1,0 +1,105 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "rebind-effectless-release-verification",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Safely rebind prepared release after verification contract correction",
+  "description": "Permit only verification-command corrections on the same active task for an effectless prepared release, with exact old-contract provenance, locked transition, invalidated proof and regression rejection of other contract/effect changes.",
+  "scope": {
+    "read": [
+      "go_workflow/release.py",
+      "go_workflow/completion.py",
+      "tests/test_release_reconcile.py"
+    ],
+    "modify": [
+      "go_workflow/release.py",
+      "go_workflow/cli.py",
+      "tests/test_release_reconcile.py",
+      ".go/tasks/active/release-safe-active-task-handoff-v0347.json"
+    ]
+  },
+  "acceptance": [
+    "A supported command rebinds only verification-list corrections from the pinned prepared-release contract and rejects effectful, foreign, or broader task changes.",
+    "Old verification/critic proof is invalidated; original release candidate bytes and version reservation remain unchanged."
+  ],
+  "verification": [
+    "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T03:08:44+02:00",
+    "base_commit": "a8e65a7507782be0a901445479d5721099160a69"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T03:25:11+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Independent read-only follow-up review no blockers after A1 safe-gate correction; exact contract binding and 16 regressions pass.",
+      "transaction_id": "0cfd5e35c4e74b43b1e6966ad228f730"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T03:25:10+02:00",
+      "task_id": "rebind-effectless-release-verification",
+      "agent": "hermes",
+      "summary": "changed_files=.go/tasks/active/release-safe-active-task-handoff-v0347.json,go_workflow/release.py,go_workflow/cli.py,tests/test_release_reconcile.py; verification_command=env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py && make check && git diff --check; verification_result=passed content-bound fa151aeed1514f76946ed8cf72696fdb; critic=independent follow-up no blockers 8572e7ae32bf4462a3d08e98804848cd; release=not published",
+      "changed_files": [
+        ".go/tasks/active/release-safe-active-task-handoff-v0347.json",
+        "go_workflow/release.py",
+        "go_workflow/cli.py",
+        "tests/test_release_reconcile.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "a8e65a7507782be0a901445479d5721099160a69",
+        "observed_head_commit": "a8e65a7507782be0a901445479d5721099160a69"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py && make check && git diff --check",
+        "result": "passed content-bound fa151aeed1514f76946ed8cf72696fdb"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent follow-up no blockers 8572e7ae32bf4462a3d08e98804848cd",
+        "skip_reason": null
+      }
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/rebind-effectless-release-verification/completion/verification-fa151aeed1514f76946ed8cf72696fdb.json",
+      "sha256": "56775c82ae96c2ebfa036b235f6c63abc36558d8c9c227cb20a0bc0d68318ab4"
+    },
+    "critic": {
+      "path": ".go/runs/rebind-effectless-release-verification/completion/critic-8572e7ae32bf4462a3d08e98804848cd.json",
+      "sha256": "083fa9ead887b41678af2d7078df4ae6e144fc5b314cb1e5b309abb4bcf1cc57"
+    }
+  }
+}

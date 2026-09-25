@@ -91,6 +91,76 @@ def test_reconcile_rejects_unowned_workspace_without_mutation(tmp_path):
         reconcile_prepared_release(repo, 'task-schema-smoke', 'someone-else', 'run-1')
     assert snapshot(repo, worker) == old
 
+def test_rebind_only_corrected_verification_then_reconcile(tmp_path, monkeypatch):
+    import go_workflow.release as publisher
+    from go_workflow.release import rebind_prepared_verification, reconcile_prepared_release
+    from go_workflow.completion import contract_digest
+    monkeypatch.setattr(publisher, '_safe_verification_correction',
+                        lambda control, task_id, before, after: before != after and after == ["python3 -c 'print(1)'", "git diff --check"])
+    repo, worker, source = fixture(tmp_path)
+    prepared = prepare(repo)
+    candidate = snapshot(repo, worker)
+    task = json.loads(source.read_text())
+    task['verification'] = ["python3 -c 'print(1)'", "git diff --check"]
+    source.write_text(json.dumps(task))
+    git(repo, 'add', str(source.relative_to(repo)))
+    git(repo, 'commit', '-qm', 'correct verification commands')
+    git(repo, 'push', 'origin', 'main')
+    updated = rebind_prepared_verification(repo, 'task-schema-smoke', 'owner', 'run-1')
+    assert updated['contract_digest'] == contract_digest(task)
+    assert updated['effects'] == {} and updated['phase'] == 'prepared'
+    assert updated['version'] == prepared['version'] and updated['preparation'] == prepared['preparation']
+    assert snapshot(repo, worker)[:3] == candidate[:3]
+    assert rebind_prepared_verification(repo, 'task-schema-smoke', 'owner', 'run-1')['contract_digest'] == contract_digest(task)
+    assert reconcile_prepared_release(repo, 'task-schema-smoke', 'owner', 'run-1')['base_commit'] == git(repo, 'rev-parse', 'HEAD')
+
+@pytest.mark.parametrize('mutation', ['summary', 'scope', 'effect', 'foreign_owner'])
+def test_rebind_rejects_other_changes_without_checkpoint_mutation(tmp_path, mutation, monkeypatch):
+    import go_workflow.release as publisher
+    from go_workflow.release import rebind_prepared_verification, PublicationError
+    monkeypatch.setattr(publisher, '_safe_verification_correction',
+                        lambda control, task_id, before, after: before != after and after == ["python3 -c 'print(1)'"])
+    repo, worker, source = fixture(tmp_path)
+    prepare(repo)
+    task = json.loads(source.read_text())
+    task['verification'] = ["python3 -c 'print(1)'"]
+    if mutation == 'summary':
+        task['summary'] = 'not the original task'
+    if mutation == 'scope':
+        task['scope']['modify'].append('personal.txt')
+    source.write_text(json.dumps(task))
+    if mutation == 'effect':
+        path = repo / '.go/runs/task-schema-smoke/release-state.json'
+        value = state(repo)
+        value['effects']['commit'] = {'status': 'pending', 'expected': {}}
+        path.write_text(json.dumps(value))
+    checkpoint = snapshot(repo, worker)[3:]
+    with pytest.raises((PublicationError, ValueError)):
+        rebind_prepared_verification(repo, 'task-schema-smoke',
+                                     'other' if mutation == 'foreign_owner' else 'owner', 'run-1')
+    assert snapshot(repo, worker)[3:] == checkpoint
+
+def test_rebind_allowlist_preserves_every_release_gate_and_rejects_true(tmp_path):
+    from go_workflow.release import _safe_verification_correction
+    control = tmp_path / 'go-workflow-stack'
+    before = [
+        'PYTHONPATH=. uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" pytest -q',
+        'make check', 'python3 cli/go.py validate .',
+        'python3 cli/go.py architecture validate . --json',
+        'python3 cli/go.py doctor . --platform wsl --agent hermes --json',
+        'bash scripts/release-check.sh --allow-candidate', 'git diff --check',
+    ]
+    after = before.copy()
+    after[0] = 'env -u PYTHONPATH uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" python -m pytest -q'
+    after[5] = 'GO_PROJECT_TEMPLATE=' + str(control.parent / 'go-project-template') + ' ./scripts/release-check.sh --allow-candidate'
+    task = 'release-safe-active-task-handoff-v0347'
+    assert _safe_verification_correction(control, task, before, after)
+    assert not _safe_verification_correction(control, task, before, ['true'])
+    assert not _safe_verification_correction(control, task, before, after[:-1])
+    assert not _safe_verification_correction(control, task, before, [*after[:1], 'true', *after[2:]])
+    assert not _safe_verification_correction(control, task, before, [*after[:5], before[5], *after[6:]])
+    assert not _safe_verification_correction(control, 'foreign-task', before, after)
+
 
 def test_reconcile_recovers_after_worker_fast_forward_before_checkpoint(tmp_path, monkeypatch):
     import go_workflow.release as publisher

@@ -6517,7 +6517,7 @@ def build_parser() -> argparse.ArgumentParser:
     relocate.set_defaults(func=cmd_managed_relocate)
     release_parser = sub.add_parser('release', help='Explicit configured task publication')
     release_sub = release_parser.add_subparsers(dest='release_operation', required=True)
-    for operation in ('prepare', 'publish', 'status', 'reconcile'):
+    for operation in ('prepare', 'publish', 'status', 'reconcile', 'rebind-verification'):
         item = release_sub.add_parser(operation)
         item.add_argument('repo')
         for field in ('task-id', 'owner', 'run-id'): item.add_argument('--' + field, required=True)
@@ -6831,7 +6831,8 @@ def cmd_managed_relocate(args: argparse.Namespace) -> int:
 
 
 def cmd_release(args):
-    from go_workflow.release import prepare_release, publish_release, reconcile_prepared_release, _load
+    from go_workflow.release import (prepare_release, publish_release, reconcile_prepared_release,
+                                     rebind_prepared_verification, _load)
     repo = Path(args.repo).resolve()
     if args.release_operation == 'prepare':
         result = prepare_release(repo, args.task_id, args.owner, args.run_id,
@@ -6840,6 +6841,8 @@ def cmd_release(args):
         result = publish_release(repo, args.task_id, args.owner, args.run_id)
     elif args.release_operation == 'reconcile':
         result = reconcile_prepared_release(repo, args.task_id, args.owner, args.run_id)
+    elif args.release_operation == 'rebind-verification':
+        result = rebind_prepared_verification(repo, args.task_id, args.owner, args.run_id)
     else:
         result = _load(repo, active_task(repo, args.task_id), args.owner, args.run_id)
     print(json.dumps(result, indent=2))

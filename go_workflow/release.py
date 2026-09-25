@@ -329,6 +329,77 @@ def _version_change(text, spec, replacement=None):
 
 def _hash(text): return hashlib.sha256(text.encode()).hexdigest()
 
+def _safe_verification_correction(control, task_id, before, after):
+    """Only the two v0.3.47 invocation fixes; never drop or replace a gate."""
+    if task_id != 'release-safe-active-task-handoff-v0347' or not isinstance(before, list) or len(before) != 7:
+        return False
+    expected = before.copy()
+    if (before[0] != 'PYTHONPATH=. uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" pytest -q'
+            or before[5] != 'bash scripts/release-check.sh --allow-candidate'):
+        return False
+    expected[0] = 'env -u PYTHONPATH uv run --no-project --with "pytest>=8,<9" --with "jsonschema>=4.23" python -m pytest -q'
+    expected[5] = ('GO_PROJECT_TEMPLATE=' + str(control.parent / 'go-project-template')
+                   + ' ./scripts/release-check.sh --allow-candidate')
+    return after == expected
+
+def rebind_prepared_verification(control, task_id, owner, run_id):
+    """Rebind a reserved, effectless candidate to a verification-only task correction.
+
+    The prior task is read from the frozen base, never reconstructed from a
+    caller-supplied digest.  Publication cannot resume until fresh proof for
+    the corrected contract has been captured.
+    """
+    control = Path(control).resolve()
+    with repository_lock(control / '.go', 'workspace-integration'):
+        with repository_lock(control / '.go', 'workspace-execution-' + task_id):
+            task = active_task(control, task_id, owner)
+            record = owned_record(control, task_id, owner, run_id, active=False)
+            require_run_idle(record)
+            verify_workspace(record)
+            checked_scope(record)
+            state = validate_state(read_object(state_path(control, task_id)))
+            if (state['phase'] != 'prepared' or state['effects'] or state['observations']
+                    or 'content_digest' in state or 'release_evidence' in state):
+                raise PublicationError('Only effectless, unverified prepared releases can rebind verification')
+            if (state['task_id'] != task_id or state['owner'] != owner or state['run_id'] != run_id
+                    or state['control_repo'] != str(control) or state['project'] != task['project']
+                    or state['profile'] != publication_profile(control, task)):
+                raise PublicationError('Frozen publication identity differs from the current task')
+            if any(record[key] != state['workspace'].get(key) for key in (
+                    'control_repo', 'path', 'owner', 'run_id', 'branch', 'base_branch',
+                    'base_commit', 'common_dir', 'repository_id', 'generation')):
+                raise PublicationError('Frozen publication workspace identity changed')
+            reservation = (control / state['reservation']).resolve()
+            if reservation.parent != (control / '.go/runs/publication-reservations').resolve() or not reservation.exists():
+                raise PublicationError('Publication reservation missing or outside canonical state')
+            if read_object(reservation) != {'task_id': task_id, 'run_id': run_id, 'owner': owner,
+                                            'version': state['version'], 'status': 'reserved'}:
+                raise PublicationError('Publication reservation changed')
+            if task.get('completion_evidence'):
+                raise PublicationError('Attached verification/critic proof must be explicitly invalidated')
+            old_path = '.go/tasks/active/' + task_id + '.json'
+            try:
+                previous = json.loads(git_text(control, 'show', state['base_commit'] + ':' + old_path))
+            except (ValueError, subprocess.CalledProcessError, json.JSONDecodeError) as exc:
+                raise PublicationError('Frozen task contract unavailable at release base') from exc
+            corrected = deepcopy(previous)
+            corrected['verification'] = task.get('verification')
+            if (corrected != task or not isinstance(task.get('verification'), list)
+                    or not task['verification']):
+                raise PublicationError('Only verification commands may change on the frozen task')
+            if not _safe_verification_correction(control, task_id, previous.get('verification'), task['verification']):
+                raise PublicationError('Verification correction is not an approved gate-preserving mapping')
+            if state['contract_digest'] == contract_digest(task):
+                if task['verification'] == previous.get('verification'):
+                    raise PublicationError('No verification correction is recorded')
+                return deepcopy(state)
+            if (contract_digest(previous) != state['contract_digest']
+                    or task['verification'] == previous.get('verification')):
+                raise PublicationError('Frozen base task does not match the reserved contract')
+            state['contract_digest'] = contract_digest(task)
+            _save(control, state)
+            return deepcopy(state)
+
 
 def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allow_push=False, allow_deploy=False):
     control = Path(control).resolve()

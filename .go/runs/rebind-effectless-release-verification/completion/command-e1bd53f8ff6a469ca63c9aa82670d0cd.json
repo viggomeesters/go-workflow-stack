@@ -1,0 +1,14 @@
+{
+  "task_id": "rebind-effectless-release-verification",
+  "project": "go-workflow-stack",
+  "contract_digest": "6c0f88885b064abb893128f202a5aecd54a122d60c4d71201a47f5d2fe489d14",
+  "revision": "a8e65a7507782be0a901445479d5721099160a69",
+  "content_digest": "bbaafc402ef80231f35108be0584f3aa73d96cdb50f047017dda5d21fb406ee6",
+  "command": "env -u PYTHONPATH python -m pytest -q tests/test_release_reconcile.py",
+  "cwd": "/home/viggo/github/go-workflow-stack",
+  "elapsed_seconds": 18.91714096767828,
+  "returncode": 0,
+  "stdout": "................                                                         [100%]\n16 passed in 16.41s\n",
+  "stderr": "",
+  "timed_out": false
+}

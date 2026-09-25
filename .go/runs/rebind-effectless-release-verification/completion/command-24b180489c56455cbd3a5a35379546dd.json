@@ -1,0 +1,14 @@
+{
+  "task_id": "rebind-effectless-release-verification",
+  "project": "go-workflow-stack",
+  "contract_digest": "6c0f88885b064abb893128f202a5aecd54a122d60c4d71201a47f5d2fe489d14",
+  "revision": "a8e65a7507782be0a901445479d5721099160a69",
+  "content_digest": "d8c1e156f1dd462cd2b611b273672762d9e31512163ff5a16bb1e95a8d20e1d5",
+  "command": "git diff --check",
+  "cwd": "/home/viggo/github/go-workflow-stack",
+  "elapsed_seconds": 0.9350932901725173,
+  "returncode": 0,
+  "stdout": "",
+  "stderr": "",
+  "timed_out": false
+}

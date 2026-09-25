@@ -1,6 +1,6 @@
 {
   "schema": "go-workflow.release-pairings.v1",
-  "current_stack_ref": "v0.3.48",
+  "current_stack_ref": "v0.3.49",
   "template_repository": "https://github.com/viggomeesters/go-project-template.git",
   "pairings": [
     {
@@ -302,6 +302,12 @@
       "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
       "template_ref": "v0.3.18",
       "note": "Taskwise campaigns and independent progress transport are explicit new-run contracts; existing bounded campaigns and template remain readable without expanding authority."
+    },
+    {
+      "stack_ref": "v0.3.49",
+      "template_commit": "9db583edcd110a95d3b7f6d9f5e543b7d68c96ca",
+      "template_ref": "v0.3.18",
+      "note": "Opt-in live terminal renders the existing outbox for new campaigns; prior saved transport and authority stay unchanged."
     }
   ]
 }

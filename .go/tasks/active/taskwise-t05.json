@@ -32,14 +32,17 @@
       "skills/repo-local-agent-workflow/SKILL.md",
       "pyproject.toml",
       "CHANGELOG.md",
-      "release-pairings.json"
+      "release-pairings.json",
+      ".gitignore"
     ]
   },
   "acceptance": [
-    "Versioned progress events, durable acknowledgments, independent 300-second watcher, transport capability and reference adapter; integrated ten-task proof and release rollout."
+    "Versioned progress events, durable acknowledgments, independent 300-second watcher, transport capability and reference adapter; integrated ten-task proof and release rollout.",
+    "User-approved terminal alternative: automatically open an independently updating real TTY for configured new Go runs; render existing ordered outbox, receipt only after display flush, safe replay/reopen, pending on viewer loss, prove on bounded Book Forge task without book generation."
   ],
   "verification": [
-    "python3 -m pytest tests/test_taskwise_campaign.py -q"
+    "python3 -m pytest tests/test_taskwise_campaign.py -q",
+    "python3 -m pytest tests/test_progress_terminal.py tests/test_progress_events.py tests/test_progress_transport.py tests/test_campaign_progress.py -q"
   ],
   "claim": {
     "agent": "codex",
@@ -52,7 +55,9 @@
   "evidence": [
     "T05 scope clarification: repository-owned skill is an agent instruction required by original rollout scope; no external installed skill or Hermes runner changes.",
     "Authorized single immutable release requires version, changelog and pairing manifest; preserve existing uv.lock unchanged.",
-    "Implementation and immutable v0.3.48 published/read back; .go/evidence/taskwise-t05/result.json and publication-readback.json. Task remains incomplete pending designated consumer and real independent chat transport."
+    "Implementation and immutable v0.3.48 published/read back; .go/evidence/taskwise-t05/result.json and publication-readback.json. Task remains incomplete pending designated consumer and real independent chat transport.",
+    "2026-09-25 user Implement accepts terminal beside chat as live delivery surface, replacing previous missing real-chat transport requirement. Existing run permissions remain frozen.",
+    "Ignore machine-local terminal liveness checkpoints; canonical outbox and final pilot receipts retain durable delivery evidence without a running viewer dirtying the release candidate."
   ],
   "architecture": {
     "impact": "material",

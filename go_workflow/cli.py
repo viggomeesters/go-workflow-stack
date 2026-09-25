@@ -3921,6 +3921,26 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
     return created
 
 
+def cmd_progress_terminal(args):
+    from .progress_terminal import enable_terminal
+    try:
+        print(json.dumps(enable_terminal(Path(args.repo).resolve()), indent=2))
+    except (OSError, ValueError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    return 0
+
+
+def cmd_progress_watch(args):
+    from .progress_terminal import watch
+    try:
+        watch(Path(args.repo).resolve(), args.campaign)
+    except KeyboardInterrupt:
+        return 0
+    except (OSError, ValueError) as exc:
+        raise RepoLocalError(str(exc)) from exc
+    return 0
+
+
 def _public_campaign(repo, **kwargs):
     from .campaign_intake import materialize_until_scope
     try:
@@ -6206,6 +6226,16 @@ def build_parser() -> argparse.ArgumentParser:
     auto.add_argument("--allow-dirty", action="store_true", help="explicitly override dirty/lock preflight gates")
     auto.add_argument("--json", action="store_true")
     auto.set_defaults(func=cmd_auto)
+    progress = sub.add_parser('progress', help='Show durable task progress in a live terminal')
+    progress_sub = progress.add_subparsers(dest='progress_command', required=True)
+    progress_watch = progress_sub.add_parser('watch', help='Replay and follow one campaign in this terminal')
+    progress_watch.add_argument('repo', nargs='?', default='.')
+    progress_watch.add_argument('--campaign', required=True)
+    progress_watch.set_defaults(func=cmd_progress_watch)
+    progress_terminal = progress_sub.add_parser('terminal', help='Enable automatic terminal opening for new Go campaigns')
+    progress_terminal.add_argument('repo', nargs='?', default='.')
+    progress_terminal.add_argument('--enable', required=True, action='store_true')
+    progress_terminal.set_defaults(func=cmd_progress_terminal)
     adapter = sub.add_parser("adapter", help="Inspect and validate the versioned agent-adapter protocol")
     adapter_sub = adapter.add_subparsers(dest="adapter_command", required=True)
     adapter_validate = adapter_sub.add_parser("validate-result", help="Validate one adapter result JSON document")

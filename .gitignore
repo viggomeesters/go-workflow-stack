@@ -3,3 +3,6 @@ __pycache__/
 .DS_Store
 build/
 *.egg-info/
+
+# Machine-local TTY liveness/receipts; canonical delivery stays in the progress outbox.
+.go/runs/progress/*.terminal.json

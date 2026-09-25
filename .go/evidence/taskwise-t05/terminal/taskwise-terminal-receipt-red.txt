@@ -1,0 +1,138 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_____________ test_render_receipt_and_retry_survive_viewer_restart _____________
+
+config = {'command': ['/opt/homebrew/opt/python@3.14/bin/python3.14', '-m', 'go_workflow.progress_terminal', 'transport', '--re...ytest-1260/test_render_receipt_and_retry_0', ...], 'schema': 'go-workflow.progress-transport.v1', 'timeout_seconds': 5}
+payload = {'operation': 'preflight', 'schema': 'go-workflow.progress-transport.v1'}
+
+    def _request(config, payload):
+        if not isinstance(config, dict) or config.get('schema') != SCHEMA:
+            raise ProgressTransportError('unsupported progress transport schema')
+        argv = config.get('command')
+        timeout = config.get('timeout_seconds', 10)
+        if (not isinstance(argv, list) or not argv or
+            any(not isinstance(x, str) or not x or '\x00' in x for x in argv) or
+            isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not 0 < timeout <= 60):
+            raise ProgressTransportError('invalid command or bounded timeout')
+        proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True, start_new_session=True, env=runtime_environment())
+        try:
+            stdout, stderr = proc.communicate(json.dumps(payload), timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            proc.communicate()
+            raise ProgressTransportError('progress transport command timed out') from exc
+        except BaseException:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            proc.communicate()
+            raise
+        if proc.returncode:
+            raise ProgressTransportError(f'progress transport exit {proc.returncode}: {stderr[-1000:]}')
+        try:
+>           result = json.loads(stdout)
+                     ^^^^^^^^^^^^^^^^^^
+
+go_workflow/progress_transport.py:61:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/__init__.py:352: in loads
+    return _default_decoder.decode(s)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:345: in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+self = <json.decoder.JSONDecoder object at 0x109f0ee40>, s = '', idx = 0
+
+    def raw_decode(self, s, idx=0):
+        """Decode a JSON document from ``s`` (a ``str`` beginning with
+        a JSON document) and return a 2-tuple of the Python
+        representation and the index in ``s`` where the document ended.
+
+        This can be used to decode a JSON document from a string that may
+        have extraneous data at the end.
+
+        """
+        try:
+            obj, end = self.scan_once(s, idx)
+        except StopIteration as err:
+>           raise JSONDecodeError("Expecting value", s, err.value) from None
+E           json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+
+/opt/homebrew/Cellar/python@3.14/3.14.3_1/Frameworks/Python.framework/Versions/3.14/lib/python3.14/json/decoder.py:363: JSONDecodeError
+
+The above exception was the direct cause of the following exception:
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-1260/test_render_receipt_and_retry_0')
+
+    def test_render_receipt_and_retry_survive_viewer_restart(tmp_path):
+        from go_workflow.progress_transport import preflight, flush
+        box = fixture(tmp_path)
+        first = box.emit('start', 'T01', {'title': 'Render once'}, key='first')
+        def viewer():
+            master, slave = pty.openpty()
+            process = subprocess.Popen([sys.executable, str(CLI), 'progress', 'watch', str(tmp_path),
+                                        '--campaign', 'pilot'], stdout=slave, stderr=slave,
+                                       env=runtime_environment(), start_new_session=True)
+            os.close(slave)
+            return master, process
+        master, process = viewer()
+        try:
+>           caps = preflight(config(tmp_path))['capabilities']
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_progress_terminal.py:64:
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+go_workflow/progress_transport.py:70: in preflight
+    result = _request(config, {'operation': 'preflight', 'schema': SCHEMA})
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
+config = {'command': ['/opt/homebrew/opt/python@3.14/bin/python3.14', '-m', 'go_workflow.progress_terminal', 'transport', '--re...ytest-1260/test_render_receipt_and_retry_0', ...], 'schema': 'go-workflow.progress-transport.v1', 'timeout_seconds': 5}
+payload = {'operation': 'preflight', 'schema': 'go-workflow.progress-transport.v1'}
+
+    def _request(config, payload):
+        if not isinstance(config, dict) or config.get('schema') != SCHEMA:
+            raise ProgressTransportError('unsupported progress transport schema')
+        argv = config.get('command')
+        timeout = config.get('timeout_seconds', 10)
+        if (not isinstance(argv, list) or not argv or
+            any(not isinstance(x, str) or not x or '\x00' in x for x in argv) or
+            isinstance(timeout, bool) or not isinstance(timeout, (int, float)) or not 0 < timeout <= 60):
+            raise ProgressTransportError('invalid command or bounded timeout')
+        proc = subprocess.Popen(argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True, start_new_session=True, env=runtime_environment())
+        try:
+            stdout, stderr = proc.communicate(json.dumps(payload), timeout=timeout)
+        except subprocess.TimeoutExpired as exc:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            proc.communicate()
+            raise ProgressTransportError('progress transport command timed out') from exc
+        except BaseException:
+            try:
+                os.killpg(proc.pid, signal.SIGKILL)
+            except ProcessLookupError:
+                pass
+            proc.communicate()
+            raise
+        if proc.returncode:
+            raise ProgressTransportError(f'progress transport exit {proc.returncode}: {stderr[-1000:]}')
+        try:
+            result = json.loads(stdout)
+        except ValueError as exc:
+>           raise ProgressTransportError('progress transport returned invalid JSON') from exc
+E           go_workflow.progress_transport.ProgressTransportError: progress transport returned invalid JSON
+
+go_workflow/progress_transport.py:63: ProgressTransportError
+=========================== short test summary info ============================
+FAILED tests/test_progress_terminal.py::test_render_receipt_and_retry_survive_viewer_restart
+1 failed in 0.08s

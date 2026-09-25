@@ -1,5 +1,11 @@
 ## 0.3.48
 
+## v0.3.49
+
+- Add opt-in live terminal progress with automatic desktop opening, ordered TTY rendering receipts, safe replay and independent heartbeats.
+- Preserve old campaign transports and publication authority; closed or unavailable viewers leave messages pending.
+
+
 - Deliver until-scope campaigns one task at a time with content-bound progress, frozen authority, publication readback and portable closure recovery.
 - Bound repeated failure recovery, admit necessary repairs with evidence, and preserve current source-bound resume context without rerunning completed tasks.
 - Add durable task events and independent 300-second heartbeats behind an explicitly configured transport. Pending message delivery stops the next task; legacy runs retain their authority.

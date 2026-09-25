@@ -1,0 +1,30 @@
+{
+  "task_id": "taskwise-t05",
+  "accepted_surface": "live terminal beside chat; user Implement authorization",
+  "tests": "61 passed; 35 passed and 2 optional tests skipped; real 300-second pilot still pending",
+  "tdd": "Missing public command, rendering receipt and intake resolution each reproduced before implementation; logs retained",
+  "review": "review_t01 independently reviewed and ran 11 targeted tests: no blockers",
+  "native_terminal": {
+    "live_at_capture": true,
+    "attached_tty": true,
+    "rendered_events": 2,
+    "canonical_outbox": ".go/runs/progress/terminal-implementation.json",
+    "surface": "terminal",
+    "human_reading_approval": false,
+    "ui_screenshot": "not obtained: computer-use policy disallows Terminal inspection; proof uses real TTY rendering receipts"
+  },
+  "source_sha256": {
+    "go_workflow/progress_terminal.py": "948b0689de54cb58c9ec3120130e08e2bbb5e01b005cd51c8dc34bf6c90c8641",
+    "go_workflow/campaign_intake.py": "20d7b4d9b2e820a252eaac30a44b71a6116d4386249d8660cbcbc33deb96f1c9",
+    "go_workflow/cli.py": "ffe407901ee44e98b2154ee76330921c92b0c991348c035f966b94d019f2be58",
+    "tests/test_progress_terminal.py": "46007ca408d708eac26c7dc00896b1212c9b203bbf24cede9ac7588262f7a034"
+  },
+  "rollout": "pending release and isolated Book Forge native worker pilot",
+  "self_reflect": "No durable agent/process improvement needed; this extends the agreed product contract, with independent review and actual TTY delivery evidence.",
+  "raw_test_log_sha256": {
+    "taskwise-terminal-intake-red.txt": "4d25d8b6f8abef8f8db7d51618180b226604713c4076512cebe1cf8f5dd6e65b",
+    "taskwise-terminal-receipt-red.txt": "44a087ee6507bf519092c56f94aac3a9439899983aeba4923f727f70082d6b0d",
+    "taskwise-terminal-red.txt": "b17587916974e01f9cc8f4699753c7a8c8d6a0cefd6a14169c7bea438bf1c968"
+  },
+  "log_format": "RED logs are display copies with trailing whitespace removed; raw digests recorded."
+}

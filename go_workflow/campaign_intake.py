@@ -13,6 +13,7 @@ import hashlib
 import json
 from pathlib import Path
 
+from .progress_terminal import resolve_transport
 from .architecture import latest_decisions
 from .campaign_contracts import CAMPAIGN_SCHEMA, STOP_CONDITIONS, campaign_findings
 from .execution_contracts import validate_execution_contract
@@ -138,7 +139,7 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
                             'shipping': {'schema': 'go-workflow.taskwise-shipping.v1',
                                          'policy': effective_shipping, 'source_ref': source_ref},
                             'progress': {'schema': 'go-workflow.campaign-progress.v1', 'heartbeat_seconds': 300,
-                                         'transport': project.get('progress_transport')}},
+                                         'transport': resolve_transport(repo, campaign_id, project.get('progress_transport'))}},
               'intent': {'text': intent, 'sha256': _sha(intent), 'source_ref': source_ref},
               'goal': {'text': intent, 'non_goals': [], 'outcomes': outcomes},
               'basis': {'vision_sha256': hashlib.sha256((root / 'vision.json').read_bytes()).hexdigest(),

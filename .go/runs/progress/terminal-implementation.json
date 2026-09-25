@@ -1,0 +1,53 @@
+{
+  "schema": "go-workflow.progress-state.v1",
+  "project_id": "go-workflow-stack",
+  "campaign_id": "terminal-implementation",
+  "next_sequence": 3,
+  "events": [
+    {
+      "schema": "go-workflow.progress-event.v1",
+      "id": "go-workflow-stack:terminal-implementation:1",
+      "sequence": 1,
+      "project_id": "go-workflow-stack",
+      "campaign_id": "terminal-implementation",
+      "kind": "start",
+      "task_id": "taskwise-t05",
+      "payload": {
+        "title": "Live terminalweergave implementeren en op Book Forge controleren"
+      },
+      "key": "actual-task-start",
+      "message": "taskwise-t05 in progress — Live terminalweergave implementeren en op Book Forge controleren.",
+      "created_at": "2026-09-25T14:37:36.567709+00:00",
+      "status": "acknowledged",
+      "receipt": {
+        "event_id": "go-workflow-stack:terminal-implementation:1",
+        "receipt": "terminal:go-workflow-stack:terminal-implementation:1:09fddfc03a9cc259ec44206adc6d4c91c08c59e405c0fc53c3e55c72479e06a6",
+        "surface": "terminal",
+        "displayed": true
+      }
+    },
+    {
+      "schema": "go-workflow.progress-event.v1",
+      "id": "go-workflow-stack:terminal-implementation:2",
+      "sequence": 2,
+      "project_id": "go-workflow-stack",
+      "campaign_id": "terminal-implementation",
+      "kind": "phase",
+      "task_id": "taskwise-t05",
+      "payload": {
+        "phase": "verificatie",
+        "summary": "Terminaltests en onafhankelijke review geslaagd; releasecontrole en geïsoleerde Book Forge-proef volgen"
+      },
+      "key": "actual-verification-phase",
+      "message": "taskwise-t05 fase verificatie — Terminaltests en onafhankelijke review geslaagd; releasecontrole en geïsoleerde Book Forge-proef volgen.",
+      "created_at": "2026-09-25T14:40:36.340112+00:00",
+      "status": "acknowledged",
+      "receipt": {
+        "event_id": "go-workflow-stack:terminal-implementation:2",
+        "receipt": "terminal:go-workflow-stack:terminal-implementation:2:411ae472147003a1b909f32a0ad106c8ce4eec4200379379eeff45e03e4f9c2a",
+        "surface": "terminal",
+        "displayed": true
+      }
+    }
+  ]
+}

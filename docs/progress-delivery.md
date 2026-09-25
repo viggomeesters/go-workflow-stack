@@ -70,3 +70,46 @@ finish its recorded reservation cleanup. It cannot prepare or publish the old
 candidate. Resuming that product work requires explicit fresh-candidate
 reconciliation; the runtime reports that limitation instead of guessing a version
 or discarding the old candidate.
+
+## Live terminal beside the chat
+
+Select the terminal once in a consumer repository:
+
+```sh
+./go progress terminal . --enable
+```
+
+New Go campaigns then open a live Terminal window on macOS, or an available
+`x-terminal-emulator` on a graphical Linux desktop. The project stores only the
+portable terminal preference. Campaign intake resolves its repository/campaign
+identity into the frozen transport command. Saved campaigns keep their transport
+until explicitly revised; selecting the terminal never changes their permissions.
+An existing different project transport is preserved and requires explicit
+reconciliation before replacement.
+
+Reopen a campaign in an attached terminal with:
+
+```sh
+./go progress watch . --campaign <campaign-id>
+```
+
+This replays the same stored messages and follows new ones. It does not restart
+tasks. The viewer reads the existing outbox, prints and flushes each event to an
+actual TTY, then records a content-bound rendering receipt. Only then can the
+transport acknowledge delivery. This proves terminal output, not human reading
+or chat delivery. The independent watchdog continues to supply 300-second
+heartbeats while the model/controller waits.
+
+Closing the window stops the viewer, not the running build. Unrendered messages
+remain pending and prevent the next task from starting. Resume opens the window
+again; lost acknowledgments retain the same event IDs. A crash between printing
+and recording a receipt can replay a line; reopening explicitly replays history.
+Only one receipt-writing viewer per campaign is allowed. A live unresponsive
+viewer, foreign-host owner, refused launch or missing desktop produces a concrete
+error rather than a delivery claim. A manually attached TTY also works without a
+desktop launcher.
+
+Task text is escaped before terminal rendering, so embedded ANSI/OSC controls
+cannot affect the terminal. Machine-local viewer liveness and rendering metadata
+(`*.terminal.json`) should be ignored by Git; canonical events and delivery
+acknowledgments remain under `.go/runs/progress/<campaign-id>.json`.

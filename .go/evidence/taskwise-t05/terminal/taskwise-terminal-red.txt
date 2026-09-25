@@ -1,0 +1,35 @@
+F                                                                        [100%]
+=================================== FAILURES ===================================
+_______________ test_watch_replays_existing_messages_to_real_tty _______________
+
+tmp_path = PosixPath('/private/var/folders/41/n6zt7fp15nn9rd905h7_l8c00000gn/T/pytest-of-viggomeesters/pytest-1258/test_watch_replays_existing_me0')
+
+    def test_watch_replays_existing_messages_to_real_tty(tmp_path):
+        box = fixture(tmp_path)
+        event = box.emit('start', 'T01', {'title': 'Controle uitvoeren'}, key='start')
+        master, slave = pty.openpty()
+        process = subprocess.Popen([sys.executable, str(CLI), 'progress', 'watch', str(tmp_path),
+                                    '--campaign', 'pilot'], stdout=slave, stderr=slave,
+                                   env=runtime_environment(), start_new_session=True)
+        os.close(slave)
+        output = b''
+        try:
+            deadline = time.monotonic() + 5
+            while time.monotonic() < deadline:
+                if select.select([master], [], [], .1)[0]:
+                    try: output += os.read(master, 65536)
+                    except OSError: break
+                if b'T01 in progress' in output: break
+>           assert 'T01 in progress' in output.decode(), output.decode()
+E           AssertionError: usage: go.py [-h]
+E                          {version,adopt,spike,intake,go,auto,adapter,proof,stack,onboarding,pairing,agent-check,doctor,loop,go-loop,router,status,index,template-check,recommendation,delivery,task,epic,decision,architecture,agents,migrate,init,validate,campaign,next,claim,finish,dirty-check,readback,route,bundle,workspace,context,managed,release,completion} ...
+E             go.py: error: argument command: invalid choice: 'progress' (choose from version, adopt, spike, intake, go, auto, adapter, proof, stack, onboarding, pairing, agent-check, doctor, loop, go-loop, router, status, index, template-check, recommendation, delivery, task, epic, decision, architecture, agents, migrate, init, validate, campaign, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)
+E
+E           assert 'T01 in progress' in 'usage: go.py [-h]\r\n             {version,adopt,spike,intake,go,auto,adapter,proof,stack,onboarding,pairing,agent-ch...aign, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)\r\n'
+E            +  where 'usage: go.py [-h]\r\n             {version,adopt,spike,intake,go,auto,adapter,proof,stack,onboarding,pairing,agent-ch...aign, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)\r\n' = <built-in method decode of bytes object at 0x98b26c000>()
+E            +    where <built-in method decode of bytes object at 0x98b26c000> = b"usage: go.py [-h]\r\n             {version,adopt,spike,intake,go,auto,adapter,proof,stack,onboarding,pairing,agent-c...aign, next, claim, finish, dirty-check, readback, route, bundle, workspace, context, managed, release, completion)\r\n".decode
+
+tests/test_progress_terminal.py:39: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_progress_terminal.py::test_watch_replays_existing_messages_to_real_tty
+1 failed in 5.05s

@@ -1,0 +1,127 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "release-compatibility-timeout-budget",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Bound nested compatibility regression timeout to measured full-suite runtime",
+  "description": "Candidate suite failed because check-compatibility.sh nested fixture exceeded fixed 300s deadline under concurrent release gates; standalone passed in 246.10s. Give subprocess a realistic finite budget and test budget plumbing; preserve every gate and do not reuse failed candidate verification.",
+  "scope": {
+    "read": [
+      "tests/test_release_compatibility_gate.py",
+      "scripts/check-compatibility.sh",
+      "scripts/check-autonomy.sh"
+    ],
+    "modify": [
+      "tests/test_release_compatibility_gate.py",
+      ".go/tasks/open/release-compatibility-timeout-budget.json",
+      ".go/tasks/active/release-compatibility-timeout-budget.json",
+      ".go/tasks/done/release-compatibility-timeout-budget.json",
+      ".go/runs/**",
+      ".go/evidence/**",
+      ".go/hierarchy.json"
+    ]
+  },
+  "acceptance": [
+    "Nested fixture keeps all exact gates and a finite 600-second deadline accommodating measured wall time under full-suite load.",
+    "Regression asserts the deadline is forwarded and full clean-environment suite reruns before release."
+  ],
+  "verification": [
+    "env -u PYTHONPATH uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest tests/test_release_compatibility_gate.py -q",
+    "python3 cli/go.py validate .",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T04:55:25+02:00",
+    "base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T05:02:07+02:00",
+      "agent": "hermes",
+      "status": "approved",
+      "evidence": "Self-review (not independent): diff limited to finite 600-second subprocess deadline and its plumbing regression; positive and negative nested compatibility tests passed 3/3 in 303.59s; no script gate change; release candidate must be reverified.",
+      "transaction_id": "909ad163aa284ba180fa889fd2eef8cf"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T05:01:43+02:00",
+      "task_id": "release-compatibility-timeout-budget",
+      "agent": "hermes",
+      "summary": "verification_command=env -u PYTHONPATH uv run --no-project --with pytest>=8,<9 --with jsonschema>=4.23 python -m pytest tests/test_release_compatibility_gate.py -q; verification_result=3 passed in 303.59s, validation and diff check passed; critic=Self-review of exact diff: only finite nested timeout 300->600 and test asserting forwarded deadline; compatibility and autonomy scripts unchanged, positive and negative nested gates both executed; release candidate verification remains failed and must rerun",
+      "changed_files": [
+        ".go/hierarchy.json",
+        ".go/runs/events.jsonl",
+        ".go/tasks/active/release-safe-active-task-handoff-v0347.json",
+        "tests/test_release_compatibility_gate.py",
+        ".go/runs/publication-reservations/a0e86fa72ddb4280ea5cfce6ae30be75c2783b2e7ff4fb2f822ed301b1800050.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion-state.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/command-02e6f8c9bf4d435c95c2c16a6d2d5c49.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/command-678282ab62024bf5a3ad5f046c0b301f.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/command-9a32a6274a6c4fa2bbd785ab5119e7c4.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/command-a932c036a4fa45188f6a0df70f314b13.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/verification-6b377ae71d6945ec92db0839a50bf8e5.json",
+        ".go/runs/reconcile-effectless-prepared-release/completion/verification-8bf7a84bd8944cb3944374f96f6fd0fc.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion-state.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-0d92be69b53a4f338bf17aff0ff26033.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-33d151eeeb664150ac18cac69b9b462e.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-3e5a881a53ae471da76807b6be47aa4e.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-4086b5449a8444a8ad4568b34f8c148b.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-40ef7ddc4bf246098d3e595e06d82d72.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-57d38022c281454ba26d6218da6107d7.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-5bf3aa0c2bbc43ec93f0c7514dd68ad5.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-660a77c17ad9435d8988b6cc095e03ec.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-7e84fb8c6fea4e859cc4efc68e652232.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-87b966d02ada49c39cac328e38b7aedd.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c65a3abdcda44fae8b4c67e0887f5fd6.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-d4ea728cb22e46bebb827c0da9a0781e.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-e98daf6b211346f1891096bbdf836186.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/command-f757d3b2733d495192e803d7ff7f3a86.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/verification-41bda35526cf43a884720a7e4cf9a0b0.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/completion/verification-9c083b91cc774d75aea9a6ea6139860c.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/publication-process.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/reconciliation-intent.json",
+        ".go/runs/release-safe-active-task-handoff-v0347/release-state.json",
+        ".go/tasks/active/release-compatibility-timeout-budget.json",
+        ".go/workspaces/release-safe-active-task-handoff-v0347.json"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "observed_head_commit": "e771e258dc83ecaaeea116900300115dc2e690c8"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH uv run --no-project --with pytest>=8,<9 --with jsonschema>=4.23 python -m pytest tests/test_release_compatibility_gate.py -q",
+        "result": "3 passed in 303.59s, validation and diff check passed"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": null,
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "unknown",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "Self-review of exact diff: only finite nested timeout 300->600 and test asserting forwarded deadline",
+        "skip_reason": null
+      }
+    }
+  ]
+}

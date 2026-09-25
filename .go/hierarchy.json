@@ -57,7 +57,8 @@
             "release-candidate-preflight-isolation",
             "release-candidate-template-git-isolation",
             "rebind-effectless-release-verification",
-            "release-candidate-verification-isolation-02"
+            "release-candidate-verification-isolation-02",
+            "release-compatibility-timeout-budget"
           ]
         },
         {

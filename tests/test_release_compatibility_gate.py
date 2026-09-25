@@ -6,6 +6,7 @@ import subprocess
 import sys
 
 ROOT = Path(__file__).resolve().parents[1]
+COMPATIBILITY_GATE_TIMEOUT_SECONDS = 600
 
 
 def run_gate(tmp_path, *, regress=False):
@@ -40,7 +41,24 @@ def run_gate(tmp_path, *, regress=False):
     return subprocess.run(['bash', str(repo / 'scripts/check-compatibility.sh')],
                           cwd=tmp_path, text=True, capture_output=True,
                           env={**os.environ, 'PYTHON': sys.executable,
-                               'PYTHONDONTWRITEBYTECODE': '1'}, timeout=300)
+                               'PYTHONDONTWRITEBYTECODE': '1'},
+                          timeout=COMPATIBILITY_GATE_TIMEOUT_SECONDS)
+
+
+def test_compatibility_gate_has_finite_full_suite_budget(tmp_path, monkeypatch):
+    original = subprocess.run
+    observed = []
+
+    def capture(command, *args, **kwargs):
+        if command[:2] == ['bash', str(tmp_path / 'source' / 'scripts/check-compatibility.sh')]:
+            observed.append(kwargs['timeout'])
+            return subprocess.CompletedProcess(command, 0, 'compatibility release gate: passed\n', '')
+        return original(command, *args, **kwargs)
+
+    monkeypatch.setattr(subprocess, 'run', capture)
+    assert run_gate(tmp_path).returncode == 0
+    assert observed == [COMPATIBILITY_GATE_TIMEOUT_SECONDS]
+    assert 300 < COMPATIBILITY_GATE_TIMEOUT_SECONDS <= 600
 
 
 def test_compatibility_gate_accepts_supported_history(tmp_path):

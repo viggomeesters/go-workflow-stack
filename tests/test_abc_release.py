@@ -423,7 +423,9 @@ def test_task_completion_does_not_report_queue_done_with_blocked_work(tmp_path,m
 
 
 @pytest.mark.parametrize('linked_template', [False, True])
-def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tmp_path, linked_template):
+@pytest.mark.parametrize('mismatched_baseline', [False, True])
+@pytest.mark.parametrize('remote_tag_missing', [False, True])
+def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tmp_path, linked_template, mismatched_baseline, remote_tag_missing):
     """The candidate gate may create fixture repos, never inside a task worker."""
     from test_abc_worktrees import ROOT
     import os
@@ -437,6 +439,7 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
     git(template_source, 'init', '-q')
     git(template_source, 'add', '.go/marker', 'sentinel.txt')
     git(template_source, '-c', 'user.name=Test', '-c', 'user.email=test@example.org', 'commit', '-qm', 'template base')
+    git(template_source, '-c', 'user.name=Test', '-c', 'user.email=test@example.org', 'tag', '-a', 'v1.0.0', '-m', 'template baseline')
     if linked_template:
         git(template_source, 'worktree', 'add', '-q', '-b', 'fixture-linked', str(template))
     template_head = git(template, 'rev-parse', 'HEAD').strip()
@@ -445,15 +448,23 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
     git(upstream, 'init', '--bare', '-q')
     git(template, 'remote', 'add', 'origin', str(upstream))
     git(template, 'push', '-q', 'origin', 'HEAD:refs/heads/main')
+    if not remote_tag_missing:
+        git(template, 'push', '-q', 'origin', 'refs/tags/v1.0.0')
     (repo / 'scripts').mkdir()
     (repo / '.go').mkdir()
     (repo / 'go_workflow').mkdir()
     (repo / 'pyproject.toml').write_text('[project]\nversion = "1.2.3"\n')
     (repo / '.go/project.json').write_text(json.dumps({'required_stack_version': '1.2.3', 'stack_ref': 'v1.2.3'}))
-    (repo / 'release-pairings.json').write_text(json.dumps({'current_stack_ref': 'v1.2.3'}))
+    (repo / 'release-pairings.json').write_text(json.dumps({
+        'schema': 'go-workflow.release-pairings.v1',
+        'current_stack_ref': 'v1.2.3',
+        'template_repository': 'https://github.com/viggomeesters/go-project-template.git',
+        'pairings': [{'stack_ref': 'v1.2.3', 'template_commit': ('a' * 40 if mismatched_baseline else template_head),
+                      'template_ref': 'v1.0.0', 'note': 'Fixture baseline'}],
+    }))
     (repo / '.gitignore').write_text('ignored-config.txt\n')
     (repo / 'go_workflow/constants.py').write_text('STACK_VERSION = "1.2.3"\n')
-    (repo / 'go_workflow/release_pairings.py').write_text('def load_manifest(*args, **kwargs): return True\n')
+    (repo / 'go_workflow/release_pairings.py').write_bytes((ROOT / 'go_workflow/release_pairings.py').read_bytes())
     (repo / 'go_workflow/runtime_identity.py').write_text('def _official_repository_url(url): return False\n')
     (repo / 'CHANGELOG.md').write_text('version 1.2.3\n')
     for name in ('release-check-inner.sh',):
@@ -491,6 +502,12 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
         ['/bin/bash', str(repo / 'scripts/release-check-inner.sh'), '1.2.3', '--allow-candidate', '--allow-local-origin'],
         cwd=repo, env={**os.environ, 'GO_RELEASE_ROOT': str(repo)}, text=True, capture_output=True,
     )
+    if mismatched_baseline or remote_tag_missing:
+        assert result.returncode != 0
+        assert 'baseline' in result.stderr.lower() or 'baseline' in result.stdout.lower(), result.stderr + result.stdout
+        assert git(repo, 'status', '--porcelain=v1', '-uall') == before
+        assert (template / 'sentinel.txt').read_text() == 'original\n'
+        return
     assert result.returncode == 0, result.stderr + result.stdout
     assert 'publish: not performed' in result.stdout
     assert git(repo, 'status', '--porcelain=v1', '-uall') == before
@@ -502,6 +519,13 @@ def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tm
     assert subprocess.run(['git', '-C', str(upstream), 'show-ref', '--verify', '--quiet',
                            'refs/heads/forbidden'], check=False).returncode != 0
     assert (repo / 'removed.txt').exists() is False
+    missing = subprocess.run(
+        ['/bin/bash', str(repo / 'scripts/release-check-inner.sh'), '1.2.3', '--allow-candidate', '--allow-local-origin'],
+        cwd=repo, env={**os.environ, 'GO_RELEASE_ROOT': str(repo), 'GO_PROJECT_TEMPLATE': str(tmp_path / 'absent')},
+        text=True, capture_output=True,
+    )
+    assert missing.returncode != 0 and 'template baseline' in missing.stderr
+    assert git(repo, 'status', '--porcelain=v1', '-uall') == before
     git(repo, 'add', 'added.txt')
     staged = git(repo, 'status', '--porcelain=v1', '-uall')
     rejected = subprocess.run(

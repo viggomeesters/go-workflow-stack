@@ -515,8 +515,11 @@ PYCANDIDATE
   # A gate must never get a writable path to the caller's sibling template.
   caller_template="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}"
   GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/go-project-template"
-  if [ -d "$caller_template/.go" ]; then
-    python3 - "$caller_template" "$GO_PROJECT_TEMPLATE" <<'PYCOPYTEMPLATE'
+  if [ ! -d "$caller_template/.go" ]; then
+    echo "candidate template baseline requires an available template checkout" >&2
+    exit 1
+  fi
+  python3 - "$caller_template" "$GO_PROJECT_TEMPLATE" <<'PYCOPYTEMPLATE'
 import os
 from pathlib import Path
 import shutil
@@ -561,7 +564,65 @@ for remote in remotes:
     subprocess.run(['git', '-C', str(target), 'config', '--local', '--add',
                     f'remote.{remote}.pushurl', str(target / '.no-upstream')], check=True)
 PYCOPYTEMPLATE
-  fi
+    # The working template may be newer than the historical pairing. Prove the
+    # manifest's tagged baseline in a second, clean, disposable checkout; do
+    # not move the template copy supplied to check-linux or touch the caller.
+    baseline_root="$ARCHIVE_WORK/template-baseline"
+    release_git clone -q --no-local "$GO_PROJECT_TEMPLATE" "$baseline_root"
+    baseline_commit="$(python3 - "$SOURCE_ROOT" "$VERSION" <<'PYBASELINE'
+import pathlib, sys
+root = pathlib.Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(root))
+from go_workflow.release_pairings import load_manifest, pairing_for
+manifest = load_manifest(root / 'release-pairings.json', expected_ref='v' + sys.argv[2])
+print(pairing_for(manifest, 'v' + sys.argv[2])['template_commit'])
+PYBASELINE
+)"
+    if ! sanitized_git -C "$baseline_root" cat-file -e "$baseline_commit^{commit}" 2>/dev/null; then
+      echo "candidate template baseline commit is unavailable" >&2
+      exit 1
+    fi
+    sanitized_git -C "$baseline_root" checkout -q --detach "$baseline_commit"
+    template_origin="$(sanitized_git -C "$GO_PROJECT_TEMPLATE" config --local --get remote.origin.url)"
+    if [ "$template_origin" = "https://github.com/viggomeesters/go-project-template.git" ]; then
+      release_protocol="https"
+    elif [ "$ALLOW_LOCAL_ORIGIN" = "1" ]; then
+      case "$template_origin" in
+        file://*|/*) release_protocol="file" ;;
+        *) echo "candidate template baseline requires official or explicit filesystem origin" >&2; exit 1 ;;
+      esac
+    else
+      echo "candidate template baseline requires official template origin" >&2
+      exit 1
+    fi
+    template_ref="$(python3 - "$SOURCE_ROOT" "$VERSION" <<'PYTEMPLATEREF'
+import pathlib, sys
+root = pathlib.Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(root))
+from go_workflow.release_pairings import load_manifest, pairing_for
+manifest = load_manifest(root / 'release-pairings.json', expected_ref='v' + sys.argv[2])
+print(pairing_for(manifest, 'v' + sys.argv[2])['template_ref'])
+PYTEMPLATEREF
+)"
+    remote_baseline="$(release_git ls-remote --tags "$template_origin" "refs/tags/$template_ref" "refs/tags/$template_ref^{}")"
+    local_tag_object="$(sanitized_git -C "$baseline_root" rev-parse "refs/tags/$template_ref")"
+    if ! printf '%s\n' "$remote_baseline" | /usr/bin/grep -Fqx "$local_tag_object$(printf '\t')refs/tags/$template_ref" || \
+       ! printf '%s\n' "$remote_baseline" | /usr/bin/grep -Fqx "$baseline_commit$(printf '\t')refs/tags/$template_ref^{}"; then
+      echo "candidate template baseline tag/commit differs from origin" >&2
+      exit 1
+    fi
+    python3 - "$SOURCE_ROOT" "$VERSION" "$baseline_root" <<'PYVERIFYBASELINE'
+import pathlib, sys
+root = pathlib.Path(sys.argv[1])
+sys.dont_write_bytecode = True
+sys.path.insert(0, str(root))
+from go_workflow.release_pairings import load_manifest, verify_baseline
+manifest = load_manifest(root / 'release-pairings.json', expected_ref='v' + sys.argv[2])
+verify_baseline(manifest, 'v' + sys.argv[2], pathlib.Path(sys.argv[3]))
+PYVERIFYBASELINE
+    echo "candidate template baseline: annotated tag and exact origin commit verified"
 fi
 
 (

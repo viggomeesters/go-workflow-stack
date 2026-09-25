@@ -3914,6 +3914,28 @@ def cmd_go(args: argparse.Namespace) -> int:
         intent,
         flags=re.I,
     ))
+    from .routing import until_scope_intent
+    if until_scope_intent(intent):
+        from .campaign_intake import materialize_until_scope
+        from .state_io import atomic_json
+        errors = validate_repo(repo)
+        if errors:
+            raise RepoLocalError("invalid repository: " + "; ".join(errors))
+        campaign_id = "taskwise-" + datetime.now().strftime("%Y%m%dT%H%M%S%f")
+        contract = materialize_until_scope(repo, intent=intent,
+            source_ref=args.intent_source_ref or "user:go-until-scope",
+            campaign_id=campaign_id, budget=getattr(args, "explicit_campaign_budget", None),
+            ship_policy=getattr(args, "explicit_ship_policy", None))
+        if not (args.write or args.execute):
+            print(json.dumps({"mode": "dry_run", "campaign": contract}, indent=2, ensure_ascii=False))
+            return 0
+        path = go_root(repo) / "campaigns" / (campaign_id + ".json")
+        atomic_json(path, contract)
+        args.campaign = str(path)
+        args.previous_campaign = ""
+        args.campaign_workspace_root = str(repo.parent / (repo.name + "-task-workspaces"))
+        args.emit_handoff = False
+        return cmd_auto(args)
     root = go_root(repo)
     state = {
         "repo_exists": repo.exists(),
@@ -5967,6 +5989,24 @@ def cmd_route(args: argparse.Namespace) -> int:
     return 0 if route["valid"] else 1
 
 
+class ExplicitShipPolicy(argparse.Action):
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
+        namespace.explicit_ship_policy = values
+
+
+class ExplicitCampaignLimit(argparse.Action):
+    """Retain explicit user limits without promoting parser defaults to authority."""
+    def __call__(self, parser, namespace, values, option_string=None):
+        if values < 1:
+            raise argparse.ArgumentError(self, "limit must be positive")
+        setattr(namespace, self.dest, values)
+        budget = dict(getattr(namespace, "explicit_campaign_budget", {}))
+        key = "wall_seconds" if self.dest == "max_minutes" else self.dest
+        budget[key] = values * 60 if self.dest == "max_minutes" else values
+        namespace.explicit_campaign_budget = budget
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
@@ -6042,12 +6082,12 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--loop", action="store_true", help="force go-loop rather than go-auto")
     go.add_argument("--write", action="store_true", help="materialize intent-created tasks; default --json/plan mode is non-mutating")
     go.add_argument("--execute", action="store_true", help="execute selected auto/go-loop lifecycle")
-    go.add_argument("--max-tasks", type=int, default=10)
+    go.add_argument("--max-tasks", type=int, default=10, action=ExplicitCampaignLimit)
     go.add_argument("--summary-chars", type=int, default=900)
-    go.add_argument("--max-minutes", type=int, default=90)
-    go.add_argument("--max-commands", type=int, default=120)
+    go.add_argument("--max-minutes", type=int, default=90, action=ExplicitCampaignLimit)
+    go.add_argument("--max-commands", type=int, default=120, action=ExplicitCampaignLimit)
     go.add_argument("--command-timeout-seconds", type=int, default=900)
-    go.add_argument("--max-attempts", type=int, default=5)
+    go.add_argument("--max-attempts", type=int, default=5, action=ExplicitCampaignLimit)
     go.add_argument("--build-command", default="", help="optional adapter command run before verification; supports safe {repo_shell}, raw {repo}, {task_id}, {attempt}, {strategy}")
     go.add_argument("--critic-command", default="", help="optional adapter command run after passing verification; non-zero blocks/repairs")
     go.add_argument("--repair-command", default="", help="optional adapter command run after failed verify/critic before next attempt")
@@ -6056,7 +6096,7 @@ def build_parser() -> argparse.ArgumentParser:
     go.add_argument("--semantic-critic", action=argparse.BooleanOptionalAction, default=True, help="run built-in semantic critic before finish (default: enabled)")
     go.add_argument("--followup-on-block", action="store_true", help="create a scoped follow-up task when critic blocks")
     go.add_argument("--checkpoint-every-tasks", type=int, default=1)
-    go.add_argument("--ship-policy", choices=["none", "local-commit", "push"], default="none")
+    go.add_argument("--ship-policy", choices=["none", "local-commit", "push"], default="none", action=ExplicitShipPolicy)
     go.add_argument("--allow-push", action="store_true")
     go.add_argument("--agent", default="agent")
     go.add_argument("--allow-dirty", action="store_true")

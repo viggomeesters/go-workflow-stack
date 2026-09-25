@@ -271,3 +271,28 @@ governing decision/brief and positive/negative/legacy validation evidence.
 R4 remains the controller's critic,
 final-candidate checks, scoped commit/push, immutable release and readback. No
 release version or changelog is changed by the build worker.
+
+## Taskwise execution until the adopted scope is complete
+
+`go --intent 'Go tot alle taken klaar' --execute` adopts the current unfinished
+repository tasks, including blocked work, into an explicit campaign. Dry-run
+omits `--execute` and writes nothing. Intake requires existing original R#
+outcomes, exact model bindings, release profiles and accepted decisions; missing
+configuration is reported rather than invented. The recorded contract freezes
+membership: later unrelated tasks do not silently join the run.
+
+New contracts opt into `go-workflow.taskwise-execution.v1` with mode
+`until_scope`. Only these contracts can use null total wall/task/attempt ceilings.
+Explicit `--max-minutes`, `--max-tasks`, `--max-attempts` and `--max-commands`
+remain cumulative limits. Default command and repair allowances remain bounded
+per task. Explicit `--ship-policy none` or `local-commit` forbids push. Existing campaign
+contracts retain their previous cumulative limits and authority.
+
+New intake derives push authority from this execution request and the selected
+configured release profiles. Optional `project.taskwise_policy.allow_push` and
+`allow_deployment` booleans can restrict it. Existing runs are never broadened.
+A reasoned no-release task does not acquire an invented release profile.
+
+The campaign plan exposes delivery-proven `progress`, separate from its activity
+history. Git changes and status labels alone do not count as delivered work;
+an empty eligible queue still requires the original goal audit.

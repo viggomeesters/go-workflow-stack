@@ -20,6 +20,7 @@ from .campaign_contracts import (
     campaign_findings,
     campaign_task_findings,
     contract_digest,
+    limit_reached,
 )
 from .task_state import open_task_records
 from .state_io import atomic_json, repository_lock, _pid_alive
@@ -447,8 +448,8 @@ def _bound_task_args(
         "run_id": "",
         "task_id": "",
         "max_commands": 36,
-        "max_minutes": max(1, (contract["authority"]["budget"]["wall_seconds"] + 59) // 60),
-        "max_attempts": contract["authority"]["budget"]["max_attempts"],
+        "max_minutes": max(1, ((contract["authority"]["budget"]["wall_seconds"] or 3600) + 59) // 60),
+        "max_attempts": contract["authority"]["budget"]["max_attempts"] or 2,
         "command_timeout_seconds": 900,
         "executor_agent": "codex",
         "repair_agent": "",
@@ -463,7 +464,7 @@ def _bound_task_args(
             setattr(bound, name, value)
     bound.max_attempts = min(
         max(int(bound.max_attempts), 1),
-        contract["authority"]["budget"]["max_attempts"],
+        contract["authority"]["budget"]["max_attempts"] or max(int(bound.max_attempts), 1),
     )
     bound.executor_agent = "codex"
     bound.semantic_critic = True
@@ -472,7 +473,7 @@ def _bound_task_args(
     bound.task_id = task["id"]
     release_authority = contract["authority"]["release"]
     bound.allow_push = bool(release_authority["allow_push"])
-    bound.ship_policy = "push" if bound.allow_push else "none"
+    bound.ship_policy = "push" if bound.allow_push else ("local-commit" if getattr(args, "explicit_ship_policy", None) == "local-commit" else "none")
     release = ((task.get("execution_contract") or {}).get("release") or {})
     project = _load_object(repo / ".go" / "project.json", "campaign project")
     profile = (project.get("release_profiles") or {}).get(release.get("profile"), {})
@@ -617,6 +618,9 @@ def plan_campaign(
         "skipped_tasks": skipped,
         "stop_semantics": "no_eligible_tasks_is_not_goal_verified",
     }
+    if contract.get("execution", {}).get("mode") == "until_scope":
+        from .campaign_contracts import proven_progress
+        projection["progress"] = proven_progress(repo, contract)
     return projection, selected
 
 
@@ -641,6 +645,7 @@ def execute_campaign(
         raise CampaignError("campaign workspace root must be outside the control repository")
     contract = load_contract(repo, contract_path, previous_path=previous)
     budget = contract["authority"]["budget"]
+    taskwise = contract.get("execution", {}).get("mode") == "until_scope"
     result: dict[str, Any] = {
         "schema": "go-workflow.auto-run-result.v1",
         "mode": mode,
@@ -699,11 +704,11 @@ def execute_campaign(
                 max(time.time() - active_since, 0.0) if active_since is not None else 0.0
             )
             if (
-                elapsed >= budget["wall_seconds"]
-                or state["consumption"]["attempts_started"] >= budget["max_attempts"]
-                or state["consumption"]["tasks_completed"] >= budget["max_tasks"]
-                or state["resources"]["commands_used"] >= state["limits"]["max_commands"]
-                or state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"]
+                limit_reached(elapsed, budget["wall_seconds"])
+                or limit_reached(state["consumption"]["attempts_started"], budget["max_attempts"])
+                or limit_reached(state["consumption"]["tasks_completed"], budget["max_tasks"])
+                or limit_reached(state["resources"]["commands_used"], budget.get("max_commands") if taskwise else state["limits"]["max_commands"])
+                or (not taskwise and state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"])
             ):
                 _stop(state_path, state, "budget_exhausted", "campaign-wide budget exhausted")
                 result.update(status="budget_exhausted", budget_exhausted=True)
@@ -805,11 +810,12 @@ def execute_campaign(
                 ]
                 task_args.max_commands = min(
                     max(int(task_args.max_commands), 1),
-                    state["limits"]["max_commands"] - state["resources"]["commands_used"],
+                    (budget.get("max_commands", state["limits"]["max_commands"]) -
+                     (0 if taskwise and "max_commands" not in budget else state["resources"]["commands_used"])),
                 )
                 task_args.max_attempts = min(
                     max(int(task_args.max_attempts), 1),
-                    state["limits"]["max_repairs"] - state["resources"]["repair_attempts"],
+                    state["limits"]["max_repairs"] - (0 if taskwise else state["resources"]["repair_attempts"]),
                 )
                 state["dispatch"]["stage"] = "bound"
                 _save_state(state_path, state)
@@ -875,8 +881,8 @@ def execute_campaign(
                 condition = (
                     "budget_exhausted"
                     if task_result.get("status") == "budget_exhausted"
-                    or state["resources"]["commands_used"] >= state["limits"]["max_commands"]
-                    or state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"]
+                    or limit_reached(state["resources"]["commands_used"], budget.get("max_commands") if taskwise else state["limits"]["max_commands"])
+                    or (not taskwise and state["resources"]["repair_attempts"] >= state["limits"]["max_repairs"])
                     else delivery_condition
                     if delivery_condition is not None
                     else "unknown_external_effect"

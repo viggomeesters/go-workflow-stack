@@ -1,0 +1,27 @@
+{
+  "task_id": "taskwise-t01",
+  "verification": {
+    "command": "python3 -m pytest tests/test_taskwise_campaign.py tests/test_campaign_intake.py tests/test_autonomy_contracts.py tests/test_autonomy_campaign.py -q",
+    "result": "83 passed",
+    "log": ".go/evidence/taskwise-t01/regression.txt"
+  },
+  "review": {
+    "reviewer": "/root/review_t01",
+    "mode": "independent",
+    "blocking_findings": [],
+    "repaired": "Explicit publication restrictions and explicit total command budgets preserved; legacy contracts unchanged."
+  },
+  "source_sha256": {
+    "go_workflow/campaign.py": "cacb79293d529620dbf5431fa2fd476ad604f498d698d58311aeeed2e88abd54",
+    "go_workflow/campaign_contracts.py": "d3e01011594d4ee343e8ad03d30064a7291ae76149402dcd5485c016cf7f72f9",
+    "go_workflow/campaign_intake.py": "667cc0fb3f9136309535d86a471f950e2fa1d2b287db2ab4a86e4187a0915283",
+    "go_workflow/cli.py": "80a1079bdba1e8545783bcbec7fd5253a2180fc6aadcaffd974c2f8b7fde9660",
+    "go_workflow/routing.py": "cfbb12c1307013c51ce51815c5bcd4e1370fbbeab57dd4932b899a14b2cfe129",
+    "schemas/campaign-contract.schema.json": "75fa442634db53ca02b3f01fb894fd0d62163b2097e3db9e94e6a511e4723683",
+    "tests/test_taskwise_campaign.py": "596c034dfded5ee0b87adbb0a4f02381ada5724bc002b6bee48ea897c91b38b3",
+    "tests/test_campaign_intake.py": "a968ffd6a64b5ed6d5fa9cdd7cb0898bcd27b8edf54fa2aebc3ad94c5822b494",
+    "docs/autonomous-campaign.md": "c20efa495761089376f2c75d06a55dfc821ddaa15fbcf0fcc02383494ae49982"
+  },
+  "release": "Single immutable release deferred until T01-T05 integrated verification, as explicitly requested. This task is development delivery on feature branch.",
+  "self_reflect": "No durable agent/process improvement needed; review defects fixed within task scope; no skill/memory/config changes."
+}

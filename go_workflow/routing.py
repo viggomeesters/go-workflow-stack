@@ -119,6 +119,12 @@ def classify_public_go_intent(intent: str, state: dict[str, Any]) -> dict[str, A
     }
 
 
+def until_scope_intent(intent: str) -> bool:
+    """Recognize an explicit whole-queue execution request, never advice/plan."""
+    text = intent.strip().lower().rstrip('.!')
+    return bool(re.fullmatch(r'(?:go\s+)?(?:tot alle taken klaar(?: zijn)?|until all tasks (?:are )?done)', text))
+
+
 def recommend_route(normalized: str, intent: str, state: dict[str, Any]) -> dict[str, Any]:
     intent = (intent or "").strip().lower()
     public = classify_public_go_intent(intent, state)
@@ -147,6 +153,8 @@ def recommend_route(normalized: str, intent: str, state: dict[str, Any]) -> dict
         return recommendation("spike", "repo exists but .go contract is missing", mode="repair_existing_repo", selected_route="spike")
     if not state.get("valid") or not all(state.get(key) for key in ("has_vision", "has_principles", "has_hierarchy")):
         return recommendation("spike", "repo-local contract is incomplete or invalid", selected_route="spike")
+    if public["implementation_authorized"] and until_scope_intent(intent):
+        return recommendation("go", "execute the frozen unfinished task scope", execution_mode="until_scope", selected_route="goal")
     if public["route"] in {"wayfinder", "vision", "plan"}:
         return recommendation(public["route"], f"public Go selected the non-executing {public['route']} route")
     if public["route"] == "advice":

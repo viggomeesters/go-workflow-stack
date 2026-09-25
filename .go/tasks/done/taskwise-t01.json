@@ -1,0 +1,113 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "taskwise-t01",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "T01 — Runscope en aantoonbare voortgang",
+  "description": "Authorized implementation plan: serial tasks, single immutable release after integrated verification. Preserve legacy runs and user changes. No Hermes runner or Book Forge edits.",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Freeze original task set; support until-scope execution without implicit total time/task ceilings; preserve explicit budgets and legacy contracts; content-bound progress only."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_taskwise_campaign.py -q"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-25T12:46:01+02:00",
+    "base_commit": "4f26103d20a382051d55629dbb30ac2d880bade1"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T12:59:09+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Independent review_t01 recheck: no blockers; 83 targeted regressions passed; exact source hashes in .go/evidence/taskwise-t01/result.json",
+      "transaction_id": "1ba325ef563747119c77ff9089cb52da"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T12:59:09+02:00",
+      "task_id": "taskwise-t01",
+      "agent": "codex",
+      "summary": "changed_files=go_workflow,schemas/campaign-contract.schema.json,tests/test_taskwise_campaign.py,tests/test_campaign_intake.py,docs/autonomous-campaign.md; verification_command=83 targeted campaign regressions and validate; verification_result=passed; critic=independent review_t01 passed; runtime=local Python; model=effective identity unconfirmed; billing_mode=unknown; evidence=.go/evidence/taskwise-t01/result.json; Self-reflect=no durable process correction needed",
+      "changed_files": [
+        "go_workflow",
+        "schemas/campaign-contract.schema.json",
+        "tests/test_taskwise_campaign.py",
+        "tests/test_campaign_intake.py",
+        "docs/autonomous-campaign.md"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "4f26103d20a382051d55629dbb30ac2d880bade1",
+        "observed_head_commit": "4f26103d20a382051d55629dbb30ac2d880bade1"
+      },
+      "verification": {
+        "command": "83 targeted campaign regressions and validate",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "local Python",
+        "model": "effective identity unconfirmed",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "local Python",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": "effective identity unconfirmed",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent review_t01 passed",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "bounded-serial-campaign-contract-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

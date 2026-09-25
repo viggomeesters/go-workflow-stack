@@ -358,14 +358,27 @@
           ],
           "properties": {
             "wall_seconds": {
-              "type": "integer",
+              "type": [
+                "integer",
+                "null"
+              ],
               "minimum": 1
             },
             "max_tasks": {
-              "type": "integer",
+              "type": [
+                "integer",
+                "null"
+              ],
               "minimum": 1
             },
             "max_attempts": {
+              "type": [
+                "integer",
+                "null"
+              ],
+              "minimum": 1
+            },
+            "max_commands": {
               "type": "integer",
               "minimum": 1
             }
@@ -515,7 +528,60 @@
       },
       "minItems": 1,
       "uniqueItems": true
+    },
+    "execution": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "mode"
+      ],
+      "properties": {
+        "schema": {
+          "const": "go-workflow.taskwise-execution.v1"
+        },
+        "mode": {
+          "const": "until_scope"
+        }
+      }
     }
   },
-  "description": "Structural validation only. Runtime validation also checks hashes, references, immutable outcome continuity and authority consistency. This document grants no authority by itself."
+  "description": "Structural validation only. Runtime validation also checks hashes, references, immutable outcome continuity and authority consistency. This document grants no authority by itself.",
+  "allOf": [
+    {
+      "if": {
+        "not": {
+          "required": [
+            "execution"
+          ]
+        }
+      },
+      "then": {
+        "properties": {
+          "authority": {
+            "properties": {
+              "budget": {
+                "properties": {
+                  "wall_seconds": {
+                    "type": "integer"
+                  },
+                  "max_tasks": {
+                    "type": "integer"
+                  },
+                  "max_attempts": {
+                    "type": "integer"
+                  }
+                },
+                "not": {
+                  "required": [
+                    "max_commands"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

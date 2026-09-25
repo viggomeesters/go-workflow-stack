@@ -68,7 +68,12 @@ def validate_campaign_contract(data: Any) -> list[str]:
                 seen.add(item)
         return seen
 
-    data = obj(data, 'schema id project revision previous_sha256 intent goal basis authority decisions', 'campaign')
+    taskwise = isinstance(data, dict) and 'execution' in data
+    data = obj(data, 'schema id project revision previous_sha256 intent goal basis authority decisions' + (' execution' if taskwise else ''), 'campaign')
+    if taskwise:
+        execution = obj(data['execution'], 'schema mode', 'execution')
+        if execution != {'schema': 'go-workflow.taskwise-execution.v1', 'mode': 'until_scope'}:
+            errors.append('execution must explicitly select taskwise until_scope')
     if data.get('schema') != CAMPAIGN_SCHEMA:
         errors.append('campaign schema mismatch')
     for key in ('id', 'project'):
@@ -161,9 +166,15 @@ def validate_campaign_contract(data: Any) -> list[str]:
             if key in seen_models:
                 errors.append('duplicate model')
             seen_models.add(key)
-    budget = obj(authority.get('budget'), 'wall_seconds max_tasks max_attempts', 'budget')
+    budget_keys = 'wall_seconds max_tasks max_attempts'
+    if taskwise and isinstance(authority.get('budget'), dict) and 'max_commands' in authority['budget']:
+        budget_keys += ' max_commands'
+    budget = obj(authority.get('budget'), budget_keys, 'budget')
+    if 'max_commands' in budget:
+        integer(budget['max_commands'], 'budget.max_commands')
     for key in ('wall_seconds', 'max_tasks', 'max_attempts'):
-        integer(budget.get(key), f'budget.{key}')
+        if not (taskwise and budget.get(key) is None):
+            integer(budget.get(key), f'budget.{key}')
     release = obj(authority.get('release'), 'profiles allow_push source_ref', 'release')
     profiles = strings(release.get('profiles'), 'release.profiles', pattern=ID_RE)
     if type(release.get('allow_push')) is not bool:
@@ -352,3 +363,45 @@ def campaign_findings(repo: Path, data: Any, *, previous: Any = None) -> list[st
     except (OSError, ValueError, TypeError, KeyError, AttributeError) as exc:
         errors.append(f'campaign references unavailable or invalid: {exc}')
     return errors
+
+
+def snapshot_task_scope(repo: Path) -> dict[str, dict[str, Any]]:
+    """Freeze all unfinished task identities and outcomes, including blocked work."""
+    result = {}
+    for state in ('open', 'active', 'blocked'):
+        for path in sorted((repo / '.go/tasks' / state).glob('*.json')):
+            task = json.loads(path.read_text(encoding='utf-8'))
+            task_id = task['id']
+            if task_id in result:
+                raise ValueError(f'duplicate task state: {task_id}')
+            outcomes = task.get('requested_outcomes', [])
+            result[task_id] = {
+                'status': state, 'summary': task['summary'],
+                'outcomes': [{'id': item['id'], 'text_sha256': hashlib.sha256(item['text'].encode()).hexdigest()}
+                             for item in outcomes],
+            }
+    return result
+
+
+def limit_reached(value: float, limit: int | None) -> bool:
+    """None is explicit absence of a campaign ceiling, never a numeric sentinel."""
+    return limit is not None and value >= limit
+
+
+def proven_progress(repo: Path, contract: dict[str, Any]) -> dict[str, Any]:
+    """Count delivery evidence, never Git activity or a mutable status label."""
+    from .campaign_delivery import delivery_report, _task
+    from .completion import completion_findings
+    completed, remaining, findings = [], [], {}
+    for task_id in contract['authority']['permitted_tasks']:
+        try:
+            report = delivery_report(repo, task_id)
+            proof_errors = completion_findings(repo, _task(repo, task_id), current=False, remote=False)
+            delivered = report['delivered'] and not proof_errors
+            findings[task_id] = report['blockers'] + [{'code': 'invalid_content_proof', 'message': error} for error in proof_errors]
+        except (ValueError, OSError, KeyError, TypeError) as exc:
+            delivered = False
+            findings[task_id] = [{'code': 'unproven', 'message': str(exc)}]
+        (completed if delivered else remaining).append(task_id)
+    return {'completed': completed, 'remaining': remaining, 'findings': findings,
+            'total': len(completed) + len(remaining)}

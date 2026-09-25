@@ -93,3 +93,20 @@ current Book Forge working directory. Once supplied: preflight the transport,
 update only that consumer to the published immutable release, run a bounded real
 task through publication and ordered chat delivery, verify readback, then close
 T05 with the resulting evidence. No other consumer pin or Hermes process changes.
+
+## Accepted terminal alternative and live consumer readback
+
+The user accepted a live terminal beside chat, then explicitly requested a plain
+log file followed by the terminal. v0.3.49 implements and publishes both. The
+consumer is now explicitly Book Forge, not an unresolved user selection. A real
+public Go preflight in its isolated `codex/progress-terminal-pilot` checkout
+opened macOS Terminal and acknowledged the run-start and concrete block message
+after actual TTY rendering. All records preserve their original task IDs.
+
+The remaining gate is repository ownership, not transport selection: the
+published Book Forge state contains BF-T086, BF-T089, BF-T100 and BF-U009 active.
+The serial campaign stops before claiming BF-U010. These records are unchanged;
+the supported drain action preserves a resumable campaign. Never remove, clear,
+relabel or bypass them just to complete this pilot. Resume BF-U010 through its
+frozen campaign after their canonical owners legitimately reconcile them.
+The full real-task consumer execution remains unproven; no done claim is made.

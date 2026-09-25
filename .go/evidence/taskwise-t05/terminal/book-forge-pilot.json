@@ -1,0 +1,44 @@
+{
+  "task_id": "BF-U010",
+  "status": "blocked_before_claim",
+  "reason": "Uitvoering gestopt v\u00f3\u00f3r claim: vier bestaande actieve taken blokkeren een nieuwe seri\u00eble run. BF-U010 blijft open; bestaande taken zijn ongewijzigd.",
+  "stack_ref": "v0.3.49",
+  "stack_commit": "26c635a8d85c0f49c4914b5d64920f72512489cf",
+  "campaign": "taskwise-20260925T165025929843",
+  "observed_delivery": {
+    "native_terminal_started": true,
+    "surface": "terminal",
+    "user_chat": false,
+    "human_reading_approval": false,
+    "run_start_acknowledged": true,
+    "block_notice": {
+      "ok": true,
+      "delivered": 1,
+      "pending": 0
+    },
+    "readable_log": ".go/runs/progress/taskwise-20260925T165025929843.log"
+  },
+  "unchanged_active_tasks": {
+    "BF-T089.json": true,
+    "BF-U009.json": true,
+    "BF-T086.json": true,
+    "BF-T100.json": true
+  },
+  "task_claimed": false,
+  "model_work_started": false,
+  "book_generation_started": false,
+  "checkpoint": {
+    "schema": "go-workflow.auto-run-result.v1",
+    "mode": "go-auto",
+    "repo": "/Users/viggomeesters/Dev/book-forge-terminal-pilot",
+    "status": "drained",
+    "completed_tasks": [],
+    "blocked_task": null,
+    "checks": [],
+    "commands_run": 0,
+    "goal_verified": false,
+    "summary": "Campaign drained at a durable boundary; no new task was dispatched.",
+    "campaign_state": ".go/runs/campaigns/taskwise-20260925T165025929843/state.json"
+  },
+  "remaining": "Resume the frozen campaign after the canonical owners legitimately complete/reconcile their active tasks. Never clear them to make the pilot pass."
+}

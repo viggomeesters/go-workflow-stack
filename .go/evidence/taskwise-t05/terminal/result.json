@@ -19,7 +19,14 @@
     "go_workflow/cli.py": "ffe407901ee44e98b2154ee76330921c92b0c991348c035f966b94d019f2be58",
     "tests/test_progress_terminal.py": "04dfbf9c4ff9e5ab10df861a90dbf03ed84c568e6a0eb549810344fa3a516b8b"
   },
-  "rollout": "pending release and isolated Book Forge native worker pilot",
+  "rollout": {
+    "status": "native_terminal_delivery_verified_task_execution_blocked",
+    "consumer": "book-forge",
+    "branch": "codex/progress-terminal-pilot",
+    "evidence": "book-forge-pilot.json",
+    "reason": "Four pre-existing active tasks prevent public Go from claiming BF-U010. Their exact bytes are preserved. No ownership gate bypassed.",
+    "human_reading_approval": false
+  },
   "self_reflect": "No durable agent/process improvement needed; this extends the agreed product contract, with independent review and actual TTY delivery evidence.",
   "raw_test_log_sha256": {
     "taskwise-terminal-intake-red.txt": "4d25d8b6f8abef8f8db7d51618180b226604713c4076512cebe1cf8f5dd6e65b",
@@ -28,5 +35,14 @@
     "log-red.txt": "0795117139c33f56ff78a19c14136fb8e3058edf9fa9f30056e47b769978d1f2"
   },
   "log_format": "RED logs are display copies with trailing whitespace removed; raw digests recorded.",
-  "readable_log": "User requested a plain live logfile; transport regenerates it from canonical outbox even while viewer is closed. Viewer reads and verifies that exact file before acknowledging rendering."
+  "readable_log": "User requested a plain live logfile; transport regenerates it from canonical outbox even while viewer is closed. Viewer reads and verifies that exact file before acknowledging rendering.",
+  "publication": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-25T14:48:01Z",
+    "tagName": "v0.3.49",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.49",
+    "gate": "immutable-release-gate.txt",
+    "release_commit": "26c635a8d85c0f49c4914b5d64920f72512489cf"
+  }
 }

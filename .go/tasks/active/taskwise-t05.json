@@ -58,7 +58,8 @@
     "Authorized single immutable release requires version, changelog and pairing manifest; preserve existing uv.lock unchanged.",
     "Implementation and immutable v0.3.48 published/read back; .go/evidence/taskwise-t05/result.json and publication-readback.json. Task remains incomplete pending designated consumer and real independent chat transport.",
     "2026-09-25 user Implement accepts terminal beside chat as live delivery surface, replacing previous missing real-chat transport requirement. Existing run permissions remain frozen.",
-    "Ignore machine-local terminal liveness checkpoints; canonical outbox and final pilot receipts retain durable delivery evidence without a running viewer dirtying the release candidate."
+    "Ignore machine-local terminal liveness checkpoints; canonical outbox and final pilot receipts retain durable delivery evidence without a running viewer dirtying the release candidate.",
+    "v0.3.49 terminal and readable log published. Native Book Forge Go preflight opened terminal and acknowledged run-start/block notice; BF-U010 stopped before claim because BF-T086,BF-T089,BF-T100,BF-U009 already active. Preserve these tasks; canonical checkpoint on codex/progress-terminal-pilot. T05 remains incomplete only for full real-task consumer execution. Evidence: .go/evidence/taskwise-t05/terminal/result.json"
   ],
   "architecture": {
     "impact": "material",

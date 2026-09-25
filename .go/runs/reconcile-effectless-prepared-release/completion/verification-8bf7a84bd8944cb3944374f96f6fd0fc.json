@@ -1,0 +1,58 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "reconcile-effectless-prepared-release",
+  "project": "go-workflow-stack",
+  "contract_digest": "8c39d73c83b277ef8f5e49c09ce7edc8cfeb65cce5a88c85475ffaae68b96181",
+  "revision": "05940adc673b04f2137bb01801a554301f9d1bcf",
+  "content_digest": "097033b4bcaa22d2a9e9ca28c46ae22334736da3aa2461871bfe1e97d55062c0",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reconcile-effectless-prepared-release",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "env -u PYTHONPATH PYTHONDONTWRITEBYTECODE=1 PYTEST_DISABLE_PLUGIN_AUTOLOAD=1 uv run --no-project --with pytest --with jsonschema python -m pytest -q -p no:cacheprovider tests/test_release_reconcile.py",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "05940adc673b04f2137bb01801a554301f9d1bcf",
+        "worktree_digest": "097033b4bcaa22d2a9e9ca28c46ae22334736da3aa2461871bfe1e97d55062c0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reconcile-effectless-prepared-release/completion/command-678282ab62024bf5a3ad5f046c0b301f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reconcile-effectless-prepared-release/completion/command-678282ab62024bf5a3ad5f046c0b301f.json",
+        "sha256": "65e682480994a70eaaedd111f29bc9f120fbfb6164db5efc592af3c3a1a50398"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "reconcile-effectless-prepared-release",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "acceptance"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/home/viggo/github/go-workflow-stack",
+        "revision": "05940adc673b04f2137bb01801a554301f9d1bcf",
+        "worktree_digest": "097033b4bcaa22d2a9e9ca28c46ae22334736da3aa2461871bfe1e97d55062c0",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/reconcile-effectless-prepared-release/completion/command-02e6f8c9bf4d435c95c2c16a6d2d5c49.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/reconcile-effectless-prepared-release/completion/command-02e6f8c9bf4d435c95c2c16a6d2d5c49.json",
+        "sha256": "53641893a88ad1318b19e5d86ba400ebb9dd05234b478bc88251f8dc3b2655d4"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

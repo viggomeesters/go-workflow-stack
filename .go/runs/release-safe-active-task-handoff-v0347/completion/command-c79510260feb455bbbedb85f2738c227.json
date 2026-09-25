@@ -1,0 +1,29 @@
+{
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "content_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+  "command": "python3 cli/go.py architecture validate . --json",
+  "cwd": "/tmp/go-managed-verify-l8wepwzm/candidate",
+  "elapsed_seconds": 3.23482912639156,
+  "returncode": 0,
+  "stdout": "{\n  \"schema\": \"go-workflow.architecture-validation.v1\",\n  \"valid\": true,\n  \"errors\": []\n}\n",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "template_head": "3073653022d1c8fb934e2068c24d33912019738c",
+    "candidate_digest": "a52945bc3157a008c9eefd5bf7a22c6874cadb62ba25510dc41aaeaef1ac6ec9",
+    "tracked_content_sha256": "c57f1a2c2b939bdde71f6cb2717cf671f840777e6c31e6336838d0b573720b6f",
+    "changed_files_sha256": "d926ea92d4b3bd3f378e367973a1c918050e0f8fe621cfb867d61593eef0a697",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

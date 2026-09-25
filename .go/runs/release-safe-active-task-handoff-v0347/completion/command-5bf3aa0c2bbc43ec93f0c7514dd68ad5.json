@@ -1,0 +1,29 @@
+{
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "e771e258dc83ecaaeea116900300115dc2e690c8",
+  "content_digest": "679468b1db8fc703f9d7ac419295bf012696c2c7815b1a5896b68915d8ce969f",
+  "command": "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template ./scripts/release-check.sh --allow-candidate --allow-local-origin",
+  "cwd": "/tmp/go-managed-verify-s98de1et/candidate",
+  "elapsed_seconds": 426.75931109813973,
+  "returncode": 0,
+  "stdout": "release preflight: v0.3.47\ntag: v0.3.47 candidate mode; final gate still requires the annotated tag\nlocal Linux/WSL verification with Python 3.11.15\n........................................................................ [ 45%]\n........................................................................ [ 91%]\n..............                                                           [100%]\n158 passed in 67.34s (0:01:07)\n..........................                                               [100%]\n26 passed in 167.64s (0:02:47)\nok: /tmp/tmp.VAHxu5GcJh/go-workflow-stack/.go\nautonomy campaign gate: passed\ncompatibility release gate: passed\n........................................................................ [ 35%]\n........................................................................ [ 70%]\n.............................................................            [100%]\n205 passed in 166.49s (0:02:46)\nok: /tmp/tmp.VAHxu5GcJh/go-workflow-stack/.go\ntemplate pairing: ok\nlocal Linux/WSL verification: ok\ninitialized: /tmp/tmp.9iRHKDxX80/fixture/.go\nok: /tmp/tmp.9iRHKDxX80/fixture/.go\nstandalone uv tool distribution: ok\npublish: not performed\n",
+  "stderr": "Resolved 1 package in 3ms\n   Building go-workflow-stack @ file:///tmp/tmp.VAHxu5GcJh/go-workflow-stack\n      Built go-workflow-stack @ file:///tmp/tmp.VAHxu5GcJh/go-workflow-stack\nPrepared 1 package in 1.23s\nInstalled 1 package in 19ms\n + go-workflow-stack==0.3.47 (from file:///tmp/tmp.VAHxu5GcJh/go-workflow-stack)\nInstalled 1 executable: go-workflow\nwarning: `/tmp/tmp.9iRHKDxX80/bin` is not on your PATH. To use installed tools, run `export PATH=\"/tmp/tmp.9iRHKDxX80/bin:$PATH\"` or `uv tool update-shell`.\n",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "template_head": "3073653022d1c8fb934e2068c24d33912019738c",
+    "candidate_digest": "129d4a33682465c8cabdba4a9a40220c2744125f53149e22d989417a118f2598",
+    "tracked_content_sha256": "64a4674182c2b4311f67a573dc5da40539e976d5213ecc8fb4556334f5da4345",
+    "changed_files_sha256": "d926ea92d4b3bd3f378e367973a1c918050e0f8fe621cfb867d61593eef0a697",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

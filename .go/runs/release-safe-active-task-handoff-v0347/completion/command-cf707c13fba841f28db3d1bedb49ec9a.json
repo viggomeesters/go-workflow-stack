@@ -1,0 +1,29 @@
+{
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "content_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+  "command": "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'",
+  "cwd": "/tmp/go-managed-verify-qspc6722/candidate",
+  "elapsed_seconds": 4.967013845220208,
+  "returncode": 0,
+  "stdout": "{\n  \"schema\": \"go-workflow.doctor.v1\",\n  \"repo\": \"/tmp/go-managed-verify-qspc6722/candidate\",\n  \"platform\": {\n    \"kind\": \"wsl\",\n    \"detected\": false\n  },\n  \"prerequisites\": [\n    {\n      \"name\": \"python\",\n      \"available\": true,\n      \"version\": \"3.11.15\",\n      \"path\": \"/home/viggo/.hermes/hermes-agent/venv/bin/python3\"\n    },\n    {\n      \"name\": \"git\",\n      \"available\": true,\n      \"path\": \"/usr/bin/git\"\n    },\n    {\n      \"name\": \"bash\",\n      \"available\": true,\n      \"path\": \"/usr/bin/bash\"\n    },\n    {\n      \"name\": \"make\",\n      \"available\": true,\n      \"path\": \"/usr/bin/make\"\n    },\n    {\n      \"name\": \"uv\",\n      \"available\": true,\n      \"path\": \"/home/viggo/.local/bin/uv\"\n    }\n  ],\n  \"agent\": {\n    \"name\": \"hermes\",\n    \"available\": true,\n    \"compatible\": true,\n    \"path\": \"/home/viggo/.local/bin/hermes\",\n    \"prompt_flag\": \"-z\"\n  },\n  \"stack\": {\n    \"version\": \"0.3.47\",\n    \"ref\": \"v0.3.47\",\n    \"git_head\": \"6732e5336a7214b86aaba4ad0ad46fc41c7123e0\",\n    \"pinned_commit\": null,\n    \"identity_source\": \"git-checkout\",\n    \"provenance_requested_ref\": \"v0.3.47\",\n    \"required_version\": \"0.3.47\",\n    \"required_ref\": \"v0.3.47\",\n    \"exact_ref\": false,\n    \"development_override\": false,\n    \"compatible\": false\n  },\n  \"contract\": {\n    \"valid\": true,\n    \"errors\": []\n  },\n  \"ready\": false,\n  \"actions\": [\n    \"checkout the pinned go-workflow-stack ref v0.3.47\"\n  ]\n}\nCandidate doctor: only the absent immutable pretag blocks ready; post-tag exact_ref=true is still required\n",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "template_head": "3073653022d1c8fb934e2068c24d33912019738c",
+    "candidate_digest": "a52945bc3157a008c9eefd5bf7a22c6874cadb62ba25510dc41aaeaef1ac6ec9",
+    "tracked_content_sha256": "c57f1a2c2b939bdde71f6cb2717cf671f840777e6c31e6336838d0b573720b6f",
+    "changed_files_sha256": "d926ea92d4b3bd3f378e367973a1c918050e0f8fe621cfb867d61593eef0a697",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

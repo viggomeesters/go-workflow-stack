@@ -1,0 +1,29 @@
+{
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "e771e258dc83ecaaeea116900300115dc2e690c8",
+  "content_digest": "679468b1db8fc703f9d7ac419295bf012696c2c7815b1a5896b68915d8ce969f",
+  "command": "env -u PYTHONPATH uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest -q",
+  "cwd": "/tmp/go-managed-verify-bixxrvcp/candidate",
+  "elapsed_seconds": 1256.189005178865,
+  "returncode": 1,
+  "stdout": "........................................................................ [ 10%]\n........................................................................ [ 20%]\n........................................................................ [ 30%]\n........................................................................ [ 40%]\n........................................................................ [ 50%]\n..........................F............................................. [ 60%]\n........................................................................ [ 70%]\n........................................................................ [ 80%]\n........................................................................ [ 90%]\n......................................................................   [100%]\n=================================== FAILURES ===================================\n______________ test_compatibility_gate_accepts_supported_history _______________\n\ntmp_path = PosixPath('/tmp/pytest-of-viggo/pytest-3427/test_compatibility_gate_accept0')\n\n    def test_compatibility_gate_accepts_supported_history(tmp_path):\n>       result = run_gate(tmp_path)\n                 ^^^^^^^^^^^^^^^^^^\n\ntests/test_release_compatibility_gate.py:47: \n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \ntests/test_release_compatibility_gate.py:40: in run_gate\n    return subprocess.run(['bash', str(repo / 'scripts/check-compatibility.sh')],\n/home/viggo/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py:550: in run\n    stdout, stderr = process.communicate(input, timeout=timeout)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/home/viggo/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py:1209: in communicate\n    stdout, stderr = self._communicate(input, endtime, timeout)\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n/home/viggo/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py:2116: in _communicate\n    self._check_timeout(endtime, orig_timeout, stdout, stderr)\n_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ \n\nself = <Popen: returncode: -9 args: ['bash', '/tmp/pytest-of-viggo/pytest-3427/test...>\nendtime = 3792260.824791638, orig_timeout = 300\nstdout_seq = [b'.', b'.', b'.', b'.', b'.', b'.', ...], stderr_seq = []\nskip_check_and_raise = False\n\n    def _check_timeout(self, endtime, orig_timeout, stdout_seq, stderr_seq,\n                       skip_check_and_raise=False):\n        \"\"\"Convenience for checking if a timeout has expired.\"\"\"\n        if endtime is None:\n            return\n        if skip_check_and_raise or _time() > endtime:\n>           raise TimeoutExpired(\n                    self.args, orig_timeout,\n                    output=b''.join(stdout_seq) if stdout_seq else None,\n                    stderr=b''.join(stderr_seq) if stderr_seq else None)\nE           subprocess.TimeoutExpired: Command '['bash', '/tmp/pytest-of-viggo/pytest-3427/test_compatibility_gate_accept0/source/scripts/check-compatibility.sh']' timed out after 300 seconds\n\n/home/viggo/.local/share/uv/python/cpython-3.11.15-linux-x86_64-gnu/lib/python3.11/subprocess.py:1253: TimeoutExpired\n=========================== short test summary info ============================\nFAILED tests/test_release_compatibility_gate.py::test_compatibility_gate_accepts_supported_history\n1 failed, 717 passed in 1251.55s (0:20:51)\n",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "template_head": "3073653022d1c8fb934e2068c24d33912019738c",
+    "candidate_digest": "129d4a33682465c8cabdba4a9a40220c2744125f53149e22d989417a118f2598",
+    "tracked_content_sha256": "64a4674182c2b4311f67a573dc5da40539e976d5213ecc8fb4556334f5da4345",
+    "changed_files_sha256": "d926ea92d4b3bd3f378e367973a1c918050e0f8fe621cfb867d61593eef0a697",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

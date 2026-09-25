@@ -1,0 +1,201 @@
+{
+  "schema": "go-workflow.executed-verification.v1",
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "content_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "env -u PYTHONPATH uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest -q",
+        "cwd": "/tmp/go-managed-verify-wwqj8hsl/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-51969bff0e63440f9533386927d29653.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-51969bff0e63440f9533386927d29653.json",
+        "sha256": "b58ace5d38ffda000b626955e1cae8acc8b2d55edbb7670a0210a6d49127632a"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/tmp/go-managed-verify-2fw8xjx8/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-bcba5d4ca02a4d0b96591e4d1f401d95.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-bcba5d4ca02a4d0b96591e4d1f401d95.json",
+        "sha256": "e3f33363d62b45ad73c73fea9598e7d918d08705ac4911ab1a3f5e6ead66ec9b"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/tmp/go-managed-verify-t4n3r9bu/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c7aa806123904f47af89f4d4fea86e00.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c7aa806123904f47af89f4d4fea86e00.json",
+        "sha256": "97fa32cfb7f0c3e999119a0ae56e96c19d219defda9138a81cc47035b79df653"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py architecture validate . --json",
+        "cwd": "/tmp/go-managed-verify-l8wepwzm/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c79510260feb455bbbedb85f2738c227.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c79510260feb455bbbedb85f2738c227.json",
+        "sha256": "a95a7fb1d123d9d941128be5bb194e261774affed6f41bc1ba2504c79e32bed2"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'",
+        "cwd": "/tmp/go-managed-verify-qspc6722/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-cf707c13fba841f28db3d1bedb49ec9a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-cf707c13fba841f28db3d1bedb49ec9a.json",
+        "sha256": "8d08fabbd3b392c5168ad627d264932ebadd723e276a2dcdbda3ac7b9bd37ce6"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template ./scripts/release-check.sh --allow-candidate --allow-local-origin",
+        "cwd": "/tmp/go-managed-verify-d4d0yany/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-b8a159a19e53423c892e8ebcf3e4c5bc.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-b8a159a19e53423c892e8ebcf3e4c5bc.json",
+        "sha256": "206f54ddaff69764839c20af304383b1474d1b807cef501a02c823a177a39edf"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/tmp/go-managed-verify-_qst4dj5/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-521feeededbf4279beed51e6ef15901f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-521feeededbf4279beed51e6ef15901f.json",
+        "sha256": "96705b041413973ff95ac60ef1cded8dfec8ae9caec6c4967b28dc0b1222f7fb"
+      }
+    }
+  ],
+  "content_unchanged": true,
+  "status": "passed"
+}

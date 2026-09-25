@@ -5,7 +5,7 @@
   "shareable_delivery": "none",
   "id": "release-safe-active-task-handoff-v0347",
   "project": "go-workflow-stack",
-  "status": "active",
+  "status": "done",
   "summary": "Publish safe same-host handoff for idle task/workspace claims",
   "description": "Produce the next immutable Go Workflow Stack release containing the reviewed same-host idle task/workspace handoff and preserve the existing Dutch-router fix. The current remote latest tag is v0.3.46, so v0.3.47 is expected; the release tool must reserve the actual next patch version from live remote refs. Align runtime/package/self-pin/release-pairing metadata, run the exact candidate release preflight, then publish only to the configured official GitHub origin/main with explicit push policy. Preserve all historical tags and pairings; do not deploy, attach unrequested assets, or use GitHub Actions.",
   "scope": {
@@ -59,10 +59,63 @@
     "claimed_at": "2026-09-24T09:00:25+02:00",
     "base_commit": "cd9cc4890888989ab5f039fb7920a23f24ec8533"
   },
-  "work_status": "in_progress",
-  "review_status": "none",
-  "review_history": [],
-  "evidence": [],
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T07:34:51+02:00",
+      "agent": "hermes-recovery",
+      "status": "approved",
+      "evidence": "Recorded critic and exact release readback passed; no independent identity attestation.",
+      "transaction_id": "e9f5fb591727444fa482f4dc6cddb82e"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T07:34:51+02:00",
+      "task_id": "release-safe-active-task-handoff-v0347",
+      "agent": "hermes-recovery",
+      "summary": "changed_files=.go/project.json,CHANGELOG.md,go_workflow/constants.py,pyproject.toml,release-pairings.json; verification_command=declared task commands; verification_result=passed; critic=passed recorded review; runtime=configured controller publisher; model=requested gpt-6-luna (effective identity unconfirmed); billing_mode=unknown; release=v0.3.47 ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+      "changed_files": [
+        ".go/project.json",
+        "CHANGELOG.md",
+        "go_workflow/constants.py",
+        "pyproject.toml",
+        "release-pairings.json"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "cd9cc4890888989ab5f039fb7920a23f24ec8533",
+        "observed_head_commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+      },
+      "verification": {
+        "command": "declared task commands",
+        "result": "passed"
+      },
+      "runtime": {
+        "agent": "hermes-recovery",
+        "runtime": "configured controller publisher",
+        "model": "requested gpt-6-luna (effective identity unconfirmed)",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "configured controller publisher",
+        "billing_mode": "unknown",
+        "owner": "hermes-recovery",
+        "model": "requested gpt-6-luna (effective identity unconfirmed)",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "passed recorded review",
+        "skip_reason": null
+      }
+    }
+  ],
   "execution_contract": {
     "schema": "go-workflow.execution-contract.v1",
     "task_kind": "product",
@@ -103,36 +156,66 @@
       "id": "R1",
       "text": "The release controller reserves the next patch version from live remote refs under the official github-release profile; with v0.3.46 still latest, the expected candidate is v0.3.47 and no existing tag is replaced.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-25T07:34:50+02:00",
+          "agent": "hermes-recovery",
+          "summary": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+        }
+      ]
     },
     {
       "id": "R2",
       "text": "Version, runtime constant, stack self-pin, release pairing, changelog and release notes identify the exact same candidate; historical release mappings and v0.3.46 remain unchanged.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-25T07:34:50+02:00",
+          "agent": "hermes-recovery",
+          "summary": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+        }
+      ]
     },
     {
       "id": "R3",
       "text": "The exact candidate passes the full Python suite, make check, repo and architecture validation, WSL doctor, and release-check candidate preflight including its immutable template pairing; no development override or GitHub Actions is used.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-25T07:34:50+02:00",
+          "agent": "hermes-recovery",
+          "summary": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+        }
+      ]
     },
     {
       "id": "R4",
       "text": "After an independent final review, the existing release publisher commits/integrates, creates an annotated tag, pushes main and tag, publishes a GitHub release with no unrequested assets, and reads back exact remote refs and hosted release metadata.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-25T07:34:50+02:00",
+          "agent": "hermes-recovery",
+          "summary": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+        }
+      ]
     },
     {
       "id": "R5",
       "text": "No deployment or application service action occurs; release remains pending if any test, review, tag, remote, or hosted readback gate fails.",
       "source": "intake_acceptance",
-      "status": "pending",
-      "evidence": []
+      "status": "verified",
+      "evidence": [
+        {
+          "created_at": "2026-09-25T07:34:50+02:00",
+          "agent": "hermes-recovery",
+          "summary": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+        }
+      ]
     }
   ],
   "architecture": {
@@ -150,5 +233,31 @@
     ],
     "conformance_required": true,
     "human_gate": "risk_acceptance"
+  },
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/verification-1518157fb0fb4506ae1e3559eaa11c7f.json",
+      "sha256": "906f08b6074cbb2ebafbfabf2b39fb890b0121a3c2c8e6ce737963d218a73de7"
+    },
+    "critic": {
+      "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/critic-53e34eb922af4eb9b3ab58f1e1c236c5.json",
+      "sha256": "4d4180474a020077225c17a94116760fe7cb5ad1e2b8f69edc62dd99e4832ae1"
+    },
+    "release": {
+      "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json",
+      "sha256": "b96fcf9263535e181fd36713de02a4ba7fe1d7031f6c91218c1727c0d826a29b"
+    }
+  },
+  "release_receipt": {
+    "schema": "go-workflow.release-receipt.v1",
+    "status": "verified",
+    "task_id": "release-safe-active-task-handoff-v0347",
+    "project": "go-workflow-stack",
+    "commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+    "tag": "v0.3.47",
+    "evidence": [
+      ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json"
+    ]
   }
 }

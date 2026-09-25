@@ -1,0 +1,353 @@
+{
+  "schema": "go-workflow.managed-run.v1",
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "control_repo": "/home/viggo/github/go-workflow-stack",
+  "owner": "hermes-recovery",
+  "run_id": "release-safe-active-task-handoff-v0347-20260924",
+  "workspace": {
+    "task_id": "release-safe-active-task-handoff-v0347",
+    "owner": "hermes-recovery",
+    "run_id": "release-safe-active-task-handoff-v0347-20260924",
+    "control_repo": "/home/viggo/github/go-workflow-stack",
+    "path": "/home/viggo/worktrees/go-workflow-release-safe-active-task-v0347",
+    "branch": "hermes/release-safe-active-task-v0347",
+    "base_branch": "main",
+    "base_commit": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/home/viggo/github/go-workflow-stack/.git",
+    "repository_id": "a95f2da4c1b54466acf8b436dc9f0974",
+    "generation": "28d41538bd264930b21fdbc5d8f8bbb6",
+    "control_host": "DESKTOP-8FC0P83",
+    "state": "ready",
+    "reconciliations": [
+      {
+        "old_base_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
+        "new_base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "workspace_head_before": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
+        "workspace_head_after": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "reconciled_at": "2026-09-24T23:31:23.247409+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "new_base_commit": "833b782b1d412d847e4c875352947c2b50759140",
+        "workspace_head_before": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "workspace_head_after": "833b782b1d412d847e4c875352947c2b50759140",
+        "reconciled_at": "2026-09-25T00:15:53.411420+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "833b782b1d412d847e4c875352947c2b50759140",
+        "new_base_commit": "a8e65a7507782be0a901445479d5721099160a69",
+        "workspace_head_before": "833b782b1d412d847e4c875352947c2b50759140",
+        "workspace_head_after": "a8e65a7507782be0a901445479d5721099160a69",
+        "reconciled_at": "2026-09-25T00:38:05.524228+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "a8e65a7507782be0a901445479d5721099160a69",
+        "new_base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "workspace_head_before": "a8e65a7507782be0a901445479d5721099160a69",
+        "workspace_head_after": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "reconciled_at": "2026-09-25T01:29:31.137450+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "new_base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "workspace_head_before": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "workspace_head_after": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "reconciled_at": "2026-09-25T02:21:20.036918+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "new_base_commit": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "workspace_head_before": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "workspace_head_after": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "reconciled_at": "2026-09-25T03:02:24.765204+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "new_base_commit": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "workspace_head_before": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "workspace_head_after": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "reconciled_at": "2026-09-25T04:24:59.512211+00:00",
+        "evidence_invalidated": true
+      }
+    ]
+  },
+  "phase": "complete",
+  "attempt": 1,
+  "check_index": 0,
+  "checks": [
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "env -u PYTHONPATH uv run --no-project --with \"pytest>=8,<9\" --with \"jsonschema>=4.23\" python -m pytest -q",
+        "cwd": "/tmp/go-managed-verify-wwqj8hsl/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-51969bff0e63440f9533386927d29653.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-51969bff0e63440f9533386927d29653.json",
+        "sha256": "b58ace5d38ffda000b626955e1cae8acc8b2d55edbb7670a0210a6d49127632a"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "make check",
+        "cwd": "/tmp/go-managed-verify-2fw8xjx8/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-bcba5d4ca02a4d0b96591e4d1f401d95.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-bcba5d4ca02a4d0b96591e4d1f401d95.json",
+        "sha256": "e3f33363d62b45ad73c73fea9598e7d918d08705ac4911ab1a3f5e6ead66ec9b"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py validate .",
+        "cwd": "/tmp/go-managed-verify-t4n3r9bu/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c7aa806123904f47af89f4d4fea86e00.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c7aa806123904f47af89f4d4fea86e00.json",
+        "sha256": "97fa32cfb7f0c3e999119a0ae56e96c19d219defda9138a81cc47035b79df653"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 cli/go.py architecture validate . --json",
+        "cwd": "/tmp/go-managed-verify-l8wepwzm/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c79510260feb455bbbedb85f2738c227.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-c79510260feb455bbbedb85f2738c227.json",
+        "sha256": "a95a7fb1d123d9d941128be5bb194e261774affed6f41bc1ba2504c79e32bed2"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "python3 -c 'from go_workflow.release import candidate_doctor_gate; candidate_doctor_gate()'",
+        "cwd": "/tmp/go-managed-verify-qspc6722/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-cf707c13fba841f28db3d1bedb49ec9a.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-cf707c13fba841f28db3d1bedb49ec9a.json",
+        "sha256": "8d08fabbd3b392c5168ad627d264932ebadd723e276a2dcdbda3ac7b9bd37ce6"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "GO_PROJECT_TEMPLATE=/home/viggo/github/go-project-template ./scripts/release-check.sh --allow-candidate --allow-local-origin",
+        "cwd": "/tmp/go-managed-verify-d4d0yany/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-b8a159a19e53423c892e8ebcf3e4c5bc.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-b8a159a19e53423c892e8ebcf3e4c5bc.json",
+        "sha256": "206f54ddaff69764839c20af304383b1474d1b807cef501a02c823a177a39edf"
+      }
+    },
+    {
+      "verification": {
+        "schema": "go-workflow.verification-evidence.v1",
+        "task_id": "release-safe-active-task-handoff-v0347",
+        "phase_id": "verify",
+        "requirement_ids": [
+          "R1",
+          "R2",
+          "R3",
+          "R4",
+          "R5"
+        ],
+        "status": "passed",
+        "command": "git diff --check",
+        "cwd": "/tmp/go-managed-verify-_qst4dj5/candidate",
+        "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "worktree_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+        "exit_code": 0,
+        "evidence": [
+          ".go/runs/release-safe-active-task-handoff-v0347/completion/command-521feeededbf4279beed51e6ef15901f.json"
+        ]
+      },
+      "raw": {
+        "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/command-521feeededbf4279beed51e6ef15901f.json",
+        "sha256": "96705b041413973ff95ac60ef1cded8dfec8ae9caec6c4967b28dc0b1222f7fb"
+      }
+    }
+  ],
+  "phase_evidence": [],
+  "effects": {},
+  "budgets": [],
+  "history": [
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": {
+        "phase": "verify",
+        "nonce": "ffa74d71af0043c7bfb6a39a2ad9fc5f",
+        "attempt": 1,
+        "started_at": 1790298194.180977
+      }
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    },
+    {
+      "event": "new_verification_capture",
+      "previous_inflight": null
+    }
+  ],
+  "requirements": [
+    {
+      "id": "R1",
+      "text": "The release controller reserves the next patch version from live remote refs under the official github-release profile; with v0.3.46 still latest, the expected candidate is v0.3.47 and no existing tag is replaced.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R2",
+      "text": "Version, runtime constant, stack self-pin, release pairing, changelog and release notes identify the exact same candidate; historical release mappings and v0.3.46 remain unchanged.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R3",
+      "text": "The exact candidate passes the full Python suite, make check, repo and architecture validation, WSL doctor, and release-check candidate preflight including its immutable template pairing; no development override or GitHub Actions is used.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R4",
+      "text": "After an independent final review, the existing release publisher commits/integrates, creates an annotated tag, pushes main and tag, publishes a GitHub release with no unrequested assets, and reads back exact remote refs and hosted release metadata.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    },
+    {
+      "id": "R5",
+      "text": "No deployment or application service action occurs; release remains pending if any test, review, tag, remote, or hosted readback gate fails.",
+      "source": "intake_acceptance",
+      "status": "pending",
+      "evidence": []
+    }
+  ],
+  "models": {},
+  "task_hash": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "code": {},
+  "execution_cwd": "/tmp/go-managed-verify-_qst4dj5/candidate",
+  "controller": {
+    "host": "DESKTOP-8FC0P83",
+    "pid": 2807239
+  },
+  "worker_group": null,
+  "inflight": null
+}

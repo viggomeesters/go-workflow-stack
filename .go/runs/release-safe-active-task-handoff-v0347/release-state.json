@@ -1,0 +1,212 @@
+{
+  "schema": "go-workflow.publication-state.v1",
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "owner": "hermes-recovery",
+  "run_id": "release-safe-active-task-handoff-v0347-20260924",
+  "control_repo": "/home/viggo/github/go-workflow-stack",
+  "workspace": {
+    "task_id": "release-safe-active-task-handoff-v0347",
+    "owner": "hermes-recovery",
+    "run_id": "release-safe-active-task-handoff-v0347-20260924",
+    "control_repo": "/home/viggo/github/go-workflow-stack",
+    "path": "/home/viggo/worktrees/go-workflow-release-safe-active-task-v0347",
+    "branch": "hermes/release-safe-active-task-v0347",
+    "base_branch": "main",
+    "base_commit": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+    "schema": "go-workflow.workspace-state.v1",
+    "common_dir": "/home/viggo/github/go-workflow-stack/.git",
+    "repository_id": "a95f2da4c1b54466acf8b436dc9f0974",
+    "generation": "28d41538bd264930b21fdbc5d8f8bbb6",
+    "control_host": "DESKTOP-8FC0P83",
+    "state": "ready",
+    "reconciliations": [
+      {
+        "old_base_commit": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
+        "new_base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "workspace_head_before": "ed69e0603845843678e4c1b2a1ff6c8380e4a208",
+        "workspace_head_after": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "reconciled_at": "2026-09-24T23:31:23.247409+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "new_base_commit": "833b782b1d412d847e4c875352947c2b50759140",
+        "workspace_head_before": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "workspace_head_after": "833b782b1d412d847e4c875352947c2b50759140",
+        "reconciled_at": "2026-09-25T00:15:53.411420+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "833b782b1d412d847e4c875352947c2b50759140",
+        "new_base_commit": "a8e65a7507782be0a901445479d5721099160a69",
+        "workspace_head_before": "833b782b1d412d847e4c875352947c2b50759140",
+        "workspace_head_after": "a8e65a7507782be0a901445479d5721099160a69",
+        "reconciled_at": "2026-09-25T00:38:05.524228+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "a8e65a7507782be0a901445479d5721099160a69",
+        "new_base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "workspace_head_before": "a8e65a7507782be0a901445479d5721099160a69",
+        "workspace_head_after": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "reconciled_at": "2026-09-25T01:29:31.137450+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "new_base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "workspace_head_before": "130ccf15292d820dd6d5cd2b930749b0faac9e60",
+        "workspace_head_after": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "reconciled_at": "2026-09-25T02:21:20.036918+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "new_base_commit": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "workspace_head_before": "e771e258dc83ecaaeea116900300115dc2e690c8",
+        "workspace_head_after": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "reconciled_at": "2026-09-25T03:02:24.765204+00:00",
+        "evidence_invalidated": true
+      },
+      {
+        "old_base_commit": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "new_base_commit": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "workspace_head_before": "022fbc250826302ddcb51f6fbc1d0a05dc5d9e28",
+        "workspace_head_after": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "reconciled_at": "2026-09-25T04:24:59.512211+00:00",
+        "evidence_invalidated": true
+      }
+    ]
+  },
+  "profile": {
+    "name": "github-release",
+    "provider": "github-release",
+    "remote": "origin",
+    "branch": "main",
+    "repository": "viggomeesters/go-workflow-stack",
+    "publication": {
+      "version": {
+        "path": "pyproject.toml",
+        "format": "toml",
+        "key": "project.version"
+      },
+      "bump": "patch",
+      "tag_prefix": "v",
+      "changelog": "CHANGELOG.md"
+    }
+  },
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "authority": {
+    "ship_policy": "push",
+    "allow_push": true,
+    "actor": "hermes-recovery"
+  },
+  "base_commit": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "remote_base": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "remote_url": "https://github.com/viggomeesters/go-workflow-stack.git",
+  "version": "0.3.47",
+  "tag": "v0.3.47",
+  "phase": "published",
+  "effects": {
+    "commit": {
+      "expected": {
+        "parent": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "tree": "ed61331042004a97f47559c8b2f13fff95e4b4c9",
+        "message": "go release: release-safe-active-task-handoff-v0347 release-safe-active-task-handoff-v0347-20260924 v0.3.47"
+      },
+      "status": "confirmed"
+    },
+    "integration": {
+      "expected": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+      "status": "confirmed"
+    },
+    "tag": {
+      "expected": {
+        "commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+        "message": "go release release-safe-active-task-handoff-v0347 release-safe-active-task-handoff-v0347-20260924 ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+      },
+      "status": "confirmed"
+    },
+    "push": {
+      "expected": {
+        "refs/heads/main": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+        "refs/tags/v0.3.47": "8fafb3b24190731ed27f83d392e6f53ad08dfe17",
+        "refs/tags/v0.3.47^{}": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+      },
+      "status": "confirmed"
+    },
+    "publication": {
+      "expected": {
+        "tag": "v0.3.47",
+        "body": "## 0.3.47\n\n- Publish safe same-host handoff for idle task/workspace claims\n"
+      },
+      "status": "confirmed"
+    }
+  },
+  "observations": [
+    {
+      "effect": "commit",
+      "observed": {
+        "parent": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "tree": "ed61331042004a97f47559c8b2f13fff95e4b4c9",
+        "message": "go release: release-safe-active-task-handoff-v0347 release-safe-active-task-handoff-v0347-20260924 v0.3.47"
+      }
+    },
+    {
+      "effect": "commit",
+      "observed": {
+        "parent": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+        "tree": "ed61331042004a97f47559c8b2f13fff95e4b4c9",
+        "message": "go release: release-safe-active-task-handoff-v0347 release-safe-active-task-handoff-v0347-20260924 v0.3.47"
+      }
+    },
+    {
+      "effect": "integration",
+      "observed": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+    },
+    {
+      "effect": "tag",
+      "observed": {
+        "commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+        "message": "go release release-safe-active-task-handoff-v0347 release-safe-active-task-handoff-v0347-20260924 ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+      }
+    },
+    {
+      "effect": "push",
+      "observed": {
+        "refs/heads/main": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+        "refs/tags/v0.3.47": "8fafb3b24190731ed27f83d392e6f53ad08dfe17",
+        "refs/tags/v0.3.47^{}": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9"
+      }
+    },
+    {
+      "effect": "publication",
+      "observed": {
+        "tag": "v0.3.47",
+        "body": "## 0.3.47\n\n- Publish safe same-host handoff for idle task/workspace claims\n"
+      }
+    }
+  ],
+  "reservation": ".go/runs/publication-reservations/a0e86fa72ddb4280ea5cfce6ae30be75c2783b2e7ff4fb2f822ed301b1800050.json",
+  "notes": "## 0.3.47\n\n- Publish safe same-host handoff for idle task/workspace claims\n",
+  "preparation": [
+    {
+      "path": "pyproject.toml",
+      "before": "540d25c0fab20a641c3654f55f4af19c1a187a70f3e693e062f719ee6b26a1a1",
+      "after": "\n[project]\nname = \"go-workflow-stack\"\nversion = \"0.3.47\"\ndescription = \"Repo-local .go JSON/JSONL workflow stack spike\"\nrequires-python = \">=3.11\"\n\n[project.scripts]\ngo-workflow = \"go_workflow.cli:main\"\n\n[project.optional-dependencies]\ntest = [\"pytest>=8,<9\", \"jsonschema>=4.23\"]\n\n[tool.pytest.ini_options]\ntestpaths = [\"tests\"]\n\n[tool.setuptools.packages.find]\ninclude = [\"go_workflow*\"]\n\n[tool.setuptools.data-files]\n\".\" = [\"release-pairings.json\"]\n\"fixtures/minimal\" = [\"fixtures/minimal/AGENTS.md\"]\n\"schemas\" = [\"schemas/*.json\"]\n\"fixtures/minimal/.go\" = [\n  \"fixtures/minimal/.go/architecture-principles.json\",\n  \"fixtures/minimal/.go/hierarchy.json\",\n  \"fixtures/minimal/.go/project.json\",\n  \"fixtures/minimal/.go/repository-map.json\",\n  \"fixtures/minimal/.go/vision.json\"\n]\n\"fixtures/minimal/.go/cache\" = [\"fixtures/minimal/.go/cache/.gitignore\"]\n\"fixtures/minimal/.go/evidence\" = [\"fixtures/minimal/.go/evidence/events.jsonl\"]\n\"fixtures/minimal/.go/tasks/open\" = [\"fixtures/minimal/.go/tasks/open/task-schema-smoke.json\"]\n"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "before": "05d3ccb1914e0238ab36efa1c03ea2ffc3278c0240db6e699afdb79a7495b0bf",
+      "after": "## 0.3.47\n\n- Publish safe same-host handoff for idle task/workspace claims\n\n# Changelog\n\n## Unreleased\n\n- Recognize simple positive Dutch direct-object `los … op` imperatives as execution-authorized Go intent; keep questions, `niet`/`nooit`/`onder geen beding`, compound conjunctions including `en`/`én`, and advice/read-only/plan-only overrides non-executing.\n- Add `task handoff` for an explicitly acknowledged idle active claim; it journals claim/workspace rebinds, preserves dirty worker contents, and verifies recorded host identity or explicit same-host attestation while refusing live or known cross-host transfers.\n\n## 0.3.46 — repository impact and conformance\n\n- Trace a Git diff through bounded reverse dependency and containment edges to exact changed nodes, impacted nodes, and recommended tests.\n- Compare actual changes with a task's advisory or strict `repository_context`, including explicit unsupported and unexpected scope.\n- Expose intended-versus-observed component dependency drift without rewriting the committed map or accepted architecture.\n- Fail closed on missing or stale graphs and keep all analysis local, deterministic, provider-free, and schema-backed.\n\n## 0.3.45 — task-bound repository context\n\n- Let tasks bind stable repository-map nodes, bounded lexical queries, dependency depth, test inclusion and advisory/strict impact policy.\n- Resolve fresh deterministic subgraphs with exact source hashes while retaining directly requested nodes and enforcing node/edge budgets.\n- Supply only the selected subgraph to build, critic and repair context; missing maps, unknown IDs and stale graphs fail closed.\n- Add schema-backed `task create --repository-context` authoring while preserving legacy task behavior.\n\n## 0.3.44 — repository intelligence foundation\n\n- Add an optional committed repository map with stable semantic component IDs, intended dependencies, test ownership and overlays.\n- Build a deterministic provider-free local graph with generic file/component/test nodes plus Python symbols and imports while excluding `.go`, dependencies and build output.\n- Expose `index build`, `index status` and bounded `index query` commands with exact provenance and fail-closed stale detection.\n- Preserve authority boundaries: source, architecture and tasks remain canonical; the detailed graph is ignored, derived and regenerable.\n\n## 0.3.43 — live unattended autonomy proof\n\n- Preserve a content-bound native-Codex campaign from semantic intake through two independently verified local releases and a grounded goal audit.\n- Prove automatic SIGTERM interruption after the first remote tag and unattended resume through the second task without per-task dispatch.\n- Record 437.987 measured seconds, zero interventions after launch, observed adapter usage, exact tag/remote commits, clean Git readback and an auditable morning report.\n- Retain six failed attempts and state the boundary honestly: short synthetic repository, local bare remote, no hosted publication, deployment, private consumer mutation or eight-hour claim.\n\n## 0.3.42 — injected-failure autonomy campaign\n\n- Prove one rough request can pass semantic intake and one controller process can release two serial managed tasks before a grounded goal audit.\n- Exercise real controller/worker processes, disposable Git worktrees and local bare-remote publication with immutable tag/readback assertions.\n- Bind unresolved decisions, omitted requirements, critic repair, no-progress, cumulative budgets, orphan ownership, dirty Git, remote movement, ambiguous effects and cleanup recovery to an executable failure matrix.\n- Gate and document the proof's limits: deterministic adapter, local Git effects, no production consumer mutation, hosted-provider claim or GitHub Actions evidence.\n\n## 0.3.41 — task-by-task autonomous delivery truth\n\n- Require campaign transitions to consume exact task, managed-run, workspace, publication and deployment readbacks before counting a managed task delivered.\n- Report structured Git/release blockers without presenting local completion as publication or a source-only release as a live deployment.\n- Preserve verified releases across checkpoint-only branch advances, so lifecycle closure never triggers a duplicate release or deployment.\n- Add history-preserving reconciliation for a clean owned workspace on a linearly advanced base; conflicts abort safely and all prior verification/critic evidence is invalidated.\n\n## 0.3.40 — outcome-bound campaign goal audit\n\n- Audit every adopted campaign outcome against current lifecycle and architecture-conformance evidence; an empty queue or declared metric is never completion proof.\n- Classify outcomes as achieved, partial, blocked or explicitly excluded and propose only deduplicated research/repair work allowed by the frozen mandate.\n- Persist one machine-readable audit plus a compact handoff linking the original request, decisions, tasks, tested candidates, releases and exact live receipts.\n- Make every campaign execution route use the shared audit before reporting `goal_verified`; historical unadopted task records remain history rather than fresh proof.\n\n## 0.3.39 — mandatory root AGENTS.md gateway\n\n- Require an exact-case root `AGENTS.md` whenever repository-local `.go/` state exists.\n- Install or safely repair a bounded gateway block through init, adopt, spike, migration and stack update while preserving custom instructions, newline bytes and file mode.\n- Validate the gateway in exact-target update previews, restore it on rollback, and ship the matching template gateway in v0.3.18.\n\n## 0.3.38 — grounded outcome behavior review\n\n- Carry exact original R# outcomes, governing product goals and explained applicable architecture into fresh critic context.\n- Bind passed outcome judgments to current candidate/context identities and hashed inspected source, test, runtime, browser, visual or audio evidence.\n- Reject preparation-only proof, unrelated green checks, stale captures and unreproduced completion claims for strict-review tasks.\n- Turn blocked reviews into bounded in-scope repairs without rewriting acceptance or demanding future publication receipts.\n- Preserve historical review compatibility through explicit `behavior_review_version: 1` adoption.\n\n## 0.3.37 — persistent campaign recovery supervision\n\n- Recover exact task dispatch after controller death while refusing live or cross-host owner takeover.\n- Freeze and persist wall, command, and repair budgets across resume without replenishment.\n- Back off temporary provider failures with the same exact model binding and no silent fallback.\n- Detect evidence-identical no-progress, preserve failed proof, and continue only with eligible independent work.\n- Add durable pause, drain, and cancel boundaries that preserve tasks, workspaces, and external-effect evidence.\n\n## 0.3.36 — durable serial campaign continuation\n\n- Execute an explicit campaign allowlist serially through the existing managed task, workspace, completion and release lifecycle.\n- Resume active work and pending cleanup before deterministically selecting the next independent eligible task.\n- Freeze the campaign revision and workspace root, persist cumulative wall/task/attempt consumption, and reject corrupt or drifting checkpoints.\n- Preserve exact release/deployment authority, including deployment-target non-escalation and truthful authority/safety/effect stops.\n- Reconcile injected process loss after authoritative task completion and emit a portable campaign-bound resume command.\n\n## 0.3.35 — evidence-backed autonomous intake\n\n- Turn a rough request into versioned, source-bound model assessment before task materialization.\n- Reuse or update matching work idempotently while preserving every requested outcome and feedback revision.\n- Enforce planning, advice and execution authority at intake and claim time; unresolved questions block only affected work.\n- Isolate assessment adapters from the target repository and persist controlled model arguments, usage and raw content hashes.\n- Keep research distinct from implementation when root cause is unknown, with executable dependency and decision references.\n\n## 0.3.34 — bounded autonomy campaign contracts\n\n- Bind serial campaigns to versioned intent, adopted outcomes, accepted decisions, explicit task/model authority, cumulative budgets, and separate delivery grants.\n- Keep validation read-only: empty queues, unresolved material choices, and broad vision cannot silently authorize work or claim goal completion.\n- Add positive, negative, drift, and legacy fixtures plus a grounded campaign architecture decision and operating guide.\n- Run managed verification in an evidence-identical disposable checkout so repository-wide fixture tests stay isolated without weakening worker guards.\n\n## 0.3.33 — proportionate task design readiness\n\n- Honor explicit design prerequisites at none/local impact and before autonomous builds.\n- Share grounded author/critic review guidance through existing Go context and handoff.\n- Separate semantic review from schema validity, with paired examples and pending bug-outcome proof.\n- Preserve trivial, delegated, research-only and unreferenced legacy behavior without new task fields.\n\n## 0.3.32 — immutable release pairing manifest\n\n- Centralize historical template baselines and require an explicit current pairing.\n- Validate template commit/tag identity and generate checked current README metadata.\n- Package the manifest with standalone installations and retain release validator isolation.\n- Release fully completed process captures after a network hostname change; keep active/uncertain owners blocked.\n\n## 0.3.31 — guided lifecycle onboarding\n\n- Detect version sources, current branch and candidate checks without executing them.\n- Collect explicit settings and emit a validated first task with release paths in scope.\n- Prove generated intake completes a first local release through the existing controller.\n\n## 0.3.30 — TOML release version sources\n\n- Publish explicit TOML version keys while preserving surrounding bytes.\n- Reject dynamic, missing, invalid or ambiguous literals before release preparation writes.\n- Keep lifecycle onboarding schemas and publication recovery aligned.\n\n## 0.3.29 — exact target upgrade previews\n\n- Validate isolated workflow snapshots using the immutable target runtime before changing pins.\n- Reject failed, changed or tampered previews and validators that mutate their snapshot.\n- Preserve explicit participant metadata, legacy task bytes and guarded rollback.\n\n## 0.3.28 — mandatory compatibility release gate\n\n- Run legacy compatibility, contract and migration checks for every candidate and tagged release.\n- Cover three historical pins and all task states with byte-preserving upgrade/rollback assertions.\n- Prove an intentionally reintroduced dependency regression blocks the gate.\n\n## 0.3.27 — preserve legacy lifecycle metadata\n\n- Restore the opt-in boundary for dependency and verification metadata in runtime\n  validation and the published task schema, preserving historical task bytes.\n- Stop lifecycle graph traversal at legacy records while retaining explicit\n  predecessor status and required release-receipt checks.\n- Identify the task and required metadata resolution before lifecycle adoption\n  writes; never infer new dependency or proof semantics.\n- Cover legacy shapes across all task states, strict intake, migration and\n  v0.3.7 pin upgrade/rollback; pair distribution checks with template v0.3.16.\n\n## 0.3.26 — ordered release campaign and phase-aware critic\n\n- Prove two different task profiles, dependent releases, rejected-critic repair,\n  current verification and cleanup through the managed native lifecycle.\n- Fix a live-discovered circular critic requirement: pre-publication review checks\n  readiness while downstream release/deployment evidence stays pending for the\n  controller; final completion still requires that evidence.\n- Keep task-worktree outcome writes with the controller; sandboxed workers report\n  evidence instead of attempting canonical state mutations.\n- Add a reproducible failure/property matrix and separate live runtime receipts,\n  preserving failed live evidence and explicit candidate-source attribution.\n\n## 0.3.25 — verified phase worker topology\n\n- Keep fresh ephemeral workers with frozen phase profiles, canonical context and\n  one owned task worktree as the supported model-switching baseline.\n- Capture versioned local session/turn protocol evidence and real process tests.\n- Explicitly defer persistent-session and subagent adapters; distinguish protocol\n  capability, fixture control proof and live model confirmation.\n\n## 0.3.24 — explicit lifecycle adoption and preserved intake provenance\n\n- Separate runtime pin updates from explicit project lifecycle configuration.\n- Preview, apply, resume and roll back open-task adoption through exact durable\n  snapshots, preserving historical tasks, named profiles and user changes.\n- Keep model/workspace/release/phase settings and pending acceptance coverage\n  across intake and configured scaffolds; preserve full review-bundle provenance.\n- Block unfinished migrations and stale stack-update rollback; no execution,\n  push, deployment or global skill authority is inferred from configuration.\n\n## 0.3.23 — explicit deployment and live-version proof\n\n- Configure separate deployment authorization, target and idempotent command adapters.\n- Bind package bytes and authoritative live commit/version to released content.\n- Resume uncertain deployments without replacing their operation identity; preserve\n  partial packages, reject wrong live data and recheck before finish/approval.\n- Preserve release-only profiles and historical proof in ordinary clones.\n\n## 0.3.22 — resumable configured publication\n\n- Explicit profiles reserve and prepare a scoped semantic version/changelog, then\n  require final executed checks, review and architecture proof before shipping.\n- Reconcile commit, fast-forward integration, annotated tag, atomic push and\n  GitHub publication from durable intent and exact readback after interruption.\n- Managed tasks retain budgets and requested model settings through publication,\n  finish and separate cleanup; live orphan processes prevent competing writes.\n- Distinguish a completed task from a completed queue when blocked work remains.\n- Keep unknown remote responses, conflicts and missing authority explicit.\n  Existing profiles retain their pending handoff; no deployment or Actions added.\n\n## 0.3.21 — outcome evidence interoperability\n\n- Accept exact proof references from the attributed evidence objects written by\n  the standard task outcome CLI. v0.3.20 safely blocked these tracked tasks.\n- Exercise real CLI outcome, finish and approval together; arbitrary summaries\n  still cannot replace validated lifecycle proof. Published v0.3.20 is retained.\n\n## 0.3.20 — verified lifecycle completion\n\n- Opted-in finish, review approval and completion reporting share content-bound\n  verification, critic and required release proof; prose cannot replace checks.\n- Capture actual declared commands with raw results and an orphan-worker guard.\n  Git-tag and GitHub release readback bind annotated tags and remote branch SHAs.\n- Failed opted-in push/readback restores active state. Legacy history remains\n  explicitly unmigrated; publication automation remains subsequent work.\n\n## 0.3.19 — managed phase resume\n\n- Resume the same managed task from confirmed build/verification/critic checkpoints with renewed budgets.\n- Register worker process groups before dispatch and reject live-owner/orphan takeover, including standalone workspace operations.\n- Preserve interrupted setup, requirements, phase evidence and explicit side-effect intent/readback records.\n- Repair explicitly moved local checkout pairs, retaining historical proof and invalidating affected checks.\n- Leave controlled tasks active at release_pending until the lifecycle publisher supplies verified release evidence.\n\n## 0.3.18 — durable worker context\n\n- Capture immutable managed-native phase context and full raw process evidence.\n- Verify canonical state, Git/index/tracked bytes and evidence before worker launch.\n- Pass current repair feedback through bounded file references; retain legacy adapters.\n- Preserve distinct attempt/critic artifacts and select only explicit phase context.\n- Refuse staging/integration/cleanup when index flags can hide user changes.\n\n## 0.3.17 — owned task workspaces\n\n- Add explicit task worktree creation, recovery and claim-following ownership.\n- Resolve worker workflow state to one canonical .go and share Git-common locks.\n- Check complete task scope before staging; expose held integration slots.\n- Preserve dirty or unproven work at cleanup, with recoverable removal failures.\n- Keep fresh-worker/resume and publisher orchestration in subsequent ABC tasks.\n\n## 0.3.16\n\n- Enforce explicit model/effort arguments for native Codex phases after installed-runtime capability checks.\n- Freeze phase profiles, reject unsupported Hermes/custom model control before build, and preserve legacy execution.\n- Record requested/unconfirmed model attribution, native per-turn token counts and measured time without fabricated invoice costs.\n\n## Unreleased\n\n## 0.3.15 — 2026-09-13\n\n- Add opt-in task execution contracts with frozen project/task model settings,\n  typed phase/evidence records, explicit cross-project dependencies and\n  dependency-aware selection/claim. Preserve contracts through task, intent,\n  execution-brief and follow-up intake; leave legacy task records unchanged.\n  Model dispatch, worktree execution and publication remain subsequent work.\n\n- Record the exact Git claim base and identity in task state plus its matching\n  claim event; `no_diff=true` compares dirty and committed claim-to-HEAD changes,\n  requires task/event agreement, and rejects unavailable or non-ancestor bases.\n- Bind autonomous ship evidence to the task-delivery commit and an explicit\n  same-name branch target resolved from Git's push-remote precedence,\n  independent `git ls-remote` readback, and exact remote SHA; mismatches fail\n  closed instead of reporting a successful push.\n\n## 0.3.14 - 2026-08-27\n\n- Require every effectively material or foundational task to resolve at least one exact accepted governing decision from task metadata or an applicable brief.\n- Apply brief-owned decision and quality-attribute conformance checks only within the owning scope, preventing unrelated multi-scope cross-failures.\n- Keep legacy and none/local work compatible while documenting reuse of existing accepted decisions instead of manufacturing per-task ADRs.\n\n## 0.3.13 - 2026-08-26\n\n- Add an opt-in, task-local architecture lane with strict brief and event contracts while keeping legacy repositories valid.\n- Resolve exact applicable briefs, decisions, quality attributes, deviations, and waivers into execution context and architecture readback/status commands.\n- Fail closed on material architecture claims and finishes until decisions, per-scope conformance, evidence, and required named-human approvals are present.\n- Add deterministic impact floors plus explicit classification, review, conformance, and time-bounded waiver commands without creating a second decision or evidence source of truth.\n\n## 0.3.12 - 2026-08-17\n\n- Require a stack-freshness preflight before route, task creation, claim, or product edits in repo-local Go projects.\n- Add `stack update --latest` to resolve the highest annotated immutable release and preserve dry-run-first, atomic rollback behavior.\n- Make already-current updates true no-ops without project writes, rollback files, or synthetic lifecycle events.\n\n## 0.3.11 - 2026-08-11\n\n- Make restricted shareable delivery a standard approval-time gate for substantial agent tasks, with explicit `required`/`none` overrides, immutable epic versioning, per-epic serialization through autonomous ship/rollback, autonomous-run artifact readback, and fail-closed approval rollback.\n\n## 0.3.10 - 2026-08-11\n\n- Add `go-workflow.delivery.v1` plus `delivery build` for deterministic standalone stakeholder HTML and adjacent SHA-256 provenance manifests.\n- Default disclosure to restricted and fail closed before writing public or link-private output containing local paths, credential material, or private-key markers.\n- Keep released deliveries immutable, require higher superseding versions for corrections, and expose publication as a separate adapter-gated command.\n- Keep runtime delivery validation in fail-closed parity with the published JSON Schema, including strict types, non-empty list items, nullable supersedes, and unknown-property rejection.\n- Redesign stakeholder HTML as a compact executive one-pager: one visible summary, three primary outcomes, collapsed proof/provenance, and no raw agent evidence or command output in the human layer.\n\n## 0.3.9 - 2026-08-01\n\n- Classify advice, explicit read-only requests, imperatives, bare Go, and Sent as goal with separate planning and implementation authority.\n- Persist compact schema-validated recommendations under repo-local `.go`, with exact SHA-256/source provenance and no copied exploration transcript.\n- Promote a pending recommendation into semantic tasks exactly once and continue execution in the same bare-Go invocation after chat context is gone.\n- Turn every execution-brief acceptance item into an evidence-backed R# outcome while preserving explicit closure for legacy free-intent outcomes.\n- Keep Wayfinder, canonical Go, Hermes links, and the public project template aligned with the durable advice-to-outcome contract.\n- Consolidate user-facing repository work behind one `Go` command with plan, task-id, loop-budget, and Wayfinder routing metadata while retaining existing CLI primitives internally.\n\n## 0.3.8 - 2026-07-27\n\n- Persist exact GO intent text, SHA-256, and an optional durable source reference on intent-created tasks and creation events.\n- Track every requested outcome as `verified`, `blocked`, or `rejected` with item-specific evidence.\n- Refuse manual and autonomous completion while any tracked outcome remains pending or lacks evidence; regressions prove 7/8 blocks and 8/8 completes.\n- Add conservative agent-capacity planning: one task defaults to a solo builder plus reviewer lane, while parallel builders require disjoint modify scopes.\n- Separate completed work from review disposition with explicit `review`, `approved`, and `needs_fix` lifecycle state; manual finish remains pending while an autonomous passed critic records explicit approval.\n- Require attributed finish evidence with changed/no-diff state, verification, runtime, billing mode, ownership, and usage fields.\n- Distinguish subscription/free usage from provider invoice cost; API-equivalent estimates are labeled as estimates rather than billed cost.\n- Validate the standalone installed distribution during release checks and keep its packaged starter fixture pinned to the release version.\n- Document the provenance-first adoption of useful agent-team patterns without copying AGPL implementation code.\n\n## 0.3.7 - 2026-07-18\n\n- Honor `GO_STACK` and explicit `--stack-repo` when an installed runtime resolves immutable tags for `stack update`.\n- Refuse to treat wheel/site-packages content as a Git checkout and return an actionable source-checkout error instead.\n- Add installed-style regression coverage for template stack updates.\n\n## 0.3.6 - 2026-07-18\n\n- Preserve numbered, plain-numbered, and bulleted GO input as explicit `requested_outcomes` plus `R1`, `R2`, ... acceptance criteria before execution.\n- Treat list numbering as traceability rather than an automatic task boundary: bundle coherent outcomes and split only on independent delivery, verification, component/repository, or safe-scope boundaries.\n- Generate intent-task scope from actual repository code/config directories so created tasks can safely modify the implementation they describe.\n- Repair v1 contract migration by adding the required stack version and linking historical task files before validation.\n\n## 0.3.5 - 2026-07-18\n\n- Fail closed when a repository has no valid local `.go` contract; never route execution to an AW Lite or vault fallback.\n- Make every non-empty GO intent create a repo-local task and `task.created` event before autonomous execution, even when backlog tasks already exist.\n- Reject direct empty `go-loop --execute` runs with a task-required result instead of claiming false completion.\n- Fix `template-check` for standalone `uv tool` package installs by avoiding Git bootstrap into site-packages.\n- Add regression coverage for task-first GO loop routing and packaged template execution.\n\n## 0.3.4 - 2026-07-16\n\n- Accept standalone VCS package installations as exact immutable runtimes only when PEP 610 provenance records Git, the required tag, its resolved full commit, and the matching package version.\n- Keep source checkouts authoritative and fail closed instead of masking a mismatched checkout with unrelated installed-package metadata.\n- Expose the selected runtime identity source and provenance ref through `doctor` for operator readback.\n\n## 0.3.3 - 2026-07-16\n\n- Detect the installed Hermes prompt interface exactly, preferring `-z PROMPT` while retaining explicit legacy `-p PROMPT` support without confusing `-p PROVIDER`.\n- Apply the detected prompt capability consistently to native build, critic, and repair phases and fail closed before retry when Hermes is incompatible.\n- Expose Hermes compatibility and prompt capability through `agent-check` and `doctor`, with truthful overview-versus-explicit readiness semantics.\n- Preserve validated WSL proof from a real two-task Hermes build/critic/resume campaign, including native protocol-result hashes.\n\n## 0.3.2 - 2026-07-16\n\n- Make the doctor mismatch fixture independent of which release tags already exist in the checkout.\n\n## 0.3.1 - 2026-07-15\n\n- Enforce exact commit identity for immutable stack tags across bootstrap and doctor checks.\n- Reject release tags that are not annotated or do not dereference to the release commit.\n- Require a visible, explicit `GO_STACK_ALLOW_DEV=1` override for unpinned local development runtimes.\n- Extract importable routing, task-state, and native-adapter domains behind the CLI facade.\n- Require built-in Codex and Hermes phases to emit validated v1 JSON and fail closed on malformed protocol-looking output.\n- Add dry-run-first `go stack update` with tag/runtime compatibility checks, atomic project writes, and durable rollback records.\n- Make JSON writes and task queue moves atomic, serialize JSONL appends, and add PID-aware process locks that recover dead owners without stealing live locks.\n- Ship a standalone `go-workflow` uv-tool entrypoint with packaged schemas/fixture, deterministic Python/frontend/existing-repo pilots, and fail-closed real-Hermes proof artifacts.\n- Fall back to an isolated uv runtime when the host has Python 3.11+ but no importable pytest.\n- Formalize live Hermes proof as a packaged schema and fail-closed CLI contract with raw-result hash verification and explicit validated copying.\n- Require raw doctor/first/resume evidence verification whenever a live Hermes proof is copied for preservation.\n- Shell-quote native Codex repository paths and remove unsafe path interpolation from native agent prompts.\n- Shell-quote generated router commands and advertise the safe `{repo_shell}` placeholder for custom adapters.\n- Prove template bootstrap cannot override its repo-local stack ref through `GO_STACK_REF`.\n- Normalize tracked workflow data and schema artifacts to non-executable file modes, with a paired-repository regression gate.\n\n## 0.3.0 - 2026-07-15\n\n- Replace hosted automation with a local Linux/WSL verification command.\n- Add immutable `stack_ref` pins and explicit template lifecycle status.\n- Add a local-only release preflight that never publishes.\n- Split version, migration, and adapter-protocol rules into importable modules.\n- Add transactional `.go` contract migrations and the shared versioned Codex/Hermes/custom adapter protocol.\n\n## 0.2.0 - 2026-07-14\n\n- Added bounded autonomous build, verification, deep-critic, repair, transactional ship, and goal-audit loops.\n- Added portable cross-machine resume state, Hermes-first executor configuration, WSL doctor checks, and a local Linux verification contract.\n- Added project/stack version compatibility plus a live opt-in Hermes acceptance campaign.\n- Hardened scope enforcement, dirty-state handling, template pairing, and project-specific template application.\n\n## 0.1.0 - 2026-07-03\n\n- Initial public scaffold for Go Workflow Stack.\n- Added public README, MIT license, security/support/contributing docs, issue templates, and local validation.\n"
+    }
+  ],
+  "content_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+  "commit": "ca64c655b1bb1d57a8e85990d4f84b9df3b423b9",
+  "tag_object": "8fafb3b24190731ed27f83d392e6f53ad08dfe17",
+  "release_evidence": {
+    "path": ".go/runs/release-safe-active-task-handoff-v0347/completion/release-882ff828945442f4bb595cdfff6debc8.json",
+    "sha256": "b96fcf9263535e181fd36713de02a4ba7fe1d7031f6c91218c1727c0d826a29b"
+  }
+}

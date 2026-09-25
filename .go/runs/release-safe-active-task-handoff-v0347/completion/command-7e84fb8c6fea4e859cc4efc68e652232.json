@@ -1,0 +1,29 @@
+{
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "e771e258dc83ecaaeea116900300115dc2e690c8",
+  "content_digest": "679468b1db8fc703f9d7ac419295bf012696c2c7815b1a5896b68915d8ce969f",
+  "command": "python3 cli/go.py validate .",
+  "cwd": "/tmp/go-managed-verify-64x38c1m/candidate",
+  "elapsed_seconds": 3.5633187498897314,
+  "returncode": 0,
+  "stdout": "ok: /tmp/go-managed-verify-64x38c1m/candidate/.go\n",
+  "stderr": "",
+  "timed_out": false,
+  "verification_source": {
+    "schema": "go-workflow.verification-source.v1",
+    "template_head": "3073653022d1c8fb934e2068c24d33912019738c",
+    "candidate_digest": "129d4a33682465c8cabdba4a9a40220c2744125f53149e22d989417a118f2598",
+    "tracked_content_sha256": "64a4674182c2b4311f67a573dc5da40539e976d5213ecc8fb4556334f5da4345",
+    "changed_files_sha256": "d926ea92d4b3bd3f378e367973a1c918050e0f8fe621cfb867d61593eef0a697",
+    "changed_files": [
+      ".go/project.json",
+      "CHANGELOG.md",
+      "go_workflow/constants.py",
+      "pyproject.toml",
+      "release-pairings.json"
+    ],
+    "isolation": "unregistered_disposable_checkout"
+  }
+}

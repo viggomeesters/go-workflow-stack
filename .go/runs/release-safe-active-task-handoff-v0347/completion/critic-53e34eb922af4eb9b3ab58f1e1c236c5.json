@@ -1,0 +1,37 @@
+{
+  "schema": "go-workflow.critic-review.v1",
+  "status": "passed",
+  "task_id": "release-safe-active-task-handoff-v0347",
+  "project": "go-workflow-stack",
+  "contract_digest": "6861d560f709889b93ac22a72f154c572f1e11a656a052047bd58512ad22feed",
+  "revision": "6732e5336a7214b86aaba4ad0ad46fc41c7123e0",
+  "content_digest": "895fcee183b05eca0d89306f0fd2998618b71ccbbe5c379f7a791e948406bd26",
+  "reviewer": "independent Hermes read-only critic deleg_baf0f0ef, with earlier five-path critic deleg_ab09d804",
+  "review_mode": "independent",
+  "summary": "Independent supplemental critic PASS reviewed all 16 changed-content paths since claim base cd9cc489 at candidate HEAD 6732e53 and content digest 895fcee1; no blocking findings. Full reviewer report SHA-256 d6e1a104400d25888c9acb7eedcfb0c09da7d1b606952e213f0016b51e904ba4. An earlier independent critic PASS separately reviewed the exact five dirty release-metadata paths (diff SHA-256 f213703ca190a6e7a009b4daf00492e8c56dcc3be847774f42297ab349ee3ff9); that narrower review alone was rejected by the completion CLI. Neither critic claims publication or reran the full suite. Fresh separately executed candidate verification passed 7/7 (725 Python tests) in verification-1518157fb0fb4506ae1e3559eaa11c7f.json, SHA-256 906f08b6074cbb2ebafbfabf2b39fb890b0121a3c2c8e6ce737963d218a73de7.",
+  "blocking_findings": [],
+  "reviewed_paths": [
+    ".go/project.json",
+    "CHANGELOG.md",
+    "go_workflow/cli.py",
+    "go_workflow/constants.py",
+    "go_workflow/execution_context.py",
+    "go_workflow/release.py",
+    "go_workflow/stack_update.py",
+    "pyproject.toml",
+    "release-pairings.json",
+    "scripts/release-check-inner.sh",
+    "tests/test_abc_phase_contracts.py",
+    "tests/test_abc_release.py",
+    "tests/test_execution_context.py",
+    "tests/test_release_compatibility_gate.py",
+    "tests/test_release_reconcile.py",
+    "tests/test_upgrade_preview.py"
+  ],
+  "evidence_refs": [
+    "/home/viggo/.hermes/cache/delegation/live/deleg_ab09d804/task-0.log",
+    "/home/viggo/.hermes/cache/delegation/live/deleg_baf0f0ef/task-0.log",
+    "/home/viggo/.hermes/cache/delegation/subagent-summary-0-20260925_072755_367041.txt",
+    ".go/runs/release-safe-active-task-handoff-v0347/completion/verification-1518157fb0fb4506ae1e3559eaa11c7f.json"
+  ]
+}

@@ -76,3 +76,20 @@ reconciliation (including source-dependent proof invalidation). Its integration
 check must start with an actually claimed parent, deliver a separate repair, then
 prove repaired bytes are present before the original task executes again. Never
 reset dirty work or call status-only reactivation a successful repair.
+
+## T05 verified implementation; connected rollout remains open
+
+The ten-task trial performs ten distinct Git publications and deployments, pauses
+at the fifth done-message acknowledgement, and resumes without repeating valid
+work. The final real-time watchdog test passed across two 300-second intervals
+(601.51 seconds); this is a recording transport, not user-chat delivery. Linux
+release candidate checks pass, including compatibility, immutable template pairing
+and standalone package installation. Source-bound logs and review evidence live
+in `.go/evidence/taskwise-t05/result.json`.
+
+T05 stays active until the user designates the consumer repository and a real
+chat transport with independent delivery capability. Do not infer this from the
+current Book Forge working directory. Once supplied: preflight the transport,
+update only that consumer to the published immutable release, run a bounded real
+task through publication and ordered chat delivery, verify readback, then close
+T05 with the resulting evidence. No other consumer pin or Hermes process changes.

@@ -5,8 +5,8 @@
   "shareable_delivery": "none",
   "id": "taskwise-t05",
   "project": "go-workflow-stack",
-  "status": "open",
-  "summary": "T05 — Voortgang en heartbeat",
+  "status": "active",
+  "summary": "T05 \u2014 Voortgang en heartbeat",
   "description": "Authorized implementation plan: serial tasks, single immutable release after integrated verification. Preserve legacy runs and user changes. No Hermes runner or Book Forge edits.",
   "scope": {
     "read": [
@@ -17,7 +17,8 @@
       "fixtures/**",
       "templates/**",
       "AGENTS.md",
-      ".go/**"
+      ".go/**",
+      "skills/repo-local-agent-workflow/SKILL.md"
     ],
     "modify": [
       "go_workflow/**",
@@ -27,7 +28,11 @@
       "fixtures/**",
       "templates/**",
       "AGENTS.md",
-      ".go/**"
+      ".go/**",
+      "skills/repo-local-agent-workflow/SKILL.md",
+      "pyproject.toml",
+      "CHANGELOG.md",
+      "release-pairings.json"
     ]
   },
   "acceptance": [
@@ -37,13 +42,17 @@
     "python3 -m pytest tests/test_taskwise_campaign.py -q"
   ],
   "claim": {
-    "agent": null,
-    "claimed_at": null
+    "agent": "codex",
+    "claimed_at": "2026-09-25T14:19:59+02:00",
+    "base_commit": "7df6ebcc2c09fc4f5db2f7acfa6c4786ec2f509c"
   },
-  "work_status": "pending",
+  "work_status": "in_progress",
   "review_status": "none",
   "review_history": [],
-  "evidence": [],
+  "evidence": [
+    "T05 scope clarification: repository-owned skill is an agent instruction required by original rollout scope; no external installed skill or Hermes runner changes.",
+    "Authorized single immutable release requires version, changelog and pairing manifest; preserve existing uv.lock unchanged."
+  ],
   "architecture": {
     "impact": "material",
     "scope_refs": [

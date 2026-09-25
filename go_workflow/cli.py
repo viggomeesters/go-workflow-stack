@@ -3921,6 +3921,14 @@ def create_tasks_from_execution_brief(repo: Path, brief: dict[str, Any], agent: 
     return created
 
 
+def _public_campaign(repo, **kwargs):
+    from .campaign_intake import materialize_until_scope
+    try:
+        return materialize_until_scope(repo, **kwargs)
+    except ValueError as exc:
+        raise RepoLocalError('Taskwise execution configuration required: ' + str(exc)) from exc
+
+
 def cmd_go(args: argparse.Namespace) -> int:
     """Bare go universal router: route loose vs repo-local work and optionally execute."""
     repo = Path(args.repo).resolve()
@@ -3933,14 +3941,21 @@ def cmd_go(args: argparse.Namespace) -> int:
         flags=re.I,
     ))
     from .routing import until_scope_intent
+    if getattr(args, 'campaign', ''):
+        if intent:
+            raise RepoLocalError('Existing campaign scope is frozen; record a campaign amendment before changing its intent')
+        return cmd_auto(args)  # Existing frozen contract retains its original authority.
+    named = re.fullmatch(r'(?:go\s+)?([A-Za-z0-9][A-Za-z0-9._-]*)', intent, flags=re.I)
+    if named and any((repo / '.go/tasks' / state / (named.group(1) + '.json')).is_file() for state in ('open', 'active', 'blocked', 'done')):
+        args.task_id = named.group(1)
+        intent = ''
     if until_scope_intent(intent):
-        from .campaign_intake import materialize_until_scope
         from .state_io import atomic_json
         errors = validate_repo(repo)
         if errors:
             raise RepoLocalError("invalid repository: " + "; ".join(errors))
         campaign_id = "taskwise-" + datetime.now().strftime("%Y%m%dT%H%M%S%f")
-        contract = materialize_until_scope(repo, intent=intent,
+        contract = _public_campaign(repo, intent=intent,
             source_ref=args.intent_source_ref or "user:go-until-scope",
             campaign_id=campaign_id, budget=getattr(args, "explicit_campaign_budget", None),
             ship_policy=getattr(args, "explicit_ship_policy", None))
@@ -4037,6 +4052,29 @@ def cmd_go(args: argparse.Namespace) -> int:
                 plan["run_envelope"]["preflight"]["dry_run_proposed_task"] = result["proposed_task"]
             result["plan"] = plan
             if args.execute:
+                # New public Go work uses the same serial delivery boundary. Explicit
+                # saved managed runs remain resumptions, never new publication grants.
+                saved_identity = getattr(args, 'task_id', '')
+                saved_run = bool(saved_identity and (root / 'runs' / saved_identity / 'run-state.json').is_file())
+                if not saved_run:
+                    selected = ([args.task_id] if getattr(args, 'task_id', '') else
+                                [task['id'] for task in result.get('created_tasks') or []])
+                    if not selected:
+                        explicit = getattr(args, 'explicit_campaign_budget', None) or {}
+                        count = explicit.get('max_tasks') or 1
+                        selected = plan.get('next_tasks', [])[:count]
+                    if selected:
+                        from .state_io import atomic_json
+                        identity = 'taskwise-' + datetime.now().strftime('%Y%m%dT%H%M%S%f')
+                        campaign = _public_campaign(repo, intent=intent or ('Go ' + ', '.join(selected)),
+                            source_ref=args.intent_source_ref or 'user:public-go', campaign_id=identity,
+                            task_ids=selected, budget=getattr(args, 'explicit_campaign_budget', None),
+                            ship_policy=getattr(args, 'explicit_ship_policy', None))
+                        path = root / 'campaigns' / (identity + '.json')
+                        atomic_json(path, campaign)
+                        args.campaign = str(path)
+                        args.previous_campaign = ''
+                        args.campaign_workspace_root = str(repo.parent / (repo.name + '-task-workspaces'))
                 exit_code, executed = execute_loop_plan(repo, args, mode=mode)
                 result["execution"] = executed
                 if args.json:
@@ -5156,10 +5194,10 @@ def cmd_campaign_block(args):
 
 
 def cmd_campaign_change(args):
-    from .campaign_changes import admit_repair, amend_future_task
+    from .campaign_changes import admit_repair, amend_future_task, configure_progress
     repo=Path(args.repo).resolve()
     request=load_json(Path(args.request))
-    operation=admit_repair if args.change_kind=='repair' else amend_future_task
+    operation={'repair':admit_repair,'amend':amend_future_task,'progress':configure_progress}[args.change_kind]
     value=operation(repo,args.campaign,owner=args.agent,**request)
     print(json.dumps(value,indent=2,ensure_ascii=False))
     return 0
@@ -6510,7 +6548,7 @@ def build_parser() -> argparse.ArgumentParser:
     campaign_block.add_argument("--reason", required=True)
     campaign_block.add_argument("--agent", default="agent")
     campaign_block.set_defaults(func=cmd_campaign_block)
-    for change_kind in ('repair','amend'):
+    for change_kind in ('repair','amend','progress'):
         change=campaign_sub.add_parser(change_kind,help='Record a bounded evidence-backed campaign change')
         change.add_argument('repo',nargs='?',default='.')
         change.add_argument('--campaign',required=True)

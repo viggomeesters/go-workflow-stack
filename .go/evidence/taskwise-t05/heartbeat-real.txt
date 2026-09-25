@@ -1,0 +1,3 @@
+REAL_HEARTBEAT_SOURCE_HASHES {"/Users/viggomeesters/Dev/go-workflow-taskwise/go_workflow/progress_events.py": "300247b5d8d3c63f3284e79ed34b46a1fad97be1dda4956cd87ad623d49b9e1e", "/Users/viggomeesters/Dev/go-workflow-taskwise/go_workflow/progress_transport.py": "a56172c9268b05122624dc22cbe79cb1fd9d543c73ccb008814d4974f31eb728", "/Users/viggomeesters/Dev/go-workflow-taskwise/go_workflow/progress_watchdog.py": "e1312f01dcbf85a5c9ccb7ab3b4e439a9ffeb397a9fcfc8047812d3ff41643ec"}
+.
+1 passed in 601.51s (0:10:01)

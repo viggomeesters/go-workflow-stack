@@ -160,3 +160,13 @@ process can consume it. Active-task resume, moved-checkout recovery and complete
 phase orchestration remain in abc-04; live multi-model worker proof remains in
 abc-09/10. The legacy attempt projection is kept for old adapters; managed
 attempt references point to distinct canonical artifact paths.
+
+## Independent progress channel
+
+Progress delivery is separate from the blocking build/critic/repair request. The
+versioned `go-workflow.progress-event.v1` and `go-workflow.progress-transport.v1`
+contracts support durable task messages and independently supervised 300-second
+heartbeats. See [progress delivery](progress-delivery.md) for the handshake,
+receipt semantics, local reference and conformance suite. A model's ordinary final
+response does not provide independent delivery capability; preflight that capability
+before an unattended campaign. Existing worker result schemas remain unchanged.

@@ -293,8 +293,11 @@ class RunSession:
             state = self.load()
             if state['controller'] != {'host': socket.gethostname(), 'pid': os.getpid()}:
                 raise RunStateError('Controller ownership changed')
+            before = deepcopy(state)
             state.update(deepcopy(changes))
             atomic_json(state_path(self.control, self.task_id, self.channel), state)
+        from .campaign_progress import phase_changed
+        phase_changed(self.control, self.task_id, before, state)
         return state
 
     @contextmanager

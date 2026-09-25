@@ -145,7 +145,8 @@
         "publishing",
         "deploying",
         "finishing",
-        "published"
+        "published",
+        "suspended"
       ]
     },
     "preparation": {
@@ -652,6 +653,93 @@
           }
         }
       }
+    },
+    "suspension": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "reason",
+        "checkpoint_sha256",
+        "candidate_digest",
+        "workspace_head"
+      ],
+      "properties": {
+        "schema": {
+          "const": "go-workflow.release-suspension.v1"
+        },
+        "reason": {
+          "type": "string",
+          "minLength": 1
+        },
+        "checkpoint_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "candidate_digest": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "workspace_head": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{40}$"
+        }
+      }
     }
-  }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "phase": {
+            "const": "suspended"
+          }
+        }
+      },
+      "then": {
+        "required": [
+          "suspension"
+        ],
+        "properties": {
+          "effects": {
+            "maxProperties": 0
+          },
+          "observations": {
+            "maxItems": 0
+          }
+        },
+        "not": {
+          "anyOf": [
+            {
+              "required": [
+                "commit"
+              ]
+            },
+            {
+              "required": [
+                "tag_object"
+              ]
+            },
+            {
+              "required": [
+                "release_evidence"
+              ]
+            },
+            {
+              "required": [
+                "deployment"
+              ]
+            }
+          ]
+        }
+      },
+      "else": {
+        "not": {
+          "required": [
+            "suspension"
+          ]
+        }
+      }
+    }
+  ]
 }

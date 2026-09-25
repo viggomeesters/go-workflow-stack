@@ -439,3 +439,21 @@ def resume_repaired_parent(repo, repair_id, actor, controller_locked=False, reco
             atomic_json(journal, intent)
         _apply(repo, journal, intent)
         return {'resumed': True, 'task_id': parent_id, 'status': proposed['status']}
+
+
+def configure_progress(repo, campaign_path, *, change_id, transport, owner, reason, evidence):
+    """Explicit opt-in revision; preserve every existing execution/ship authority."""
+    from .campaign_progress import SCHEMA, validate_progress
+    binding = {'schema': SCHEMA, 'heartbeat_seconds': 300, 'transport': transport}
+    errors = validate_progress(binding)
+    if errors or transport is None:
+        raise ValueError('Configure an explicit valid independent transport: ' + '; '.join(errors))
+    def build(repo, old, new, writes, change):
+        if not old.get('execution'):
+            raise ValueError('Legacy bounded campaigns keep their execution mode; create an explicitly authorized taskwise revision first')
+        new['execution']['progress'] = deepcopy(binding)
+        if new['authority'] != old['authority']:
+            raise ValueError('Progress migration must not change authority')
+        change['transport_schema'] = transport['schema']
+    return _change(repo, campaign_path, change_id=change_id, kind='progress_configured',
+                   request={'transport': transport}, owner=owner, reason=reason, evidence=evidence, build=build)

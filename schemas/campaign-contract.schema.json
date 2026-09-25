@@ -567,6 +567,57 @@
               "minLength": 1
             }
           }
+        },
+        "progress": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "schema",
+            "heartbeat_seconds",
+            "transport"
+          ],
+          "properties": {
+            "schema": {
+              "const": "go-workflow.campaign-progress.v1"
+            },
+            "heartbeat_seconds": {
+              "const": 300
+            },
+            "transport": {
+              "anyOf": [
+                {
+                  "type": "null"
+                },
+                {
+                  "type": "object",
+                  "additionalProperties": false,
+                  "required": [
+                    "schema",
+                    "command",
+                    "timeout_seconds"
+                  ],
+                  "properties": {
+                    "schema": {
+                      "const": "go-workflow.progress-transport.v1"
+                    },
+                    "command": {
+                      "type": "array",
+                      "minItems": 1,
+                      "items": {
+                        "type": "string",
+                        "minLength": 1
+                      }
+                    },
+                    "timeout_seconds": {
+                      "type": "number",
+                      "exclusiveMinimum": 0,
+                      "maximum": 60
+                    }
+                  }
+                }
+              ]
+            }
+          }
         }
       }
     }

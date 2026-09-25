@@ -1,0 +1,94 @@
+{
+  "task_id": "taskwise-t05",
+  "status": "implementation_verified_rollout_pending",
+  "release_target": "v0.3.48",
+  "verification_logs": [
+    "checkpoints.txt",
+    "contracts.txt",
+    "controller.txt",
+    "events.txt",
+    "final-targeted.txt",
+    "final-version-triage.txt",
+    "full-regression-summary.txt",
+    "gateway.txt",
+    "heartbeat-real.txt",
+    "legacy-go.txt",
+    "linux-candidate-release.txt",
+    "linux-smoke.txt",
+    "public-go.txt",
+    "serial-integration.txt",
+    "suspension-crash.txt"
+  ],
+  "source_sha256": {
+    "AGENTS.md": "689fd7ddaedcdb65f5019b362470dd879af2438f8fdba4bb8de07870f92e779d",
+    "CHANGELOG.md": "bbf5000cd995da026a55e88a29facb5112e308be74c57c479a6dde268bdffb9d",
+    "docs/agent-adapter-protocol.md": "542be943ccfa6ad5ac1b4a1addcbc136b727972658dc8b43f95ed049ec164a3d",
+    "docs/progress-delivery.md": "06125bb79befedcb73d7d554e4aa0fe4fd03304d12385ce47718939011b65cc0",
+    "docs/releases/v0.3.48.md": "e2b462ef5dca0c1413f5504ad39da31168286048a08d8ad29e151af4380c0ff4",
+    "fixtures/minimal/AGENTS.md": "00fcbbb50731f586b1572df399995e1075a427906b84c5345f3268e6091ab8ee",
+    "go_workflow/agents_gateway.py": "b63da39c382b4685f6749efd62d64378b0d11996f2347eee13fc77ed3a706f73",
+    "go_workflow/campaign.py": "1997b8773334de0cb4ab37f14244d3a5ea1703d655919564bc108d5e63f2c20e",
+    "go_workflow/campaign_changes.py": "4c85f9013b39aedfdb760b43760df50b0f1147df78ac84cbeb2d341fa805f117",
+    "go_workflow/campaign_contracts.py": "55d23e064adbe0f8c1c2b9bb099ed931358febad980f2c3ee2cd83ce82508d93",
+    "go_workflow/campaign_intake.py": "25a373e4189fdb33dd008db8f18db490da49472587e3ea91e766af03f03dcd70",
+    "go_workflow/campaign_progress.py": "1c326121f8c1bc8b56fcb742e31c89332f13c772ea8c56206d148d07ff077495",
+    "go_workflow/cli.py": "d237074a9d9b29fbcbc31a5d9530abad4928827bc657d5f6c2a6713051748a97",
+    "go_workflow/constants.py": "e9b8c6a4afc3f0cad716001942558d419f302540431ae6be4790298658d5a432",
+    "go_workflow/progress_events.py": "300247b5d8d3c63f3284e79ed34b46a1fad97be1dda4956cd87ad623d49b9e1e",
+    "go_workflow/progress_transport.py": "a56172c9268b05122624dc22cbe79cb1fd9d543c73ccb008814d4974f31eb728",
+    "go_workflow/progress_watchdog.py": "e1312f01dcbf85a5c9ccb7ab3b4e439a9ffeb397a9fcfc8047812d3ff41643ec",
+    "go_workflow/release.py": "073935ac98ca65b28c9181f5cc08806daf911847e7d1d2aac379589db360906d",
+    "go_workflow/run_state.py": "63098813960bf5ea2088c868cba04f53549d8291fb9898588f6eb4cfaa201d89",
+    "pyproject.toml": "259ba541354536835b4569b100968553f569b1af7647acd79dc9d76eef534d86",
+    "release-pairings.json": "55f3d58c8ba3ff99d09571f53a75b540af1b721a2f1b7999b0ab6f6a859426a6",
+    "schemas/campaign-contract.schema.json": "e952539dd25a7e288770b142ba8638309a4d7fa813e564010b0fe0ea20c4e5c5",
+    "schemas/progress-event.schema.json": "98282b547acda4e6ecd14ba1c2cc6cf5702cc4685c78c20dcbfc291560db4e32",
+    "schemas/progress-state.schema.json": "2937131075fddf5517e4a910209798dce15f286177cf0ac37e8d983f1d43ba02",
+    "schemas/publication-state.schema.json": "811f176ef7b4062781574c36c162833d515e6b9a2b93acb55ece6909563f18bc",
+    "skills/repo-local-agent-workflow/SKILL.md": "f80bc96b65dee115b88543e6cd9eee5802c73699cbe38ce1e70f9f1e0ccb3bd6",
+    "tests/test_agents_gateway.py": "4fa14454549df0c934574ff8f8dbd992915ec6523494ba80533cbae40451a734",
+    "tests/test_campaign_progress.py": "80d46e331e0f2d69976397c178843bed707f2e57efdc7cceeb6e24c827791f84",
+    "tests/test_progress_events.py": "e42d881db55fc2ba284ca9aff8c661881161aa1c8c215455c4eebca0c6346611",
+    "tests/test_progress_transport.py": "329357ec886eca7f55dd1adaef272f26eeba99e21932a3bf3a2ee023b56e49a1",
+    "tests/test_progress_watchdog.py": "9d1cae8e4055d5b234cbcf0c6968f84dfdff9917a9a35e5ad4ee209b4ddc964a",
+    "tests/test_public_taskwise_go.py": "f396c7e917bf40147b798b244f69c46a9eb9721d9ce4c1882b462b2662e3bd63",
+    "tests/test_smoke.py": "9f892460e1a37a60be98451fc837d62d89553ce72e07164f96525dcee5c6227e",
+    "tests/test_taskwise_checkpoints.py": "556d712c555796a5ad6eae478416ed341df6fa296d0ac48fd01b0211226ba204",
+    "tests/test_taskwise_progress_integration.py": "bb01609f09547e5b3c8714e1aacd674254190022234da8b53de6b4bdeeb8e3e7",
+    "tests/test_taskwise_release_suspension.py": "64e0e47636a45be1a0edf5c3920deaa3efb247517e9cdd942b3c575f9f5ad698"
+  },
+  "review": {
+    "reviewers": [
+      "/root/review_t01",
+      "/root/inspect_progress",
+      "/root/review_resume_context"
+    ],
+    "status": "implementation_reviewed",
+    "blocking_findings": [],
+    "final_release_review": "review_t01: no blocking release findings; hashes and preserved authorization verified; consumer/chat rollout remains pending"
+  },
+  "real_heartbeat": {
+    "seconds": 601.51,
+    "intervals": 2,
+    "transport": "local recording reference",
+    "user_chat": false
+  },
+  "rollout": {
+    "status": "blocked_missing_designation",
+    "reason": "User must designate consumer repository and independently capable real chat transport. Current Codex interface cannot inject independent assistant messages into an active chat. No consumer pin changed."
+  },
+  "original_checkout": {
+    "path": "/Users/viggomeesters/Dev/go-workflow-stack",
+    "head_preserved": "9454f45264a66e49cbd9543b73a2d14f5ac93110",
+    "uv_lock_sha256": "33b200cd51938544f146bf9045dec0dcc0fd7f7a60f6c4a3df405471de0d55d5"
+  },
+  "limitations": [
+    "Effectless suspended release candidates require explicit fresh-candidate reconciliation; published effects are never suspended.",
+    "No real-chat rollout or full assignment completion claim."
+  ],
+  "self_reflect": "No durable agent/process improvement needed; independent review defects were repaired within this product scope. No external skill/memory/config changes.",
+  "broad_regression": {
+    "original": "873 passed,40 failed,2 skipped",
+    "resolution": "36 failures superseded by Linux231pass; remaining4 final-source tests passed. No unresolved failures."
+  }
+}

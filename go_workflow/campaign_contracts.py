@@ -72,7 +72,11 @@ def validate_campaign_contract(data: Any) -> list[str]:
     data = obj(data, 'schema id project revision previous_sha256 intent goal basis authority decisions' + (' execution' if taskwise else ''), 'campaign')
     if taskwise:
         has_shipping = isinstance(data['execution'], dict) and 'shipping' in data['execution']
-        execution = obj(data['execution'], 'schema mode' + (' shipping' if has_shipping else ''), 'execution')
+        has_progress = isinstance(data['execution'], dict) and 'progress' in data['execution']
+        execution = obj(data['execution'], 'schema mode' + (' shipping' if has_shipping else '') + (' progress' if has_progress else ''), 'execution')
+        if has_progress:
+            from .campaign_progress import validate_progress
+            errors.extend(validate_progress(execution['progress']))
         if has_shipping:
             shipping = obj(execution['shipping'], 'schema policy source_ref', 'shipping')
             if shipping.get('schema') != 'go-workflow.taskwise-shipping.v1' or shipping.get('policy') not in {'none', 'local-commit', 'push'}:

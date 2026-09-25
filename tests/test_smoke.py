@@ -5082,6 +5082,23 @@ def test_go_execution_brief_materializes_semantic_work_units_with_compact_proven
     assert second["scope"]["modify"] == ["app/settings.py"]
 
 
+def _legacy_mechanical_after_public_go_gate(repo: Path, gated, task_ids: list[str]):
+    """New public Go cannot invent native configuration; explicitly exercise old auto."""
+    assert gated.returncode == 1
+    assert "execution_contract" in gated.stderr, gated.stderr + gated.stdout
+    for identity in task_ids:
+        path = repo / ".go/tasks/open" / f"{identity}.json"
+        task = json.loads(path.read_text(encoding="utf-8"))
+        assert task["status"] == "open" and not (task.get("claim") or {}).get("agent")
+        assert all(outcome["status"] == "pending" for outcome in task["requested_outcomes"])
+    executed = run_go("auto", str(repo), "--execute", "--allow-dirty", "--no-semantic-critic",
+                      "--agent", "pytest", "--max-tasks", str(len(task_ids)), "--json")
+    assert executed.returncode == 0, executed.stderr + executed.stdout
+    payload = json.loads(executed.stdout)
+    assert payload["completed_tasks"] == task_ids
+    return payload
+
+
 def test_go_execution_brief_fails_before_mutation_and_execute_does_not_stop_at_taskification(tmp_path: Path):
     repo = tmp_path / "execution-brief-run-project"
     subprocess.run(["git", "init", "-q", str(repo)], check=True)
@@ -5126,10 +5143,7 @@ def test_go_execution_brief_fails_before_mutation_and_execute_does_not_stop_at_t
         "go", str(repo), "--execution-brief", str(brief_path), "--execute", "--allow-dirty",
         "--no-semantic-critic", "--agent", "pytest", "--json",
     )
-    assert executed.returncode == 0, executed.stderr + executed.stdout
-    payload = json.loads(executed.stdout)
-    assert payload["created_tasks"][0]["id"] == "run-approved-check"
-    assert payload["execution"]["completed_tasks"] == ["run-approved-check"]
+    _legacy_mechanical_after_public_go_gate(repo, executed, ["run-approved-check"])
     assert (repo / ".go" / "tasks" / "done" / "run-approved-check.json").is_file()
 
 
@@ -5275,13 +5289,11 @@ def test_recommendation_promotion_resumes_from_go_state_and_executes_once(tmp_pa
         "--agent", "pytest", "--json",
     )
 
-    assert executed.returncode == 0, executed.stderr + executed.stdout
-    payload = json.loads(executed.stdout)
-    assert payload["recommendation_promotion"]["status"] == "applied"
-    assert payload["created_tasks"][0]["id"] == "resume-approved-check"
-    assert payload["execution"]["completed_tasks"] == ["resume-approved-check"]
+    _legacy_mechanical_after_public_go_gate(repo, executed, ["resume-approved-check"])
     assert not (repo / ".go" / "recommendations" / "pending.json").exists()
-    applied_path = repo / payload["recommendation_promotion"]["path"]
+    applied_paths = list((repo / ".go/recommendations/applied").glob("*.json"))
+    assert len(applied_paths) == 1
+    applied_path = applied_paths[0]
     applied = json.loads(applied_path.read_text(encoding="utf-8"))
     assert applied["status"] == "applied"
     assert applied["applied_tasks"] == ["resume-approved-check"]
@@ -5359,7 +5371,7 @@ def test_execution_brief_outcomes_require_disposition_and_auto_verify_with_comma
         "go", str(auto_repo), "--execution-brief", str(auto_brief_path), "--execute",
         "--allow-dirty", "--no-semantic-critic", "--agent", "pytest", "--json",
     )
-    assert executed.returncode == 0, executed.stderr + executed.stdout
+    _legacy_mechanical_after_public_go_gate(auto_repo, executed, ["evidence-backed-outcomes"])
     done = json.loads((auto_repo / ".go" / "tasks" / "done" / "evidence-backed-outcomes.json").read_text(encoding="utf-8"))
     assert [item["status"] for item in done["requested_outcomes"]] == ["verified", "verified"]
     for outcome in done["requested_outcomes"]:
@@ -5429,11 +5441,13 @@ def test_complete_advice_to_outcome_journey_survives_long_chat_loss(tmp_path: Pa
         "go", str(repo), "--intent", "Go", "--execute", "--allow-dirty",
         "--no-semantic-critic", "--agent", "pytest", "--json",
     )
-    assert executed.returncode == 0, executed.stderr + executed.stdout
-    payload = json.loads(executed.stdout)
-    assert payload["recommendation_promotion"]["status"] == "applied"
-    assert payload["execution"]["completed_tasks"] == ["prove-compact-menu", "prove-settings-coverage"]
-    for task_id in payload["execution"]["completed_tasks"]:
+    payload = _legacy_mechanical_after_public_go_gate(repo, executed, ["prove-compact-menu", "prove-settings-coverage"])
+    applied = list((repo / ".go/recommendations/applied").glob("*.json"))
+    assert len(applied) == 1
+    promoted = json.loads(applied[0].read_text())
+    assert promoted["status"] == "applied"
+    assert promoted["applied_tasks"] == ["prove-compact-menu", "prove-settings-coverage"]
+    for task_id in payload["completed_tasks"]:
         done = json.loads((repo / ".go" / "tasks" / "done" / f"{task_id}.json").read_text(encoding="utf-8"))
         assert all(item["status"] == "verified" and item["evidence"] for item in done["requested_outcomes"])
     validated = run_go("validate", str(repo))

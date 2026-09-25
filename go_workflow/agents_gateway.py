@@ -3,6 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+import json
+import re
 import os
 from pathlib import Path
 import stat
@@ -28,10 +30,31 @@ When the user invokes `Go`, `Go plan`, `Go <task-id>`, `Go loop`, or asks to con
 4. Create or repair a concrete `.go` task before changing product files. Execute one task at a time and stay within its `scope.modify` boundary.
 5. Record content-bound verification evidence, run the required critic/recheck, repair blocking findings, and satisfy finish plus any required release evidence.
 6. Continue through remaining in-scope work until the goal is met, a declared budget is exhausted, or a real repository gate blocks progress. Never call an empty queue `done` without auditing the original outcomes.
+7. “Go tot alle taken klaar” freezes all unfinished in-scope task IDs, including blocked tasks, into the existing campaign controller. Show scope and dependency order; do not invent a five-task or two-hour ceiling. Explicit user budgets still apply.
+8. Finish each task through claim, implementation, verification, independent review, commit, authorized push, configured deployment/readback and synchronized closure before announcing done and starting another. New authorized taskwise runs default to push; user/repository restrictions and frozen older-run authority prevail. Deployment without a requirement is not applicable; required unconfigured deployment is blocked.
+9. Use the versioned progress outbox and an independently capable transport for task start, phase, repair, amendment, done and final messages. Preflight transport before unattended execution. A separate watcher offers a heartbeat every 300 seconds; no connected transport means no promised chat heartbeat. Retain undelivered events and stop before the next task until delivery recovers.
+10. Resume from current canonical task, workspace, proof and publication records. Keep necessary repair tasks linked to original outcomes, show amended future tasks, and continue independent work around concrete blockers. Never count status/log churn as proven progress or expand an old run’s authority implicitly.
 
 Do not redirect repository workflow state to a hidden central queue or retired vault. Nested `AGENTS.md` files may add directory-specific obligations, but they do not replace the root gateway or `.go` source of truth.
 {GATEWAY_END}
 """
+
+
+# Exact released predecessor remains readable at its old immutable pin. Adoption
+# and stack update still render the current gateway; this grants no new authority.
+LEGACY_GATEWAY_BLOCK = GATEWAY_BLOCK[:GATEWAY_BLOCK.index('7. “Go tot alle taken klaar”')] + GATEWAY_BLOCK[GATEWAY_BLOCK.index('\nDo not redirect repository workflow'):]
+
+
+def _readable_legacy_gateway(repo, existing):
+    try:
+        project = json.loads((repo / '.go/project.json').read_text())
+        ref = project.get('stack_ref', '')
+        version = project.get('required_stack_version', '')
+        if ref != 'v' + version or not re.fullmatch(r'\d+\.\d+\.\d+', version):
+            return False
+        return tuple(map(int, version.split('.'))) < (0, 3, 48) and LEGACY_GATEWAY_BLOCK.strip() in existing
+    except (OSError, ValueError, TypeError):
+        return False
 
 
 class AgentsGatewayError(ValueError):
@@ -171,6 +194,8 @@ def validate_agents_gateway(repo: Path) -> list[str]:
             ]
         desired, action = render_gateway(existing)
         if action != "none" or desired != existing:
+            if _readable_legacy_gateway(repo, existing):
+                return []
             return [
                 "root AGENTS.md is missing the current bounded .go gateway block; repair with "
                 "`go-workflow agents sync . --apply`"

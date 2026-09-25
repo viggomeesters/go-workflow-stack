@@ -111,8 +111,8 @@ def validate_state(value):
                 'contract_digest', 'authority', 'base_commit', 'remote_base', 'remote_url', 'version', 'tag',
                 'phase', 'preparation', 'effects', 'observations', 'reservation', 'notes'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence', 'deployment', 'candidate'}
-            or value.get('schema') != SCHEMA or not isinstance(value.get('phase'), str) or value.get('phase') not in {'preparing', 'prepared', 'publishing', 'deploying', 'finishing', 'published'}
+            or set(value) - required - {'commit', 'tag_object', 'content_digest', 'release_evidence', 'deployment', 'candidate', 'suspension'}
+            or value.get('schema') != SCHEMA or not isinstance(value.get('phase'), str) or value.get('phase') not in {'preparing', 'prepared', 'publishing', 'deploying', 'finishing', 'published', 'suspended'}
             or not isinstance(value.get('preparation'), list) or not isinstance(value.get('effects'), dict)
             or not isinstance(value.get('observations'), list)):
         raise PublicationError('Invalid publication checkpoint')
@@ -175,6 +175,18 @@ def validate_state(value):
                        or not re.fullmatch('[0-9a-f]{64}',str(item.get('digest'))) for item in candidate['history'])
                 or candidate['history'][-1]['digest']!=candidate['digest']):
             raise PublicationError('Invalid explicit release candidate revision')
+    if value['phase'] == 'suspended' or 'suspension' in value:
+        suspension = value.get('suspension')
+        if (value['phase'] != 'suspended' or not isinstance(suspension, dict)
+                or set(suspension) != {'schema', 'reason', 'checkpoint_sha256', 'candidate_digest', 'workspace_head'}
+                or suspension.get('schema') != 'go-workflow.release-suspension.v1'
+                or not isinstance(suspension.get('reason'), str) or not suspension['reason'].strip()
+                or any(not re.fullmatch('[0-9a-f]{64}', str(suspension.get(key)))
+                       for key in ('checkpoint_sha256', 'candidate_digest'))
+                or not re.fullmatch('[0-9a-f]{40}', str(suspension.get('workspace_head')))
+                or value['effects'] or value['observations']
+                or any(key in value for key in ('commit', 'tag_object', 'release_evidence', 'deployment'))):
+            raise PublicationError('Invalid suspended publication checkpoint')
     if 'deployment' in value:
         from .deployment import validate_state as validate_deployment
         validate_deployment(value['deployment'])
@@ -195,7 +207,7 @@ def _load(control, task, owner, run_id):
     reservation = (control / value['reservation']).resolve()
     if reservation.parent != (control / '.go/runs/publication-reservations').resolve():
         raise PublicationError('Publication reservation escaped canonical state')
-    if value['phase'] != 'published':
+    if value['phase'] not in {'published', 'suspended'}:
         expected = {'task_id': task['id'], 'run_id': run_id, 'owner': owner, 'version': value['version'], 'status': 'reserved'}
         if reservation.exists() and read_object(reservation) != expected:
             raise PublicationError('Publication reservation ownership changed; explicit reconciliation required')
@@ -466,7 +478,10 @@ def prepare_release(control, task_id, owner, run_id, *, ship_policy='none', allo
             raise PublicationError('Publication preparation requires the owned ready base branch')
         path = state_path(control, task_id)
         resuming = path.exists()
-        if resuming: state = _load(control, task, owner, run_id)
+        if resuming:
+            state = _load(control, task, owner, run_id)
+            if state['phase'] == 'suspended':
+                raise PublicationError('Suspended release requires explicit fresh-candidate reconciliation on the current base')
         else:
             from .deployment import authorize
             authorize(profile.get('deployment'), allow_deploy)
@@ -855,6 +870,58 @@ def _release_reservation(control, state):
         atomic_json(path, {**expected, 'status': 'released'})
 
 
+def suspend_prepared_release(control, task_id, owner, *, reason='Blocked task releases its unused publication channel'):
+    """Release only an effectless reservation; preserve the candidate and every proof.
+
+    The suspended state is written before releasing the reservation. A lost
+    acknowledgement therefore rolls forward without ever reviving old publish
+    authority or overwriting a reservation subsequently held by another task.
+    Reactivation deliberately requires a separately reviewed fresh candidate.
+    """
+    control = Path(control).resolve()
+    path = state_path(control, task_id)
+    if not isinstance(reason, str) or not reason.strip():
+        raise PublicationError('Suspension requires a concrete reason')
+    with repository_lock(control / '.go', 'managed-run-' + task_id, timeout_seconds=.1):
+        with repository_lock(control / '.go', 'workspace-integration', timeout_seconds=.1):
+            with repository_lock(control / '.go', 'workspace-execution-' + task_id, timeout_seconds=.1):
+                if not path.exists():
+                    return {'status': 'not_applicable', 'task_id': task_id}
+                raw = path.read_bytes()
+                previous = validate_state(json.loads(raw))
+                run_id = previous['run_id']
+                if previous['phase'] == 'suspended':
+                    task = active_task(control, task_id)
+                    if (task['status'] not in {'active', 'blocked'}
+                            or (task.get('claim') or {}).get('agent') != owner):
+                        raise PublicationError('Suspension retry requires the same active/blocked task owner')
+                else:
+                    task = active_task(control, task_id, owner)
+                state = _load(control, task, owner, run_id)
+                record = owned_record(control, task_id, owner, run_id, active=previous['phase'] != 'suspended')
+                require_run_idle(record)
+                verify_workspace(record)
+                checked_scope(record)
+                if (state['phase'] not in {'prepared', 'suspended'} or state['effects'] or state['observations']
+                        or any(key in state for key in ('commit', 'tag_object', 'release_evidence', 'deployment'))):
+                    raise PublicationError('Only an owned effectless prepared release may suspend')
+                worker = Path(record['path'])
+                candidate = content_snapshot(worker, task)['digest']
+                head = git_text(worker, 'rev-parse', 'HEAD')
+                if state['phase'] == 'suspended':
+                    if (state['suspension']['candidate_digest'] != candidate
+                            or state['suspension']['workspace_head'] != head):
+                        raise PublicationError('Suspended candidate changed; preserve it for explicit reconciliation')
+                else:
+                    state['suspension'] = {'schema': 'go-workflow.release-suspension.v1', 'reason': reason,
+                        'checkpoint_sha256': hashlib.sha256(raw).hexdigest(),
+                        'candidate_digest': candidate, 'workspace_head': head}
+                    state['phase'] = 'suspended'
+                    _save(control, state)
+                _release_reservation(control, state)
+                return deepcopy(state)
+
+
 def publish_release(control, task_id, owner, run_id):
     from . import cli as api
     from .shipping import capture_release, verify_release_evidence, observe_release
@@ -862,6 +929,8 @@ def publish_release(control, task_id, owner, run_id):
     control = Path(control).resolve()
     with publication_slot(control, task_id, owner, run_id) as (record, session):
         task = active_task(control, task_id); state = _load(control, task, owner, run_id)
+        if state['phase'] == 'suspended':
+            raise PublicationError('Suspended release cannot publish; explicit fresh-candidate reconciliation is required')
         if state['phase'] == 'published':
             proof = read_artifact(control / '.go', state['release_evidence'])
             verify_release_evidence(control, task, proof, state['content_digest'])

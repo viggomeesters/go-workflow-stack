@@ -1,3 +1,11 @@
+## 0.3.48
+
+- Deliver until-scope campaigns one task at a time with content-bound progress, frozen authority, publication readback and portable closure recovery.
+- Bound repeated failure recovery, admit necessary repairs with evidence, and preserve current source-bound resume context without rerunning completed tasks.
+- Add durable task events and independent 300-second heartbeats behind an explicitly configured transport. Pending message delivery stops the next task; legacy runs retain their authority.
+- Preserve effectless failed release candidates while releasing their unused publication reservation; suspended candidates require explicit fresh-candidate reconciliation.
+- Verify ten actual local releases/deployments, independent clone readback, lost chat acknowledgements, and new-process continuation. A local recording transport does not establish real user-chat delivery.
+
 ## 0.3.47
 
 - Publish safe same-host handoff for idle task/workspace claims

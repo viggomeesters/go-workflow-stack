@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Durable task progress event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "id",
+    "sequence",
+    "project_id",
+    "campaign_id",
+    "kind",
+    "task_id",
+    "payload",
+    "key",
+    "message",
+    "created_at",
+    "status",
+    "receipt"
+  ],
+  "properties": {
+    "schema": {
+      "const": "go-workflow.progress-event.v1"
+    },
+    "id": {
+      "type": "string",
+      "minLength": 5
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "kind": {
+      "enum": [
+        "run_start",
+        "start",
+        "phase",
+        "heartbeat",
+        "done",
+        "block",
+        "repair",
+        "amend",
+        "resume",
+        "run_end"
+      ]
+    },
+    "task_id": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "payload": {
+      "type": "object"
+    },
+    "key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "message": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "status": {
+      "enum": [
+        "pending",
+        "acknowledged"
+      ]
+    },
+    "receipt": {
+      "type": [
+        "object",
+        "null"
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "status": {
+            "const": "pending"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "receipt": {
+            "type": "null"
+          }
+        }
+      },
+      "else": {
+        "properties": {
+          "receipt": {
+            "type": "object",
+            "minProperties": 1
+          }
+        }
+      }
+    }
+  ]
+}

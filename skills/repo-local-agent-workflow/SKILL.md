@@ -374,3 +374,27 @@ lessons recorded in `.go/plans/legacy-insights.json`, without restoring a vault
 writer, broad mandatory skill chain, task-ID release versions, global skill edits
 or GitHub Actions. Updating this repository-local skill source does not authorize
 automatic installation or configuration changes in another runtime.
+
+
+## Serial campaigns and progress delivery
+
+Use the existing campaign controller for “Go tot alle taken klaar”. Freeze the
+unfinished task set and outcomes, include blocked tasks in scope, and respect
+explicit budgets without adding an implicit time/task ceiling. Each task completes
+verification, independent review, commit, authorized push, configured deployment
+readback and closure synchronization before the next primary task. New authorized
+runs default to push; repository restrictions and old frozen authority prevail.
+
+Progress is a versioned adapter contract with durable event IDs and acknowledgments.
+Configure `project.progress_transport` and preflight independent message delivery
+before unattended work. A separate process offers heartbeats every 300 seconds,
+including while the agent waits. A recording adapter is local evidence, not a real
+chat connection. Missing capability is a concrete delivery blocker. A pending done
+message must be acknowledged before the next task starts. Report actual task IDs,
+results and publication status; count delivered tasks, never infer elapsed work
+percentages from task counts. See `docs/progress-delivery.md`.
+
+Resume from current task/run/workspace/proof/publication records, preserving valid
+checkpoints. Link necessary repair work to original outcomes; amend future tasks
+with evidence and visible reasons. Do not turn infrastructure repair into unlimited
+scope expansion. Summarize original tasks, added repairs and remaining blockers.

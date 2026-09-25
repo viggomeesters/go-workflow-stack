@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Ordered progress outbox",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "project_id",
+    "campaign_id",
+    "next_sequence",
+    "events"
+  ],
+  "properties": {
+    "schema": {
+      "const": "go-workflow.progress-state.v1"
+    },
+    "project_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "campaign_id": {
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+    },
+    "next_sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "$ref": "progress-event.schema.json"
+      }
+    }
+  }
+}

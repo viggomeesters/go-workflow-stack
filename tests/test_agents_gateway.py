@@ -231,3 +231,19 @@ def test_all_bootstrap_paths_install_gateway(tmp_path: Path, command: str):
     assert result.returncode == 0, result.stderr + result.stdout
     assert (repo / "AGENTS.md").is_file()
     assert run_go("validate", repo).returncode == 0
+
+
+def test_released_gateway_is_readable_only_at_older_matching_pin(tmp_path):
+    from go_workflow.agents_gateway import LEGACY_GATEWAY_BLOCK, validate_agents_gateway, plan_agents_gateway
+    import json
+    (tmp_path/'.go').mkdir()
+    project=tmp_path/'.go/project.json'
+    project.write_text(json.dumps({'required_stack_version':'0.3.47','stack_ref':'v0.3.47'}))
+    (tmp_path/'AGENTS.md').write_text(LEGACY_GATEWAY_BLOCK)
+    assert validate_agents_gateway(tmp_path)==[]
+    assert plan_agents_gateway(tmp_path)['action']!='none'
+    project.write_text(json.dumps({'required_stack_version':'0.3.48','stack_ref':'v0.3.48'}))
+    assert validate_agents_gateway(tmp_path)
+    project.write_text(json.dumps({'required_stack_version':'0.3.47','stack_ref':'v0.3.47'}))
+    (tmp_path/'AGENTS.md').write_text(LEGACY_GATEWAY_BLOCK.replace('one task at a time','all tasks simultaneously'))
+    assert validate_agents_gateway(tmp_path)

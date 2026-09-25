@@ -757,12 +757,13 @@ def plan_campaign(
     return projection, selected
 
 
-def execute_campaign(
+def _execute_campaign(
     repo: Path,
     args: Any,
     mode: str,
     api: Any,
     execute_task: Any,
+    progress: Any,
 ) -> tuple[int, dict[str, Any]]:
     """Run permitted tasks serially until a declared stop boundary is reached."""
     repo = repo.resolve()
@@ -794,12 +795,16 @@ def execute_campaign(
         state_path, state = _load_or_create_state(
             repo, contract, contract_path, workspace_root, args,
         )
+        progress.begin(state)
+        _recover_suspension_before_selection(repo, state_path, state, args, api)
         _reconcile_completed_task(repo, state_path, state, contract)
+        progress.sync(state)
         action = str(getattr(args, "campaign_action", "run") or "run")
         if action in {"pause", "drain", "cancel"}:
             status, reason = _control_stop(state_path, state, action, str(getattr(args, "agent", "agent")))
             result.update(status=status, summary=reason, blocked_task=state.get("current_task"))
             result["campaign_state"] = str(state_path.relative_to(repo))
+            progress.finish(state, result)
             api.write_latest_run_state(repo, repo / ".go", result, args, mode)
             return 1, result
         if action not in {"run", "resume"}:
@@ -814,6 +819,7 @@ def execute_campaign(
                 "task_id": state["provider"]["task_id"],
             }
             _save_state(state_path, state)
+            progress.sync(state)
             result.update(
                 status="provider_backoff",
                 summary=reason,
@@ -821,6 +827,7 @@ def execute_campaign(
                 retry_not_before_epoch=not_before,
                 campaign_state=str(state_path.relative_to(repo)),
             )
+            progress.finish(state, result)
             api.write_latest_run_state(repo, repo / ".go", result, args, mode)
             return 1, result
         if not_before is not None:
@@ -935,6 +942,7 @@ def execute_campaign(
                 "started_at": _now_iso(),
             }
             _save_state(state_path, state)
+            progress.sync(state)
             try:
                 task_args = _bound_task_args(
                     args,
@@ -958,6 +966,7 @@ def execute_campaign(
                 )
                 state["dispatch"]["stage"] = "bound"
                 _save_state(state_path, state)
+                progress.sync(state)
             except CampaignError as exc:
                 _stop(state_path, state, "unsafe_repository", str(exc), task_id=task["id"])
                 result.update(
@@ -970,6 +979,7 @@ def execute_campaign(
                 break
             state["dispatch"]["stage"] = "dispatched"
             _save_state(state_path, state)
+            progress.sync(state)
             code, task_result = execute_task(repo, task_args, mode, task, api)
             used_commands = max(int(task_result.get("commands_run") or 0), 0)
             used_repairs = max(int(task_result.get("repair_attempts") or 0), 0)
@@ -1070,6 +1080,19 @@ def execute_campaign(
                 open_path = repo / ".go" / "tasks" / "open" / f"{task['id']}.json"
                 active_path = repo / ".go" / "tasks" / "active" / f"{task['id']}.json"
                 if no_progress and (open_path.is_file() or active_path.is_file()):
+                    if taskwise and managed_delivery:
+                        from .release import suspend_prepared_release
+                        try:
+                            suspension = suspend_prepared_release(repo, task['id'], str(getattr(args, 'agent', 'agent')),
+                                reason='Bounded recovery exhausted; retain candidate and free unused publication channel')
+                            state['history'].append({'event': 'campaign.publication_suspended', 'task_id': task['id'],
+                                'created_at': _now_iso(), 'status': suspension.get('phase') or suspension.get('status')})
+                        except (ValueError, OSError) as exc:
+                            state['history'].append({'event': 'campaign.publication_suspension_blocked', 'task_id': task['id'],
+                                'created_at': _now_iso(), 'reason': str(exc)})
+                            _stop(state_path, state, 'unknown_external_effect', 'Publication suspension must reconcile before isolation: ' + str(exc), task_id=task['id'])
+                            result.update(status='unknown_external_effect', summary=state['stop']['reason'], blocked_task=task['id'])
+                            break
                     if active_path.is_file():
                         api.block_task_record(
                             repo,
@@ -1089,9 +1112,11 @@ def execute_campaign(
                         "created_at": _now_iso(),
                         "task_id": task["id"],
                         "fingerprint": failure["fingerprint"],
+                        "summary": failure["summary"],
                         "strategy": failure["strategy"],
                     })
                     _save_state(state_path, state)
+                    progress.sync(state)
                     result["blocked_task"] = task["id"]
                     continue
                 _stop(
@@ -1132,7 +1157,65 @@ def execute_campaign(
                 "task_id": task["id"],
             })
             _save_state(state_path, state)
+            progress.sync(state)
             result["completed_tasks"] = list(state["completed_tasks"])
+        progress.finish(state, result)
         result["campaign_state"] = str(state_path.relative_to(repo))
         api.write_latest_run_state(repo, repo / ".go", result, args, mode)
     return (0 if result["status"] in {"budget_exhausted", "goal_verified"} else 1), result
+
+
+def execute_campaign(repo, args, mode, api, execute_task):
+    from .campaign_progress import ProgressSession, ProgressError
+    from .progress_transport import ProgressTransportError
+    contract = load_contract(Path(repo).resolve(), Path(args.campaign).resolve(), previous_path=Path(args.previous_campaign).resolve() if getattr(args, 'previous_campaign', '') else None)
+    try:
+        with ProgressSession(repo, contract, str(getattr(args, 'agent', 'agent')),
+                             control_only=getattr(args, 'campaign_action', 'run') in {'pause', 'drain', 'cancel'}) as progress:
+            return _execute_campaign(repo, args, mode, api, execute_task, progress)
+    except (ProgressError, ProgressTransportError) as exc:
+        path = _run_directory(Path(repo), contract['id']) / 'state.json'
+        with repository_lock(Path(repo) / '.go', 'campaign-controller', timeout_seconds=0.1):
+            state = _load_object(path, 'campaign run state') if path.exists() else {}
+            if state:
+                _validate_state(state)
+                if state['controller']['host'] == socket.gethostname() and state['controller']['pid'] == os.getpid():
+                    _stop(path, state, 'authority_required', str(exc), task_id=state.get('current_task'))
+        return 1, {'schema': 'go-workflow.auto-run-result.v1', 'mode': mode, 'repo': str(repo),
+                   'status': 'authority_required', 'completed_tasks': state.get('completed_tasks', []),
+                   'blocked_task': state.get('current_task'),
+                   'checks': [], 'commands_run': state.get('resources', {}).get('commands_used', 0),
+                   'goal_verified': False, 'campaign_state': str(path),
+                   'summary': str(exc), 'progress_delivery': {'ok': False, 'error': str(exc)}}
+
+
+def _recover_suspension_before_selection(repo, state_path, state, args, api):
+    identity = state.get('current_task')
+    if not identity:
+        return
+    path = repo / '.go/runs' / identity / 'release-state.json'
+    if not path.exists():
+        return
+    publication = _load_object(path, 'publication checkpoint')
+    if publication.get('phase') != 'suspended':
+        return
+    from .release import suspend_prepared_release
+    actor = str(getattr(args, 'agent', 'agent'))
+    # Exact suspended state/owner/bytes and stopped writers are checked by this API.
+    suspend_prepared_release(repo, identity, actor, reason=publication['suspension']['reason'])
+    task_path = repo / '.go/tasks/active' / (identity + '.json')
+    reason = publication['suspension']['reason']
+    if task_path.exists():
+        task = _load_object(task_path, 'active suspended task')
+        api.block_task_record(repo, repo / '.go', task_path, task, actor, reason, [])
+    else:
+        blocked = _load_object(repo / '.go/tasks/blocked' / (identity + '.json'), 'blocked suspended task')
+        if blocked.get('id') != identity or blocked.get('status') != 'blocked' or blocked.get('claim', {}).get('agent') != actor:
+            raise CampaignError('Suspended task identity or owner changed during isolation')
+    state['current_task'] = None
+    state['dispatch'] = None
+    state['status'] = 'running'
+    state['stop'] = None
+    state['history'].append({'event': 'campaign.no_progress_isolated', 'task_id': identity,
+                             'created_at': _now_iso(), 'summary': reason, 'source': 'reconciled suspended publication checkpoint'})
+    _save_state(state_path, state)

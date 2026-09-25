@@ -1,0 +1,35 @@
+release preflight: v0.3.48
+tag: v0.3.48 candidate mode; final gate still requires the annotated tag
+candidate template baseline: annotated tag and exact origin commit verified
+local Linux/WSL verification with Python 3.12.14
+........................................................................ [ 45%]
+........................................................................ [ 91%]
+..............                                                           [100%]
+158 passed in 33.89s
+..........................                                               [100%]
+26 passed in 66.20s (0:01:06)
+ok: /tmp/tmp.uSIe89piTM/go-workflow-stack/.go
+autonomy campaign gate: passed
+compatibility release gate: passed
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+.............................................................            [100%]
+205 passed in 83.61s (0:01:23)
+ok: /tmp/tmp.uSIe89piTM/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 1ms
+   Building go-workflow-stack @ file:///tmp/tmp.uSIe89piTM/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.uSIe89piTM/go-workflow-stack
+Prepared 1 package in 866ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 10ms
+ + go-workflow-stack==0.3.48 (from file:///tmp/tmp.uSIe89piTM/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.LrpmwZPxr9/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.LrpmwZPxr9/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.LrpmwZPxr9/fixture/.go
+ok: /tmp/tmp.LrpmwZPxr9/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed

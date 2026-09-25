@@ -1,0 +1,44 @@
+FAILED tests/test_guided_onboarding.py::test_guided_first_task_completes_through_existing_native_controller
+FAILED tests/test_legacy_lifecycle_compatibility.py::test_upgrade_from_legacy_pin_preserves_tasks_and_rollback[v0.3.7]
+FAILED tests/test_legacy_lifecycle_compatibility.py::test_upgrade_from_legacy_pin_preserves_tasks_and_rollback[v0.3.14]
+FAILED tests/test_legacy_lifecycle_compatibility.py::test_upgrade_from_legacy_pin_preserves_tasks_and_rollback[v0.3.26]
+FAILED tests/test_release_pairings.py::test_historical_pairings_preserve_the_previous_immutable_commits
+FAILED tests/test_smoke.py::test_tracked_data_contracts_are_not_executable - ...
+FAILED tests/test_smoke.py::test_all_task_materializers_persist_shareable_delivery_policy
+FAILED tests/test_smoke.py::test_concurrent_substantial_approvals_serialize_epic_delivery_builds
+FAILED tests/test_smoke.py::test_failed_ship_holds_epic_delivery_lock_until_rollback_completes
+FAILED tests/test_smoke.py::test_manual_approval_waits_for_epic_lock_without_holding_task_lock
+FAILED tests/test_smoke.py::test_autonomous_critic_approval_returns_automatic_delivery
+FAILED tests/test_smoke.py::test_failed_autonomous_review_append_restores_task_and_evidence
+FAILED tests/test_smoke.py::test_modular_core_and_adapter_protocol_are_published_as_repo_contracts
+FAILED tests/test_smoke.py::test_doctor_reports_wsl_hermes_readiness_and_version_contract
+FAILED tests/test_smoke.py::test_adopt_writes_and_validate_enforces_deterministic_stack_ref
+FAILED tests/test_smoke.py::test_release_preflight_is_local_and_version_synchronized
+FAILED tests/test_smoke.py::test_release_preflight_allows_normal_tag_gate_before_origin_push
+FAILED tests/test_smoke.py::test_release_preflight_sanitizes_git_config_for_real_gate
+FAILED tests/test_smoke.py::test_release_preflight_rejects_tag_that_does_not_point_to_head
+FAILED tests/test_smoke.py::test_release_preflight_rejects_explicit_template_before_historical_gate_execution
+FAILED tests/test_smoke.py::test_release_preflight_fails_closed_when_git_status_cannot_read_index
+FAILED tests/test_smoke.py::test_release_preflight_does_not_execute_repo_local_clean_filter
+FAILED tests/test_smoke.py::test_release_preflight_cannot_hide_modified_file_with_index_flag[--assume-unchanged]
+FAILED tests/test_smoke.py::test_release_preflight_cannot_hide_modified_file_with_index_flag[--skip-worktree]
+FAILED tests/test_smoke.py::test_historical_release_gate_cannot_write_relative_file_into_caller_checkout
+FAILED tests/test_smoke.py::test_release_launcher_bootstrap_ignores_git_replacement_for_head
+FAILED tests/test_smoke.py::test_existing_release_uses_immutable_canonical_template_pairing
+FAILED tests/test_smoke.py::test_release_preflight_cannot_hide_untracked_files_with_git_config
+FAILED tests/test_smoke.py::test_release_preflight_validates_existing_tag_from_separate_shallow_tips
+FAILED tests/test_smoke.py::test_release_preflight_rejects_untrusted_origin[https://example.com/attacker/go-workflow-stack.git-False-refuses non-official origin]
+FAILED tests/test_smoke.py::test_release_preflight_rejects_untrusted_origin[ext::malicious-helper-True-refuses remote-helper origin]
+FAILED tests/test_smoke.py::test_release_preflight_rejects_untrusted_origin[git+https://github.com/viggomeesters/go-workflow-stack.git-False-refuses remote-helper origin]
+FAILED tests/test_smoke.py::test_release_preflight_rejects_untrusted_origin[Git+https://github.com/viggomeesters/go-workflow-stack.git-False-refuses remote-helper origin]
+FAILED tests/test_smoke.py::test_release_preflight_rejects_untrusted_origin[git@github.com:viggomeesters/go-workflow-stack.git-False-requires the official HTTPS origin]
+FAILED tests/test_smoke.py::test_release_preflight_rejects_rewritten_annotated_tag_object
+FAILED tests/test_smoke.py::test_migrate_plans_then_applies_legacy_contract_without_implicit_writes
+FAILED tests/test_smoke.py::test_go_execution_brief_fails_before_mutation_and_execute_does_not_stop_at_taskification
+FAILED tests/test_smoke.py::test_recommendation_promotion_resumes_from_go_state_and_executes_once
+FAILED tests/test_smoke.py::test_execution_brief_outcomes_require_disposition_and_auto_verify_with_command_evidence
+FAILED tests/test_smoke.py::test_complete_advice_to_outcome_journey_survives_long_chat_loss
+40 failed, 873 passed, 2 skipped in 1650.93s (0:27:30)
+
+The broad macOS run began before final version metadata, staging, and legacy public-Go expectation updates. Linux memfd release security cases are supported on Linux. Final-source Linux tests/test_smoke.py, test_release_pairings.py, test_public_taskwise_go.py, test_campaign_progress.py: 231 passed. Remaining guided-onboarding and legacy-lifecycle cases require targeted final-source confirmation.
+Final-source guided onboarding and three legacy-pin lifecycle checks: 4 passed in12.05s. All40 original failures are superseded by passing final-source tests; no unresolved failures.

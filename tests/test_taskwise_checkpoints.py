@@ -1,5 +1,6 @@
 """Worker chunk budgets preserve serial execution without manufacturing progress."""
 import json
+import sys
 
 from go_workflow import cli
 from go_workflow.campaign import execute_campaign, _chunk_checkpoint, _failure_record
@@ -35,6 +36,8 @@ def test_until_scope_resumes_internal_budget_chunks_to_actual_delivery(tmp_path,
     ledger.write_text(json.dumps(decision)+'\n')
     git(repo,'add','.go');git(repo,'commit','-qm','campaign policy')
     contract=materialize_until_scope(repo,intent='Go tot alle taken klaar',source_ref='user:fixture',campaign_id='chunks')
+    contract['execution']['progress']['transport']={'schema':'go-workflow.progress-transport.v1',
+        'command':[sys.executable,'-m','go_workflow.progress_transport','record','--path',str(tmp_path/'chat.json')], 'timeout_seconds':10}
     path=tmp_path/'campaign.json';path.write_text(json.dumps(contract))
     args.campaign=str(path);args.previous_campaign='';args.campaign_workspace_root=str(tmp_path/'workers')
     args.max_commands=1
@@ -76,6 +79,8 @@ def _campaign_for(repo,args,task,tmp_path):
         'data':{'decision_id':'bounded-policy','status':'accepted','decision':'Deliver requested outcomes'}})+'\n')
     git(repo,'add','.go');git(repo,'commit','-qm','campaign recovery policy')
     contract=materialize_until_scope(repo,intent='Go tot alle taken klaar',source_ref='user:fixture',campaign_id='recovery')
+    contract['execution']['progress']['transport']={'schema':'go-workflow.progress-transport.v1',
+        'command':[sys.executable,'-m','go_workflow.progress_transport','record','--path',str(tmp_path/'chat.json')], 'timeout_seconds':10}
     path=repo/'.go/recovery-campaign.json';path.write_text(json.dumps(contract))
     args.campaign=str(path);args.previous_campaign='';args.campaign_workspace_root=str(tmp_path/'workers')
     return path

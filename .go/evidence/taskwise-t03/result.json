@@ -1,0 +1,44 @@
+{
+  "task_id": "taskwise-t03",
+  "verification": [
+    {
+      "command": "python3 -m pytest tests/test_campaign_changes.py tests/test_taskwise_recovery.py tests/test_taskwise_checkpoints.py tests/test_campaign_intake.py tests/test_autonomy_recovery.py tests/test_autonomy_campaign.py tests/test_autonomy_goal_audit.py tests/test_taskwise_campaign.py -q",
+      "result": "106 passed in 86.97s",
+      "log": ".go/evidence/taskwise-t03/regression.txt"
+    },
+    {
+      "command": "python3 -m pytest tests/test_autonomy_contracts.py tests/test_abc_resume.py tests/test_taskwise_no_release.py -q",
+      "result": "72 passed in 117.83s",
+      "log": ".go/evidence/taskwise-t03/compatibility.txt"
+    },
+    {
+      "command": "python3 -m pytest tests/test_campaign_changes.py -q",
+      "result": "25 passed after final stale-parent guard, independently executed by /root/review_t01"
+    }
+  ],
+  "review": {
+    "reviewer": "/root/inspect_progress",
+    "status": "approved",
+    "blocking_findings": [],
+    "repaired": "Final critic distinct from diagnosis; canonical owner/proof retained on block; recovery survives chunk boundaries; managed-run exclusion; read-only intake authority; wait all repairs; stale parent explicit reconciliation handoff."
+  },
+  "source_sha256": {
+    "docs/autonomous-campaign.md": "b470ef13f76e3fe638184a866daaf56a07b74a89148ae3b8e9f9d058bd4b6008",
+    "go_workflow/campaign.py": "4fae609a8d8d2312b65734c9fb51560764f93f31a65be8045f4e8847bd979cd0",
+    "go_workflow/campaign_audit.py": "c44b8a2a9246aa3085fc46355990669a38d88f47186f7c9ab85db102c2003634",
+    "go_workflow/campaign_intake.py": "a446fe31890c1690ee0a3227205835ebf343e02f5fc8ca3dcd080332f0c5dc90",
+    "go_workflow/cli.py": "06475a6a79dcdd011a50b267ed5fc20ae4ab8adfc5522fa81ef728cc2b5c2b6e",
+    "go_workflow/migrations.py": "7cd93f6ae67d4a02ba09cb3be523159bdf1faeb1a1e836952ca54c2ed72ddba8",
+    "go_workflow/run_state.py": "c339a1db471adfb7ea1f2bf3214d9781deab399a262e5f6f799770f85eefd4c3",
+    "schemas/run-state.schema.json": "fdbf23ef11085c5b2525c1bc8963b23f24ee2ba94dc65422c1d5cc9d1ccb3e4e",
+    "tests/test_campaign_intake.py": "47f99b2ced21859361213a56bad056e3323253245bd75f2c5c1a94b76b279688",
+    "go_workflow/campaign_changes.py": "4c9b11f2a3ac5bbc5a9ed688a5fa3d114c2a4a140390732e6a5530f3ec34576d",
+    "go_workflow/recovery_policy.py": "df424de52dba83b50db5c72fa69d5b610129ed89ff3057c04d4e120bd41d95c2",
+    "tests/test_campaign_changes.py": "a39956decbcf2e3639aec9ac74b977ea6305caced2df0513985b61671336aa72",
+    "tests/test_taskwise_checkpoints.py": "d68e1c042ea9ca58f797a70fba73358971521a5de22f5a1af4ea20dd8a6e63c8",
+    "tests/test_taskwise_recovery.py": "170ab34e0793dd862e9bcc9d7c82f9b654be9d498fdd38836434a549299b68e0"
+  },
+  "next_task_dependency": "T04 must implement safe current-base reconciliation before an existing parent workspace resumes; T03 returns an explicit handoff and preserves blocked state and dirty bytes. Recorded in .go/plans/taskwise-delivery.md.",
+  "release": "Development delivery on feature branch. Single immutable release follows integrated T01-T05 verification.",
+  "self_reflect": "Cross-module review caught integration defects; fixed in scope with real controller tests. No global skill or memory mutation needed."
+}

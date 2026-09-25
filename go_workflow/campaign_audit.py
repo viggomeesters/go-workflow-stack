@@ -307,6 +307,8 @@ def audit_campaign_goal(
     repo = repo.resolve()
     root = workflow_root(repo)
     contract = _load(Path(contract_path).resolve())
+    from .campaign import resolve_previous_path
+    previous_path=resolve_previous_path(repo,contract,previous_path)
     previous = _load(Path(previous_path).resolve()) if previous_path else None
     shape_findings = validate_campaign_contract(contract)
     if shape_findings:

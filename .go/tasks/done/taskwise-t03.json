@@ -1,0 +1,109 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "none",
+  "id": "taskwise-t03",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "T03 — Autonoom herstel",
+  "description": "Authorized implementation plan: serial tasks, single immutable release after integrated verification. Preserve legacy runs and user changes. No Hermes runner or Book Forge edits.",
+  "scope": {
+    "read": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ],
+    "modify": [
+      "go_workflow/**",
+      "schemas/**",
+      "tests/**",
+      "docs/**",
+      "fixtures/**",
+      "templates/**",
+      "AGENTS.md",
+      ".go/**"
+    ]
+  },
+  "acceptance": [
+    "Different strategy after repeated failure; linked bounded repairs; safe future-task amendments and independent continuation."
+  ],
+  "verification": [
+    "python3 -m pytest tests/test_taskwise_campaign.py -q"
+  ],
+  "claim": {
+    "agent": "codex",
+    "claimed_at": "2026-09-25T13:39:39+02:00",
+    "base_commit": "74b1c9209aaa30c9d15882536a69f4b1733e9946"
+  },
+  "work_status": "completed",
+  "review_status": "approved",
+  "review_history": [
+    {
+      "created_at": "2026-09-25T13:57:56+02:00",
+      "agent": "codex",
+      "status": "approved",
+      "evidence": "Independent inspect_progress approved after repairs. 106 plus 72 regressions passed;25 final campaign-change tests passed. Stale-parent reconciliation is explicit T04 handoff, no premature resume claim.",
+      "transaction_id": "d39f803d422f4d9388af45759412303e"
+    }
+  ],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T13:57:56+02:00",
+      "task_id": "taskwise-t03",
+      "agent": "codex",
+      "summary": "changed_files=campaign recovery admission run-state CLI schema docs tests; verification_command=local pytest; verification_result=106 plus 72 regressions passed and 25 final parent tests; critic=independent inspect_progress approved; runtime=local Python; model=effective identity unconfirmed; billing_mode=unknown; evidence=.go/evidence/taskwise-t03/result.json; Self-reflect=cross-module defects repaired with actual controller tests; T04=current-base reconciliation remains explicit next task",
+      "changed_files": [
+        "campaign recovery admission run-state CLI schema docs tests"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "74b1c9209aaa30c9d15882536a69f4b1733e9946",
+        "observed_head_commit": "74b1c9209aaa30c9d15882536a69f4b1733e9946"
+      },
+      "verification": {
+        "command": "local pytest",
+        "result": "106 plus 72 regressions passed and 25 final parent tests"
+      },
+      "runtime": {
+        "agent": "codex",
+        "runtime": "local Python",
+        "model": "effective identity unconfirmed",
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "local Python",
+        "billing_mode": "unknown",
+        "owner": "codex",
+        "model": "effective identity unconfirmed",
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent inspect_progress approved",
+        "skip_reason": null
+      }
+    }
+  ],
+  "architecture": {
+    "impact": "material",
+    "scope_refs": [
+      "autonomous-campaign"
+    ],
+    "concerns": [],
+    "decision_ids": [
+      "bounded-serial-campaign-contract-v1"
+    ],
+    "conformance_required": true,
+    "human_gate": "none"
+  }
+}

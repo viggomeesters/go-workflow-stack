@@ -225,6 +225,9 @@
         },
         "taskwise_candidate": {
           "type": "boolean"
+        },
+        "taskwise_recovery": {
+          "type": "boolean"
         }
       }
     }

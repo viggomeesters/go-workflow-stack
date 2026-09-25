@@ -67,11 +67,13 @@ def validate_state(value):
 
     if 'publication' in value:
         spec = value['publication']
-        if (not isinstance(spec, dict) or not {'profile', 'ship_policy', 'allow_push'}.issubset(spec) or set(spec) - {'profile', 'ship_policy', 'allow_push', 'allow_deploy', 'taskwise_delivery', 'taskwise_candidate'}
+        if (not isinstance(spec, dict) or not {'profile', 'ship_policy', 'allow_push'}.issubset(spec) or set(spec) - {'profile', 'ship_policy', 'allow_push', 'allow_deploy', 'taskwise_delivery', 'taskwise_candidate', 'taskwise_recovery'}
                 or not isinstance(spec['ship_policy'], str) or spec['ship_policy'] not in {'none', 'commit', 'push'}
                 or ('allow_deploy' in spec and type(spec['allow_deploy']) is not bool)
                 or type(spec['allow_push']) is not bool or (spec['profile'] is not None and not isinstance(spec['profile'], dict))):
             raise RunStateError('Invalid frozen publication selection/authority')
+        if 'taskwise_recovery' in spec and type(spec['taskwise_recovery']) is not bool:
+            raise RunStateError('Invalid frozen taskwise recovery selection')
         if 'taskwise_candidate' in spec and type(spec['taskwise_candidate']) is not bool:
             raise RunStateError('Invalid frozen candidate opt-in')
         delivery = spec.get('taskwise_delivery')
@@ -452,6 +454,8 @@ def _execute_managed(control, args, task_id, api, result):
                  'worker_group': None, 'inflight': None, 'setup_task': task}
         if getattr(args,'taskwise_delivery',False) and state['publication']['profile'] is not None:
             state['publication']['taskwise_candidate']=True
+        if getattr(args, 'taskwise_delivery', False):
+            state['publication']['taskwise_recovery'] = True
         taskwise_delivery = publisher.taskwise_no_release_policy(control, task, args)
         if taskwise_delivery is not None:
             state['publication']['taskwise_delivery'] = taskwise_delivery
@@ -535,6 +539,8 @@ def _execute_managed(control, args, task_id, api, result):
     state = session.load()
     budget = {'max_commands': maximum, 'max_minutes': minutes, 'commands_used': 0, 'started_at': time.time()}
     session.update(budgets=state['budgets'] + [budget])
+    recovery_enabled = publication.get('taskwise_recovery', False)
+    chunk_attempt_limit = state['attempt'] + max(int(args.max_attempts), 1) - 1 if recovery_enabled else max(int(args.max_attempts), 1)
     while True:
         state = session.load()
         phase = state['phase']
@@ -544,8 +550,12 @@ def _execute_managed(control, args, task_id, api, result):
         if result['commands_run'] >= maximum or time.monotonic() - started >= minutes * 60:
             result.update(status='budget_exhausted', budget_exhausted=True, summary='Phase checkpoint saved; resume this task with a new budget.')
             break
-        if state['attempt'] > max(int(args.max_attempts), 1):
-            result.update(status='attempts_exhausted', blocked_task=task_id); break
+        if state['attempt'] > chunk_attempt_limit:
+            if recovery_enabled:
+                result.update(status='budget_exhausted', budget_exhausted=True, summary='Repair chunk checkpoint; resume under campaign authority')
+            else:
+                result.update(status='attempts_exhausted', blocked_task=task_id)
+            break
         if phase == 'release':
             used = None
             try:
@@ -601,6 +611,42 @@ def _execute_managed(control, args, task_id, api, result):
                 artifact, _ = completion.finalize_checks(workspace, task, args.agent, [item['completion_check'] for item in state['checks']])
                 if artifact['status'] != 'passed': raise RunStateError('Final verification manifest is stale or failed')
             session.update(phase='critic'); continue
+        strategy = 'direct_fix'
+        if recovery_enabled:
+            from .recovery_policy import recovery_decision, validate_recovery_plan
+            recovery = recovery_decision(task_id, state['phase_evidence'])
+            recovery['scope'] = task.get('scope', {})
+            strategy = recovery['strategy']
+            if phase == 'repair' and recovery['required']:
+                before_diagnosis = run_code(workspace, record, task)
+                with session.operation():
+                    diagnosis = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'],
+                        recovery['kind'], timeout, feedback={'recovery': recovery, 'checks': state['checks'],
+                        'result': state['phase_evidence'][-1]['result']}, publication_pending=proving_delivery)
+                after_diagnosis = run_code(workspace, record, task)
+                plan = None
+                try:
+                    if before_diagnosis != after_diagnosis:
+                        raise ValueError('Read-only recovery diagnosis changed the workspace')
+                    if diagnosis.get('returncode') != 0 or diagnosis.get('status') != 'success':
+                        raise ValueError('Independent recovery diagnosis failed or found no safe route')
+                    plan = validate_recovery_plan(workspace, diagnosis.get('recovery_plan'), recovery)
+                except ValueError as exc:
+                    history = state['phase_evidence'] + [{'phase': recovery['kind'], 'attempt': state['attempt'],
+                        'result': diagnosis, 'code_before': before_diagnosis, 'code_after': after_diagnosis,
+                        'recovery_rejection': str(exc)}]
+                    result['commands_run'] += 1
+                    state['budgets'][-1]['commands_used'] = result['commands_run']
+                    session.update(phase_evidence=history, inflight=None, worker_group=None, budgets=state['budgets'])
+                    result.update(status='recovery_blocked', blocked_task=task_id, summary=str(exc))
+                    break
+                history = state['phase_evidence'] + [{'phase': recovery['kind'], 'attempt': state['attempt'],
+                    'result': diagnosis, 'code_before': before_diagnosis, 'code_after': after_diagnosis,
+                    'recovery_plan': plan}]
+                result['commands_run'] += 1
+                state['budgets'][-1]['commands_used'] = result['commands_run']
+                session.update(phase_evidence=history, inflight=None, worker_group=None, budgets=state['budgets'])
+                continue
         before = run_code(workspace, record, task)
         with session.operation() if phase != 'verify' or not proving_delivery else __import__('contextlib').nullcontext():
             if phase == 'verify':
@@ -622,19 +668,25 @@ def _execute_managed(control, args, task_id, api, result):
                     'checks': state['checks'],
                     'result': state['phase_evidence'][-1]['result'] if state['phase_evidence'] else {},
                     'campaign_failures': state.get('campaign_failures', []),
+                    **({'recovery': recovery} if recovery_enabled else {}),
                 }
                 if phase == 'critic':
-                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], 'direct_fix', timeout, feedback=feedback, publication_pending=proving_delivery)
+                    output = api.run_default_critic_agent(workspace, 'codex', task, state['attempt'], strategy, timeout, feedback=feedback, publication_pending=proving_delivery)
                 else:
                     command = (api.default_executor_agent_command if phase == 'build' else api.default_repair_agent_command)('codex', task)
-                    output = api.run_hook_command(workspace, command, task, state['attempt'], 'direct_fix', phase, timeout,
+                    output = api.run_hook_command(workspace, command, task, state['attempt'], strategy, phase, timeout,
                                                   require_protocol=True, feedback=feedback)
         after = run_code(workspace, record, task)
         if phase in {'critic', 'verify'} and before != after:
             output = {**output, 'returncode': 78, 'status': 'blocked', 'summary': 'Read-only proof phase changed workspace; proof invalidated'}
         state = session.load()
         success = output.get('returncode') == 0 and (phase == 'verify' or output.get('status') == 'success')
-        evidence = state['phase_evidence'] + [{'phase': phase, 'attempt': state['attempt'], 'result': output,
+        failure_result = output
+        if not success and 'completion_check' in output:
+            raw = completion.read_artifact(root, output['completion_check']['raw'])
+            failure_result = {key: raw[key] for key in ('command', 'returncode', 'stdout', 'stderr', 'timed_out') if key in raw}
+        evidence = state['phase_evidence'] + [{'phase': phase, 'attempt': state['attempt'], 'strategy': strategy,
+                                               'result': output, 'failure_result': failure_result,
                                                'code_before': before, 'code_after': after}]
         changes = {'phase_evidence': evidence, 'inflight': None, 'worker_group': None, 'code': after,
                    'requirements': active_task(control, task_id, args.agent).get('requested_outcomes', [])}

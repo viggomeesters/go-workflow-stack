@@ -156,3 +156,10 @@ def test_invalid_shipping_is_not_inferred(tmp_path, policy):
     repo, _ = setup(tmp_path)
     with pytest.raises(ValueError, match='ship_policy'):
         intake(repo, ship_policy=policy)
+
+
+def test_read_only_scope_does_not_invent_repair_write_authority(tmp_path):
+    repo,task=setup(tmp_path)
+    task['scope']['modify']=[]
+    write(repo/'.go/tasks/open'/f"{task['id']}.json",task)
+    assert intake(repo)['authority']['expansion']['repair']=={'max_tasks':0,'modify':[],'outcome_ids':[]}

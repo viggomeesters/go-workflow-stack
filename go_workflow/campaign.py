@@ -401,14 +401,10 @@ def _stop(
 
 
 def _failure_record(task: dict[str, Any], task_result: dict[str, Any], previous: list[dict[str, Any]]) -> dict[str, Any]:
-    material = {
-        "task_id": task["id"],
-        "status": task_result.get("status"),
-        "summary": task_result.get("summary"),
-        "checks": task_result.get("checks") or [],
-    }
-    fingerprint = hashlib.sha256(json.dumps(material, sort_keys=True, default=str).encode()).hexdigest()
-    repeat = previous[-1].get("repeat_count", 0) + 1 if previous and previous[-1].get("fingerprint") == fingerprint else 1
+    from .recovery_policy import failure_fingerprint
+    fingerprint = failure_fingerprint(task["id"], task_result)
+    relevant = [item for item in previous if item.get('task_id') == task['id']]
+    repeat = relevant[-1].get("repeat_count", 0) + 1 if relevant and relevant[-1].get("fingerprint") == fingerprint else 1
     return {
         "task_id": task["id"],
         "created_at": _now_iso(),
@@ -423,6 +419,83 @@ def _failure_record(task: dict[str, Any], task_result: dict[str, Any], previous:
             "repair_attempts": max(int(task_result.get("repair_attempts") or 0), 0),
         },
     }
+
+
+def _chunk_checkpoint(repo, task_id):
+    """A resumable cursor is activity; only executed source-bound checks are proof.
+
+    Exclude code/log/status churn from the cursor. A repeated cursor without new
+    verified evidence cannot grant an unlimited sequence of worker budgets.
+    """
+    from .run_state import read_state, run_code
+    from .completion import read_artifact
+    from .worktrees import read_object, registry_path
+    state = read_state(repo, task_id)
+    if state['inflight'] or state['worker_group']:
+        raise CampaignError('Worker budget returned with an unresolved live operation')
+    record = read_object(registry_path(repo, task_id))
+    paths = [repo/'.go/tasks'/status/(task_id+'.json') for status in ('active','done')]
+    task = next((_load_object(path,'checkpoint task') for path in paths if path.is_file()),None)
+    if task is None:raise CampaignError('Worker checkpoint has no authoritative task')
+    if state['phase'] not in {'release','cleanup','complete'} and run_code(Path(record['path']),record,task)!=state['code']:
+        raise CampaignError('Worker checkpoint source changed')
+    proofs=[]
+    for entry in state['phase_evidence']:
+        check = entry.get('result',{}).get('completion_check')
+        if entry.get('phase')!='verify' or not check:continue
+        raw=read_artifact(repo/'.go',check['raw'])
+        proof=check['verification']
+        if (raw.get('task_id')!=task_id or raw.get('command')!=proof['command']
+                or raw.get('content_digest')!=proof['worktree_digest']
+                or raw.get('returncode')!=proof['exit_code']):
+            raise CampaignError('Checkpoint verification evidence is inconsistent')
+        from .recovery_policy import failure_fingerprint
+        proofs.append({'command':proof['command'],'exit_code':proof['exit_code'],
+                       'result':failure_fingerprint(task_id,raw)})
+    cursor={'phase':state['phase'],'check_index':state['check_index'],
+            'checks': sorted({json.dumps(proof,sort_keys=True) for proof in proofs}),
+            # Publication intents permit readback on the next chunk; they are
+            # never counted as verification proof or completed work.
+            'publication_steps':sorted((name,value.get('status')) for name,value in state['effects'].items())}
+    if state.get('publication',{}).get('taskwise_recovery'):
+        from .recovery_policy import recovery_decision
+        recovery=recovery_decision(task_id,state['phase_evidence'])
+        cursor['recovery']={key:recovery[key] for key in ('required','strategy','failure_fingerprint','accepted_plans')}
+    if state['phase']=='release' and state.get('publication',{}).get('profile'):
+        from . import release
+        publication=release._load(repo,task,state['owner'],state['run_id'])
+        cursor['publication_phase']=publication['phase']
+        cursor['publication_effects']=sorted((name,value.get('status')) for name,value in publication['effects'].items())
+    return {'cursor':hashlib.sha256(json.dumps(cursor,sort_keys=True).encode()).hexdigest(),
+            'phase':state['phase'],'verified_checks':len(cursor['checks'])}
+
+
+def _resume_delivered_repairs(repo, state, actor):
+    from .campaign_changes import resume_repaired_parent
+    seen={item.get('repair_id') for item in state['history'] if item.get('event')=='campaign.parent_resumed'}
+    for identity in state['completed_tasks']:
+        if identity in seen:continue
+        path=repo/'.go/tasks/done'/(identity+'.json')
+        task=_load_object(path,'completed repair')
+        if not task.get('campaign_repair'):continue
+        from .campaign_delivery import delivery_report
+        waiting=False
+        for candidate in (repo/'.go/tasks').glob('*/*.json'):
+            sibling=_load_object(candidate,'repair dependency')
+            link=sibling.get('campaign_repair') or {}
+            if (link.get('parent_id')==task['campaign_repair']['parent_id']
+                    and link.get('campaign_id')==state['campaign_id']
+                    and (sibling['status']!='done' or not delivery_report(repo,sibling['id'])['delivered'])):
+                waiting=True;break
+        if waiting:continue
+        resumed=resume_repaired_parent(repo,identity,actor,controller_locked=True)
+        if resumed.get('task_id'):
+            event='campaign.parent_resume_blocked' if resumed.get('reason')=='workspace_reconciliation_required' else 'campaign.parent_resumed'
+            if event=='campaign.parent_resume_blocked' and any(item.get('event')==event and item.get('repair_id')==identity for item in state['history']):
+                continue
+            state['history'].append({'event':event,'repair_id':identity,
+                'task_id':resumed['task_id'],'failure_count':len(state['failures']),'created_at':_now_iso(),
+                'readback':resumed})
 
 
 def _temporary_provider_failure(task_result: dict[str, Any]) -> bool:
@@ -511,6 +584,10 @@ def _bound_task_args(
     )
 
     if task.get("status") != "open":
+        # Campaign-created bindings are authoritative on resume; initial CLI
+        # workspace arguments must not override the saved run on the next chunk.
+        for field in ('workspace_path','workspace_branch','base_branch','base_commit','run_id'):
+            setattr(bound,field,'')
         return bound
     workspace = ((task.get("execution_contract") or {}).get("workspace") or {})
     if workspace.get("mode") != "task_worktree" or workspace.get("control_state") != "repo_local_single_writer":
@@ -546,6 +623,16 @@ def _load_object(path: Path, label: str) -> dict[str, Any]:
     return value
 
 
+def resolve_previous_path(repo, contract, previous_path=None):
+    if previous_path is None and contract.get('revision',1)>1:
+        directory=_run_directory(repo,contract['id'])
+        matches=[candidate for candidate in directory.glob('contract-r*.json')
+                 if not candidate.is_symlink()
+                 and contract_digest(_load_object(candidate,'campaign predecessor'))==contract.get('previous_sha256')]
+        if len(matches)==1:return matches[0]
+    return previous_path
+
+
 def load_contract(
     repo: Path,
     path: Path,
@@ -554,6 +641,7 @@ def load_contract(
 ) -> dict[str, Any]:
     """Load and bind one explicit contract revision to the canonical repo."""
     contract = _load_object(path, "campaign contract")
+    previous_path = resolve_previous_path(repo,contract,previous_path)
     previous = _load_object(previous_path, "previous campaign contract") if previous_path else None
     findings = campaign_findings(repo, contract, previous=previous)
     if findings:
@@ -572,7 +660,8 @@ def plan_campaign(
     contract = load_contract(repo, contract_path, previous_path=previous_path)
     root = repo / ".go"
     from .delivery_blocks import pending_block_findings
-    pending = pending_block_findings(repo)
+    from .campaign_changes import pending_change_findings
+    pending = pending_block_findings(repo) + pending_change_findings(repo)
     if pending:raise CampaignError("; ".join(pending))
     permitted = contract["authority"]["permitted_tasks"]
     active_paths = sorted((root / "tasks" / "active").glob("*.json"))
@@ -584,6 +673,15 @@ def plan_campaign(
 
     def eligible(task: dict[str, Any]) -> list[str]:
         findings = campaign_task_findings(contract, task)
+        from .campaign_delivery import delivery_report
+        for identity in permitted:
+            for status in ('open','active','blocked','done'):
+                path=root/'tasks'/status/(identity+'.json')
+                if not path.is_file():continue
+                repair=_load_object(path,'repair dependency')
+                if (repair.get('campaign_repair') or {}).get('parent_id')==task['id']:
+                    if status!='done' or not delivery_report(repo,identity)['delivered']:
+                        findings.append('Necessary repair awaits verified delivery: '+identity)
         findings.extend(api.dependency_findings(repo, task, readiness=True))
         findings.extend(api.architecture_claim_findings(root, task))
         return findings
@@ -727,6 +825,7 @@ def execute_campaign(
         state["stop"] = None
         _save_state(state_path, state)
         while True:
+            _resume_delivered_repairs(repo,state,str(getattr(args,'agent','agent')))
             active_since = state["clock"]["active_since_epoch"]
             elapsed = state["consumption"]["active_wall_seconds"] + (
                 max(time.time() - active_since, 0.0) if active_since is not None else 0.0
@@ -746,9 +845,14 @@ def execute_campaign(
                 repo, contract_path, api, previous_path=previous,
             )
             no_progress_ids = {
-                item["task_id"] for item in state["failures"]
+                item["task_id"] for index,item in enumerate(state["failures"])
                 if item.get("repeat_count", 0) >= 2
                 and item.get("strategy") == "block_or_isolate_research"
+                and item['task_id'] not in state['completed_tasks']
+                and not any(event.get('event')=='campaign.parent_resumed'
+                            and event.get('task_id')==item['task_id']
+                            and event.get('failure_count',0)>index
+                            for event in state['history'])
             }
             if no_progress_ids and projection["selection"] == "next_open":
                 independent = [task for task in selected if task["id"] not in no_progress_ids]
@@ -764,6 +868,10 @@ def execute_campaign(
                     projection["selection"] = "next_independent_after_no_progress"
             result["campaign"] = projection
             if not selected:
+                from .campaign_audit import audit_campaign_goal
+                audit = audit_campaign_goal(repo,contract_path,previous_path=previous,persist=True)
+                result['completion_audit']=audit
+                result['goal_verified']=audit['goal_verified']
                 if no_progress_ids:
                     blocked = sorted(no_progress_ids)[0]
                     reason = (
@@ -773,15 +881,6 @@ def execute_campaign(
                     _stop(state_path, state, "authority_required", reason, task_id=blocked)
                     result.update(status="authority_required", summary=reason, blocked_task=blocked)
                     break
-                from .campaign_audit import audit_campaign_goal
-                audit = audit_campaign_goal(
-                    repo,
-                    contract_path,
-                    previous_path=previous,
-                    persist=True,
-                )
-                result["completion_audit"] = audit
-                result["goal_verified"] = audit["goal_verified"]
                 if audit["goal_verified"]:
                     reason = "Every adopted campaign outcome has current required proof."
                     _stop(state_path, state, "goal_verified", reason)
@@ -901,6 +1000,24 @@ def execute_campaign(
                 and (delivery is None or delivery["delivered"])
             )
             if not successful:
+                if taskwise and task_result.get('status')=='budget_exhausted':
+                    # Internal worker chunks never become substantive failures.
+                    # Explicit campaign limits are checked at the top of the loop.
+                    checkpoint=None
+                    if managed_delivery:
+                        checkpoint=_chunk_checkpoint(repo,task['id'])
+                    seen={item.get('cursor') for item in state['history']
+                          if item.get('event')=='campaign.worker_checkpoint' and item.get('task_id')==task['id']}
+                    if checkpoint and checkpoint['cursor'] not in seen:
+                        state['history'].append({'event':'campaign.worker_checkpoint','task_id':task['id'],
+                                                 'created_at':_now_iso(),**checkpoint})
+                        state['dispatch']=None
+                        _save_state(state_path,state)
+                        continue
+                    _stop(state_path,state,'budget_exhausted',
+                          'Worker checkpoint saved; no new verified checkpoint permits automatic continuation',task_id=task['id'])
+                    result.update(task_result)
+                    break
                 if delivery is not None and code == 0 and task["id"] in completed and not delivery["delivered"]:
                     task_result["summary"] = "Delivery proof incomplete: " + "; ".join(
                         item["message"] for item in delivery["blockers"]
@@ -923,7 +1040,9 @@ def execute_campaign(
                         retry_not_before_epoch=state["provider"]["not_before_epoch"],
                     )
                     break
-                no_progress = failure["repeat_count"] >= 2
+                no_progress = failure["repeat_count"] >= 2 or task_result.get('status')=='recovery_blocked'
+                if task_result.get('status')=='recovery_blocked':
+                    failure.update(repeat_count=max(failure['repeat_count'],2),strategy='block_or_isolate_research')
                 delivery_condition = delivery.get("stop_condition") if delivery is not None else None
                 condition = (
                     "budget_exhausted"

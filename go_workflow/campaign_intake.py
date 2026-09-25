@@ -130,6 +130,7 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
         if not isinstance(budget, dict) or set(budget) - (set(ceilings) | {'max_commands'}):
             raise ValueError('budget accepts only wall_seconds, max_tasks and max_attempts')
         ceilings.update(budget)
+    repair_scope = sorted({pattern for key in selected for pattern in tasks[key]['scope']['modify']})
     push = effective_shipping == 'push'
     result = {'schema': CAMPAIGN_SCHEMA, 'id': campaign_id, 'project': project['id'],
               'revision': 1, 'previous_sha256': None,
@@ -142,8 +143,10 @@ def materialize_until_scope(repo: Path, *, intent: str, source_ref: str,
                         'principles_sha256': hashlib.sha256((root / 'architecture-principles.json').read_bytes()).hexdigest(),
                         'decision_ids': [item['id'] for item in decisions]},
               'authority': {'mode': 'execute', 'source_ref': source_ref, 'permitted_tasks': selected,
-                            'expansion': {kind: {'max_tasks': 0, 'modify': [], 'outcome_ids': []}
-                                          for kind in ('research', 'repair')},
+                            'expansion': {'research': {'max_tasks': 0, 'modify': [], 'outcome_ids': []},
+                                          'repair': {'max_tasks': len(selected) if repair_scope else 0,
+                                                     'modify': repair_scope,
+                                                     'outcome_ids': [outcome['id'] for outcome in outcomes] if repair_scope else []}},
                             'models': models, 'budget': ceilings,
                             'release': {'profiles': profiles, 'allow_push': push,
                                         'source_ref': source_ref if profiles or push else None},

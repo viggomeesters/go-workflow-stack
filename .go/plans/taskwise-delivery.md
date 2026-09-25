@@ -64,3 +64,15 @@ bounded actual execution INCLUDING live chat delivery. Preserve other pins and
 rollback. Real consumer/channel selection was requested asynchronously; no
 independent message injection into the active Codex chat is currently available
 through the exposed tools. Do not claim full plan completion without live proof.
+
+## Evidence-driven follow-up within T04
+
+T03 independent review reproduced the active-parent case: a separately published
+repair advances the control base while the original owned workspace retains its
+old baseline and candidate bytes. T03 preserves that workspace and returns an
+explicit `workspace_reconciliation_required` handoff before reactivation. T04
+must compose this into current resume context and reuse safe workspace
+reconciliation (including source-dependent proof invalidation). Its integration
+check must start with an actually claimed parent, deliver a separate repair, then
+prove repaired bytes are present before the original task executes again. Never
+reset dirty work or call status-only reactivation a successful repair.

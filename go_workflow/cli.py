@@ -1858,6 +1858,10 @@ def block_task_record(repo: Path, root: Path, active_path: Path, task: dict[str,
     with repository_lock(root, f"task-{task['id']}"):
         if not active_path.is_file():
             raise StateLockError(f"active task disappeared before block: {task['id']}")
+        current=load_json(active_path)
+        if current.get('id')!=task['id'] or current.get('status')!='active':
+            raise StateLockError('Active task identity changed before block')
+        task=current
         task["status"] = "blocked"
         task["blocked"] = {"created_at": now_iso(), "agent": agent, "reason": reason}
         target = task_path(root, "blocked", task["id"])
@@ -2401,6 +2405,20 @@ def run_default_critic_agent(
         "When behavior_review is present in the verified context, emit a matching go-workflow.behavior-review.v1 object in the adapter result. Cover each original R# exactly once; bind inspected evidence to the task, requirement, candidate and context digests. A passed outcome needs current behavior_proof bytes. A blocked outcome needs an actionable repair limited to the original scope and declared checks. Use pending_downstream only for controller-owned publication still pending.",
         "Return status success only when there are no blocking findings; otherwise return status blocked and summarize the findings.",
     ])
+    if (strategy in {'recovery_diagnosis','recovery_reassessment'}
+            and feedback and feedback.get('recovery',{}).get('kind')==strategy):
+        instructions = ' '.join([
+            'You are an independent read-only recovery critic. Do not edit files or publish.',
+            'Verify GO_CONTEXT_VERIFY_COMMAND and inspect the current source and raw failure evidence in GO_CONTEXT_PATH.',
+            'Diagnose why the previous approach failed; choose a substantively different safe method, such as a smaller reproduction or targeted instrumentation.',
+            'This is diagnosis, not final product approval. Return a versioned adapter result containing recovery_plan:',
+            'schema go-workflow.recovery-plan.v1, failure_fingerprint copied exactly from feedback.recovery.failure_fingerprint,',
+            'method (new nonempty approach, different from prior_methods), diagnosis (concrete reasoning), safe_to_continue (boolean),',
+            'findings (nonempty array of path, sha256 of actual current file bytes, finding describing the relevant inspected evidence).',
+            'Paths must be repository-relative existing files. Do not invent evidence or relabel an unchanged approach.',
+            'After two strategies explicitly reassess the original route. If no evidence-backed safe route remains, use safe_to_continue false.',
+            'A safe recovery proposal uses adapter status success; it does not approve the task or waive verification and final critic.',
+        ])
     if publication_pending:
         instructions += " " + " ".join([
             "This critic runs before controller-owned publication.",
@@ -5137,6 +5155,16 @@ def cmd_campaign_block(args):
     return 0
 
 
+def cmd_campaign_change(args):
+    from .campaign_changes import admit_repair, amend_future_task
+    repo=Path(args.repo).resolve()
+    request=load_json(Path(args.request))
+    operation=admit_repair if args.change_kind=='repair' else amend_future_task
+    value=operation(repo,args.campaign,owner=args.agent,**request)
+    print(json.dumps(value,indent=2,ensure_ascii=False))
+    return 0
+
+
 def cmd_campaign_audit(args: argparse.Namespace) -> int:
     """Run the same outcome audit used by campaign completion."""
     from .campaign_audit import audit_campaign_goal
@@ -6469,6 +6497,13 @@ def build_parser() -> argparse.ArgumentParser:
     campaign_block.add_argument("--reason", required=True)
     campaign_block.add_argument("--agent", default="agent")
     campaign_block.set_defaults(func=cmd_campaign_block)
+    for change_kind in ('repair','amend'):
+        change=campaign_sub.add_parser(change_kind,help='Record a bounded evidence-backed campaign change')
+        change.add_argument('repo',nargs='?',default='.')
+        change.add_argument('--campaign',required=True)
+        change.add_argument('--request',required=True,help='JSON proposal with reason, source evidence and existing identities')
+        change.add_argument('--agent',default='agent')
+        change.set_defaults(func=cmd_campaign_change,change_kind=change_kind)
     campaign_audit = campaign_sub.add_parser("audit", help="Audit adopted outcomes and write a compact handoff")
     campaign_audit.add_argument("repo", nargs="?", default=".")
     campaign_audit.add_argument("--contract", required=True)

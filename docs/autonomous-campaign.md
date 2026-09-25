@@ -337,3 +337,49 @@ from the real shared proof, then their records enter the same closure commit.
 Incompatible models, release destinations, architecture, already claimed work,
 and dependency cycles must be reconciled before grouping. Preparation and
 finalization use recoverable intents; incomplete transitions fence new claims.
+
+### Evidence-backed recovery and scope changes
+
+New taskwise managed runs freeze `publication.taskwise_recovery`. Older runs do
+not acquire this policy on resume. After two substantively identical failures,
+the controller requests a separate read-only diagnostic critic before another
+repair. A changed method must cite current, in-scope source bytes and the exact
+failure fingerprint. Renamed methods, administrative records, stale source hashes
+and recycled evidence cannot reset recovery. After two approaches the critic
+reassesses the original route; an unsupported route becomes `recovery_blocked`.
+The campaign preserves the blocked task and continues eligible independent work.
+
+Worker command/time/attempt chunks are checkpoints, not failures or completion.
+Until-scope campaigns continue a new verified cursor under the same frozen
+mandate. Repeated administrative activity grants no unlimited fresh budgets.
+Explicit campaign limits, provider backoff and pause/cancel remain authoritative.
+
+The existing campaign CLI admits necessary outside-task repairs and amends future
+work with JSON proposals:
+
+```
+go campaign repair REPO --campaign .go/campaign.json --request repair.json --agent OWNER
+go campaign amend REPO --campaign .go/campaign.json --request amendment.json --agent OWNER
+```
+
+A repair proposal has `change_id`, `parent_id`, a full canonical `repair_task`,
+`outcome_ids`, recorded `failure_fingerprint`, `reason`, and `evidence` entries
+containing repository-relative `path` and exact `sha256`. An amendment supplies
+`change_id`, `task_id`, `patch`, `reason`, and the same evidence shape. Only
+unfinished open work can be amended. Acceptance, verification and original
+outcomes cannot be removed; modify authority cannot expand. New unrelated ideas
+remain backlog work. Repairs cannot acquire repair children.
+
+Changes serialize with campaign, managed-run and task ownership, preserve source
+bytes in a recovery intent, validate the dependency graph, and update canonical
+tasks/hierarchy plus a new explicit campaign revision. Resources and original
+outcomes survive migration. Resume resolves its immutable predecessor snapshot.
+A partially applied change fences new work until the identical proposal recovers;
+user edits cause a concrete conflict. Existing runs retain their original
+expansion allowance. New runs authorize bounded repairs within the adopted tasks'
+combined modify scopes; read-only task sets acquire no write authority.
+
+An admitted repair blocks its parent until actual verified delivery, including
+publication closure. Parent resumption preserves its original contract, owner
+and checkpoint. A changed repository base still requires safe reconciliation;
+resumption never silently resets a dirty workspace or erases prior evidence.

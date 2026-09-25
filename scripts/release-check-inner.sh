@@ -119,6 +119,7 @@ release_origin_url() {
   esac
   if python3 - "$ROOT" "$raw_url" <<'PY'
 import sys
+sys.dont_write_bytecode = True
 sys.path.insert(0, sys.argv[1])
 from go_workflow.runtime_identity import _official_repository_url
 raise SystemExit(0 if _official_repository_url(sys.argv[2]) else 1)
@@ -425,6 +426,112 @@ else
     exit 1
   fi
   echo "tag: v$VERSION candidate mode; final gate still requires the annotated tag"
+  # Run fixture-creating checks outside a registered task worker. The checkout
+  # remains the source of truth; the disposable clone receives its exact
+  # unstaged worktree delta (including untracked files, modes and symlinks).
+  # An index delta cannot be reconstructed by copying files: refuse it.
+  if ! sanitized_git -C "$ROOT" diff --cached --quiet --exit-code HEAD --; then
+    echo "candidate index differs from HEAD; staged changes require a separate verified candidate" >&2
+    exit 1
+  fi
+  ARCHIVE_WORK="$(mktemp -d)"
+  SOURCE_ROOT="$ARCHIVE_WORK/go-workflow-stack"
+  head_commit="$(sanitized_git -C "$ROOT" rev-parse HEAD)"
+  release_remote="$(release_origin_url)" || exit 1
+  release_protocol="file"
+  release_git clone -q --no-local --no-checkout "$ROOT" "$SOURCE_ROOT"
+  sanitized_git -C "$SOURCE_ROOT" checkout -q --detach "$head_commit"
+  sanitized_git -C "$SOURCE_ROOT" remote set-url origin "$release_remote"
+  python3 - "$ROOT" "$SOURCE_ROOT" "$ARCHIVE_WORK/caller-manifest.json" <<'PYCANDIDATE'
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import subprocess
+import sys
+
+source, target, manifest_path = map(Path, sys.argv[1:])
+env = {**os.environ, 'GIT_CONFIG_GLOBAL': '/dev/null', 'GIT_CONFIG_SYSTEM': '/dev/null',
+       'GIT_CONFIG_NOSYSTEM': '1', 'GIT_OPTIONAL_LOCKS': '0'}
+def git(*args):
+    return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', '-C', str(source), *args], env=env)
+
+status = git('-c', 'status.showUntrackedFiles=all', 'status', '--porcelain=v1', '-z', '--untracked-files=all')
+ignored = git('ls-files', '--others', '--ignored', '--exclude-standard', '-z')
+parts = status.split(b'\0')
+if parts[-1:] != [b'']:
+    raise SystemExit('incomplete candidate status')
+paths = []
+i = 0
+while i < len(parts) - 1:
+    record = parts[i]
+    code = record[:2]
+    if code[:1] in (b'R', b'C') or code[1:] in (b'R', b'C'):
+        raise SystemExit('candidate rename/copy requires an explicit release reconciliation')
+    path = os.fsdecode(record[3:])
+    if path.startswith('/') or '..' in Path(path).parts or path == '.git':
+        raise SystemExit('unsafe candidate path')
+    paths.append(path)
+    i += 1
+
+for raw in ignored.split(b'\0'):
+    if raw:
+        path = os.fsdecode(raw)
+        if path.startswith('/') or '..' in Path(path).parts or path == '.git':
+            raise SystemExit('unsafe ignored candidate path')
+        paths.append(path)
+
+def fingerprint(path):
+    if path.is_symlink():
+        return ['symlink', os.readlink(path)]
+    if not path.exists():
+        return ['deleted']
+    if not path.is_file():
+        raise SystemExit(f'unsupported candidate file type: {path}')
+    return ['file', hashlib.sha256(path.read_bytes()).hexdigest(), path.stat().st_mode & 0o777]
+
+before = {path: fingerprint(source / path) for path in paths}
+index_path = Path(os.fsdecode(git('rev-parse', '--path-format=absolute', '--git-path', 'index').strip()))
+index_hash = hashlib.sha256(index_path.read_bytes()).hexdigest()
+for path in paths:
+    original, copied = source / path, target / path
+    if any((target / parent).is_symlink() for parent in Path(path).parents if str(parent) != '.'):
+        raise SystemExit('candidate parent symlink')
+    if copied.is_symlink() or copied.is_file():
+        copied.unlink()
+    if original.is_symlink():
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        copied.symlink_to(os.readlink(original))
+    elif original.exists():
+        copied.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(original, copied, follow_symlinks=False)
+    if fingerprint(copied) != before[path]:
+        raise SystemExit(f'candidate copy mismatch: {path}')
+manifest_path.write_text(json.dumps({'head': git('rev-parse', 'HEAD').decode().strip(),
+                                     'status': status.hex(), 'ignored': ignored.hex(), 'index': index_hash,
+                                     'paths': before}, sort_keys=True))
+PYCANDIDATE
+  # A gate must never get a writable path to the caller's sibling template.
+  caller_template="${GO_PROJECT_TEMPLATE:-$ROOT/../go-project-template}"
+  GO_PROJECT_TEMPLATE="$ARCHIVE_WORK/go-project-template"
+  if [ -d "$caller_template/.go" ]; then
+    python3 - "$caller_template" "$GO_PROJECT_TEMPLATE" <<'PYCOPYTEMPLATE'
+import os
+from pathlib import Path
+import shutil
+import sys
+
+source, target = map(Path, sys.argv[1:])
+if source.is_symlink():
+    raise SystemExit('candidate template symlink is not isolated')
+for base, dirs, files in os.walk(source, followlinks=False):
+    dirs[:] = [name for name in dirs if name != '.git']
+    if any((Path(base) / name).is_symlink() for name in dirs + files):
+        raise SystemExit('candidate template contains an external-capable symlink')
+shutil.copytree(source, target, ignore=shutil.ignore_patterns('.git'))
+PYCOPYTEMPLATE
+  fi
 fi
 
 (
@@ -443,7 +550,26 @@ PYPAIRING
   sanitized_gate "$BASH_BIN" "$SOURCE_ROOT/scripts/check-distribution.sh" "$SOURCE_ROOT"
 )
 
-if [ -n "${head_commit:-}" ]; then
+if [ "$ALLOW_CANDIDATE" = "1" ] && [ "$EXISTING_MODE" != "1" ] && [ "$local_tag_present" = "0" ]; then
+  python3 - "$ROOT" "$ARCHIVE_WORK/caller-manifest.json" <<'PYREADBACK'
+import hashlib, json, os, pathlib, subprocess, sys
+root, manifest_path = map(pathlib.Path, sys.argv[1:])
+before = json.loads(manifest_path.read_text())
+def git(*args):
+    return subprocess.check_output(['/usr/bin/git', '--no-replace-objects', '-C', str(root), *args])
+assert git('rev-parse', 'HEAD').decode().strip() == before['head'], 'candidate gate changed caller HEAD'
+assert git('-c', 'status.showUntrackedFiles=all', 'status', '--porcelain=v1', '-z', '--untracked-files=all').hex() == before['status'], 'candidate gate changed caller status'
+assert git('ls-files', '--others', '--ignored', '--exclude-standard', '-z').hex() == before['ignored'], 'candidate gate changed caller ignored files'
+index = pathlib.Path(os.fsdecode(git('rev-parse', '--path-format=absolute', '--git-path', 'index').strip()))
+assert hashlib.sha256(index.read_bytes()).hexdigest() == before['index'], 'candidate gate changed caller index'
+for name, expected in before['paths'].items():
+    path = root / name
+    if path.is_symlink(): actual = ['symlink', os.readlink(path)]
+    elif not path.exists(): actual = ['deleted']
+    else: actual = ['file', hashlib.sha256(path.read_bytes()).hexdigest(), path.stat().st_mode & 0o777]
+    assert actual == expected, f'candidate gate changed caller file: {name}'
+PYREADBACK
+elif [ -n "${head_commit:-}" ]; then
   current_head="$(sanitized_git -C "$ROOT" rev-parse HEAD)"
   if [ "$current_head" != "$head_commit" ]; then
     echo "release validation changed the caller HEAD" >&2

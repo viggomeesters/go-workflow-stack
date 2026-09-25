@@ -420,3 +420,72 @@ def test_task_completion_does_not_report_queue_done_with_blocked_work(tmp_path,m
     assert result['completed_tasks']==['task-schema-smoke'] and result['status']=='task_complete'
     assert (repo/'.go/tasks/blocked/unresolved.json').exists()
     assert managed_publish(repo,base,worker,15)['status']=='task_complete'
+
+
+def test_candidate_preflight_isolates_exact_dirty_worker_and_preserves_caller(tmp_path):
+    """The candidate gate may create fixture repos, never inside a task worker."""
+    from test_abc_worktrees import ROOT
+    import os
+    repo = tmp_path / 'candidate'
+    repo.mkdir()
+    template = tmp_path / 'go-project-template'
+    (template / '.go').mkdir(parents=True)
+    (template / 'sentinel.txt').write_text('original\n')
+    (repo / 'scripts').mkdir()
+    (repo / '.go').mkdir()
+    (repo / 'go_workflow').mkdir()
+    (repo / 'pyproject.toml').write_text('[project]\nversion = "1.2.3"\n')
+    (repo / '.go/project.json').write_text(json.dumps({'required_stack_version': '1.2.3', 'stack_ref': 'v1.2.3'}))
+    (repo / 'release-pairings.json').write_text(json.dumps({'current_stack_ref': 'v1.2.3'}))
+    (repo / '.gitignore').write_text('ignored-config.txt\n')
+    (repo / 'go_workflow/constants.py').write_text('STACK_VERSION = "1.2.3"\n')
+    (repo / 'go_workflow/release_pairings.py').write_text('def load_manifest(*args, **kwargs): return True\n')
+    (repo / 'go_workflow/runtime_identity.py').write_text('def _official_repository_url(url): return False\n')
+    (repo / 'CHANGELOG.md').write_text('version 1.2.3\n')
+    for name in ('release-check-inner.sh',):
+        (repo / 'scripts' / name).write_bytes((ROOT / 'scripts' / name).read_bytes())
+    (repo / 'scripts/check-linux.sh').write_text(
+        '#!/bin/bash\nset -eu\n'
+        'test -f added.txt && test ! -e removed.txt && test -L link.txt\n'
+        'test "$(cat changed.txt)" = revised\n'
+        'test "$(cat added.txt)" = extra\n'
+        'test -x changed.txt\n'
+        'test "$(readlink link.txt)" = changed.txt\n'
+        'test "$(cat ignored-config.txt)" = private-input\n'
+        'test "$(cat "$GO_PROJECT_TEMPLATE/sentinel.txt")" = original\n'
+        'printf fixture > "$GO_PROJECT_TEMPLATE/sentinel.txt"\n'
+        'test -d .git && touch fixture-created.txt\n'
+    )
+    (repo / 'scripts/check-distribution.sh').write_text('#!/bin/bash\nset -eu\ntest -f fixture-created.txt\n')
+    (repo / 'removed.txt').write_text('remove\n')
+    (repo / 'changed.txt').write_text('original\n')
+    git(repo, 'init', '-q', '-b', 'main')
+    git(repo, 'add', '.')
+    git(repo, '-c', 'user.name=Test', '-c', 'user.email=test@example.org', 'commit', '-qm', 'base')
+    git(repo, 'remote', 'add', 'origin', str(repo))
+    (repo / 'removed.txt').unlink()
+    (repo / 'changed.txt').write_text('revised\n')
+    (repo / 'changed.txt').chmod(0o755)
+    (repo / 'added.txt').write_text('extra\n')
+    (repo / 'ignored-config.txt').write_text('private-input\n')
+    (repo / 'link.txt').symlink_to('changed.txt')
+    before = git(repo, 'status', '--porcelain=v1', '-uall')
+    result = subprocess.run(
+        ['/bin/bash', str(repo / 'scripts/release-check-inner.sh'), '1.2.3', '--allow-candidate', '--allow-local-origin'],
+        cwd=repo, env={**os.environ, 'GO_RELEASE_ROOT': str(repo)}, text=True, capture_output=True,
+    )
+    assert result.returncode == 0, result.stderr + result.stdout
+    assert 'publish: not performed' in result.stdout
+    assert git(repo, 'status', '--porcelain=v1', '-uall') == before
+    assert not (repo / 'fixture-created.txt').exists()
+    assert (template / 'sentinel.txt').read_text() == 'original\n'
+    assert (repo / 'removed.txt').exists() is False
+    git(repo, 'add', 'added.txt')
+    staged = git(repo, 'status', '--porcelain=v1', '-uall')
+    rejected = subprocess.run(
+        ['/bin/bash', str(repo / 'scripts/release-check-inner.sh'), '1.2.3', '--allow-candidate', '--allow-local-origin'],
+        cwd=repo, env={**os.environ, 'GO_RELEASE_ROOT': str(repo)}, text=True, capture_output=True,
+    )
+    assert rejected.returncode != 0
+    assert 'candidate index differs from HEAD' in rejected.stderr
+    assert git(repo, 'status', '--porcelain=v1', '-uall') == staged

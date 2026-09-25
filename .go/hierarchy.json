@@ -53,7 +53,8 @@
             "reliability-05",
             "configure-github-publication-profile",
             "release-safe-active-task-handoff-v0347",
-            "reconcile-effectless-prepared-release"
+            "reconcile-effectless-prepared-release",
+            "release-candidate-preflight-isolation"
           ]
         },
         {

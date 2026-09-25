@@ -1,0 +1,14 @@
+{
+  "task_id": "release-candidate-preflight-isolation",
+  "project": "go-workflow-stack",
+  "contract_digest": "a100625e4bee73f5472e83eb084e1ce79c6364535ff793de559ba66e21a6c978",
+  "revision": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+  "content_digest": "224ad1b59e5408d2524ca7ba014e6a66bb7dd26d8b8bd2e3f3a9e5d07fd17696",
+  "command": "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py",
+  "cwd": "/home/viggo/github/go-workflow-stack",
+  "elapsed_seconds": 124.57458890415728,
+  "returncode": 0,
+  "stdout": ".............................                                            [100%]\n29 passed in 111.49s (0:01:51)\n",
+  "stderr": "",
+  "timed_out": false
+}

@@ -1,0 +1,96 @@
+{
+  "schema": "go-workflow.repo-local.task.v1",
+  "kind": "task",
+  "execution_mode": "mechanical",
+  "shareable_delivery": "auto",
+  "id": "release-candidate-preflight-isolation",
+  "project": "go-workflow-stack",
+  "status": "done",
+  "summary": "Isolate prepared-release candidate preflight from worker control guard",
+  "description": "Candidate release-check must validate byte-identical prepared worktree content in a disposable Git checkout so smoke CLI subprocesses can create fixture repositories without inheriting the task-worker mutation prohibition. Preserve dirty candidate bytes, symlinks, untracked/deleted paths, official remote and pairing checks; never change or publish the frozen v0.3.47 candidate as part of this task.",
+  "scope": {
+    "read": [
+      "scripts/release-check.sh",
+      "scripts/release-check-inner.sh",
+      "scripts/check-linux.sh",
+      "go_workflow/worktrees.py",
+      "tests/test_abc_release.py"
+    ],
+    "modify": [
+      "scripts/release-check-inner.sh",
+      "tests/test_abc_release.py"
+    ]
+  },
+  "acceptance": [
+    "Exact prepared task-worktree candidate preflight passes when corresponding isolated candidate passes; caller HEAD/index/files are unchanged and no publication effects occur.",
+    "Dirty candidate bytes including deletion, symlink and metadata are preserved; no unverified source, remote, tag or template pairing is accepted.",
+    "Regression reproduces the 107 worker-guard smoke failures before the fix and verifies a green isolated run without weakening the guard."
+  ],
+  "verification": [
+    "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py",
+    "make check",
+    "git diff --check"
+  ],
+  "claim": {
+    "agent": "hermes",
+    "claimed_at": "2026-09-25T01:39:20+02:00",
+    "base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42"
+  },
+  "work_status": "completed",
+  "review_status": "review",
+  "review_history": [],
+  "evidence": [
+    {
+      "schema": "go-workflow.finish-evidence.v1",
+      "created_at": "2026-09-25T02:14:20+02:00",
+      "task_id": "release-candidate-preflight-isolation",
+      "agent": "hermes",
+      "summary": "verification_command=env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py && make check && git diff --check; verification_result=passed content-bound verification 6ae4f34abab14ac2b26b02ee49ec84a2; critic=independent read-only reviewer passed no blockers 37d5dae8c3be417bb0bead3e912f1500; changed_files=scripts/release-check-inner.sh,tests/test_abc_release.py; runtime=Hermes Agent",
+      "changed_files": [
+        "scripts/release-check-inner.sh",
+        "tests/test_abc_release.py"
+      ],
+      "no_diff": false,
+      "git": {
+        "claim_base_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42",
+        "observed_head_commit": "c5f5bf7611e0b2e79733a28e416dc68d7fd97e42"
+      },
+      "verification": {
+        "command": "env -u PYTHONPATH python -m pytest -q tests/test_abc_release.py && make check && git diff --check",
+        "result": "passed content-bound verification 6ae4f34abab14ac2b26b02ee49ec84a2"
+      },
+      "runtime": {
+        "agent": "hermes",
+        "runtime": "Hermes Agent",
+        "model": null,
+        "billing_mode": "unknown"
+      },
+      "usage": {
+        "schema": "go-workflow.usage-attribution.v1",
+        "runtime_kind": "Hermes Agent",
+        "billing_mode": "unknown",
+        "owner": "hermes",
+        "model": null,
+        "token_estimate": null,
+        "api_equivalent_cost_usd": null,
+        "provider_invoice_cost_usd": null,
+        "cost_label": "api_equivalent_not_invoice_cost"
+      },
+      "review": {
+        "outcome": "independent read-only reviewer passed no blockers 37d5dae8c3be417bb0bead3e912f1500",
+        "skip_reason": null
+      }
+    }
+  ],
+  "completion_evidence": {
+    "schema": "go-workflow.completion-evidence.v1",
+    "verification": {
+      "path": ".go/runs/release-candidate-preflight-isolation/completion/verification-6ae4f34abab14ac2b26b02ee49ec84a2.json",
+      "sha256": "d691f91cdc85edc2ad3209bf716125a6c526d7db4cf369e3b6f9f6d5a7dd7715"
+    },
+    "critic": {
+      "path": ".go/runs/release-candidate-preflight-isolation/completion/critic-37d5dae8c3be417bb0bead3e912f1500.json",
+      "sha256": "27ea3efccd8f2107ee235f89bdad72f2115724ef75a25943d72f5c58bae0c82d"
+    }
+  }
+}

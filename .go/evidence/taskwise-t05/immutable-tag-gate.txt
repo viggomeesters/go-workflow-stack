@@ -1,0 +1,34 @@
+release preflight: v0.3.48
+tag: annotated v0.3.48 payload reconstructed from git archive with tag refs
+local Linux/WSL verification with Python 3.12.14
+........................................................................ [ 45%]
+........................................................................ [ 91%]
+..............                                                           [100%]
+158 passed in 24.36s
+..........................                                               [100%]
+26 passed in 55.74s
+ok: /tmp/tmp.dQMI0ioD8z/go-workflow-stack/.go
+autonomy campaign gate: passed
+compatibility release gate: passed
+........................................................................ [ 35%]
+........................................................................ [ 70%]
+.............................................................            [100%]
+205 passed in 55.84s
+ok: /tmp/tmp.dQMI0ioD8z/go-workflow-stack/.go
+template pairing: ok
+local Linux/WSL verification: ok
+Resolved 1 package in 0.68ms
+   Building go-workflow-stack @ file:///tmp/tmp.dQMI0ioD8z/go-workflow-stack
+      Built go-workflow-stack @ file:///tmp/tmp.dQMI0ioD8z/go-workflow-stack
+Prepared 1 package in 415ms
+warning: Failed to hardlink files; falling back to full copy. This may lead to degraded performance.
+         If the cache and target directories are on different filesystems, hardlinking may not be supported.
+         If this is intentional, set `export UV_LINK_MODE=copy` or use `--link-mode=copy` to suppress this warning.
+Installed 1 package in 4ms
+ + go-workflow-stack==0.3.48 (from file:///tmp/tmp.dQMI0ioD8z/go-workflow-stack)
+Installed 1 executable: go-workflow
+warning: `/tmp/tmp.tuUSJQAbzG/bin` is not on your PATH. To use installed tools, run `export PATH="/tmp/tmp.tuUSJQAbzG/bin:$PATH"` or `uv tool update-shell`.
+initialized: /tmp/tmp.tuUSJQAbzG/fixture/.go
+ok: /tmp/tmp.tuUSJQAbzG/fixture/.go
+standalone uv tool distribution: ok
+publish: not performed

@@ -1,0 +1,22 @@
+{
+  "schema": "taskwise-release-readback.v1",
+  "release": {
+    "isDraft": false,
+    "isPrerelease": false,
+    "publishedAt": "2026-09-25T13:09:16Z",
+    "tagName": "v0.3.48",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.48"
+  },
+  "remote_refs": [
+    "edf44fa1dba16072c3c70811e49be069b61ca1d7\trefs/heads/codex/taskwise-delivery",
+    "edf44fa1dba16072c3c70811e49be069b61ca1d7\trefs/heads/main",
+    "b6d69ef5d40be02f4bd6c625ddb7440e023da541\trefs/tags/v0.3.48",
+    "edf44fa1dba16072c3c70811e49be069b61ca1d7\trefs/tags/v0.3.48^{}"
+  ],
+  "release_commit": "edf44fa1dba16072c3c70811e49be069b61ca1d7",
+  "tag_object": "b6d69ef5d40be02f4bd6c625ddb7440e023da541",
+  "gate": "immutable-tag-gate.txt",
+  "gate_exit_code": 0,
+  "consumer_rollout": "pending designation and real independent chat transport",
+  "rollback": "Consumer pin v0.3.47; preserve newer evidence and do not reinterpret new authority."
+}

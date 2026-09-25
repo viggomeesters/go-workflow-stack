@@ -12,6 +12,7 @@
     "full-regression-summary.txt",
     "gateway.txt",
     "heartbeat-real.txt",
+    "immutable-tag-gate.txt",
     "legacy-go.txt",
     "linux-candidate-release.txt",
     "linux-smoke.txt",
@@ -90,5 +91,10 @@
   "broad_regression": {
     "original": "873 passed,40 failed,2 skipped",
     "resolution": "36 failures superseded by Linux231pass; remaining4 final-source tests passed. No unresolved failures."
+  },
+  "publication": {
+    "status": "published_verified",
+    "evidence": "publication-readback.json",
+    "url": "https://github.com/viggomeesters/go-workflow-stack/releases/tag/v0.3.48"
   }
 }

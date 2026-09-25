@@ -51,7 +51,8 @@
   "review_history": [],
   "evidence": [
     "T05 scope clarification: repository-owned skill is an agent instruction required by original rollout scope; no external installed skill or Hermes runner changes.",
-    "Authorized single immutable release requires version, changelog and pairing manifest; preserve existing uv.lock unchanged."
+    "Authorized single immutable release requires version, changelog and pairing manifest; preserve existing uv.lock unchanged.",
+    "Implementation and immutable v0.3.48 published/read back; .go/evidence/taskwise-t05/result.json and publication-readback.json. Task remains incomplete pending designated consumer and real independent chat transport."
   ],
   "architecture": {
     "impact": "material",

@@ -341,7 +341,7 @@ def _parent_base_handoff(repo, parent_id, state):
                 'next_action': 'Reconcile the owned parent workspace with the current base, preserve dirty work, and refresh dependent checkpoint evidence before resuming.'}
     return None
 
-def resume_repaired_parent(repo, repair_id, actor, controller_locked=False):
+def resume_repaired_parent(repo, repair_id, actor, controller_locked=False, reconcile=False):
     """Resume only the unchanged original task after proven repair delivery."""
     from .completion import completion_findings
     from .campaign_delivery import delivery_report
@@ -377,6 +377,15 @@ def resume_repaired_parent(repo, repair_id, actor, controller_locked=False):
             if intent.get('phase') != 'complete':
                 if (repo / '.go/runs' / parent_id / 'run-state.json').exists():
                     state = read_state(repo, parent_id); require_stopped(state)
+                    if reconcile:
+                        from .repair_reconciliation import reconcile_repair_parent
+                        try:
+                            recovered = reconcile_repair_parent(repo, parent_id, repair_id, actor, locks_held=True)
+                        except ValueError as exc:
+                            return {'resumed': False, 'task_id': parent_id, 'reason': 'repair_reconciliation_blocked', 'next_action': str(exc)}
+                        if not recovered['reconciled']:
+                            return recovered
+                        state = read_state(repo, parent_id)
                     handoff = _parent_base_handoff(repo, parent_id, state)
                     if handoff:
                         return handoff
@@ -396,12 +405,21 @@ def resume_repaired_parent(repo, repair_id, actor, controller_locked=False):
             state = read_state(repo, parent_id); require_stopped(state)
             if state['owner'] != actor or (parent.get('claim') or {}).get('agent') != actor:
                 raise ValueError('Parent claim requires explicit ownership handoff')
-            handoff = _parent_base_handoff(repo, parent_id, state)
-            if handoff:
-                return handoff
             proposed['status'] = 'active'
             if json_hash(protected_task(proposed)) != state['task_hash']:
                 raise ValueError('Parent checkpoint contract requires explicit reconciliation')
+            if reconcile:
+                from .repair_reconciliation import reconcile_repair_parent
+                try:
+                    recovered = reconcile_repair_parent(repo, parent_id, repair_id, actor, locks_held=True)
+                except ValueError as exc:
+                    return {'resumed': False, 'task_id': parent_id, 'reason': 'repair_reconciliation_blocked', 'next_action': str(exc)}
+                if not recovered['reconciled']:
+                    return recovered
+                state = read_state(repo, parent_id)
+            handoff = _parent_base_handoff(repo, parent_id, state)
+            if handoff:
+                return handoff
         else:
             if (parent.get('claim') or {}).get('agent'):
                 raise ValueError('Blocked claimed task has no resumable checkpoint')

@@ -383,3 +383,36 @@ An admitted repair blocks its parent until actual verified delivery, including
 publication closure. Parent resumption preserves its original contract, owner
 and checkpoint. A changed repository base still requires safe reconciliation;
 resumption never silently resets a dirty workspace or erases prior evidence.
+
+### Current resume context and source reconciliation
+
+`go campaign context REPO --task-id TASK --agent OWNER --json` returns the
+versioned `go-workflow.resume-context.v1` view: canonical task/owner/phase, current
+source and checkpoint revisions, independently checked evidence, publication
+readback state, blockers and next action. It performs no publication or task
+mutation; verifying delivered work can refresh Git remote objects for readback.
+Managed dispatch embeds a newly composed view in every context snapshot. A prior
+chat or handoff cannot replace current task, source or lifecycle records.
+
+New taskwise checkpoints distinguish strict dispatch snapshots from proof
+dependencies. Index-only staging and unrelated operational hierarchy changes
+refresh context without repeating confirmed checks. Source, candidate HEAD,
+contract, model and instruction changes invalidate dependent proof. Candidate
+HEAD remains a dependency because commands may inspect Git history. Interrupted
+verification resumes the unfinished check after process termination is proved;
+confirmed preceding checks retain their original immutable command receipts.
+An interrupted critic reruns the critic without discarding valid checks. Live
+controller/process-group ownership and uncertain cross-host ownership still
+block takeover, regardless of elapsed timeout.
+
+Delivered repairs can reconcile an owned blocked parent under its frozen commit
+policy. A separate temporary index captures scoped dirty work; a merge preview
+must succeed before workspace refs change. A recovery journal binds exact before
+and after commits, registry and checkpoint values. Conflicts and unexpected
+staging remain untouched. The new base must exactly match the delivered repair
+closure; unrelated external advancement requires reassessment. No permission
+flag changes. Push readback refreshes only the frozen remote's expected base.
+The parent resumes verification after repaired bytes are present; source-dependent
+proof is archived and refreshed. Incomplete reconciliation fences other task
+starts until recovered. A fresh clone recognizes verified portable closure
+without reopening old absolute workspace paths or rerunning completed work.

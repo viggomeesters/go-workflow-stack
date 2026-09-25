@@ -5165,6 +5165,13 @@ def cmd_campaign_change(args):
     return 0
 
 
+def cmd_resume_context(args):
+    from .resume_context import compose_resume_context
+    result=compose_resume_context(Path(args.repo),args.task_id,actor=args.agent)
+    print(json.dumps(result,indent=2,ensure_ascii=False) if args.json else result['summary'])
+    return 0
+
+
 def cmd_campaign_audit(args: argparse.Namespace) -> int:
     """Run the same outcome audit used by campaign completion."""
     from .campaign_audit import audit_campaign_goal
@@ -6490,6 +6497,12 @@ def build_parser() -> argparse.ArgumentParser:
     validate.set_defaults(func=cmd_validate)
     campaign_parser = sub.add_parser("campaign", help="Inspect bounded campaign completion evidence")
     campaign_sub = campaign_parser.add_subparsers(dest="campaign_command", required=True)
+    resume_context=campaign_sub.add_parser('context',help='Compose current authoritative task resume context')
+    resume_context.add_argument('repo',nargs='?',default='.')
+    resume_context.add_argument('--task-id',required=True)
+    resume_context.add_argument('--agent',default=None)
+    resume_context.add_argument('--json',action='store_true')
+    resume_context.set_defaults(func=cmd_resume_context)
     campaign_block = campaign_sub.add_parser("block", help="Prepare one joint delivery using existing task IDs")
     campaign_block.add_argument("repo", nargs="?", default=".")
     campaign_block.add_argument("--coordinator", required=True)

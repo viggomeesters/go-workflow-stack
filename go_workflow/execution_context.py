@@ -83,6 +83,7 @@ def verification_checkout(workspace: Path, record: dict, candidate_code: dict):
             raise ContextError('Managed candidate changed before verification isolation')
     with tempfile.TemporaryDirectory(prefix='go-managed-verify-') as directory:
         checkout = Path(directory) / 'candidate'
+        index_tree=git(workspace,'write-tree').stdout.strip()
         git(workspace, 'clone', '--quiet', '--no-hardlinks', '--no-checkout', '.', str(checkout))
         git(checkout, 'checkout', '--quiet', '-b', 'verification-' + uuid.uuid4().hex, candidate['head'])
         for name in candidate['files']:
@@ -90,6 +91,10 @@ def verification_checkout(workspace: Path, record: dict, candidate_code: dict):
             if relative.is_absolute() or '..' in relative.parts:
                 raise ContextError('Candidate path escapes verification checkout')
             _copy_candidate_path(workspace / relative, checkout / relative)
+        # Preserve the candidate index too. Staged new files are tracked source
+        # bytes, and Git-aware checks may inspect partially staged changes. The
+        # local clone copies the source object store, including staged blobs.
+        git(checkout,'read-tree',index_tree)
         actual = git_state(checkout, {
             'path': str(checkout),
             'base_commit': candidate['base_commit'],
@@ -221,6 +226,8 @@ def create_snapshot(workspace: Path, task: dict, phase: str, attempt: int, strat
                'vision': json.loads((root / 'vision.json').read_text()),
                'architecture_principles': json.loads((root / 'architecture-principles.json').read_text()),
                'hierarchy': json.loads((root / 'hierarchy.json').read_text())}
+    from .resume_context import compose_resume_context
+    context['resume_state']=compose_resume_context(root.parent,task['id'],actor=record['owner'])
     snapshot = {'schema': SCHEMA, 'snapshot_id': identity, 'task_id': task['id'], 'phase': phase,
                 'attempt': attempt, 'strategy': strategy, 'workspace': record, 'git': state,
                 'contract_sha256': json_hash(task.get('execution_contract')), 'task_sha256': json_hash(task),

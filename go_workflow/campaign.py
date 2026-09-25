@@ -470,14 +470,18 @@ def _chunk_checkpoint(repo, task_id):
             'phase':state['phase'],'verified_checks':len(cursor['checks'])}
 
 
-def _resume_delivered_repairs(repo, state, actor):
+def _resume_delivered_repairs(repo, state, actor, contract=None):
     from .campaign_changes import resume_repaired_parent
     seen={item.get('repair_id') for item in state['history'] if item.get('event')=='campaign.parent_resumed'}
-    for identity in state['completed_tasks']:
-        if identity in seen:continue
+    handled_parents=set()
+    for identity in reversed(state['completed_tasks']):
         path=repo/'.go/tasks/done'/(identity+'.json')
         task=_load_object(path,'completed repair')
         if not task.get('campaign_repair'):continue
+        parent_id=task['campaign_repair']['parent_id']
+        if parent_id in handled_parents:continue
+        handled_parents.add(parent_id)
+        if identity in seen:continue
         from .campaign_delivery import delivery_report
         waiting=False
         for candidate in (repo/'.go/tasks').glob('*/*.json'):
@@ -488,9 +492,11 @@ def _resume_delivered_repairs(repo, state, actor):
                     and (sibling['status']!='done' or not delivery_report(repo,sibling['id'])['delivered'])):
                 waiting=True;break
         if waiting:continue
-        resumed=resume_repaired_parent(repo,identity,actor,controller_locked=True)
+        reconcile=bool(((contract or {}).get('execution') or {}).get('shipping'))
+        resumed=resume_repaired_parent(repo,identity,actor,controller_locked=True,reconcile=reconcile)
         if resumed.get('task_id'):
-            event='campaign.parent_resume_blocked' if resumed.get('reason')=='workspace_reconciliation_required' else 'campaign.parent_resumed'
+            event=('campaign.parent_resume_blocked' if not resumed.get('resumed')
+                   and resumed.get('reason') not in {None,'parent_not_blocked'} else 'campaign.parent_resumed')
             if event=='campaign.parent_resume_blocked' and any(item.get('event')==event and item.get('repair_id')==identity for item in state['history']):
                 continue
             state['history'].append({'event':event,'repair_id':identity,
@@ -661,7 +667,8 @@ def plan_campaign(
     root = repo / ".go"
     from .delivery_blocks import pending_block_findings
     from .campaign_changes import pending_change_findings
-    pending = pending_block_findings(repo) + pending_change_findings(repo)
+    from .repair_reconciliation import pending_reconciliation_findings
+    pending = pending_block_findings(repo) + pending_change_findings(repo) + pending_reconciliation_findings(repo)
     if pending:raise CampaignError("; ".join(pending))
     permitted = contract["authority"]["permitted_tasks"]
     active_paths = sorted((root / "tasks" / "active").glob("*.json"))
@@ -825,7 +832,7 @@ def execute_campaign(
         state["stop"] = None
         _save_state(state_path, state)
         while True:
-            _resume_delivered_repairs(repo,state,str(getattr(args,'agent','agent')))
+            _resume_delivered_repairs(repo,state,str(getattr(args,'agent','agent')),contract)
             active_since = state["clock"]["active_since_epoch"]
             elapsed = state["consumption"]["active_wall_seconds"] + (
                 max(time.time() - active_since, 0.0) if active_since is not None else 0.0

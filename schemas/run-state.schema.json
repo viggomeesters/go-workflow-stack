@@ -230,6 +230,13 @@
           "type": "boolean"
         }
       }
+    },
+    "proof_identity": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "pattern": "^[0-9a-f]{64}$"
     }
   },
   "additionalProperties": false

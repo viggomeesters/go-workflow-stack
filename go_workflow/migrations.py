@@ -150,7 +150,8 @@ def configured_project(project, settings):
 def pending_lifecycle_findings(repo):
     from .delivery_blocks import pending_block_findings
     from .campaign_changes import pending_change_findings
-    findings = pending_block_findings(repo) + pending_change_findings(repo)
+    from .repair_reconciliation import pending_reconciliation_findings
+    findings = pending_block_findings(repo) + pending_change_findings(repo) + pending_reconciliation_findings(repo)
     for path in sorted((Path(repo) / '.go/migrations').glob('*.json')):
         try:
             record = _read(path)

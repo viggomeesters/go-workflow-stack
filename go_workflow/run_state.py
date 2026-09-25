@@ -40,13 +40,15 @@ def validate_state(value):
     arrays = {'checks', 'phase_evidence', 'budgets', 'history', 'requirements'}
     required = strings | objects | arrays | {'schema', 'phase', 'attempt', 'check_index', 'worker_group', 'inflight'}
     if (not isinstance(value, dict) or not required.issubset(value)
-            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd', 'publication', 'campaign_failures'}
+            or set(value) - required - {'cleanup', 'setup_task', 'execution_cwd', 'publication', 'campaign_failures', 'proof_identity'}
             or value['schema'] != SCHEMA
             or value['phase'] not in {'setup', 'build', 'release_prepare', 'verify', 'critic', 'repair', 'release', 'cleanup', 'complete'}
             or any(not isinstance(value[name], str) or not value[name] for name in strings)
             or any(not isinstance(value[name], dict) for name in objects)
             or any(not isinstance(value[name], list) for name in arrays)):
         raise RunStateError('Invalid managed run state shape')
+    if value.get('proof_identity') is not None and (not isinstance(value['proof_identity'], str) or len(value['proof_identity']) != 64 or any(c not in '0123456789abcdef' for c in value['proof_identity'])):
+        raise RunStateError('Invalid proof dependency identity')
     if ('campaign_failures' in value and (
             not isinstance(value['campaign_failures'], list)
             or any(not isinstance(item, dict) for item in value['campaign_failures']))):
@@ -378,6 +380,15 @@ def execute_managed(control, args, mode, task, api):
               'repair_attempts': 0}
     try:
         with repository_lock(control / '.go', 'managed-run-' + task_id, timeout_seconds=0.1):
+            if state_path(control,task_id).exists():
+                from .resume_context import compose_resume_context
+                result['resume_started_from']=compose_resume_context(control,task_id,actor=args.agent)
+            if (control / '.go/tasks/done' / (task_id + '.json')).exists():
+                from .delivery_closure import inspect_closure
+                from .campaign_delivery import delivery_report
+                if inspect_closure(control, task_id)['delivered'] and delivery_report(control, task_id)['delivered']:
+                    result.update(status=completion_status(control), completed_tasks=[task_id])
+                    return 0, result
             return _execute_managed(control, args, task_id, api, result)
     except (ValueError, api.StateLockError, api.RepoLocalError) as exc:
         result.update(status='resume_gate', blocked_task=task_id, summary=str(exc))
@@ -519,11 +530,18 @@ def _execute_managed(control, args, task_id, api, result):
     workspace = Path(record['path'])
     if freeze_selection(control, task) != state['models']: raise RunStateError('Frozen model selection changed')
     current_code = run_code(workspace, record, task)
+    from .proof_dependencies import proof_identity, valid_check_prefix
+    selective_proof = publication.get('taskwise_recovery', False)
+    current_identity = proof_identity(workspace, record, task, state['models']) if selective_proof else None
     publication_in_progress = (publishing and state['phase'] == 'release'
         and publisher.state_path(control, task_id).exists()
         and publisher._load(control, task, args.agent, state['run_id'])['phase'] in {'publishing', 'deploying', 'finishing', 'published'})
     publication_in_progress = publication_in_progress or (taskwise_delivery is not None and state['phase'] == 'release' and bool(state['effects']))
-    if not publication_in_progress and (state['inflight'] or current_code != state['code']):
+    if (selective_proof and not publication_in_progress and record['state']=='ready'
+            and current_code['control_base_head']!=record['base_commit']):
+        raise RunStateError('Control base advanced; reconcile the owned workspace before execution, preserving valid checkpoint evidence')
+    if not publication_in_progress and (state['inflight'] or current_code != state['code']
+            or (selective_proof and state.get('proof_identity') is not None and current_identity != state['proof_identity'])):
         history = state['history'] + [{'event': 'reconciled_interruption_or_drift', 'previous_phase': state['phase'],
                                      'inflight': state['inflight'], 'code_before': state['code'], 'code_now': current_code,
                                      'invalidated_checks': state['checks']}]
@@ -531,8 +549,19 @@ def _execute_managed(control, args, task_id, api, result):
         # A confirmed build is kept. All affected verification and critic proof
         # is invalidated, while an unconfirmed build/repair repeats its own phase.
         phase = state['phase'] if state['phase'] in {'build', 'repair', 'release_prepare'} else 'verify'
-        session.update(phase=phase, check_index=0, checks=[], history=history, code=current_code,
+        preserved = (selective_proof and current_identity == state.get('proof_identity')
+                     and state['phase'] in {'verify', 'critic', 'release'}
+                     and valid_check_prefix(workspace, task, state))
+        if preserved:
+            phase = state['phase']
+            history[-1]['invalidated_checks'] = []
+            history[-1]['preserved_checks'] = len(state['checks'])
+        session.update(phase=phase, check_index=state['check_index'] if preserved else 0,
+                       checks=state['checks'] if preserved else [], history=history, code=current_code,
+                       **({'proof_identity': current_identity} if selective_proof else {}),
                        inflight=None, worker_group=None)
+    elif selective_proof and state.get('proof_identity') is None:
+        session.update(proof_identity=current_identity)
     maximum = max(int(args.max_commands), 1)
     minutes = max(int(args.max_minutes), 1)
     started = time.monotonic()
@@ -604,7 +633,8 @@ def _execute_managed(control, args, task_id, api, result):
                 result.update(status='resume_gate', blocked_task=task_id, summary=str(exc)); break
             result['commands_run'] += 1
             state['budgets'][-1]['commands_used'] = result['commands_run']
-            session.update(phase='verify', check_index=0, checks=[], code=run_code(workspace, record, task), budgets=state['budgets'])
+            session.update(phase='verify', check_index=0, checks=[], code=run_code(workspace, record, task), budgets=state['budgets'],
+                           **({'proof_identity': proof_identity(workspace, record, task, state['models'])} if selective_proof else {}))
             continue
         if phase == 'verify' and state['check_index'] >= len(task['verification']):
             if proving_delivery:
@@ -690,6 +720,8 @@ def _execute_managed(control, args, task_id, api, result):
                                                'code_before': before, 'code_after': after}]
         changes = {'phase_evidence': evidence, 'inflight': None, 'worker_group': None, 'code': after,
                    'requirements': active_task(control, task_id, args.agent).get('requested_outcomes', [])}
+        if selective_proof:
+            changes['proof_identity'] = proof_identity(workspace, record, task, state['models'])
         if phase == 'verify':
             changes.update(checks=state['checks'] + [output], check_index=state['check_index'] + 1)
             if not success: changes.update(phase='repair', attempt=state['attempt'] + 1)

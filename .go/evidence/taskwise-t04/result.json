@@ -1,0 +1,48 @@
+{
+  "task_id": "taskwise-t04",
+  "verification": [
+    {
+      "log": ".go/evidence/taskwise-t04/integration.txt",
+      "result": "61 passed in 176.60s (0:02:56)"
+    },
+    {
+      "log": ".go/evidence/taskwise-t04/repair.txt",
+      "result": "25 passed in 230.38s (0:03:50)"
+    },
+    {
+      "log": ".go/evidence/taskwise-t04/final.txt",
+      "result": "35 passed in 292.43s (0:04:52)"
+    },
+    {
+      "log": ".go/evidence/taskwise-t04/proof.txt",
+      "result": "8 passed in 40.44s"
+    }
+  ],
+  "review": {
+    "reviewers": [
+      "/root/review_resume_context",
+      "/root/inspect_progress"
+    ],
+    "status": "approved",
+    "blocking_findings": []
+  },
+  "source_sha256": {
+    "go_workflow/run_state.py": "6aed66387438d5e26efd293d0760d363053cc7990acb0cb7843508e7c220ed75",
+    "go_workflow/repair_reconciliation.py": "bc45cdb76cf7a90dd9ecb3450bcd3bfda6ba0a8b57db33a84d49c46cae78e61c",
+    "go_workflow/campaign_changes.py": "4a103e66fe17045d40bd649d94973b61bdf80039d4ed9d9a883742b87f00760f",
+    "go_workflow/resume_context.py": "0726b89a7a21ec2ad64d514e38a1845d99aace7a652eed8ade535da6107b048e",
+    "go_workflow/campaign.py": "58486c09ae745923650ece58c77761a2171b55d35e63861c4b2cf18d37564a20",
+    "go_workflow/cli.py": "fdc464d441d6bc82ca92f9198a63cfaf2bb22bcf10c00ff5c07e0d07883848b6",
+    "go_workflow/migrations.py": "3dd1fa64ff84eb0ca7211af6aa5649068a6584e6ad09a773d506a32c071d561a",
+    "go_workflow/execution_context.py": "792acacbc6bddb24ce597eae0605651c40f97f6202dbc518ded8b87a4c267910",
+    "go_workflow/proof_dependencies.py": "3dcbc86f34329771e0caa63578e8a679089a97df103e517ec1bd2962e18a8f92",
+    "tests/test_resume_context.py": "1a313bc6464a4e4188a966e95e95f2de5d36603db281641962f2e27250d3b6fe",
+    "tests/test_resume_proof_dependencies.py": "a419c50244b3db011089114a666c29e99a709dee38ef03f09fd4e5bfbf1497fc",
+    "tests/test_repair_reconciliation.py": "23b1e959d50f436e1f800f09fb32a0bf17fa2a060d7c58f76384e7ef3ba1feb4",
+    "schemas/run-state.schema.json": "a57138f6d433c4090311f20ad762650be6bc6c019ec39c0672c58bda6ffa4fe4",
+    "schemas/resume-context.schema.json": "88d4b4a0d2ae88f554d9546ae7b2ff74f01a8137f505f68d8bde2837868457ce",
+    "docs/autonomous-campaign.md": "37aab869f772706764c185d23ace4f29caacb8aef19953adc68fc5e99ee9970b"
+  },
+  "release": "Feature branch delivery; immutable release follows T05 integrated proof.",
+  "self_reflect": "Resume uses current authoritative records and dependency-specific evidence. Independent review caught liveness priority; fixed and regression covered. Repair publication is journaled and exact closure-bound."
+}
